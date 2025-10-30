@@ -194,6 +194,9 @@
 							<metro2:HyperlinkEx Uri="https://twitter.com/veigr">
 								<Run Text="@veigr" />
 							</metro2:HyperlinkEx>
+							<metro2:HyperlinkEx Uri="https://x.com/d_kancolle">
+							<Run Text="@donaco" />
+							</metro2:HyperlinkEx>
 							<LineBreak />
 							<Run Text="Icon design:" />
 							<metro2:HyperlinkEx Uri="https://twitter.com/Nrtwd/">
@@ -208,6 +211,8 @@
 						<TextBlock FontFamily="Segoe UI"
 								   TextWrapping="Wrap">
 							<Run Text="{Binding Source={x:Static models:ProductInfo.Copyright}, Mode=OneWay}" />
+							<LineBreak />
+							<Run Text="                                   2025 donaco" />
 						</TextBlock>
 
 						<TextBlock FontFamily="Segoe UI"

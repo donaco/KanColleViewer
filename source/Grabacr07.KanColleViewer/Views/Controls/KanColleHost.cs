@@ -196,6 +196,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		{
 			try
 			{
+				if (this.WebBrowser == null) return; // null時遅延　エラー回避
 				if (this.WebBrowser.TryGetKanColleCanvas(out var canvas))
 				{
 					var js = $"var style = document.createElement(\"style\"); style.innerHTML = \"{Regex.Replace(this.UserStyleSheet, "\r|\n", " ")}\"; document.body.appendChild(style);";
