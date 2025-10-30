@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
@@ -38,6 +38,11 @@ namespace Counter
 					new MissionCounter(KanColleClient.Current.Proxy),
 				}
 			};
+		}
+
+		public void RequestNotify(string type, string header, string body)
+		{
+			this.NotifyRequested?.Invoke(this, new NotifyEventArgs(type, header, body));
 		}
 	}
 }
