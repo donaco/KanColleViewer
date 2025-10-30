@@ -1,9 +1,9 @@
 ﻿提督業も忙しい！ (KanColleViewer)
 --
 
-[![Build status (master)](https://img.shields.io/appveyor/ci/Grabacr07/KanColleViewer.svg?style=flat-square)](https://ci.appveyor.com/project/Grabacr07/kancolleviewer)
-[![Release](https://img.shields.io/github/release/Grabacr07/KanColleViewer.svg?style=flat-square)](https://github.com/Grabacr07/KanColleViewer/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Grabacr07/KanColleViewer/latest/total.svg?style=flat-square)](https://github.com/Grabacr07/KanColleViewer/releases/latest)
+[![Build status (master)](https://img.shields.io/appveyor/ci/donaco/KanColleViewer.svg?style=flat-square)](https://ci.appveyor.com/project/donaco/kancolleviewer)
+[![Release](https://img.shields.io/github/release/donaco/KanColleViewer.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/donaco/KanColleViewer/latest/total.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
 [![NuGet (KanColleWrapper)](https://img.shields.io/nuget/v/KanColleWrapper.svg?style=flat-square)](https://www.nuget.org/packages/KanColleWrapper/)
 [![License](https://img.shields.io/github/license/Grabacr07/KanColleViewer.svg?style=flat-square)](https://github.com/Grabacr07/KanColleViewer/blob/develop/LICENSE.txt)
 
@@ -37,11 +37,12 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 
 ### 動作環境
 
+* Windows 11
 * Windows 10
-* Windows 8.1
-* Windows 7
+* Windows 8.1 64bit
+* Windows 7   64bit
 
-開発者 ([@Grabacr07](https://twitter.com/Grabacr07)) は Windows 10 Enterprise でのみ動作確認を行っております。
+Windows 11 Pro でのみ動作確認を行っております。
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。
 
 * [.NET Framework 4.6](http://www.microsoft.com/ja-jp/download/details.aspx?id=30653)
@@ -55,7 +56,7 @@ Windows 10 の場合は標準でインストールされています。
 
 ### 開発環境・言語
 
-C# + WPF で開発しています。開発環境は Windows 10 Enterprise + Visual Studio 2017 です。
+C# + WPF で開発しています。開発環境は Windows 11 Pro + Visual Studio 2022 です。
 
 ### ライセンス
 
@@ -166,3 +167,4 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **用途 :** クラッシュ ログ収集
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/Application Insights.txt](licenses/Application Insights.txt)
+
