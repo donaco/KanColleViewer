@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-                                             version 4.5.0  2018/08/22
+                                             version 4.6  2025/10/30
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -26,11 +26,12 @@
 
 ■動作環境
 
+・Windows 11
 ・Windows 10
-・Windows 8
-・Windows 7
+・Windows 8 64bit
+・Windows 7 64bit
 
-開発者は Windows 10 Enterprise でのみ動作確認を行っております。 
+Windows 11 Pro でのみ動作確認を行っております。 
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。
 Windows 8 以降での使用を推奨します。
 
@@ -39,7 +40,7 @@ Windows 8 以降での使用を推奨します。
 Windows 8 またはそれ以前で使用する場合、.NET Framework 4.6 のインストールが必要です。
 Windows 10 の場合は標準でインストールされています。
 
-現在、艦これ本体の二期への移行に伴い、Chromium エンジンで暫定対応しています。
+現在、艦これ本体のセキュア化に伴い、Chromium エンジンで暫定対応しています。
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 
 
@@ -59,7 +60,7 @@ Windows 10 の場合は標準でインストールされています。
 ■開発環境・言語
 
 C# + WPF で開発しています。
-開発環境は Windows 10 Pro + Visual Studio Enterprise 2015 です。
+開発環境は Windows 11 Pro + Visual Studio 2022 です。
 
 
 ■使用ライブラリ
@@ -182,7 +183,8 @@ Application Insights
 
 
 ■更新履歴
-
+2025/10/26 - version 4.6 alpha2 リリース
+2025/10/26 - version 4.6 alpha リリース
 2020/03/28 - version 4.5.2 リリース
 2018/08/17 - version 4.5 リリース
 2016/06/20 - version 4.2.6 リリース
@@ -224,5 +226,5 @@ Application Insights
  Product URL:  http://grabacr.net/kancolleviewer
  Source code:  https://github.com/Grabacr07/KanColleViewer
  License:      MIT License
- Author:       @Grabacr07
+ Author:       @Grabacr07 / donaco
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

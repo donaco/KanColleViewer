@@ -11,30 +11,53 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 {
 	public static class CefBridge
 	{
-		private static readonly string asesmblyDirectory = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-		private static readonly string cefDirectory = Path.Combine(asesmblyDirectory, Environment.Is64BitProcess ? "x64" : "x86");
+		// Assembly.GetExecutingAssembly または AppDomain.CurrentDomain.BaseDirectory を使う
+		private static readonly string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory;
+		private static readonly string cefDirectory = Path.Combine(assemblyDirectory, Environment.Is64BitProcess ? "x64" : "x86");
 		private static bool initialized;
+		private static readonly object cefInitLock = new object();
 
 		public static string CachePath => Path.Combine(Application.Instance.LocalAppData.FullName, "Chromium");
 
 		public static void Initialize()
 		{
-			if (initialized) return;
-
-			CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
-
-			var cefSettings = new CefSettings()
+			lock (cefInitLock)
 			{
-				BrowserSubprocessPath = Path.Combine(cefDirectory, "CefSharp.BrowserSubprocess.exe"),
-				CachePath = CefBridge.CachePath,
-			};
-			cefSettings.CefCommandLineArgs.Add("disable-features", "AudioServiceOutOfProcess");
-			cefSettings.CefCommandLineArgs.Add("proxy-server", Settings.NetworkSettings.LocalProxySettingsString);
+				if (initialized || CefSharp.Cef.IsInitialized) return;
 
-			CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
-			CefSharp.Cef.Initialize(cefSettings);
+				CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 
-			initialized = true;
+				// 結合する前にパスを決定して存在確認する
+				var browserSubprocessPath = Path.Combine(cefDirectory, "CefSharp.BrowserSubprocess.exe");
+				// フォールバック: ルート出力ディレクトリにも存在するか試す
+				var fallbackPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
+
+				if (!File.Exists(browserSubprocessPath) && File.Exists(fallbackPath))
+				{
+					browserSubprocessPath = fallbackPath;
+				}
+
+				if (!File.Exists(browserSubprocessPath))
+				{
+					throw new FileNotFoundException(
+						$"CefSettings.BrowserSubprocessPath not found. Tried: '{browserSubprocessPath}' and '{fallbackPath}'. " +
+						"Ensure CefSharp.BrowserSubprocess.exe and native dependencies are copied to the output folder (x86/x64).");
+				}
+
+				var cefSettings = new CefSettings
+				{
+					BrowserSubprocessPath = browserSubprocessPath,
+					CachePath = CefBridge.CachePath,
+				};
+
+				cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
+				cefSettings.CefCommandLineArgs["proxy-server"] = Settings.NetworkSettings.LocalProxySettingsString;
+
+				CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
+				CefSharp.Cef.Initialize(cefSettings);
+
+				initialized = true;
+			}
 		}
 
 		public static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs args)
