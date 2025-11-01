@@ -200,8 +200,12 @@
     <Compile Include="Composition\PluginHost.cs" />
     <Compile Include="Composition\PluginMetadata.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
+    <Compile Include="Models\Cef\CapturedHttp.cs" />
+    <Compile Include="Models\Cef\CaptureLogService.cs" />
     <Compile Include="Models\Cef\ContextMenuHandler.cs" />
     <Compile Include="Models\Cef\CefBridge.cs" />
+    <Compile Include="Models\Cef\CustomRequestHandler.cs" />
+    <Compile Include="Models\Cef\ResponseFilter.cs" />
     <Compile Include="Models\Cef\ScreenshotRequest.cs" />
     <Compile Include="Models\ExitConfirmationType.cs" />
     <Compile Include="Models\IZoomFactor.cs" />
@@ -294,6 +298,9 @@
     <Compile Include="Views\Behaviors\SetWindowLocationAction.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CaptureWindow.xaml.cs">
+      <DependentUpon>CaptureWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Contents\StateDetailIndicator.xaml.cs">
       <DependentUpon>StateDetailIndicator.xaml</DependentUpon>
@@ -431,6 +438,9 @@
     </Page>
     <Page Include="Views\BrowserWindow.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CaptureWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Catalogs\ShipCatalogWindow.xaml">

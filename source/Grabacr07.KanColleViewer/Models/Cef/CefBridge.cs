@@ -51,7 +51,16 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				};
 
 				cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
-				cefSettings.CefCommandLineArgs["proxy-server"] = Settings.NetworkSettings.LocalProxySettingsString;
+
+				// proxy-server は空でなければ設定する（Network.xaml の設定を残すため）
+				var proxyString = Settings.NetworkSettings.LocalProxySettingsString;
+				if (!string.IsNullOrWhiteSpace(proxyString))
+				{
+					cefSettings.CefCommandLineArgs["proxy-server"] = proxyString;
+				}
+				// ログレベルを上げてログファイルを指定 （トラブルシューティング用）
+				cefSettings.LogSeverity = LogSeverity.Verbose;
+				cefSettings.LogFile = Path.Combine(CachePath, "cef.log");
 
 				CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 				CefSharp.Cef.Initialize(cefSettings);
@@ -91,6 +100,13 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				.FirstOrDefault(x => x.Url.Contains("/kcs2/index.php"));
 
 			return canvas != null;
+		}
+
+		// 追加: ChromiumWebBrowser に RequestHandler を割り当てるユーティリティ
+		public static void AttachRequestHandler(ChromiumWebBrowser browser, Action<CapturedHttp> onCaptured)
+		{
+			if (browser == null) throw new ArgumentNullException(nameof(browser));
+			browser.RequestHandler = new CustomRequestHandler(onCaptured);
 		}
 	}
 }

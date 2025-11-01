@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -59,11 +60,56 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				newBrowser.FrameLoadEnd += instance.HandleLoadEnd;
 				newBrowser.MenuHandler = new ContextMenuHandler();
 				newBrowser.WpfKeyboardHandler = new InhibitTabKeyHandler(newBrowser);
+
+				// ここで RequestHandler を添付する（CEF が初期化済みであることを前提）
+				try
+				{
+					// 既に CustomRequestHandler が設定されていなければアタッチ
+					if (!(newBrowser.RequestHandler is CustomRequestHandler))
+					{
+						CefBridge.AttachRequestHandler(newBrowser, captured =>
+						{
+							// UI スレッドでログ化・表示（大量トラフィックだと UI を圧迫するので注意）
+							Application.Current.Dispatcher.Invoke(() =>
+							{
+								System.Diagnostics.Debug.WriteLine($"Captured: {captured.Url}");
+								System.Diagnostics.Debug.WriteLine(captured.ResponseBody);
+
+								// 任意: ファイルにログを残す（デバッグ用）
+								try
+								{
+									var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "captured.log");
+									Directory.CreateDirectory(Path.GetDirectoryName(log));
+									// 変更前（現在）: ファイル出力や Debug.WriteLine をしている箇所
+									// …
+									// File.AppendAllText(log, $"{DateTime.Now}: {captured.Url}\n{captured.RequestBody}\n{captured.ResponseBody}\n\n");
+
+									// 変更後: CaptureLogService に流す
+									CaptureLogService.Instance.Add(captured);
+								}
+								catch { /* swallow */ }
+							});
+						});
+					}
+				}
+				catch (Exception ex)
+				{
+					// Attach に失敗してもブラウザ表示は継続させる
+					System.Diagnostics.Debug.WriteLine("AttachRequestHandler failed: " + ex);
+				}
 			}
 			if (instance.scrollViewer != null)
 			{
 				instance.scrollViewer.Content = newBrowser;
 			}
+
+			System.Diagnostics.Debug.WriteLine($"WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}");
+			try
+			{
+				File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "debug_browsercb.log"),
+					$"{DateTime.Now}: WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}\n");
+			}
+			catch { }
 		}
 
 		#endregion
