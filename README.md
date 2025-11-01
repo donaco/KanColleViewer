@@ -1,7 +1,7 @@
 ﻿提督業も忙しい！ (KanColleViewer)
 --
 
-[![Build status (master)](https://img.shields.io/appveyor/ci/donaco/KanColleViewer.svg?style=flat-square)](https://ci.appveyor.com/project/donaco/kancolleviewer)
+[![Build status (master)](https://img.shields.io/appveyor/ci/Grabacr07/KanColleViewer.svg?style=flat-square)](https://ci.appveyor.com/project/donaco/kancolleviewer)
 [![Release](https://img.shields.io/github/release/donaco/KanColleViewer.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/donaco/KanColleViewer/latest/total.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
 [![NuGet (KanColleWrapper)](https://img.shields.io/nuget/v/KanColleWrapper.svg?style=flat-square)](https://www.nuget.org/packages/KanColleWrapper/)
@@ -16,7 +16,7 @@
 
 ### このプロジェクトについて
 
-Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.github.io/)) 上で艦これを表示し、[Nekoxy](https://github.com/veigr/Nekoxy) で通信内容をキャプチャしています。
+Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.github.io/)) 上で艦これを表示し、通信内容をキャプチャしています。
 **当然ですが、通信内容の変更や、DMM/艦これのサーバーに対する情報の送信等 (マクロ・チート行為) は一切行っていません。**
 
 
@@ -42,7 +42,7 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 * Windows 8.1 64bit
 * Windows 7   64bit
 
-Windows 11 Pro でのみ動作確認を行っております。
+Windows 11 Pro でのみ動作確認を行っており、64bit OS のみサポートしています。
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。
 
 * [.NET Framework 4.6](http://www.microsoft.com/ja-jp/download/details.aspx?id=30653)
@@ -50,13 +50,15 @@ Windows 7 では、遠征や建造の終了時のトースト通知が動作し�
 Windows 8 またはそれ以前で使用する場合、.NET Framework 4.6 のインストールが必要です。
 Windows 10 の場合は標準でインストールされています。
 
-現在、艦これ本体の二期への移行に伴い、Chromium エンジンで暫定対応しています。
+現在、艦これ本体のセキュア化に伴い、ブラウザ機能のみで暫定対応しています。
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 
 
 ### 開発環境・言語
 
-C# + WPF で開発しています。開発環境は Windows 11 Pro + Visual Studio 2022 です。
+C# + WPF で開発しています。
+GitHub Copilot を使用しています。
+開発環境は Windows 11 Pro + Visual Studio 2022 です。
 
 ### ライセンス
 
