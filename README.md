@@ -39,8 +39,8 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 
 * Windows 11
 * Windows 10
-* Windows 8.1 64bit
-* Windows 7   64bit
+* Windows 8  64bit
+* Windows 7  64bit
 
 Windows 11 Pro でのみ動作確認を行っており、64bit OS のみサポートしています。
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。

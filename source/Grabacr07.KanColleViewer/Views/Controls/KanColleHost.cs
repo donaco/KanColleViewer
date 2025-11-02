@@ -69,7 +69,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 					{
 						CefBridge.AttachRequestHandler(newBrowser, captured =>
 						{
-							// UI スレッドでログ化・表示（大量トラフィックだと UI を圧迫するので注意）
+							// UI スレッドでログ化・表示（既存）
 							Application.Current.Dispatcher.Invoke(() =>
 							{
 								System.Diagnostics.Debug.WriteLine($"Captured: {captured.Url}");
@@ -89,6 +89,17 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 								}
 								catch { /* swallow */ }
 							});
+
+							// 追加: KanColleClient に捕捉内容を渡して起動判定をさせる（CEF 傍受でアプリを Started にする）
+							try
+							{
+								// 非 UI スレッドで呼ぶことを想定 — 引数はプリミティブ (url, responseBody)
+								Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
+							}
+							catch (Exception ex)
+							{
+								System.Diagnostics.Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
+							}
 						});
 					}
 				}

@@ -111,7 +111,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 						}
 					case ProxyType.DirectAccess:
 						//プロキシを使用しない場合、HTTPだけNekoxyを通し、後は直アクセス
-						return $"http=127.0.0.1:{port}";
+						// return $"http=127.0.0.1:{port}";
+						// 変更後（HTTP と HTTPS をローカルプロキシへ）
+						return $"http=127.0.0.1:{port};https=127.0.0.1:{port}";
 					default:
 						throw new IndexOutOfRangeException();
 				}
