@@ -11,9 +11,31 @@ namespace Grabacr07.KanColleViewer.Views
 
 		public FleetWindow()
 		{
-			File.AppendAllText(UiLog, $"FleetWindow ctor: {DateTime.Now}\n");
+			try
+			{
+				var logDir = Path.GetDirectoryName(UiLog);
+				if (!string.IsNullOrEmpty(logDir) && !Directory.Exists(logDir))
+				{
+					Directory.CreateDirectory(logDir);
+				}
+				File.AppendAllText(UiLog, $"FleetWindow ctor: {DateTime.Now}\n");
+			}
+			catch (Exception ex)
+			{
+				// ログ書き込みが失敗しても UI の初期化は継続させる
+				Debug.WriteLine($"FleetWindow: failed to append ui log in ctor: {ex}");
+			}
+
 			InitializeComponent();
-			File.AppendAllText(UiLog, $"FleetWindow InitializeComponent done: {DateTime.Now}\n");
+
+			try
+			{
+				File.AppendAllText(UiLog, $"FleetWindow InitializeComponent done: {DateTime.Now}\n");
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine($"FleetWindow: failed to append ui log after InitializeComponent: {ex}");
+			}
 		}
 	}
 }
