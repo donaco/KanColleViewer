@@ -129,10 +129,13 @@ namespace Grabacr07.KanColleWrapper
 
 		private void SetRequireInfo(kcsapi_require_info data)
 		{
-			this.Homeport.UpdateAdmiral(data.api_basic);
+			if (data.api_basic != null)
+			{
+				this.Homeport.UpdateAdmiral(data.api_basic);
+			}
 			this.Homeport.Itemyard.Update(data.api_slot_item);
 			this.Homeport.Dockyard.Update(data.api_kdock);
-		}
+			}
 
 		// Cef からの捕捉を扱う簡易ステート（スレッドセーフ）
 		private readonly object capturedLock = new object();
