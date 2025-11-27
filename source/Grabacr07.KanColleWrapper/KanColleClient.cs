@@ -7,7 +7,8 @@ using Grabacr07.KanColleWrapper.Models.Raw;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using Codeplex.Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Grabacr07.KanColleWrapper
 {

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using Codeplex.Data;
+using Newtonsoft.Json.Linq;
 
 namespace Grabacr07.KanColleViewer.Models
 {
@@ -32,15 +32,27 @@ namespace Grabacr07.KanColleViewer.Models
 					if (response.IsSuccessStatusCode)
 					{
 						var content = await response.Content.ReadAsStringAsync();
-						var json = DynamicJson.Parse(content);
-						var result = ((object[])json)
-							.Select(x => (dynamic)x)
+
+						// Newtonsoft.Json によるパースへ変更
+						JArray array;
+						try
+						{
+							array = JArray.Parse(content);
+						}
+						catch (Exception jex)
+						{
+							System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: JArray.Parse failed: " + jex);
+							return new SallyArea[0];
+						}
+
+						var result = array
+							.OfType<JToken>()
 							.Select(x =>
 								new SallyArea
 								{
-									Area = (int)x.area,
-									Name = (string)x.name,
-									Color = Helper.StringToColor(x.color)
+									Area = (int?)(x["area"]) ?? 0,
+									Name = (string)(x["name"]),
+									Color = Helper.StringToColor((string)(x["color"]))
 								})
 							.ToArray();
 
