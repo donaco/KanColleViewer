@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using Codeplex.Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -26,19 +27,29 @@ namespace Grabacr07.KanColleWrapper
 				}
 				if (string.IsNullOrEmpty(json)) return false;
 
-				// DynamicJson でまずパースして api_data を取り出す（従来の方針を踏襲）
-				dynamic djson = DynamicJson.Parse(json);
-				var apiData = djson.api_data;
-				if (apiData == null)
+				// Newtonsoft.Json でパースして api_data を取り出す
+				JObject root;
+				try
+				{
+					root = JObject.Parse(json);
+				}
+				catch (JsonException jex)
+				{
+					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: JObject.Parse failed: " + jex);
+					return false;
+				}
+
+				var apiDataToken = root["api_data"];
+				if (apiDataToken == null)
 				{
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: api_data not found.");
 					return false;
 				}
 
-				var apiDataString = apiData.ToString();
+				var apiDataString = apiDataToken.ToString(Formatting.None);
 				System.Diagnostics.Debug.WriteLine($"TryDeserializeApiData: api_data length = {apiDataString?.Length}");
 
-				// 優先: DataContractJsonSerializer を使ってデシリアライズ
+				// 優先: DataContractJsonSerializer を使ってデシリアライズ（従来の挙動を保持）
 				try
 				{
 					var serializer = new DataContractJsonSerializer(typeof(T));
@@ -53,24 +64,15 @@ namespace Grabacr07.KanColleWrapper
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: DataContractJsonSerializer failed: " + exSerializer);
 				}
 
-				// フォールバック: DynamicJson の Deserialize<T>() を試す
+				// フォールバック: Newtonsoft.Json の ToObject<T>() を試す
 				try
 				{
-					// apiData が既に DynamicJson の場合
-					if (apiData is DynamicJson dyn)
-					{
-						result = dyn.Deserialize<T>();
-						return true;
-					}
-
-					// 文字列として再パースしてから Deserialize を試す
-					var dyn2 = DynamicJson.Parse(apiDataString);
-					result = dyn2.Deserialize<T>();
+					result = apiDataToken.ToObject<T>();
 					return true;
 				}
-				catch (Exception exDyn)
+				catch (Exception exNewton)
 				{
-					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: DynamicJson.Deserialize fallback failed: " + exDyn);
+					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: Newtonsoft.Json ToObject<T> fallback failed: " + exNewton);
 				}
 			}
 			catch (Exception ex)

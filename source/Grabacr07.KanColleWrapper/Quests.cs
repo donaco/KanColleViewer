@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +9,8 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
-using Codeplex.Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Nekoxy;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
@@ -115,30 +116,75 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				var djson = DynamicJson.Parse(session.GetResponseAsJson());
+				// JSON をパースして api_data を取り出す（DynamicJson の代わりに Newtonsoft を使用）
+				var json = session.GetResponseAsJson();
+				JObject root;
+				try
+				{
+					root = JObject.Parse(json);
+				}
+				catch (JsonException jex)
+				{
+					Debug.WriteLine("Quests.Serialize: JObject.Parse failed: " + jex);
+					return null;
+				}
+
+				var data = root["api_data"];
+				if (data == null)
+				{
+					Debug.WriteLine("Quests.Serialize: api_data not found.");
+					return null;
+				}
+
 				var questlist = new kcsapi_questlist
 				{
-					api_count = Convert.ToInt32(djson.api_data.api_count),
-					api_completed_kind = Convert.ToInt32(djson.api_data.api_completed_kind),
-					api_exec_count = Convert.ToInt32(djson.api_data.api_exec_count),
-					api_exec_type = Convert.ToInt32(djson.api_data.api_exec_type),
+					api_count = (int?)(data["api_count"]) ?? 0,
+					api_completed_kind = (int?)(data["api_completed_kind"]) ?? 0,
+					api_exec_count = (int?)(data["api_exec_count"]) ?? 0,
+					api_exec_type = (int?)(data["api_exec_type"]) ?? 0,
 				};
 
-				if (djson.api_data.api_list != null)
+				var apiListToken = data["api_list"];
+				if (apiListToken != null && apiListToken.Type == JTokenType.Array)
 				{
 					var list = new List<kcsapi_quest>();
 					var serializer = new DataContractJsonSerializer(typeof(kcsapi_quest));
-					foreach (var x in (object[])djson.api_data.api_list)
+
+					foreach (var item in apiListToken)
 					{
 						try
 						{
-							list.Add(serializer.ReadObject(new MemoryStream(Encoding.UTF8.GetBytes(x.ToString()))) as kcsapi_quest);
+							// まず既存と同じ DataContractJsonSerializer を試す
+							var itemJson = item.ToString(Formatting.None);
+							using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(itemJson)))
+							{
+								var obj = serializer.ReadObject(ms) as kcsapi_quest;
+								if (obj != null)
+								{
+									list.Add(obj);
+									continue;
+								}
+							}
 						}
-						catch (SerializationException ex)
+						catch (SerializationException sex)
 						{
-							// 最後のページで任務数が 5 に満たないとき、api_list が -1 で埋められるというクソ API のせい
-							// (2020/3/27のアップデートでapi_listのページングは廃止されたので必要なくなったかもしれない)
-							Debug.WriteLine(ex.Message);
+							// 一部 API の -1 埋めなどで失敗することがある（従来の実装と同じく無視）
+							Debug.WriteLine(sex.Message);
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("Quests.Serialize: serializer failed: " + ex);
+						}
+
+						// フォールバック：Newtonsoft で直接マッピング
+						try
+						{
+							var obj2 = item.ToObject<kcsapi_quest>();
+							if (obj2 != null) list.Add(obj2);
+						}
+						catch (Exception ex2)
+						{
+							Debug.WriteLine("Quests.Serialize: ToObject<kcsapi_quest> failed: " + ex2);
 						}
 					}
 

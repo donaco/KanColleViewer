@@ -96,6 +96,9 @@
     <Reference Include="Nekoxy, Version=1.5.3.21, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nekoxy.1.5.3.21\lib\net45\Nekoxy.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="StatefulModel">
@@ -253,7 +256,6 @@
     <Compile Include="Models\SlotItem.cs" />
     <Compile Include="Models\SlotItemInfo.cs" />
     <Compile Include="Models\UseItem.cs" />
-    <Compile Include="DynamicJson.cs" />
     <Compile Include="Homeport.cs" />
     <Compile Include="Internal\RetryObservableExtensions.cs" />
     <Compile Include="KanColleError.cs" />

@@ -70,19 +70,16 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 
 以下のライブラリを使用しています。
 
-#### [DynamicJson](http://dynamicjson.codeplex.com/)
+#### [Newtonsoft.Json](https://www.newtonsoft.com/json)
 
-> DynamicJson  
-> ver 1.2.0.0 (May. 21th, 2010)
+> Newtonsoft.Json  
+> ver 13.0.4 (2025/9/16)
 >
-> created and maintained by neuecc <ils@neue.cc>  
-> licensed under Microsoft Public License(Ms-PL)  
-> http://neue.cc/  
-> http://dynamicjson.codeplex.com/
+> created James Newton-King 
 
 * **用途 :** JSON デシリアライズ
-* **ライセンス :** Ms-PL
-* **ライセンス全文 :** [licenses/Ms-PL.txt](licenses/Ms-PL.txt)
+* **ライセンス :** The MIT License (MIT)
+* * **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
 
 #### [Livet](http://ugaya40.hateblo.jp/entry/Livet)
 
