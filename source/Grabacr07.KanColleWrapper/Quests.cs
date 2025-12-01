@@ -116,7 +116,7 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				// JSON をパースして api_data を取り出す（DynamicJson の代わりに Newtonsoft を使用）
+				// JSON をパースして api_data を取り出す（Newtonsoft を使用）
 				var json = session.GetResponseAsJson();
 				JObject root;
 				try

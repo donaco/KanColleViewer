@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ using CefSharp.Wpf;
 using CefSharp.Wpf.Internals;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
+using Grabacr07.KanColleWrapper;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
 {
@@ -238,6 +240,63 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleLoadEnd(object sender, FrameLoadEndEventArgs e)
 		{
+			try
+			{
+				// UI スレッドに処理を委譲して、WPF オブジェクトへのアクセス例外を防ぐ
+				this.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					try
+					{
+						// WebBrowser が準備できていれば RequestHandler を割り当てる
+						if (this.WebBrowser != null)
+						{
+							// AttachRequestHandler は CustomRequestHandler を割り当てます
+							// 既に CustomRequestHandler が設定されていなければアタッチ
+							try
+							{
+								if (!(this.WebBrowser.RequestHandler is CustomRequestHandler))
+								{
+									CefBridge.AttachRequestHandler(this.WebBrowser, captured =>
+									{
+										try
+										{
+											// UI スレッドでログ化・表示（既存）
+											Application.Current.Dispatcher.Invoke(() =>
+											{
+												CaptureLogService.Instance.Add(captured);
+											});
+										}
+										catch { /* swallow */ }
+
+										try
+										{
+											// 非 UI スレッドで処理する（CapturedProcessor 側でスレッド安全に扱う）
+											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
+										}
+										catch (Exception ex)
+										{
+											Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
+										}
+									});
+								}
+							}
+							catch (Exception ex)
+							{
+								Debug.WriteLine("AttachRequestHandler failed (UI thread): " + ex);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("HandleLoadEnd (UI delegate) failed: " + ex);
+					}
+				}));
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("HandleLoadEnd top-level failed: " + ex);
+			}
+
 			if (e.Frame.IsMain)
 			{
 				this.Dispatcher.Invoke(() => this.ApplySize());

@@ -10,7 +10,9 @@ namespace Grabacr07.KanColleWrapper.Internal
 	{
 		public static string GetResponseAsJson(this Session session)
 		{
-			return session.Response.BodyAsString.Replace("svdata=", "");
+			// 新: NormalizeSvDataString を使って堅牢に抽出する
+			// return session.Response.BodyAsString.Replace("svdata=", "");
+			return NormalizeSvDataString(session?.Response?.BodyAsString);
 		}
 
 		/// <summary>

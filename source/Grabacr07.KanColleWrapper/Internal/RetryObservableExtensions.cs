@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -9,6 +9,11 @@ namespace Grabacr07.KanColleWrapper.Internal
 {
 	public static class RetryObservableExtensions
 	{
+		public static string NormalizeSvDataString(string responseBody)
+		{
+			throw new NotImplementedException();
+		}
+
 		/// <summary>
 		/// When catched exception, do onError action and repeat observable sequence.
 		/// </summary>

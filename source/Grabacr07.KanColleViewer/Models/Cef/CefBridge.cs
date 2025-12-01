@@ -52,6 +52,18 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 				cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
 
+				// 例: リモートデバッグポートを追加（開発用）
+				cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
+
+				// ログファイルの場所をわかりやすくしておく（既に LogFile を設定している場合は上書きしない）
+				try
+				{
+					var cefLogDir = Path.Combine(CefBridge.CachePath);
+					Directory.CreateDirectory(cefLogDir);
+					cefSettings.LogFile = Path.Combine(cefLogDir, "cef.log");
+				}
+				catch { }
+
 				// proxy-server は空でなければ設定する（Network.xaml の設定を残すため）
 				var proxyString = Settings.NetworkSettings.LocalProxySettingsString;
 				if (!string.IsNullOrWhiteSpace(proxyString))

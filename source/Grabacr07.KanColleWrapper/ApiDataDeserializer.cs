@@ -18,7 +18,7 @@ namespace Grabacr07.KanColleWrapper
 			result = default;
 			try
 			{
-				var json = ExtractSvDataJson(responseBody);
+				var json = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				// ログ: 抽出した JSON の先頭を出力（長すぎる場合は切る）
 				if (!string.IsNullOrEmpty(json))
 				{
@@ -80,28 +80,6 @@ namespace Grabacr07.KanColleWrapper
 				System.Diagnostics.Debug.WriteLine("TryDeserializeApiData failed: " + ex);
 			}
 			return false;
-		}
-
-		// svdata= prefix や不要プレフィックスを取り除いて JSON 本体を返す（null 可）
-		private static string ExtractSvDataJson(string s)
-		{
-			if (string.IsNullOrEmpty(s)) return null;
-
-			// svdata= prefix がある場合はその後を使う
-			var idx = s.IndexOf("svdata=");
-			if (idx >= 0)
-			{
-				s = s.Substring(idx + "svdata=".Length);
-			}
-
-			// 一部レスポンスは "throw 1; < don't be evil' >{...}" のようなプレフィックスがあるため最初の '{' から切り出す
-			var firstBrace = s.IndexOf('{');
-			if (firstBrace >= 0)
-			{
-				s = s.Substring(firstBrace);
-			}
-
-			return s.Trim();
 		}
 	}
 }

@@ -38,8 +38,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		{
 			if (request?.Url == null) return null;
 
-			// 簡易フィルタ（必要に応じて拡張）
-			if (!(request.Url.Contains("kcsapi") || request.Url.Contains("/api/")))
+			// 簡易フィルタ（診断時は広めに拾う）
+			if (!(request.Url.Contains("kcsapi") || request.Url.Contains("/api/") || request.Url.Contains("/kcs2/index.php")))
 			{
 				return null;
 			}
@@ -47,7 +47,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			// -- スナップショット（ここで必要な情報をコピーしておく） --
 			var snapshotUrl = request.Url;
 			var snapshotMethod = request.Method;
-			var snapshotStatusCode = response?.StatusCode ?? 0;
+			// response.StatusCode may not exist on all IResponse implementations; handle safely later
+			var snapshotStatus = response?.StatusCode; // may be unavailable; diagnostic logging handles null
 			var snapshotRequestBody = ExtractRequestBody(request); // IRequest をこの時点で扱う（同期）
 			var snapshotResponseHeaders = BuildHeadersDictionary(response); // IResponse -> Dictionary にコピー
 
@@ -62,11 +63,30 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					{
 						Url = snapshotUrl,
 						Method = snapshotMethod,
-						StatusCode = snapshotStatusCode,
+						StatusCode = snapshotStatus ?? 0,
 						RequestBody = snapshotRequestBody,
 						ResponseBody = responseBody,
 						ResponseHeaders = snapshotResponseHeaders
 					};
+
+					// 診断ログ: 重要な情報をローカルに残す（容量注意：短く）
+					try
+					{
+						var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+						Directory.CreateDirectory(logDir);
+						var logPath = Path.Combine(logDir, "cef_captured_diagnostic.log");
+
+						var safeResp = responseBody ?? string.Empty;
+						var preview = safeResp.Length > 4000 ? safeResp.Substring(0, 4000) + "..." : safeResp;
+
+						var headerText = snapshotResponseHeaders != null
+							? string.Join(", ", snapshotResponseHeaders.Select(kv => kv.Key + ":" + kv.Value))
+							: "(no headers)";
+
+						var entry = $"{DateTime.Now:O} URL={snapshotUrl}\nMethod={snapshotMethod} Status={snapshotStatus}\nHeaders={headerText}\nRequestBody={(snapshotRequestBody ?? "(none)").Replace("\r","").Replace("\n"," ")}\nResponsePreview:\n{preview}\n\n";
+						File.AppendAllText(logPath, entry, Encoding.UTF8);
+					}
+					catch { /* swallow logging errors */ }
 
 					try { onCaptured?.Invoke(captured); } catch { /* swallow */ }
 				}
