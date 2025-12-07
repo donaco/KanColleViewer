@@ -50,17 +50,6 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void Update(kcsapi_ndock[] source)
 		{
-			// 診断ログ：入渠ドック一覧
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = source != null ? $"ndocks={source.Length} ids={string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()))}..." : "null";
-				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.Update(kcsapi_ndock[]) invoked. {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			if (this.Docks.Count == source.Length)
 			{
 				foreach (var raw in source) this.Docks[raw.api_id]?.Update(raw);
@@ -74,16 +63,6 @@ namespace Grabacr07.KanColleWrapper
 
 		private void Start(SvData data)
 		{
-			// 診断ログ：入渠開始
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.Start invoked. RequestPreview={data?.Request?["api_ndock_id"]}\n\n");
-			}
-			catch { /* swallow */ }
-
 			try
 			{
 				//var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];
@@ -106,16 +85,6 @@ namespace Grabacr07.KanColleWrapper
 
 		private void ChangeSpeed(SvData data)
 		{
-			// 診断ログ：入渠高速化
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.ChangeSpeed invoked. RequestPreview={data?.Request?["api_ndock_id"]}\n\n");
-			}
-			catch { /* swallow */ }
-
 			try
 			{
 				var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];

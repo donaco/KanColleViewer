@@ -99,34 +99,9 @@ namespace Grabacr07.KanColleWrapper
 			this.Dockyard = new Dockyard(proxy);
 			this.Quests = new Quests(proxy);
 
-			// 診断ログ: コンストラクタ呼び出しとインスタンス識別子を記録
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				File.AppendAllText(path, $"{DateTime.Now:O} Homeport.ctor invoked. instanceHash={this.GetHashCode()} proxyHash={(proxy?.GetHashCode() ?? 0)}\n");
-			}
-			catch { }
-
 			// port は UI スレッドで反映する
 			proxy.api_port.TryParse<kcsapi_port>().Subscribe(x =>
 			{
-				// 追加診断ログ: api_port 受信（UI スレッドに渡す前に記録）
-				try
-				{
-					var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-					Directory.CreateDirectory(logDir);
-					var path = Path.Combine(logDir, "client_updates.log");
-
-					var ships = x.Data.api_ship?.Length ?? 0;
-					var ndocks = x.Data.api_ndock?.Length ?? 0;
-					var decks = x.Data.api_deck_port?.Length ?? 0;
-					var materials = x.Data.api_material?.Length ?? 0;
-					File.AppendAllText(path, $"{DateTime.Now:O} Homeport.api_port received. instanceHash={this.GetHashCode()} ships={ships} ndocks={ndocks} decks={decks} materials={materials}\n");
-				}
-				catch { }
-
 				RunOnUi(() =>
 				{
 					this.UpdateAdmiral(x.Data.api_basic);
@@ -141,16 +116,6 @@ namespace Grabacr07.KanColleWrapper
 			// 個別 basic も UI スレッドで反映
 			proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
 			{
-				// 診断ログ: api_get_member_basic を受信
-				try
-				{
-					var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-					Directory.CreateDirectory(logDir);
-					var path = Path.Combine(logDir, "client_updates.log");
-					File.AppendAllText(path, $"{DateTime.Now:O} Homeport.api_get_member_basic received. instanceHash={this.GetHashCode()}\n");
-				}
-				catch { }
-
 				RunOnUi(() => this.UpdateAdmiral(x.Data));
 			});
 
@@ -160,28 +125,6 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void UpdateAdmiral(kcsapi_basic data)
 		{
-			// 診断ログ追加
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-
-				string preview;
-				try
-				{
-					var json = JsonConvert.SerializeObject(data);
-					preview = json?.Length > 1000 ? json.Substring(0, 1000) + "..." : json;
-				}
-				catch
-				{
-					preview = "(serialize failed)";
-				}
-
-				File.AppendAllText(path, $"{DateTime.Now:O} Homeport.UpdateAdmiral invoked. data preview: {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			this.Admiral = new Admiral(data);
 		}
 

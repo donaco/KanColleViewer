@@ -76,20 +76,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 							{
 								System.Diagnostics.Debug.WriteLine($"Captured: {captured.Url}");
 								System.Diagnostics.Debug.WriteLine(captured.ResponseBody);
-
-								// 任意: ファイルにログを残す（デバッグ用）
-								try
-								{
-									var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "captured.log");
-									Directory.CreateDirectory(Path.GetDirectoryName(log));
-									// 変更前（現在）: ファイル出力や Debug.WriteLine をしている箇所
-									// …
-									// File.AppendAllText(log, $"{DateTime.Now}: {captured.Url}\n{captured.RequestBody}\n{captured.ResponseBody}\n\n");
-
-									// 変更後: CaptureLogService に流す
-									CaptureLogService.Instance.Add(captured);
-								}
-								catch { /* swallow */ }
 							});
 
 							// 追加: KanColleClient に捕捉内容を渡して起動判定をさせる（CEF 傍受でアプリを Started にする）

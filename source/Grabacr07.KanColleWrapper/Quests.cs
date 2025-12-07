@@ -203,17 +203,6 @@ namespace Grabacr07.KanColleWrapper
 		// internal に変更（KanColleClient から直接呼べるようにする）
 		internal void Update(kcsapi_questlist questlist)
 		{
-			// 診断ログ：任務リスト更新
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = questlist == null ? "null" : $"count={questlist.api_count} exec_count={questlist.api_exec_count} listLen={(questlist.api_list?.Length ?? 0)}";
-				File.AppendAllText(path, $"{DateTime.Now:O} Quests.Update invoked. {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			this.IsUntaken = false;
 
 			if (questlist.api_list == null)

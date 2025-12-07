@@ -187,17 +187,6 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		internal void Update(kcsapi_ship2[] source)
 		{
-			// 診断ログ
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = source != null ? $"ships={source.Length} ids={string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()))}..." : "null";
-				File.AppendAllText(path, $"{DateTime.Now:O} Organization.Update(kcsapi_ship2[]) invoked. {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			if (source.Length <= 1)
 			{
 				foreach (var ship in source)
@@ -233,17 +222,6 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		internal void Update(kcsapi_deck[] source)
 		{
-			// 診断ログ
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = source != null ? $"fleets={source.Length} ids={string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()))}..." : "null";
-				File.AppendAllText(path, $"{DateTime.Now:O} Organization.Update(kcsapi_deck[]) invoked. {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			if (this.Fleets.Count == source.Length)
 			{
 				foreach (var raw in source) this.Fleets[raw.api_id]?.Update(raw);
@@ -258,17 +236,6 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void Update(kcsapi_deck source)
 		{
-			// 診断ログ
-			try
-			{
-				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-				Directory.CreateDirectory(logDir);
-				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = source != null ? $"fleetId={source.api_id}" : "null";
-				File.AppendAllText(path, $"{DateTime.Now:O} Organization.Update(kcsapi_deck) invoked. {preview}\n\n");
-			}
-			catch { /* swallow */ }
-
 			var fleet = this.Fleets[source.api_id];
 			if (fleet != null)
 			{
