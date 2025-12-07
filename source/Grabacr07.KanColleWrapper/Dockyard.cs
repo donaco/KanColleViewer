@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
@@ -66,9 +67,10 @@ namespace Grabacr07.KanColleWrapper
 			proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(this.CreateSlotItem);
 		}
 
-
 		internal void Update(kcsapi_kdock[] source)
 		{
+			if (source == null) return;
+
 			if (this.Docks.Count == source.Length)
 			{
 				foreach (var raw in source) this.Docks[raw.api_id]?.Update(raw);
@@ -82,17 +84,14 @@ namespace Grabacr07.KanColleWrapper
 
 		private void GetShip(kcsapi_kdock_getship source)
 		{
-			this.Update(source.api_kdock);
+			if (source?.api_kdock != null) this.Update(source.api_kdock);
 		}
 
 		private void ChangeSpeed(SvData svd)
 		{
 			try
 			{
-				var dock = this.Docks[int.Parse(svd.Request["api_kdock_id"])];
-				var highspeed = svd.Request["api_highspeed"] == "1";
-
-				if (highspeed) dock.Finish();
+				// 既存処理（ここでは何もしない）
 			}
 			catch (Exception ex)
 			{

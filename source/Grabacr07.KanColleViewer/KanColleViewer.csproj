@@ -131,6 +131,9 @@
     <Reference Include="Nekoxy, Version=1.5.3.21, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nekoxy.1.5.3.21\lib\net45\Nekoxy.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="StatefulModel">
       <HintPath>..\packages\StatefulModel.0.6.0\lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10\StatefulModel.dll</HintPath>
       <Private>True</Private>
@@ -299,9 +302,6 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CaptureWindow.xaml.cs">
-      <DependentUpon>CaptureWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\Contents\StateDetailIndicator.xaml.cs">
       <DependentUpon>StateDetailIndicator.xaml</DependentUpon>
     </Compile>
@@ -438,9 +438,6 @@
     </Page>
     <Page Include="Views\BrowserWindow.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\CaptureWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Catalogs\ShipCatalogWindow.xaml">

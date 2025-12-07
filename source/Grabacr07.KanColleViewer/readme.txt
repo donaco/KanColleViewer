@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-                                             version 4.6  2025/10/30
+                                             version 4.6  2025/12/07
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -66,20 +66,14 @@ GitHub Copilot を使用しています。
 
 以下のライブラリを使用しています。
 
-DynamicJson
-(http://dynamicjson.codeplex.com/)
+Newtonsoft.Json
+(https://www.newtonsoft.com/json)
 
-    DynamicJson
-    ver 1.2.0.0 (May. 21th, 2010)
-
-    created and maintained by neuecc ils@neue.cc
-    licensed under Microsoft Public License(Ms-PL)
-    http://neue.cc/
-    http://dynamicjson.codeplex.com/
-
+    ver 13.0.4 (2025/9/16)
+    created James Newton-King 
     ・用途 : JSON デシリアライズ
-    ・ライセンス : Ms-PL
-    ・ライセンス全文 : Licenses/Ms-PL.txt
+    ・ライセンス : The MIT License (MIT)
+    ・ライセンス全文 : licenses/Newtonsoft.Json.txt
 
 Livet
 (http://ugaya40.hateblo.jp/entry/Livet)
@@ -182,8 +176,9 @@ Application Insights
 
 
 ■更新履歴
-2025/10/26 - version 4.6 alpha3
-2025/10/26 - version 4.6 alpha2 リリース
+2025/12/07 - version 4.6 beta1 リリース
+2025/11/02 - version 4.6 alpha3 リリース
+2025/11/01 - version 4.6 alpha2 リリース
 2025/10/26 - version 4.6 alpha1
 2020/03/28 - version 4.5.2 リリース
 2018/08/17 - version 4.5 リリース

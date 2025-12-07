@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ using CefSharp.Wpf;
 using CefSharp.Wpf.Internals;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
+using Grabacr07.KanColleWrapper;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
 {
@@ -61,53 +63,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				newBrowser.MenuHandler = new ContextMenuHandler();
 				newBrowser.WpfKeyboardHandler = new InhibitTabKeyHandler(newBrowser);
 
-				// ここで RequestHandler を添付する（CEF が初期化済みであることを前提）
-				try
-				{
-					// 既に CustomRequestHandler が設定されていなければアタッチ
-					if (!(newBrowser.RequestHandler is CustomRequestHandler))
-					{
-						CefBridge.AttachRequestHandler(newBrowser, captured =>
-						{
-							// UI スレッドでログ化・表示（既存）
-							Application.Current.Dispatcher.Invoke(() =>
-							{
-								System.Diagnostics.Debug.WriteLine($"Captured: {captured.Url}");
-								System.Diagnostics.Debug.WriteLine(captured.ResponseBody);
-
-								// 任意: ファイルにログを残す（デバッグ用）
-								try
-								{
-									var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "captured.log");
-									Directory.CreateDirectory(Path.GetDirectoryName(log));
-									// 変更前（現在）: ファイル出力や Debug.WriteLine をしている箇所
-									// …
-									// File.AppendAllText(log, $"{DateTime.Now}: {captured.Url}\n{captured.RequestBody}\n{captured.ResponseBody}\n\n");
-
-									// 変更後: CaptureLogService に流す
-									CaptureLogService.Instance.Add(captured);
-								}
-								catch { /* swallow */ }
-							});
-
-							// 追加: KanColleClient に捕捉内容を渡して起動判定をさせる（CEF 傍受でアプリを Started にする）
-							try
-							{
-								// 非 UI スレッドで呼ぶことを想定 — 引数はプリミティブ (url, responseBody)
-								Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
-							}
-							catch (Exception ex)
-							{
-								System.Diagnostics.Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
-							}
-						});
-					}
-				}
-				catch (Exception ex)
-				{
-					// Attach に失敗してもブラウザ表示は継続させる
-					System.Diagnostics.Debug.WriteLine("AttachRequestHandler failed: " + ex);
-				}
 			}
 			if (instance.scrollViewer != null)
 			{
@@ -115,12 +70,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 
 			System.Diagnostics.Debug.WriteLine($"WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}");
-			try
-			{
-				File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "debug_browsercb.log"),
-					$"{DateTime.Now}: WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}\n");
-			}
-			catch { }
 		}
 
 		#endregion
@@ -238,6 +187,54 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleLoadEnd(object sender, FrameLoadEndEventArgs e)
 		{
+			try
+			{
+				// UI スレッドに処理を委譲して、WPF オブジェクトへのアクセス例外を防ぐ
+				this.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					try
+					{
+						// WebBrowser が準備できていれば RequestHandler を割り当てる
+						if (this.WebBrowser != null)
+						{
+							// AttachRequestHandler は CustomRequestHandler を割り当てます
+							// 既に CustomRequestHandler が設定されていなければアタッチ
+							try
+							{
+								if (!(this.WebBrowser.RequestHandler is CustomRequestHandler))
+								{
+									CefBridge.AttachRequestHandler(this.WebBrowser, captured =>
+									{
+
+										try
+										{
+											// 非 UI スレッドで処理する（CapturedProcessor 側でスレッド安全に扱う）
+											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
+										}
+										catch (Exception ex)
+										{
+											Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
+										}
+									});
+								}
+							}
+							catch (Exception ex)
+							{
+								Debug.WriteLine("AttachRequestHandler failed (UI thread): " + ex);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("HandleLoadEnd (UI delegate) failed: " + ex);
+					}
+				}));
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("HandleLoadEnd top-level failed: " + ex);
+			}
+
 			if (e.Frame.IsMain)
 			{
 				this.Dispatcher.Invoke(() => this.ApplySize());

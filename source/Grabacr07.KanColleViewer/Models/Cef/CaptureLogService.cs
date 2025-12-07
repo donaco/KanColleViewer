@@ -21,9 +21,20 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private CaptureLogService() { }
 
+		// 追加: 表示するホストのサフィックス（例: "kancolle-server.com"）
+		// null または空文字列ならフィルタなし（従来の挙動）
+		//public string HostSuffixFilter { get; set; } = null; // フィルターなし
+		public string HostSuffixFilter { get; set; } = "kancolle-server.com";
+
 		public void Add(CapturedHttp entry)
 		{
 			if (entry == null) return;
+
+			// ホストフィルタが設定されている場合、対象外は破棄する
+			if (!string.IsNullOrEmpty(this.HostSuffixFilter) && !IsHostMatch(entry.Url, this.HostSuffixFilter))
+			{
+				return;
+			}
 
 			// UI スレッドにディスパッチして追加
 			if (!dispatcher.CheckAccess())
@@ -62,6 +73,27 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			else
 			{
 				Entries.Clear();
+			}
+		}
+
+		private static bool IsHostMatch(string url, string hostSuffix)
+		{
+			if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(hostSuffix)) return false;
+			try
+			{
+				if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+				{
+					// パースできない場合は単純包含チェック（最終手段）
+					return url.IndexOf(hostSuffix, StringComparison.OrdinalIgnoreCase) >= 0;
+				}
+				var host = uri.Host ?? string.Empty;
+				// サブドメインを含めて末尾一致を確認（例: abc.kancolle-server.com）
+				return host.Equals(hostSuffix, StringComparison.OrdinalIgnoreCase)
+					|| host.EndsWith("." + hostSuffix, StringComparison.OrdinalIgnoreCase);
+			}
+			catch
+			{
+				return false;
 			}
 		}
 	}

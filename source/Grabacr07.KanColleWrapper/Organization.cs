@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
+using System.IO; // 追加
+using Newtonsoft.Json; // 追加
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -281,7 +283,7 @@ namespace Grabacr07.KanColleWrapper
 				var currentIndex = Array.IndexOf(currentFleet.Ships, ship);
 				var old = fleet.Change(index, ship);
 
-				// Fleet.Change(int, Ship) は、変更前の艦を返す (= old) ので、
+				// Fleet.Change(int, Ship) は、変更前の艦を返す (= old) ので、 
 				// ship の移動元 (currentFleet + currentIndex) に old を書き込みにいく
 				currentFleet.Change(currentIndex, old);
 			}

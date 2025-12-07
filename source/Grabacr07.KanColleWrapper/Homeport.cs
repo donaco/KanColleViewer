@@ -1,10 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq; // 追加
+using System.Windows; // 追加
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -43,7 +47,26 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public Quests Quests { get; }
 
-	
+		// UI スレッドへ安全に実行するヘルパー
+		private static void RunOnUi(Action action)
+		{
+			try
+			{
+				if (Application.Current != null && Application.Current.Dispatcher != null)
+				{
+					Application.Current.Dispatcher.BeginInvoke(action);
+				}
+				else
+				{
+					action();
+				}
+			}
+			catch
+			{
+				try { action(); } catch { }
+			}
+		}
+
 		#region Admiral 変更通知プロパティ
 
 		private Admiral _Admiral;
@@ -76,19 +99,28 @@ namespace Grabacr07.KanColleWrapper
 			this.Dockyard = new Dockyard(proxy);
 			this.Quests = new Quests(proxy);
 
+			// port は UI スレッドで反映する
 			proxy.api_port.TryParse<kcsapi_port>().Subscribe(x =>
 			{
-				this.UpdateAdmiral(x.Data.api_basic);
-				this.Organization.Update(x.Data.api_ship);
-				this.Repairyard.Update(x.Data.api_ndock);
-				this.Organization.Update(x.Data.api_deck_port);
-				this.Organization.Combined = x.Data.api_combined_flag != 0;
-				this.Materials.Update(x.Data.api_material);
+				RunOnUi(() =>
+				{
+					this.UpdateAdmiral(x.Data.api_basic);
+					this.Organization.Update(x.Data.api_ship);
+					this.Repairyard.Update(x.Data.api_ndock);
+					this.Organization.Update(x.Data.api_deck_port);
+					this.Organization.Combined = x.Data.api_combined_flag != 0;
+					this.Materials.Update(x.Data.api_material);
+				});
 			});
-			proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x => this.UpdateAdmiral(x.Data));
+
+			// 個別 basic も UI スレッドで反映
+			proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
+			{
+				RunOnUi(() => this.UpdateAdmiral(x.Data));
+			});
+
 			proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment);
 		}
-
 
 		internal void UpdateAdmiral(kcsapi_basic data)
 		{
