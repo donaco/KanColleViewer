@@ -56,8 +56,8 @@ namespace Grabacr07.KanColleWrapper
 				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
 				Directory.CreateDirectory(logDir);
 				var path = Path.Combine(logDir, "client_updates.log");
-				var preview = source != null ? "ndocks=" + source.Length + " ids=" + string.Join(", ", source.Take(10).Select(x => x.api_id.ToString())) + "..." : "null";
-				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.Update(kcsapi_ndock[]) invoked. " + preview + Environment.NewLine + Environment.NewLine);
+				var preview = source != null ? $"ndocks={source.Length} ids={string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()))}..." : "null";
+				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.Update(kcsapi_ndock[]) invoked. {preview}\n\n");
 			}
 			catch { /* swallow */ }
 
@@ -80,15 +80,7 @@ namespace Grabacr07.KanColleWrapper
 				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
 				Directory.CreateDirectory(logDir);
 				var path = Path.Combine(logDir, "client_updates.log");
-
-				var reqPreview = "(no id)";
-				if (data?.Request != null)
-				{
-					var v = data.Request["api_ndock_id"];
-					if (!string.IsNullOrEmpty(v)) reqPreview = v;
-				}
-
-				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.Start invoked. RequestPreview=" + reqPreview + Environment.NewLine + Environment.NewLine);
+				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.Start invoked. RequestPreview={data?.Request?["api_ndock_id"]}\n\n");
 			}
 			catch { /* swallow */ }
 
@@ -120,15 +112,7 @@ namespace Grabacr07.KanColleWrapper
 				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
 				Directory.CreateDirectory(logDir);
 				var path = Path.Combine(logDir, "client_updates.log");
-
-				var reqPreview = "(no id)";
-				if (data?.Request != null)
-				{
-					var v = data.Request["api_ndock_id"];
-					if (!string.IsNullOrEmpty(v)) reqPreview = v;
-				}
-
-				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.ChangeSpeed invoked. RequestPreview=" + reqPreview + Environment.NewLine + Environment.NewLine);
+				File.AppendAllText(path, $"{DateTime.Now:O} Repairyard.ChangeSpeed invoked. RequestPreview={data?.Request?["api_ndock_id"]}\n\n");
 			}
 			catch { /* swallow */ }
 
@@ -148,9 +132,24 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
+		/// <summary>
+		/// 指定した艦 ID が現在入渠中かどうかを返します。
+		/// </summary>
 		internal bool CheckRepairing(int id)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				// Docks が null になり得るケースに備え安全に扱う
+				if (this.Docks == null) return false;
+
+				// Repairing 状態のドックに対象の艦がいるか
+				return this.Docks.Values.Any(d => d != null && d.ShipId == id && d.State == RepairingDockState.Repairing);
+			}
+			catch
+			{
+				// エラーがあっても false を返して処理を継続させる
+				return false;
+			}
 		}
 	}
 }

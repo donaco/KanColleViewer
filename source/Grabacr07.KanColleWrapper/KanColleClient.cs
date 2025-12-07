@@ -456,6 +456,10 @@ namespace Grabacr07.KanColleWrapper
 										if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
 										if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
 										if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
+
+										// 追加: 連合フラグを反映（CombinedFleet を生成・破棄する）
+										this.Homeport.Organization.Combined = port.api_combined_flag != 0;
+
 										if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
 									}
 									catch (Exception ex)
@@ -478,6 +482,10 @@ namespace Grabacr07.KanColleWrapper
 								if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
 								if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
 								if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
+
+								// 追加: 連合フラグを反映
+								this.Homeport.Organization.Combined = port.api_combined_flag != 0;
+
 								if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
 							}
 
@@ -487,7 +495,7 @@ namespace Grabacr07.KanColleWrapper
 								var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
 								Directory.CreateDirectory(logDir);
 								var path = Path.Combine(logDir, "client_updates.log");
-								File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: applied api_port to Homeport. portShips={(port.api_ship?.Length ?? 0)} materials={(port.api_material?.Length ?? 0)} ndocks={(port.api_ndock?.Length ?? 0)}\n");
+								File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: applied api_port to Homeport. portShips={(port.api_ship?.Length ?? 0)} materials={(port.api_material?.Length ?? 0)} ndocks={(port.api_ndock?.Length ?? 0)} combined={port.api_combined_flag}\n");
 							}
 							catch { }
 						}
@@ -508,6 +516,70 @@ namespace Grabacr07.KanColleWrapper
 
 					return;
 				}
+
+				// /kcsapi/api_get_member/questlist を直接 Homeport.Quests に流す（フォールバック）
+				try
+				{
+					if (url.Contains("/kcsapi/api_get_member/questlist"))
+					{
+						if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
+						{
+							try
+							{
+								if (Application.Current != null)
+								{
+									Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+									{
+										try
+										{
+											this.Homeport.Quests.Update(questlist);
+										}
+										catch (Exception ex)
+										{
+											try
+											{
+												var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+												Directory.CreateDirectory(logDir);
+												var path = Path.Combine(logDir, "client_updates.log");
+												File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured -> questlist apply failed: {ex}\n");
+											}
+											catch { }
+										}
+									}));
+								}
+								else
+								{
+									this.Homeport.Quests.Update(questlist);
+								}
+
+								try
+								{
+									var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+									Directory.CreateDirectory(logDir);
+									var path = Path.Combine(logDir, "client_updates.log");
+									File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: applied questlist to Homeport. quests={(questlist.api_list?.Length ?? 0)} exec_count={questlist.api_exec_count}\n");
+								}
+								catch { }
+							}
+							catch { /* swallow */ }
+						}
+						else
+						{
+							try
+							{
+								var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+								Directory.CreateDirectory(logDir);
+								var path = Path.Combine(logDir, "client_updates.log");
+								File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: questlist parse failed. url={url}\n");
+							}
+							catch { }
+						}
+
+						return;
+					}
+				}
+				catch { /* swallow */ }
+
 			}
 			catch { /* swallow */ }
 		}

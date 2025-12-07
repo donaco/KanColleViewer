@@ -200,7 +200,8 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		private void Update(kcsapi_questlist questlist)
+		// internal に変更（KanColleClient から直接呼べるようにする）
+		internal void Update(kcsapi_questlist questlist)
 		{
 			// 診断ログ：任務リスト更新
 			try
