@@ -9,9 +9,72 @@ namespace Grabacr07.KanColleWrapper.Internal
 {
 	public static class RetryObservableExtensions
 	{
-		public static string NormalizeSvDataString(string responseBody)
+		// svdata 正規化ロジック（Extensions.NormalizeSvDataString と互換）
+		public static string NormalizeSvDataString(string s)
 		{
-			throw new NotImplementedException();
+			if (string.IsNullOrEmpty(s)) return null;
+
+			// svdata= を取り除く（存在すれば）
+			var t = s.Replace("svdata=", "");
+
+			// 最初の '{' を探す（throw 1; プレフィックス等を排除）
+			var first = t.IndexOf('{');
+			if (first < 0) return null;
+
+			// 波括弧でバランスをとって切り出す（文字列リテラル内の '{' '}' を無視、エスケープも考慮）
+			int depth = 0;
+			bool inString = false;
+			bool escape = false;
+			int i;
+			for (i = first; i < t.Length; i++)
+			{
+				char ch = t[i];
+
+				if (escape)
+				{
+					// 直前がバックスラッシュによるエスケープ → 文字列内の特殊文字は無視して継続
+					escape = false;
+					continue;
+				}
+
+				if (ch == '\\')
+				{
+					// 次の文字はエスケープされる
+					escape = true;
+					continue;
+				}
+
+				if (ch == '"')
+				{
+					// 文字列リテラルの開始/終了をトグル
+					inString = !inString;
+					continue;
+				}
+
+				if (inString)
+				{
+					// 文字列内にある波括弧は無視
+					continue;
+				}
+
+				if (ch == '{')
+				{
+					depth++;
+				}
+				else if (ch == '}')
+				{
+					depth--;
+					if (depth == 0)
+					{
+						i++; // include this closing brace
+						break;
+					}
+				}
+			}
+
+			if (depth != 0) return null;
+
+			return t.Substring(first, i - first).Trim();
 		}
 
 		/// <summary>

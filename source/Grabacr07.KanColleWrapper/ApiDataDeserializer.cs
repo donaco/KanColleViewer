@@ -25,7 +25,19 @@ namespace Grabacr07.KanColleWrapper
 					var preview = json.Length > 1000 ? json.Substring(0, 1000) + "..." : json;
 					System.Diagnostics.Debug.WriteLine($"TryDeserializeApiData: extracted json preview: {preview}");
 				}
-				if (string.IsNullOrEmpty(json)) return false;
+				if (string.IsNullOrEmpty(json))
+				{
+					// 正規化失敗 → サンプルをファイルに保存して原因調査しやすくする
+					try
+					{
+						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "normalize_failed.log");
+						Directory.CreateDirectory(Path.GetDirectoryName(path));
+						var preview = responseBody?.Length > 2000 ? responseBody.Substring(0, 2000) + "..." : responseBody;
+						File.AppendAllText(path, $"{DateTime.Now:O} url-missing-or-not-json preview:\n{preview}\n\n");
+					}
+					catch { }
+					return false;
+				}
 
 				// Newtonsoft.Json でパースして api_data を取り出す
 				JObject root;
@@ -36,6 +48,15 @@ namespace Grabacr07.KanColleWrapper
 				catch (JsonException jex)
 				{
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: JObject.Parse failed: " + jex);
+					// パースできない JSON を調査用ファイルに残す
+					try
+					{
+						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "parse_failed.log");
+						Directory.CreateDirectory(Path.GetDirectoryName(path));
+						var preview = json.Length > 4000 ? json.Substring(0, 4000) + "..." : json;
+						File.AppendAllText(path, $"{DateTime.Now:O} JObject.Parse failed: {jex}\njson preview:\n{preview}\n\n");
+					}
+					catch { }
 					return false;
 				}
 
@@ -43,6 +64,14 @@ namespace Grabacr07.KanColleWrapper
 				if (apiDataToken == null)
 				{
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: api_data not found.");
+					try
+					{
+						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "api_data_missing.log");
+						Directory.CreateDirectory(Path.GetDirectoryName(path));
+						var preview = json.Length > 4000 ? json.Substring(0, 4000) + "..." : json;
+						File.AppendAllText(path, $"{DateTime.Now:O} api_data not found in json preview:\n{preview}\n\n");
+					}
+					catch { }
 					return false;
 				}
 
@@ -62,6 +91,14 @@ namespace Grabacr07.KanColleWrapper
 				catch (Exception exSerializer)
 				{
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: DataContractJsonSerializer failed: " + exSerializer);
+					try
+					{
+						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "deserialize_failed.log");
+						Directory.CreateDirectory(Path.GetDirectoryName(path));
+						var preview = apiDataString.Length > 4000 ? apiDataString.Substring(0, 4000) + "..." : apiDataString;
+						File.AppendAllText(path, $"{DateTime.Now:O} DataContractJsonSerializer failed: {exSerializer}\napi_data preview:\n{preview}\n\n");
+					}
+					catch { }
 				}
 
 				// フォールバック: Newtonsoft.Json の ToObject<T>() を試す
@@ -73,6 +110,14 @@ namespace Grabacr07.KanColleWrapper
 				catch (Exception exNewton)
 				{
 					System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: Newtonsoft.Json ToObject<T> fallback failed: " + exNewton);
+					try
+					{
+						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "toobject_failed.log");
+						Directory.CreateDirectory(Path.GetDirectoryName(path));
+						var preview = apiDataString.Length > 4000 ? apiDataString.Substring(0, 4000) + "..." : apiDataString;
+						File.AppendAllText(path, $"{DateTime.Now:O} ToObject<T> failed: {exNewton}\napi_data preview:\n{preview}\n\n");
+					}
+					catch { }
 				}
 			}
 			catch (Exception ex)

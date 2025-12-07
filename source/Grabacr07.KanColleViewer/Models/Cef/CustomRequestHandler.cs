@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.Handler;
 
@@ -33,73 +35,121 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			this.onCaptured = onCaptured;
 		}
 
-		// 修正: IResponse / IRequest のフィールドを即座にコピーしてコールバックで CefSharp オブジェクトに触らない
 		protected override IResponseFilter GetResourceResponseFilter(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response)
 		{
 			if (request?.Url == null) return null;
 
-			// 簡易フィルタ（診断時は広めに拾う）
 			if (!(request.Url.Contains("kcsapi") || request.Url.Contains("/api/") || request.Url.Contains("/kcs2/index.php")))
 			{
 				return null;
 			}
 
-			// -- スナップショット（ここで必要な情報をコピーしておく） --
 			var snapshotUrl = request.Url;
 			var snapshotMethod = request.Method;
-			// response.StatusCode may not exist on all IResponse implementations; handle safely later
-			var snapshotStatus = response?.StatusCode; // may be unavailable; diagnostic logging handles null
-			var snapshotRequestBody = ExtractRequestBody(request); // IRequest をこの時点で扱う（同期）
-			var snapshotResponseHeaders = BuildHeadersDictionary(response); // IResponse -> Dictionary にコピー
+			var snapshotStatus = response?.StatusCode;
+			var snapshotRequestBody = ExtractRequestBody(request);
+			var snapshotResponseHeaders = BuildHeadersDictionary(response);
 
-			// ResponseFilter のコールバック内では CefSharp 型にはアクセスしない
+			// ResponseFilter のコールバックは短くして、重い処理は Task.Run にオフロードする
 			return new ResponseFilter(bytes =>
 			{
+				// 受け取った bytes をそのまま Task に渡して非同期で処理する
 				try
 				{
-					var responseBody = ResponseFilter.TryDecode(bytes);
-
-					var captured = new CapturedHttp
+					var copy = bytes != null ? (byte[])bytes.Clone() : new byte[0];
+					Task.Run(() =>
 					{
-						Url = snapshotUrl,
-						Method = snapshotMethod,
-						StatusCode = snapshotStatus ?? 0,
-						RequestBody = snapshotRequestBody,
-						ResponseBody = responseBody,
-						ResponseHeaders = snapshotResponseHeaders
-					};
+						string responseBodyText = null;
+						try { responseBodyText = ResponseFilter.TryDecode(copy); } catch { responseBodyText = null; }
 
-					// 診断ログ: 重要な情報をローカルに残す（容量注意：短く）
-					try
-					{
-						var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-						Directory.CreateDirectory(logDir);
-						var logPath = Path.Combine(logDir, "cef_captured_diagnostic.log");
+						// gzip 判定: ヘッダー × バイト先頭マジックを組み合わせつつ、
+						// バイナリ内に gzip マジックが埋まっている場合はそのオフセットから展開を試す
+						bool decompressionSucceeded = false;
+						string normalized = null;
+						try
+						{
+							// バイト列内で gzip マジック (0x1F 0x8B) を探す
+							int gzipOffset = -1;
+							if (copy != null && copy.Length >= 2)
+							{
+								for (int i = 0; i < copy.Length - 1; i++)
+								{
+									if (copy[i] == 0x1F && copy[i + 1] == 0x8B) { gzipOffset = i; break; }
+								}
+							}
 
-						var safeResp = responseBody ?? string.Empty;
-						var preview = safeResp.Length > 4000 ? safeResp.Substring(0, 4000) + "..." : safeResp;
+							if (gzipOffset >= 0)
+							{
+								// 見つかったオフセットから展開を試みる
+								try
+								{
+									using (var ms = new MemoryStream(copy, gzipOffset, copy.Length - gzipOffset))
+									using (var gz = new GZipStream(ms, CompressionMode.Decompress))
+									using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+									{
+										var decompressed = sr.ReadToEnd();
+										decompressionSucceeded = true;
+										normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
+									}
+								}
+								catch
+								{
+									normalized = null;
+								}
+							}
 
-						var headerText = snapshotResponseHeaders != null
-							? string.Join(", ", snapshotResponseHeaders.Select(kv => kv.Key + ":" + kv.Value))
-							: "(no headers)";
+							// フォールバック: 文字列化済みテキストから正規化を試す（すでに展開済み／非圧縮のケース）
+							if (string.IsNullOrEmpty(normalized))
+							{
+								normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
+								// responseBodyText が有効なら decompressionSucceeded は true としない（既に展開済みの可能性あり）
+							}
+						}
+						catch
+						{
+							normalized = null;
+						}
 
-						var entry = $"{DateTime.Now:O} URL={snapshotUrl}\nMethod={snapshotMethod} Status={snapshotStatus}\nHeaders={headerText}\nRequestBody={(snapshotRequestBody ?? "(none)").Replace("\r","").Replace("\n"," ")}\nResponsePreview:\n{preview}\n\n";
-						File.AppendAllText(logPath, entry, Encoding.UTF8);
-					}
-					catch { /* swallow logging errors */ }
+						// 詳細診断ログ（非同期なので UI ブロックしない）
+						try
+						{
+							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+							Directory.CreateDirectory(logDir);
+							var logPath = Path.Combine(logDir, "cef_captured_diagnostic.log");
 
-					try { onCaptured?.Invoke(captured); } catch { /* swallow */ }
+							var safeResp = responseBodyText ?? string.Empty;
+							var preview = safeResp.Length > 4000 ? safeResp.Substring(0, 4000) + "..." : safeResp;
+							var headerText = snapshotResponseHeaders != null ? string.Join(", ", snapshotResponseHeaders.Select(kv => kv.Key + ":" + kv.Value)) : "(no headers)";
+							var entry = $"{DateTime.Now:O} URL={snapshotUrl}\nMethod={snapshotMethod} Status={snapshotStatus}\nHeaders={headerText}\nRequestBody={(snapshotRequestBody ?? "(none)").Replace("\r","").Replace("\n"," ")}\nResponsePreview:\n{preview}\nDecompressionSucceeded={decompressionSucceeded} NormalizedLength={(normalized?.Length ?? 0)}\n\n";
+							File.AppendAllText(logPath, entry, Encoding.UTF8);
+						}
+						catch { /* swallow */ }
+
+						// 正常に正規化できたらアプリへ渡す（onCaptured は別スレッドで安全に呼ぶ)
+						if (!string.IsNullOrEmpty(normalized))
+						{
+							var captured = new CapturedHttp
+							{
+								Url = snapshotUrl,
+								Method = snapshotMethod,
+								StatusCode = snapshotStatus ?? 0,
+								RequestBody = snapshotRequestBody,
+								ResponseBody = normalized,
+								ResponseHeaders = snapshotResponseHeaders
+							};
+
+							try
+							{
+								// onCaptured は軽量にする想定だが念のためも別スレッドで
+								Task.Run(() => { try { onCaptured?.Invoke(captured); } catch { } });
+							}
+							catch { }
+						}
+					});
 				}
-				catch (Exception ex)
+				catch
 				{
-					// トラブルシュート用にログを残す（過度に多く残さないよう注意）
-					try
-					{
-						var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "capture_errors.log");
-						Directory.CreateDirectory(Path.GetDirectoryName(log));
-						File.AppendAllText(log, $"{DateTime.Now}: ResponseFilter callback exception: {ex}\n");
-					}
-					catch { }
+					// swallow
 				}
 			});
 		}
@@ -146,12 +196,15 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					}
 					catch
 					{
-						// プロパティアクセスが失敗する可能性があるため吞む
+						// swallow
 					}
 				}
 				return ResponseFilter.TryDecode(bytesList.ToArray());
 			}
-			catch { return null; }
+			catch
+			{
+				return null;
+			}
 		}
 	}
 }

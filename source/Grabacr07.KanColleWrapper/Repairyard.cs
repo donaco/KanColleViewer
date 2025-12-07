@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
@@ -47,27 +48,19 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 
-		/// <summary>
-		/// 指定した ID の艦娘が現在入渠中かどうかを確認します。
-		/// </summary>
-		/// <param name="shipId">艦隊に所属する艦娘の ID。</param>
-		public bool CheckRepairing(int shipId)
-		{
-			return this.Docks.Values.Where(x => x.Ship != null).Any(x => x.ShipId == shipId);
-		}
-
-		/// <summary>
-		/// 指定した艦隊に、現在入渠中の艦娘がいるかどうかを確認します。
-		/// </summary>
-		public bool CheckRepairing(Fleet fleet)
-		{
-			var repairingShipIds = this.Docks.Values.Where(x => x.Ship != null).Select(x => x.Ship.Id).ToArray();
-			return fleet.Ships.Any(x => repairingShipIds.Any(id => id == x.Id));
-		}
-
-
 		internal void Update(kcsapi_ndock[] source)
 		{
+			// 診断ログ：入渠ドック一覧
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				var preview = source != null ? "ndocks=" + source.Length + " ids=" + string.Join(", ", source.Take(10).Select(x => x.api_id.ToString())) + "..." : "null";
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.Update(kcsapi_ndock[]) invoked. " + preview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
 			if (this.Docks.Count == source.Length)
 			{
 				foreach (var raw in source) this.Docks[raw.api_id]?.Update(raw);
@@ -81,6 +74,24 @@ namespace Grabacr07.KanColleWrapper
 
 		private void Start(SvData data)
 		{
+			// 診断ログ：入渠開始
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+
+				var reqPreview = "(no id)";
+				if (data?.Request != null)
+				{
+					var v = data.Request["api_ndock_id"];
+					if (!string.IsNullOrEmpty(v)) reqPreview = v;
+				}
+
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.Start invoked. RequestPreview=" + reqPreview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
 			try
 			{
 				//var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];
@@ -103,6 +114,24 @@ namespace Grabacr07.KanColleWrapper
 
 		private void ChangeSpeed(SvData data)
 		{
+			// 診断ログ：入渠高速化
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+
+				var reqPreview = "(no id)";
+				if (data?.Request != null)
+				{
+					var v = data.Request["api_ndock_id"];
+					if (!string.IsNullOrEmpty(v)) reqPreview = v;
+				}
+
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Repairyard.ChangeSpeed invoked. RequestPreview=" + reqPreview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
 			try
 			{
 				var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];
@@ -117,6 +146,11 @@ namespace Grabacr07.KanColleWrapper
 			{
 				System.Diagnostics.Debug.WriteLine("高速修復材の解析に失敗しました: {0}", ex);
 			}
+		}
+
+		internal bool CheckRepairing(int id)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

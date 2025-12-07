@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
+using Newtonsoft.Json;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -89,17 +91,50 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void Update(kcsapi_slotitem[] source)
 		{
+			// 診断ログ：受信した装備数を記録
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				var preview = source != null ? $"slotitems={source.Length} ids={string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()))}..." : "null";
+				File.AppendAllText(path, $"{DateTime.Now:O} Itemyard.Update(slotitem[]) invoked. {preview}\n\n");
+			}
+			catch { /* swallow */ }
+
 			this.SlotItems = new MemberTable<SlotItem>(source.Select(x => new SlotItem(x)));
 			foreach(var ship in this.homeport.Organization.Ships.Values) ship.UpdateSlots();
 		}
 
 		internal void Update(kcsapi_useitem[] source)
 		{
+			// 診断ログ：消費アイテム更新
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				var preview = source != null ? $"useitems={source.Length}" : "null";
+				File.AppendAllText(path, $"{DateTime.Now:O} Itemyard.Update(useitem[]) invoked. {preview}\n\n");
+			}
+			catch { /* swallow */ }
+
 			this.UseItems = new MemberTable<UseItem>(source.Select(x => new UseItem(x)));
 		}
 
 		internal void AddFromDock(kcsapi_kdock_getship source)
 		{
+			// 診断ログ：ドックから追加
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				var preview = source != null && source.api_slotitem != null ? $"addFromDock slotitems={source.api_slotitem.Length}" : "null";
+				File.AppendAllText(path, $"{DateTime.Now:O} Itemyard.AddFromDock invoked. {preview}\n\n");
+			}
+			catch { /* swallow */ }
+
 			if (source.api_slotitem == null) return; // まるゆ
 
 			foreach (var x in source.api_slotitem.Select(x => new SlotItem(x)))
@@ -111,6 +146,16 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void RemoveFromShip(Ship ship)
 		{
+			// 診断ログ：艦からの削除
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				File.AppendAllText(path, $"{DateTime.Now:O} Itemyard.RemoveFromShip invoked. shipId={ship?.Id}\n\n");
+			}
+			catch { /* swallow */ }
+
 			foreach (var x in ship.EquippedItems.ToArray())
 			{
 				this.SlotItems.Remove(x.Item);

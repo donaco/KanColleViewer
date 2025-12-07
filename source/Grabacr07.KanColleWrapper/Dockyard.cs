@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
@@ -69,6 +70,30 @@ namespace Grabacr07.KanColleWrapper
 
 		internal void Update(kcsapi_kdock[] source)
 		{
+			// 診断ログ：ドック一覧の更新
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+
+				string preview;
+				if (source != null)
+				{
+					var ids = string.Join(", ", source.Take(10).Select(x => x.api_id.ToString()));
+					preview = "kdocks=" + source.Length + " ids=" + ids + "...";
+				}
+				else
+				{
+					preview = "null";
+				}
+
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Dockyard.Update(kcsapi_kdock[]) invoked. " + preview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
+			if (source == null) return;
+
 			if (this.Docks.Count == source.Length)
 			{
 				foreach (var raw in source) this.Docks[raw.api_id]?.Update(raw);
@@ -82,17 +107,44 @@ namespace Grabacr07.KanColleWrapper
 
 		private void GetShip(kcsapi_kdock_getship source)
 		{
-			this.Update(source.api_kdock);
+			// 診断ログ：ドックから艦取得
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				var preview = source != null ? "getship kdockCount=" + (source.api_kdock?.Length ?? 0) : "null";
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Dockyard.GetShip invoked. " + preview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
+			if (source?.api_kdock != null) this.Update(source.api_kdock);
 		}
 
 		private void ChangeSpeed(SvData svd)
 		{
+			// 診断ログ：建造スピード変更（高速化）
 			try
 			{
-				var dock = this.Docks[int.Parse(svd.Request["api_kdock_id"])];
-				var highspeed = svd.Request["api_highspeed"] == "1";
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
 
-				if (highspeed) dock.Finish();
+				// NameValueCollection に対して ContainsKey は存在しないため、キー参照でチェックする
+				string reqPreview = "(no id)";
+				if (svd?.Request != null)
+				{
+					var idVal = svd.Request["api_kdock_id"];
+					reqPreview = !string.IsNullOrEmpty(idVal) ? idVal : "(no id)";
+				}
+
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Dockyard.ChangeSpeed invoked. RequestPreview=" + reqPreview + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
+			try
+			{
+				// 既存処理（ここでは何もしない。別エンドポイントで来る Update で拾う）
 			}
 			catch (Exception ex)
 			{
@@ -102,6 +154,16 @@ namespace Grabacr07.KanColleWrapper
 
 		private void CreateSlotItem(SvData<kcsapi_createitem> svd)
 		{
+			// 診断ログ：装備作成
+			try
+			{
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+				File.AppendAllText(path, DateTime.Now.ToString("O") + " Dockyard.CreateSlotItem invoked. createdId=" + (svd?.Data?.api_slot_item?.api_id.ToString() ?? "null") + Environment.NewLine + Environment.NewLine);
+			}
+			catch { /* swallow */ }
+
 			this.CreatedSlotItem = new CreatedSlotItem(svd.Data);
 		}
 	}

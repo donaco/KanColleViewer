@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -11,6 +12,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Windows; // 追加
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -99,10 +101,42 @@ namespace Grabacr07.KanColleWrapper
 				// onInitialized
 				(start2, requireInfo) =>
 				{
-					this.Master = new Master(start2);
-					this.Homeport = new Homeport(this.Proxy);
-					this.SetRequireInfo(requireInfo);
-					this.IsStarted = true;
+					try
+					{
+						// 診断ログ: onInitialized をファイルに残す
+						try
+						{
+							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+							Directory.CreateDirectory(logDir);
+							var path = Path.Combine(logDir, "client_updates.log");
+							File.AppendAllText(path, $"{DateTime.Now:O} onInitialized invoked (CapturedProcessor)\nstart2 length: { (start2?.ToString().Length ?? 0) } requireInfo length: { (requireInfo?.ToString().Length ?? 0) }\n\n");
+						}
+						catch { }
+
+						// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
+						if (Application.Current != null)
+						{
+							Application.Current.Dispatcher.Invoke(() =>
+							{
+								this.Master = new Master(start2);
+								this.Homeport = new Homeport(this.Proxy);
+								this.SetRequireInfo(requireInfo);
+								this.IsStarted = true;
+							});
+						}
+						else
+						{
+							// UI が存在しない（テスト等）の場合は通常実行
+							this.Master = new Master(start2);
+							this.Homeport = new Homeport(this.Proxy);
+							this.SetRequireInfo(requireInfo);
+							this.IsStarted = true;
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("onInitialized handler failed: " + ex);
+					}
 				});
 
 			var start = this.Proxy.api_req_map_start;
@@ -234,8 +268,59 @@ namespace Grabacr07.KanColleWrapper
 				System.Diagnostics.Debug.WriteLine("AddDebugSubscriptions failed: " + ex);
 			}
 
-			//ログ診断用の購読はここまで
+			// 追加2：グローバルに api_port が捕まっているかを確実にログ
+			try
+			{
+				// グローバル診断: api_port の到着を記録し、現在の Homeport インスタンス hash を出す
+				this.Proxy.api_port.Subscribe(s =>
+				{
+					try
+					{
+						var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+						Directory.CreateDirectory(logDir);
+						var path = Path.Combine(logDir, "client_updates.log");
+
+						var homeHash = this.Homeport != null ? this.Homeport.GetHashCode().ToString() : "(no homeport)";
+						var respLen = s.Response?.BodyAsString?.Length ?? 0;
+						File.AppendAllText(path, $"{DateTime.Now:O} Global.api_port captured. HomeportHash={homeHash} respLen={respLen}\n");
+					}
+					catch { }
+				});
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Global api_port subscribe failed: " + ex);
+			}
+
+			//追加3
+			try
+			{
+				// 生セッション（MimeType フィルタを通さない）から api_port を捕捉してログする（診断用）
+				this.Proxy.SessionSource
+					.Where(s => s?.Request?.PathAndQuery == "/kcsapi/api_port/port")
+					.Subscribe(s =>
+					{
+						try
+						{
+							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+							Directory.CreateDirectory(logDir);
+							var path = Path.Combine(logDir, "client_updates.log");
+
+							var homeHash = this.Homeport != null ? this.Homeport.GetHashCode().ToString() : "(no homeport)";
+							var respLen = s.Response?.BodyAsString?.Length ?? 0;
+							var mime = s.Response?.MimeType ?? "(no mime)";
+							File.AppendAllText(path, $"{DateTime.Now:O} Global.SessionSource api_port captured. HomeportHash={homeHash} respLen={respLen} mime={mime}\n");
+						}
+						catch { }
+					});
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Global SessionSource api_port subscribe failed: " + ex);
+			}
+
 		}
+			//ログ診断用の購読はここまで
 
 		public void Initialieze()
 		{
@@ -267,14 +352,52 @@ namespace Grabacr07.KanColleWrapper
 				.Subscribe(x => this.SetRequireInfo(x.Data));
 		}
 
+		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）
 		private void SetRequireInfo(kcsapi_require_info data)
 		{
-			if (data.api_basic != null)
+			try
 			{
-				this.Homeport.UpdateAdmiral(data.api_basic);
+				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+				Directory.CreateDirectory(logDir);
+				var path = Path.Combine(logDir, "client_updates.log");
+
+				File.AppendAllText(path, $"{DateTime.Now:O} SetRequireInfo invoked\n");
+				if (data == null)
+				{
+					File.AppendAllText(path, "  data is null\n\n");
+					return;
+				}
+				else
+				{
+					File.AppendAllText(path, $"  api_basic present: {(data.api_basic != null)}\n");
+					File.AppendAllText(path, $"  api_slot_item count: {(data.api_slot_item != null ? data.api_slot_item.Length.ToString() : "null")}\n");
+					File.AppendAllText(path, $"  api_kdock count: {(data.api_kdock != null ? data.api_kdock.Length.ToString() : "null")}\n");
+				}
 			}
-			this.Homeport.Itemyard.Update(data.api_slot_item);
-			this.Homeport.Dockyard.Update(data.api_kdock);
+			catch { /* swallow */ }
+
+			// Homeport の更新は UI スレッドで行う（バインディング更新を確実にするため）
+			if (Application.Current != null)
+			{
+				Application.Current.Dispatcher.Invoke(() =>
+				{
+					if (data.api_basic != null)
+					{
+						this.Homeport.UpdateAdmiral(data.api_basic);
+					}
+					this.Homeport.Itemyard.Update(data.api_slot_item);
+					this.Homeport.Dockyard.Update(data.api_kdock);
+				});
+			}
+			else
+			{
+				if (data.api_basic != null)
+				{
+					this.Homeport.UpdateAdmiral(data.api_basic);
+				}
+				this.Homeport.Itemyard.Update(data.api_slot_item);
+				this.Homeport.Dockyard.Update(data.api_kdock);
+			}
 		}
 
 		/// <summary>
@@ -298,8 +421,95 @@ namespace Grabacr07.KanColleWrapper
 			}
 			catch { /* swallow */ }
 
-			// 実処理は CapturedProcessor に委譲
-			this.capturedProcessor.Process(url, responseBody);
+			// 実処理は CapturedProcessor に委譲（初期化判定はこれで行う）
+			try
+			{
+				this.capturedProcessor.Process(url, responseBody);
+			}
+			catch { /* swallow */ }
+
+			// 追加: 起動済み/未起動に関わらず、CEF で捕まえた /kcsapi/api_port/port (および一部の重要エンドポイント)
+			// を直接 Homeport に流す（プロキシを使わない環境向けのフォールバック）。
+			try
+			{
+				if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(responseBody)) return;
+
+				// 正規化済み JSON が既に渡される想定だが念のため正規化
+				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
+				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
+
+				// /kcsapi/api_port/port をパースして Homeport に反映
+				if (url.Contains("/kcsapi/api_port/port"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
+					{
+						try
+						{
+							// UI スレッドで安全に反映する
+							if (Application.Current != null)
+							{
+								Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+								{
+									try
+									{
+										if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
+										if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
+										if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
+										if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
+										if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
+									}
+									catch (Exception ex)
+									{
+										// 更新失敗はログ（調査用）
+										try
+										{
+											var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+											var path = Path.Combine(logDir, "client_updates.log");
+											File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured -> port apply failed: {ex}\n");
+										}
+										catch { }
+									}
+								}));
+							}
+							else
+							{
+								// 非 UI 環境の場合は直接呼ぶ
+								if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
+								if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
+								if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
+								if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
+								if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
+							}
+
+							// 診断ログ
+							try
+							{
+								var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+								Directory.CreateDirectory(logDir);
+								var path = Path.Combine(logDir, "client_updates.log");
+								File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: applied api_port to Homeport. portShips={(port.api_ship?.Length ?? 0)} materials={(port.api_material?.Length ?? 0)} ndocks={(port.api_ndock?.Length ?? 0)}\n");
+							}
+							catch { }
+						}
+						catch { /* swallow */ }
+					}
+					else
+					{
+						// パース失敗はログ
+						try
+						{
+							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
+							Directory.CreateDirectory(logDir);
+							var path = Path.Combine(logDir, "client_updates.log");
+							File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: api_port parse failed. url={url}\n");
+						}
+						catch { }
+					}
+
+					return;
+				}
+			}
+			catch { /* swallow */ }
 		}
 	}
 }
