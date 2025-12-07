@@ -122,7 +122,6 @@ namespace Grabacr07.KanColleWrapper
 			proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment);
 		}
 
-
 		internal void UpdateAdmiral(kcsapi_basic data)
 		{
 			this.Admiral = new Admiral(data);

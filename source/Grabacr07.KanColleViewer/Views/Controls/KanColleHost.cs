@@ -63,39 +63,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				newBrowser.MenuHandler = new ContextMenuHandler();
 				newBrowser.WpfKeyboardHandler = new InhibitTabKeyHandler(newBrowser);
 
-				// ここで RequestHandler を添付する（CEF が初期化済みであることを前提）
-				try
-				{
-					// 既に CustomRequestHandler が設定されていなければアタッチ
-					if (!(newBrowser.RequestHandler is CustomRequestHandler))
-					{
-						CefBridge.AttachRequestHandler(newBrowser, captured =>
-						{
-							// UI スレッドでログ化・表示（既存）
-							Application.Current.Dispatcher.Invoke(() =>
-							{
-								System.Diagnostics.Debug.WriteLine($"Captured: {captured.Url}");
-								System.Diagnostics.Debug.WriteLine(captured.ResponseBody);
-							});
-
-							// 追加: KanColleClient に捕捉内容を渡して起動判定をさせる（CEF 傍受でアプリを Started にする）
-							try
-							{
-								// 非 UI スレッドで呼ぶことを想定 — 引数はプリミティブ (url, responseBody)
-								Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
-							}
-							catch (Exception ex)
-							{
-								System.Diagnostics.Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
-							}
-						});
-					}
-				}
-				catch (Exception ex)
-				{
-					// Attach に失敗してもブラウザ表示は継続させる
-					System.Diagnostics.Debug.WriteLine("AttachRequestHandler failed: " + ex);
-				}
 			}
 			if (instance.scrollViewer != null)
 			{
@@ -103,12 +70,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 
 			System.Diagnostics.Debug.WriteLine($"WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}");
-			try
-			{
-				File.AppendAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "debug_browsercb.log"),
-					$"{DateTime.Now}: WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}\n");
-			}
-			catch { }
 		}
 
 		#endregion
@@ -244,15 +205,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 								{
 									CefBridge.AttachRequestHandler(this.WebBrowser, captured =>
 									{
-										try
-										{
-											// UI スレッドでログ化・表示（既存）
-											Application.Current.Dispatcher.Invoke(() =>
-											{
-												CaptureLogService.Instance.Add(captured);
-											});
-										}
-										catch { /* swallow */ }
 
 										try
 										{

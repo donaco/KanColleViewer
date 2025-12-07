@@ -114,6 +114,7 @@ namespace Grabacr07.KanColleWrapper
 
 		private static kcsapi_questlist Serialize(Session session)
 		{
+			// 既存の解析処理（変更なし）
 			try
 			{
 				// JSON をパースして api_data を取り出す（Newtonsoft を使用）

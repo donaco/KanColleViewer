@@ -67,7 +67,6 @@ namespace Grabacr07.KanColleWrapper
 			proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(this.CreateSlotItem);
 		}
 
-
 		internal void Update(kcsapi_kdock[] source)
 		{
 			if (source == null) return;
@@ -92,7 +91,7 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				// 既存処理（ここでは何もしない。別エンドポイントで来る Update で拾う）
+				// 既存処理（ここでは何もしない）
 			}
 			catch (Exception ex)
 			{

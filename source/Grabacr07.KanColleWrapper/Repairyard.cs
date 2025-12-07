@@ -47,7 +47,6 @@ namespace Grabacr07.KanColleWrapper
 			proxy.api_req_nyukyo_speedchange.TryParse().Subscribe(this.ChangeSpeed);
 		}
 
-
 		internal void Update(kcsapi_ndock[] source)
 		{
 			if (this.Docks.Count == source.Length)
@@ -65,7 +64,6 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				//var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];
 				var ship = this.homeport.Organization.Ships[int.Parse(data.Request["api_ship_id"])];
 				var highspeed = data.Request["api_highspeed"] == "1";
 
@@ -74,8 +72,6 @@ namespace Grabacr07.KanColleWrapper
 					ship.Repair();
 					this.homeport.Organization.GetFleet(ship.Id)?.State.Update();
 				}
-
-				// 高速修復でない場合、別途 ndock が来るので、ここで何かする必要はなさげ
 			}
 			catch (Exception ex)
 			{

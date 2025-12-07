@@ -108,11 +108,6 @@ namespace Grabacr07.KanColleViewer
 						navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
 						navigator.Navigate();
 
-						//通信内容の表示
-						Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-						{
-							new Grabacr07.KanColleViewer.Views.CaptureWindow().Show();
-						}));
 					}
 #if !DEBUG
 					appInstance.CommandLineArgsReceived += (sender, args) =>

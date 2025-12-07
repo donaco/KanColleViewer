@@ -243,16 +243,8 @@ namespace Grabacr07.KanColleWrapper
 
 										if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
 									}
-									catch (Exception ex)
+									catch (Exception)
 									{
-										// 更新失敗はログ（調査用）
-										try
-										{
-											var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-											var path = Path.Combine(logDir, "client_updates.log");
-											File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured -> port apply failed: {ex}\n");
-										}
-										catch { }
 									}
 								}));
 							}
@@ -272,17 +264,7 @@ namespace Grabacr07.KanColleWrapper
 						}
 						catch { /* swallow */ }
 					}
-					else
-					{
-						// パース失敗はログ
-						try
-						{
-							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-							Directory.CreateDirectory(logDir);
-							var path = Path.Combine(logDir, "client_updates.log");
-							File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: api_port parse failed. url={url}\n");
-						}
-						catch { }
+					else{
 					}
 
 					return;
@@ -305,16 +287,8 @@ namespace Grabacr07.KanColleWrapper
 										{
 											this.Homeport.Quests.Update(questlist);
 										}
-										catch (Exception ex)
+										catch (Exception)
 										{
-											try
-											{
-												var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-												Directory.CreateDirectory(logDir);
-												var path = Path.Combine(logDir, "client_updates.log");
-												File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured -> questlist apply failed: {ex}\n");
-											}
-											catch { }
 										}
 									}));
 								}
@@ -322,28 +296,11 @@ namespace Grabacr07.KanColleWrapper
 								{
 									this.Homeport.Quests.Update(questlist);
 								}
-
-								try
-								{
-									var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-									Directory.CreateDirectory(logDir);
-									var path = Path.Combine(logDir, "client_updates.log");
-									File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: applied questlist to Homeport. quests={(questlist.api_list?.Length ?? 0)} exec_count={questlist.api_exec_count}\n");
-								}
-								catch { }
 							}
 							catch { /* swallow */ }
 						}
 						else
 						{
-							try
-							{
-								var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-								Directory.CreateDirectory(logDir);
-								var path = Path.Combine(logDir, "client_updates.log");
-								File.AppendAllText(path, $"{DateTime.Now:O} ProcessCaptured: questlist parse failed. url={url}\n");
-							}
-							catch { }
 						}
 
 						return;

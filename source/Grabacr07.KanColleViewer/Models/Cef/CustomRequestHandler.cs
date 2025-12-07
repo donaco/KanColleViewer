@@ -64,7 +64,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 						// gzip 判定: ヘッダー × バイト先頭マジックを組み合わせつつ、
 						// バイナリ内に gzip マジックが埋まっている場合はそのオフセットから展開を試す
-						bool decompressionSucceeded = false;
 						string normalized = null;
 						try
 						{
@@ -88,7 +87,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 									using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
 									{
 										var decompressed = sr.ReadToEnd();
-										decompressionSucceeded = true;
 										normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
 									}
 								}
@@ -109,21 +107,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						{
 							normalized = null;
 						}
-
-						// 詳細診断ログ（非同期なので UI ブロックしない）
-						try
-						{
-							var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs");
-							Directory.CreateDirectory(logDir);
-							var logPath = Path.Combine(logDir, "cef_captured_diagnostic.log");
-
-							var safeResp = responseBodyText ?? string.Empty;
-							var preview = safeResp.Length > 4000 ? safeResp.Substring(0, 4000) + "..." : safeResp;
-							var headerText = snapshotResponseHeaders != null ? string.Join(", ", snapshotResponseHeaders.Select(kv => kv.Key + ":" + kv.Value)) : "(no headers)";
-							var entry = $"{DateTime.Now:O} URL={snapshotUrl}\nMethod={snapshotMethod} Status={snapshotStatus}\nHeaders={headerText}\nRequestBody={(snapshotRequestBody ?? "(none)").Replace("\r","").Replace("\n"," ")}\nResponsePreview:\n{preview}\nDecompressionSucceeded={decompressionSucceeded} NormalizedLength={(normalized?.Length ?? 0)}\n\n";
-							File.AppendAllText(logPath, entry, Encoding.UTF8);
-						}
-						catch { /* swallow */ }
 
 						// 正常に正規化できたらアプリへ渡す（onCaptured は別スレッドで安全に呼ぶ)
 						if (!string.IsNullOrEmpty(normalized))
