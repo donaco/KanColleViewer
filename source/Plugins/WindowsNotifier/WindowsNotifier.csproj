@@ -75,6 +75,7 @@
   <ItemGroup>
     <Reference Include="DesktopToast">
       <HintPath>..\..\..\assemblies\DesktopToast.dll</HintPath>
+            <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
