@@ -219,95 +219,146 @@ namespace Grabacr07.KanColleWrapper
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
 
-				// /kcsapi/api_port/port をパースして Homeport に反映
+				// Helper: 実行を UI スレッドに移す
+				Action<Action> runOnUi = action =>
+				{
+					try
+					{
+						if (Application.Current != null)
+						{
+							Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+							{
+								try { action(); } catch { }
+							}));
+						}
+						else
+						{
+							try { action(); } catch { }
+						}
+					}
+					catch { try { action(); } catch { } }
+				};
+
+				// /kcsapi/api_port/port をパースして Homeport に反映（既存処理そのまま）
 				if (url.Contains("/kcsapi/api_port/port"))
 				{
 					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
 					{
 						try
 						{
-							// UI スレッドで安全に反映する
-							if (Application.Current != null)
+							runOnUi(() =>
 							{
-								Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+								try
 								{
-									try
-									{
-										if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
-										if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
-										if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
-										if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
+									if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
+									if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
+									if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
+									if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
 
-										// 追加: 連合フラグを反映（CombinedFleet を生成・破棄する）
-										this.Homeport.Organization.Combined = port.api_combined_flag != 0;
+									// 連合フラグ
+									this.Homeport.Organization.Combined = port.api_combined_flag != 0;
 
-										if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
-									}
-									catch (Exception)
-									{
-									}
-								}));
-							}
-							else
-							{
-								// 非 UI 環境の場合は直接呼ぶ
-								if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
-								if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
-								if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
-								if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
-
-								// 追加: 連合フラグを反映
-								this.Homeport.Organization.Combined = port.api_combined_flag != 0;
-
-								if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
-							}
+									if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
+								}
+								catch { }
+							});
 						}
-						catch { /* swallow */ }
-					}
-					else{
+						catch { }
 					}
 
 					return;
 				}
 
-				// /kcsapi/api_get_member/questlist を直接 Homeport.Quests に流す（フォールバック）
-				try
+				// /kcsapi/api_get_member/questlist を直接 Homeport.Quests に流す（既存）
+				if (url.Contains("/kcsapi/api_get_member/questlist"))
 				{
-					if (url.Contains("/kcsapi/api_get_member/questlist"))
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
 					{
-						if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
+						try
 						{
-							try
-							{
-								if (Application.Current != null)
-								{
-									Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-									{
-										try
-										{
-											this.Homeport.Quests.Update(questlist);
-										}
-										catch (Exception)
-										{
-										}
-									}));
-								}
-								else
-								{
-									this.Homeport.Quests.Update(questlist);
-								}
-							}
-							catch { /* swallow */ }
+							runOnUi(() => this.Homeport.Quests.Update(questlist));
 						}
-						else
-						{
-						}
-
-						return;
+						catch { }
 					}
+					return;
 				}
-				catch { /* swallow */ }
 
+				// 新規フォールバック: 艦娘情報 (ship, ship2)
+				if (url.Contains("/kcsapi/api_get_member/ship2") || url.Contains("/kcsapi/api_get_member/ship"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship2[]>(normalized, out var ships))
+					{
+						try { runOnUi(() => this.Homeport.Organization.Update(ships)); } catch { }
+					}
+					return;
+				}
+
+				// ship3 (api_ship_data + api_deck_data)
+				if (url.Contains("/kcsapi/api_get_member/ship3"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship3>(normalized, out var s3))
+					{
+						try
+						{
+							runOnUi(() =>
+							{
+								try
+								{
+									if (s3.api_ship_data != null) this.Homeport.Organization.Update(s3.api_ship_data);
+									if (s3.api_deck_data != null) this.Homeport.Organization.Update(s3.api_deck_data);
+								}
+								catch { }
+							});
+						}
+						catch { }
+					}
+					return;
+				}
+
+				// デッキ情報 (deck, deck_port)
+				if (url.Contains("/kcsapi/api_get_member/deck") || url.Contains("/kcsapi/api_get_member/deck_port"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_deck[]>(normalized, out var decks))
+					{
+						try { runOnUi(() => this.Homeport.Organization.Update(decks)); } catch { }
+					}
+					return;
+				}
+
+				// ship_deck
+				if (url.Contains("/kcsapi/api_get_member/ship_deck"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship_deck>(normalized, out var shipDeck))
+					{
+						try
+						{
+							// kcsapi_ship_deck の内部にある配列フィールドを利用して既存の Update オーバーロードを呼ぶ
+							runOnUi(() =>
+							{
+								try
+								{
+									if (shipDeck.api_ship_data != null) this.Homeport.Organization.Update(shipDeck.api_ship_data);
+									if (shipDeck.api_deck_data != null) this.Homeport.Organization.Update(shipDeck.api_deck_data);
+								}
+								catch { }
+							});
+						}
+						catch { }
+					}
+					return;
+				}
+
+				// 装備一覧 (slot_item)
+				if (url.Contains("/kcsapi/api_get_member/slot_item"))
+				{
+					if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_slotitem[]>(normalized, out var slotItems))
+					{
+						try { runOnUi(() => this.Homeport.Itemyard.Update(slotItems)); } catch { }
+					}
+					return;
+				}
+
+				// その他、将来的なフォールバック追加箇所の余地を残す（例: api_req_kousyou/*, api_req_hensei/* 等）
 			}
 			catch { /* swallow */ }
 		}
