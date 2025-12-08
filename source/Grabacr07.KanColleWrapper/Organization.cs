@@ -215,6 +215,23 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 		}
+		/// <summary>
+		/// 戦闘結果の反映などで情報が更新された際に、重要なプロパティの通知を格好します。
+		/// </summary>
+		internal void NotifyUpdated()
+		{
+			try
+			{
+				// 重要なプロパティ名を指定して強制的に PropertyChanged を発行
+				this.RaisePropertyChanged(nameof(this.Ships));
+				this.RaisePropertyChanged(nameof(this.Fleets));
+				this.RaisePropertyChanged(nameof(this.Combined));
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("Organization.NotifyUpdated failed: " + ex);
+			}
+		}
 
 
 		/// <summary>
