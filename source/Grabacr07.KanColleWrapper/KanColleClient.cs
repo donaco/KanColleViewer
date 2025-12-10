@@ -145,14 +145,12 @@ namespace Grabacr07.KanColleWrapper
 			/// <summary>
 			/// プロキシのイベントが発火しているかチェックするデバッグ用ログ　後で削除
 			/// </summary>
-
-#if DEBUG
 			try
 			{
 				var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
-
+#if DEBUG
 				Debug.WriteLine($"KanColleClient: Proxy instance created. ListeningPort = {proxy.ListeningPort}");
-
+#endif
 				proxy.ApiSessionSource
 					.Subscribe(s =>
 					{
@@ -171,7 +169,6 @@ namespace Grabacr07.KanColleWrapper
 			{
 				Debug.WriteLine("KanColleClient: proxy debug subscription failed: " + ex);
 			}
-#endif
 		}
 
 		public void Initialieze()
@@ -336,6 +333,33 @@ namespace Grabacr07.KanColleWrapper
 							// 追加：出撃したデッキ ID を記録しておく
 							this.sortieDeckIds.Add(deckId);
 							Debug.WriteLine($"TryHandleMapStart: Fleet {deckId} marked as Sortie.");
+
+							// 追加処理: 連合艦隊のときは第2艦隊も出撃としてマークする
+							// 条件は可能な限り寛容に：組織が連合フラグを持っている、または第2艦隊に艦が存在する場合
+							try
+							{
+								if (deckId == 1)
+								{
+									bool isCombined = false;
+									try { isCombined = org.Combined; } catch { /* プロパティが無い場合は無視 */ }
+
+									bool hasSecondFleet = org.Fleets.ContainsKey(2) && org.Fleets[2].Ships != null && org.Fleets[2].Ships.Length > 0;
+
+									if (isCombined || hasSecondFleet)
+									{
+										if (org.Fleets.ContainsKey(2))
+										{
+											org.Fleets[2].Sortie();
+											this.sortieDeckIds.Add(2);
+											Debug.WriteLine("TryHandleMapStart: Fleet 2 also marked as Sortie (combined).");
+										}
+									}
+								}
+							}
+							catch (Exception exCombined)
+							{
+								Debug.WriteLine("TryHandleMapStart: combined-fleet mark failed: " + exCombined);
+							}
 						}
 						else
 						{
@@ -489,8 +513,9 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleQuestList(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/questlist")) return false;
-
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleQuestList called. url={url}");
+#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
@@ -516,9 +541,10 @@ namespace Grabacr07.KanColleWrapper
 			if (!((url.Contains("/kcsapi/api_get_member/ship2") || url.Contains("/kcsapi/api_get_member/ship"))
 				   && !url.Contains("/kcsapi/api_get_member/ship_deck")))
 				return false;
-
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleShipArray called. url={url}");
 			try
+#endif
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship2[]>(normalized, out var ships))
 				{
@@ -551,8 +577,9 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleShip3(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/ship3")) return false;
-
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleShip3 called. url={url}");
+#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship3>(normalized, out var s3))
@@ -586,25 +613,154 @@ namespace Grabacr07.KanColleWrapper
 
 		private bool TryHandleDecks(string url, string normalized)
 		{
-			if (!(url.Contains("/kcsapi/api_get_member/deck") || url.Contains("/kcsapi/api_get_member/deck_port"))) return false;
+		　// 追加エンドポイントを許可：deck / deck_port に加え、編成変更系 API も扱う
+		　if (!(url.Contains("/kcsapi/api_get_member/deck")
+          || url.Contains("/kcsapi/api_get_member/deck_port")
+          || url.Contains("/kcsapi/api_req_hensei/change")
+          || url.Contains("/kcsapi/api_req_hensei/preset_select")
+          || url.Contains("/kcsapi/api_req_member/updatedeckname")))
+		　return false;
 
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleDecks called. url={url}");
+#endif
 			try
 			{
+				// まず配列として試す
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_deck[]>(normalized, out var decks))
 				{
 					Debug.WriteLine($"TryHandleDecks: deserialized decks len={decks?.Length ?? 0}");
-					RunOnUi(() => { try { this.Homeport.Organization.Update(decks); Debug.WriteLine($"TryHandleDecks: applied. Fleets={this.Homeport?.Organization?.Fleets?.Count}"); } catch (Exception ex) { Debug.WriteLine("TryHandleDecks.RunOnUi failed: " + ex); } });
+					RunOnUi(() =>
+					{
+						try
+						{
+							// 変更: 配列を丸ごと渡すのではなく、個別要素ごとに更新する
+							if (decks != null)
+							{
+								foreach (var deck in decks)
+								{
+									try
+									{
+										this.Homeport.Organization.Update(deck); // 単一デッキ更新を繰り返す
+									}
+									catch (Exception exDeck)
+									{
+										Debug.WriteLine("TryHandleDecks: single-deck update failed: " + exDeck);
+									}
+								}
+							}
+
+
+                            Debug.WriteLine($"TryHandleDecks: applied array (per-deck). Fleets={this.Homeport?.Organization?.Fleets?.Count}");
+
+							// 強制的な UI 更新処理（Port ハンドラと同等の処理を行う）
+							try
+							{
+								this.Homeport?.Organization?.NotifyUpdated();
+							}
+							catch (Exception exNotify)
+							{
+								Debug.WriteLine("TryHandleDecks: NotifyUpdated failed: " + exNotify);
+							}
+
+							try
+							{
+								var org = this.Homeport?.Organization;
+								if (org != null)
+								{
+									foreach (var f in org.Fleets.Values)
+									{
+										try
+										{
+											f.State.Calculate();
+											f.State.Update();
+											f.RaiseShipsUpdated();
+										}
+										catch (Exception exFleet)
+										{
+											Debug.WriteLine("TryHandleDecks: fleet post-update failed: " + exFleet);
+										}
+									}
+								}
+							}
+							catch (Exception exRefresh)
+							{
+								Debug.WriteLine("TryHandleDecks: UI refresh loop failed: " + exRefresh);
+							}
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("TryHandleDecks.RunOnUi failed: " + ex);
+						}
+					});
+
+					return true;
 				}
-				else
+
+				// 配列でなければ単一デッキを試す（例: 単一要素レスポンスや編成変更 API の場合）
+				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_deck>(normalized, out var singleDeck))
 				{
-					Debug.WriteLine("TryHandleDecks: deserialization failed.");
+#if DEBUG
+					Debug.WriteLine("TryHandleDecks: deserialized single deck.");
+#endif
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport.Organization.Update(singleDeck);
+
+							Debug.WriteLine($"TryHandleDecks: applied single. Fleets={this.Homeport?.Organization?.Fleets?.Count}");
+
+							try
+							{
+								this.Homeport?.Organization?.NotifyUpdated();
+							}
+							catch (Exception exNotify)
+							{
+								Debug.WriteLine("TryHandleDecks: NotifyUpdated (single) failed: " + exNotify);
+							}
+
+							try
+							{
+								var org = this.Homeport?.Organization;
+								if (org != null)
+								{
+									foreach (var f in org.Fleets.Values)
+									{
+										try
+										{
+											f.State.Calculate();
+											f.State.Update();
+											f.RaiseShipsUpdated();
+										}
+										catch (Exception exFleet)
+										{
+											Debug.WriteLine("TryHandleDecks: fleet post-update (single) failed: " + exFleet);
+										}
+									}
+								}
+							}
+							catch (Exception exRefresh)
+							{
+								Debug.WriteLine("TryHandleDecks: UI refresh loop (single) failed: " + exRefresh);
+							}
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("TryHandleDecks.RunOnUi (single) failed: " + ex);
+						}
+					});
+
+					return true;
 				}
+
+				Debug.WriteLine("TryHandleDecks: deserialization failed.");
 			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine("TryHandleDecks failed: " + ex);
 			}
+
 			return true;
 		}
 
@@ -665,8 +821,9 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleSlotItems(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/slot_item")) return false;
-
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleSlotItems called. url={url}");
+#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_slotitem[]>(normalized, out var slotItems))
