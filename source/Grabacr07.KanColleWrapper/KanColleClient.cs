@@ -148,9 +148,6 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
-#if DEBUG
-				Debug.WriteLine($"KanColleClient: Proxy instance created. ListeningPort = {proxy.ListeningPort}");
-#endif
 				proxy.ApiSessionSource
 					.Subscribe(s =>
 					{
@@ -292,9 +289,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleMapStart(string url, string requestBody)
 		{
 			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleMapStart called. url={url}");
-#endif
 			try
 			{
 				// requestBody は form-urlencoded の想定: "api_deck_id=1&...". null の場合は出撃フラグのみ設定。
@@ -397,9 +391,6 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (!url.Contains("/kcsapi/api_port/port")) return false;
 
-#if DEBUG
-			Debug.WriteLine($"TryHandlePort: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
-#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
@@ -513,9 +504,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleQuestList(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/questlist")) return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleQuestList called. url={url}");
-#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
@@ -541,10 +529,7 @@ namespace Grabacr07.KanColleWrapper
 			if (!((url.Contains("/kcsapi/api_get_member/ship2") || url.Contains("/kcsapi/api_get_member/ship"))
 				   && !url.Contains("/kcsapi/api_get_member/ship_deck")))
 				return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleShipArray called. url={url}");
 			try
-#endif
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship2[]>(normalized, out var ships))
 				{
@@ -577,9 +562,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleShip3(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/ship3")) return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleShip3 called. url={url}");
-#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship3>(normalized, out var s3))
@@ -621,9 +603,6 @@ namespace Grabacr07.KanColleWrapper
           || url.Contains("/kcsapi/api_req_member/updatedeckname")))
 		　return false;
 
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleDecks called. url={url}");
-#endif
 			try
 			{
 				// まず配列として試す
@@ -700,9 +679,6 @@ namespace Grabacr07.KanColleWrapper
 				// 配列でなければ単一デッキを試す（例: 単一要素レスポンスや編成変更 API の場合）
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_deck>(normalized, out var singleDeck))
 				{
-#if DEBUG
-					Debug.WriteLine("TryHandleDecks: deserialized single deck.");
-#endif
 					RunOnUi(() =>
 					{
 						try
@@ -767,9 +743,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleShipDeck(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/ship_deck")) return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleShipDeck called. url={url}");
-#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship_deck>(normalized, out var shipDeck))
@@ -821,9 +794,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleSlotItems(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/slot_item")) return false;
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleSlotItems called. url={url}");
-#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_slotitem[]>(normalized, out var slotItems))
@@ -847,9 +817,6 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
 
-#if DEBUG
-			Debug.WriteLine($"ProcessCaptured: TryHandleBattleResult called. url={url}");
-#endif
 			// 解析は試すが、主目的は UI の強制再描画
 			try
 			{
