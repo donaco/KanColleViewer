@@ -209,7 +209,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 										try
 										{
 											// 非 UI スレッドで処理する（CapturedProcessor 側でスレッド安全に扱う）
-											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
+											//Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
+											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody);
 										}
 										catch (Exception ex)
 										{

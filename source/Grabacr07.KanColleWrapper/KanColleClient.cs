@@ -88,6 +88,9 @@ namespace Grabacr07.KanColleWrapper
 		// Captured 処理を委譲するコンポーネント
 		private readonly CapturedProcessor capturedProcessor;
 
+		// 1) フィールド追加（capturedProcessor 宣言の近くに挿入）
+		private readonly HashSet<int> sortieDeckIds = new HashSet<int>();
+
 		private KanColleClient()
 		{
 			this.Initialieze();
@@ -138,6 +141,37 @@ namespace Grabacr07.KanColleWrapper
 				.Finally(() => this.IsInSortie = false)
 				.Repeat()
 				.Subscribe();
+
+			/// <summary>
+			/// プロキシのイベントが発火しているかチェックするデバッグ用ログ　後で削除
+			/// </summary>
+
+#if DEBUG
+			try
+			{
+				var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
+
+				Debug.WriteLine($"KanColleClient: Proxy instance created. ListeningPort = {proxy.ListeningPort}");
+
+				proxy.ApiSessionSource
+					.Subscribe(s =>
+					{
+						try
+						{
+							Debug.WriteLine("KanColleClient: ApiSessionSource fired.");
+							try { Debug.WriteLine($"  Session.ToString(): {s}"); } catch { }
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("KanColleClient: ApiSessionSource handler failed: " + ex);
+						}
+					});
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("KanColleClient: proxy debug subscription failed: " + ex);
+			}
+#endif
 		}
 
 		public void Initialieze()
@@ -201,7 +235,7 @@ namespace Grabacr07.KanColleWrapper
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
 		/// </summary>
-		public void ProcessCaptured(string url, string responseBody)
+		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
 			// 実処理は CapturedProcessor に委譲（初期化判定はこれで行う）
 			try
@@ -217,6 +251,8 @@ namespace Grabacr07.KanColleWrapper
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
 
+				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
+				if (TryHandleMapStart(url, requestBody)) return;
 
 				// 小さな責務に分割して判定する（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
@@ -255,11 +291,91 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
+		// 新規追加: map/start を処理して出撃フラグを設定するフォールバックハンドラ
+		private bool TryHandleMapStart(string url, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
+#if DEBUG
+			Debug.WriteLine($"ProcessCaptured: TryHandleMapStart called. url={url}");
+#endif
+			try
+			{
+				// requestBody は form-urlencoded の想定: "api_deck_id=1&...". null の場合は出撃フラグのみ設定。
+				int deckId = -1;
+				if (!string.IsNullOrEmpty(requestBody))
+				{
+					try
+					{
+						// リクエストボディが "api_deck_id=1" の形式で来ることを想定してパース
+						var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+						foreach (var p in pairs)
+						{
+							var kv = p.Split(new[] { '=' }, 2);
+							if (kv.Length == 2 && kv[0] == "api_deck_id" && int.TryParse(Uri.UnescapeDataString(kv[1]), out var id))
+							{
+								deckId = id;
+								break;
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("TryHandleMapStart: failed to parse requestBody: " + ex);
+					}
+				}
+
+				// 出撃デッキの記録（あれば）
+				if (deckId > 0)
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+						if (org != null && org.Fleets.ContainsKey(deckId))
+						{
+							org.Fleets[deckId].Sortie();
+							// 追加：出撃したデッキ ID を記録しておく
+							this.sortieDeckIds.Add(deckId);
+							Debug.WriteLine($"TryHandleMapStart: Fleet {deckId} marked as Sortie.");
+						}
+						else
+						{
+							Debug.WriteLine($"TryHandleMapStart: Fleet {deckId} not found to mark Sortie.");
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("TryHandleMapStart: marking fleet sortie failed: " + ex);
+					}
+				}
+
+				// UI スレッドで出撃フラグを立てる（帰投処理は TryHandlePort 側で行う）
+				RunOnUi(() =>
+				{
+					try
+					{
+						this.IsInSortie = true;
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("TryHandleMapStart.RunOnUi failed: " + ex);
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("TryHandleMapStart failed: " + ex);
+			}
+
+			return true;
+		}
+
 		private bool TryHandlePort(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_port/port")) return false;
 
-			Debug.WriteLine($"ProcessCaptured: TryHandlePort called. url={url}, len={normalized?.Length ?? 0}");
+#if DEBUG
+			Debug.WriteLine($"TryHandlePort: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
+#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
@@ -289,11 +405,72 @@ namespace Grabacr07.KanColleWrapper
 							{
 								Debug.WriteLine("TryHandlePort: NotifyUpdated failed: " + exNotify);
 							}
+
+							// --- 追加: 各艦隊を明示的に再計算・再通知して UI を確実に更新 ---
+							try
+							{
+								var org = this.Homeport?.Organization;
+								if (org != null)
+								{
+									foreach (var f in org.Fleets.Values)
+									{
+										try
+										{
+											// 再計算して状態を整える
+											f.State.Calculate();
+											f.State.Update();
+
+											// View 側で監視されるイベントを確実に発火させる
+											f.RaiseShipsUpdated();
+										}
+										catch (Exception exFleet)
+										{
+											Debug.WriteLine("TryHandlePort: fleet post-update failed: " + exFleet);
+										}
+									}
+								}
+							}
+							catch (Exception exRefresh)
+							{
+								Debug.WriteLine("TryHandlePort: UI refresh loop failed: " + exRefresh);
+							}
 						}
 						catch (Exception ex)
 						{
 							Debug.WriteLine("TryHandlePort.RunOnUi failed: " + ex);
 						}
+
+						// TryHandlePort 内の RunOnUi の末尾付近に追加してください
+						try
+						{
+							var org = this.Homeport?.Organization;
+							if (org != null)
+							{
+								// 記録済みの出撃デッキだけを対象に Homing() を呼ぶ（誤って遠征艦隊を戻さない）
+								var returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
+								foreach (var returningDeckId in returning)
+								{
+									try
+									{
+										org.Fleets[returningDeckId].Homing();
+									}
+									catch (Exception ex)
+									{
+										Debug.WriteLine("TryHandlePort: fleet Homing failed: " + ex);
+									}
+									// 処理済みは記録から削除
+									this.sortieDeckIds.Remove(returningDeckId);
+								}
+							}
+
+							// Global な出撃フラグは、まだ出撃中のデッキが残っているかで決める
+							this.IsInSortie = this.sortieDeckIds.Count > 0;
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("TryHandlePort: post-processing failed: " + ex);
+						}
+
 					});
 				}
 				else
@@ -434,8 +611,9 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleShipDeck(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/ship_deck")) return false;
-
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleShipDeck called. url={url}");
+#endif
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship_deck>(normalized, out var shipDeck))
@@ -446,7 +624,24 @@ namespace Grabacr07.KanColleWrapper
 						try
 						{
 							if (shipDeck.api_ship_data != null) this.Homeport.Organization.Update(shipDeck.api_ship_data);
-							if (shipDeck.api_deck_data != null) this.Homeport.Organization.Update(shipDeck.api_deck_data);
+
+							// 変更: api_deck_data が部分配列 (例: 1 要素) の場合、Organization.Update(kcsapi_deck[]) に渡すと
+							// Fleets コレクション全体が置き換わるため、個別要素ごとに Update(kcsapi_deck) を呼ぶようにします。
+							if (shipDeck.api_deck_data != null)
+							{
+								foreach (var deck in shipDeck.api_deck_data)
+								{
+									try
+									{
+										this.Homeport.Organization.Update(deck); // 単一デッキ更新
+									}
+									catch (Exception exDeck)
+									{
+										Debug.WriteLine("TryHandleShipDeck: single-deck update failed: " + exDeck);
+									}
+								}
+							}
+
 							Debug.WriteLine($"TryHandleShipDeck: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
 						}
 						catch (Exception ex)
@@ -495,7 +690,9 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
 
+#if DEBUG
 			Debug.WriteLine($"ProcessCaptured: TryHandleBattleResult called. url={url}");
+#endif
 			// 解析は試すが、主目的は UI の強制再描画
 			try
 			{
@@ -528,6 +725,19 @@ namespace Grabacr07.KanColleWrapper
 						return;
 					}
 
+					// --- 追加: 更新前の各艦隊状態を出力（診断用） ---
+					Debug.WriteLine("TryHandleBattleResult: pre-update fleet states:");
+					foreach (var f in org.Fleets.Values)
+					{
+						try
+						{
+							var expeditionState = f.Expedition != null ? f.Expedition.IsInExecution.ToString() : "null";
+							var situation = f.State != null ? f.State.Situation.ToString() : "(null)";
+							Debug.WriteLine($"  Fleet {f.Id}: IsInSortie={f.IsInSortie}, Ships={f.Ships.Length}, Expedition.IsInExecution={expeditionState}, State.Situation={situation}");
+						}
+						catch (Exception ex) { Debug.WriteLine("  pre-log failed: " + ex); }
+					}
+
 					// 出撃フラグに依らず全フリートを強制更新（CEF 経路では出撃検知が漏れるためのフォールバック）
 					foreach (var fleet in org.Fleets.Values)
 					{
@@ -551,6 +761,47 @@ namespace Grabacr07.KanColleWrapper
 					catch (Exception exNotify)
 					{
 						Debug.WriteLine("TryHandleBattleResult: NotifyUpdated failed: " + exNotify);
+					}
+
+					// 既にある NotifyUpdated 呼び出しの直後に以下を追加してください。
+					// UI のメッセージループが落ち着いたあとに再通知することで
+					// DataTemplate やバインディングの再評価を確実に促します。
+					try
+					{
+						// UI スレッドキューの低優先度で再通知を行う
+						if (Application.Current != null && Application.Current.Dispatcher != null)
+						{
+							Application.Current.Dispatcher.InvokeAsync(() =>
+							{
+								try
+								{
+									this.Homeport?.Organization?.NotifyUpdated();
+								}
+								catch (Exception exInner)
+								{
+									Debug.WriteLine("TryHandlePort: deferred NotifyUpdated failed: " + exInner);
+								}
+							}, System.Windows.Threading.DispatcherPriority.Background);
+						}
+					}
+					catch (Exception exDeferred)
+					{
+						Debug.WriteLine("TryHandlePort: schedule deferred NotifyUpdated failed: " + exDeferred);
+					}
+
+
+
+					// --- 追加: 更新後の各艦隊状態を出力（診断用） ---
+					Debug.WriteLine("TryHandleBattleResult: post-update fleet states:");
+					foreach (var f in org.Fleets.Values)
+					{
+						try
+						{
+							var expeditionState = f.Expedition != null ? f.Expedition.IsInExecution.ToString() : "null";
+							var situation = f.State != null ? f.State.Situation.ToString() : "(null)";
+							Debug.WriteLine($"  Fleet {f.Id}: IsInSortie={f.IsInSortie}, Ships={f.Ships.Length}, Expedition.IsInExecution={expeditionState}, State.Situation={situation}");
+						}
+						catch (Exception ex) { Debug.WriteLine("  post-log failed: " + ex); }
 					}
 
 					Debug.WriteLine($"TryHandleBattleResult: forced update done. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");

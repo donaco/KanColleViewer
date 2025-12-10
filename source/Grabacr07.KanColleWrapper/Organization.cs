@@ -1,13 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using System.IO; // 追加
 using Newtonsoft.Json; // 追加
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO; // 追加
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -449,6 +450,9 @@ namespace Grabacr07.KanColleWrapper
 
 		private void SubscribeSortieSessions(KanColleProxy proxy)
 		{
+#if DEBUG
+			Debug.WriteLine("Organization.SubscribeSortieSessions: subscribing to sortie sessions.");
+#endif
 			proxy.ApiSessionSource
 				.SkipUntil(proxy.api_req_map_start.TryParse().Do(this.Sortie))
 				.TakeUntil(proxy.api_port)
@@ -494,15 +498,38 @@ namespace Grabacr07.KanColleWrapper
 
 		private void Sortie(SvData data)
 		{
-			if (data == null || !data.IsSuccess) return;
+			if (data == null || !data.IsSuccess)
+			{
+				Debug.WriteLine("Organization.Sortie: received null or unsuccessful SvData.");
+				return;
+			}
 
 			try
 			{
 				var id = int.Parse(data.Request["api_deck_id"]);
-				var fleet = this.Fleets[id];
-				fleet.Sortie();
+				// Sortie の中のデバッグ行をガード
+#if DEBUG
+				Debug.WriteLine($"Organization.Sortie: detected sortie for deck {id} (Request keys: {string.Join(",", data.Request.Keys)})");
+#endif
 
-				if (this.Combined && id == 1) this.Fleets[2].Sortie();
+				var fleet = this.Fleets[id];
+				if (fleet == null)
+				{
+					Debug.WriteLine($"Organization.Sortie: fleet {id} not found in Fleets collection.");
+				}
+				else
+				{
+					Debug.WriteLine($"Organization.Sortie: before Sortie -> Fleet.Id={fleet.Id}, IsInSortie={fleet.IsInSortie}");
+					fleet.Sortie();
+					Debug.WriteLine($"Organization.Sortie: after Sortie -> Fleet.Id={fleet.Id}, IsInSortie={fleet.IsInSortie}");
+				}
+
+				if (this.Combined && id == 1)
+				{
+					Debug.WriteLine("Organization.Sortie: combined fleet flag set, also marking fleet 2 as sortie.");
+					this.Fleets[2].Sortie();
+					Debug.WriteLine($"Organization.Sortie: fleet 2 IsInSortie={this.Fleets[2].IsInSortie}");
+				}
 			}
 			catch (Exception ex)
 			{
@@ -512,6 +539,11 @@ namespace Grabacr07.KanColleWrapper
 
 		private void Homing()
 		{
+			// Homing の開始ログ
+#if DEBUG
+			Debug.WriteLine("Organization.Homing: invoked.");
+#endif
+
 			this.evacuatedShipsIds.Clear();
 			this.towShipIds.Clear();
 
@@ -523,7 +555,9 @@ namespace Grabacr07.KanColleWrapper
 
 			foreach (var target in this.Fleets.Values)
 			{
+				Debug.WriteLine($"Organization.Homing: Homing fleet {target.Id} (IsInSortie before={target.IsInSortie})");
 				target.Homing();
+				Debug.WriteLine($"Organization.Homing: Homing fleet {target.Id} (IsInSortie after={target.IsInSortie})");
 			}
 		}
 

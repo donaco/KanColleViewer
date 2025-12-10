@@ -229,11 +229,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		internal void RaiseShipsUpdated()
 		{
-			// 既存の ShipsUpdated 通知に加えて、Ships も明示的に通知する。
-			// これにより、Fleet.Ships を購読している外部コンポーネント（プラグインや ViewModel）が
-			// 戦闘後の更新を確実に受け取れるようになります。
 			this.RaisePropertyChanged(nameof(this.ShipsUpdated));
-			this.RaisePropertyChanged(nameof(this.Ships));
 		}
 
 		public override string ToString()
