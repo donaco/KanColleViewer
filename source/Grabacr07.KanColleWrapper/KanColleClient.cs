@@ -257,6 +257,10 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleShipDeck(url, normalized)) return;
 				if (TryHandleSlotItems(url, normalized)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
+				if (TryHandleNyukyoSpeedChange(url, requestBody)) return;
+				if (TryHandleNyukyoStart(url, requestBody)) return;
+				if (TryHandleNdockList(url, normalized)) return;
+				if (TryHandlePort(url, normalized)) return;
 
 				// 将来的なフォールバック追加箇所はここに追加
 			}
@@ -940,5 +944,151 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		#endregion
+		/// <summary>
+		/// 入渠系1 ドック一覧
+		/// </summary>
+		private bool TryHandleNdockList(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/ndock")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ndock[]>(normalized, out var ndocks))
+				{
+					Debug.WriteLine($"TryHandleNdockList: deserialized ndocks len={ndocks?.Length ?? 0}");
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.Repairyard?.Update(ndocks);
+							Debug.WriteLine("TryHandleNdockList: applied.");
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine("TryHandleNdockList.RunOnUi failed: " + ex);
+						}
+					});
+				}
+				else
+				{
+					Debug.WriteLine("TryHandleNdockList: deserialization failed.");
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("TryHandleNdockList failed: " + ex);
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 入渠系2 入渠開始
+		/// </summary>
+		private bool TryHandleNyukyoStart(string url, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_nyukyo/start")) return false;
+
+			try
+			{
+				// requestBody をパースして api_ship_id/api_highspeed を取得する（form-urlencoded 想定）
+				if (string.IsNullOrEmpty(requestBody)) return true;
+
+				var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					var kv = pair.Split(new[] { '=' }, 2);
+					if (kv.Length == 2)
+					{
+						try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+					}
+				}
+
+				if (!dict.ContainsKey("api_ship_id")) return true;
+
+				int shipId;
+				if (!int.TryParse(dict["api_ship_id"], out shipId)) return true;
+
+				var highspeed = dict.ContainsKey("api_highspeed") && dict["api_highspeed"] == "1";
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var ship = this.Homeport?.Organization?.Ships?[shipId];
+						if (ship == null) return;
+
+						// 既存の Repairyard.Start と同様、高速修復材使用なら即時 Repair を反映
+						if (highspeed)
+						{
+							ship.Repair();
+							this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
+						}
+						// 通常入渠開始はドック一覧 (ndock) が後で来る想定なのでここでは無理に触らない
+						Debug.WriteLine($"TryHandleNyukyoStart: processed shipId={shipId}, highspeed={highspeed}");
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("TryHandleNyukyoStart.RunOnUi failed: " + ex);
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("TryHandleNyukyoStart failed: " + ex);
+			}
+
+			return true;
+		}
+		
+		/// <summary>
+		/// 入渠系3 高速修復材
+		/// </summary>
+		private bool TryHandleNyukyoSpeedChange(string url, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_nyukyo/speedchange")) return false;
+
+			try
+			{
+				// requestBody をパースして api_ndock_id を取得する（form-urlencoded 想定）
+				if (string.IsNullOrEmpty(requestBody)) return true;
+
+				var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					var kv = pair.Split(new[] { '=' }, 2);
+					if (kv.Length == 2)
+					{
+						try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+					}
+				}
+
+				if (!dict.ContainsKey("api_ndock_id")) return true;
+				if (!int.TryParse(dict["api_ndock_id"], out var ndockId)) return true;
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var dock = this.Homeport?.Repairyard?.Docks?[ndockId];
+						var ship = dock?.Ship;
+						if (dock != null) dock.Finish();
+						if (ship != null)
+						{
+							ship.Repair();
+							this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
+						}
+					}
+					catch
+					{
+					}
+				});
+			}
+			catch
+			{
+			}
+
+			return true;
+		}
 	}
 }
