@@ -1,3 +1,4 @@
+using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 using Nekoxy;
 using Newtonsoft.Json;
@@ -8,11 +9,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Windows; // 追加
+using System.Xml.Linq;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -253,6 +255,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleQuestList(url, normalized)) return;
 				if (TryHandleShipArray(url, normalized)) return;
 				if (TryHandleShip3(url, normalized)) return;
+				if (TryHandleCharge(url, normalized)) return;
 				if (TryHandleDecks(url, normalized)) return;
 				if (TryHandleShipDeck(url, normalized)) return;
 				if (TryHandleSlotItems(url, normalized)) return;
@@ -1083,6 +1086,75 @@ namespace Grabacr07.KanColleWrapper
 					{
 					}
 				});
+			}
+			catch
+			{
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 補給処理
+		/// </summary>
+		private bool TryHandleCharge(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_hokyu/charge")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_charge>(normalized, out var charge))
+				{
+					// charge.api_material : int[] (length=4) — Materials の private Update(int[]) を反射で呼び出して反映
+					// charge.api_ship : kcsapi_charge_ship[] — 各艦の燃料/弾薬/onslot を更新し艦隊状態を再計算
+					RunOnUi(() =>
+					{
+						try
+						{
+							// Materials の private Update(int[]) をリフレクションで呼ぶ
+							var materials = this.Homeport?.Materials;
+							if (materials != null && charge.api_material != null)
+							{
+								var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+								mi?.Invoke(materials, new object[] { charge.api_material });
+							}
+
+							// Ships の補給反映
+							if (charge.api_ship != null && charge.api_ship.Length > 0)
+							{
+								Fleet affectedFleet = null;
+								var org = this.Homeport?.Organization;
+								foreach (var s in charge.api_ship)
+								{
+									try
+									{
+										var ship = org?.Ships?[s.api_id];
+										if (ship == null) continue;
+
+										ship.Charge(s.api_fuel, s.api_bull, s.api_onslot);
+
+										if (affectedFleet == null) affectedFleet = org.GetFleet(ship.Id);
+									}
+									catch
+									{
+									}
+								}
+
+								if (affectedFleet != null)
+								{
+									try { affectedFleet.State.Update(); } catch { }
+									try { affectedFleet.State.Calculate(); } catch { }
+								}
+							}
+
+							// 全体の UI 再評価を促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						}
+						catch
+						{
+						}
+					});
+				}
 			}
 			catch
 			{
