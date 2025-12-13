@@ -10,6 +10,7 @@
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
+			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 mc:Ignorable="d"
 			 d:DesignWidth="500"
 			 d:DesignHeight="640"
@@ -313,6 +314,20 @@
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+		<TextBlock Text="開発者ツールの表示設定"
+				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
+		<StackPanel Orientation="Horizontal"
+						HorizontalAlignment="Right">
+			<TextBlock Text="※CefSharp.Wpf の埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
+						   Style="{DynamicResource DetailTextStyleKey}"
+						   Margin="16,8" />
+			<Border Width="5" />
+			<metro2:CallMethodButton MethodTarget="{Binding Source={x:Static root:WindowService.Current}}"
+										 MethodName="ShowDevTools"
+										 Content="表示"
+										 MinWidth="110"
+										 Padding="16,6" />
+		</StackPanel>
 	</StackPanel>
 </UserControl>

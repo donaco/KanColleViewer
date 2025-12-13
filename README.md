@@ -1,7 +1,6 @@
 ﻿提督業も忙しい！ (KanColleViewer)
 --
 
-[![Build status (master)](https://img.shields.io/appveyor/ci/Grabacr07/KanColleViewer.svg?style=flat-square)](https://ci.appveyor.com/project/donaco/kancolleviewer)
 [![Release](https://img.shields.io/github/release/donaco/KanColleViewer.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/donaco/KanColleViewer/latest/total.svg?style=flat-square)](https://github.com/donaco/KanColleViewer/releases/latest)
 [![NuGet (KanColleWrapper)](https://img.shields.io/nuget/v/KanColleWrapper.svg?style=flat-square)](https://www.nuget.org/packages/KanColleWrapper/)

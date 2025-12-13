@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
@@ -15,6 +16,8 @@ using Livet.Messaging;
 using MetroRadiance.UI;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
+using CefSharp.Wpf;
+using CefSharp;
 
 namespace Grabacr07.KanColleViewer
 {
@@ -125,6 +128,75 @@ namespace Grabacr07.KanColleViewer
 		public void ClearZoomFactor()
 		{
 			this.kanColleWindow?.Messenger.Raise(new InteractionMessage { MessageKey = "WebBrowser.Zoom" });
+		}
+
+		// 追加: DevTools を開くためのユーティリティ
+		public void ShowDevTools()
+		{
+			try
+			{
+				// Application の開いているウィンドウを検索して ChromiumWebBrowser を探す
+				var browser = this.FindFirstChromiumWebBrowser();
+				if (browser == null)
+				{
+					// 見つからなければ通知だけ行う
+					StatusService.Current.Notify("DevTools を開けるブラウザが見つかりませんでした。");
+					return;
+				}
+
+				// UI スレッドで ShowDevTools を呼ぶ（フォールバックを含む）
+				browser.Dispatcher.BeginInvoke(new Action(() =>
+				{
+					try
+					{
+						browser.ShowDevTools();
+					}
+					catch (Exception)
+					{
+						try
+						{
+							browser.GetBrowser()?.GetHost()?.ShowDevTools();
+						}
+						catch (Exception ex)
+						{
+							StatusService.Current.Notify("DevTools の表示に失敗しました: " + ex.Message);
+						}
+					}
+				}));
+			}
+			catch (Exception ex)
+			{
+				StatusService.Current.Notify("DevTools の表示に失敗しました: " + ex.Message);
+			}
+		}
+
+		private ChromiumWebBrowser FindFirstChromiumWebBrowser()
+		{
+			if (Application.Current == null) return null;
+
+			foreach (Window w in Application.Current.Windows)
+			{
+				var found = FindChild<ChromiumWebBrowser>(w);
+				if (found != null) return found;
+			}
+
+			return null;
+		}
+
+		private T FindChild<T>(DependencyObject parent) where T : DependencyObject
+		{
+			if (parent == null) return null;
+
+			var count = VisualTreeHelper.GetChildrenCount(parent);
+			for (int i = 0; i < count; i++)
+			{
+				var child = VisualTreeHelper.GetChild(parent, i);
+				if (child is T typed) return typed;
+				var result = FindChild<T>(child);
+				if (result != null) return result;
+			}
+
+			return null;
 		}
 
 		public void SetLocationLeft()
