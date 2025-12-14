@@ -316,13 +316,11 @@ namespace Grabacr07.KanColleWrapper
 			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
 			try
 			{
-				// requestBody は form-urlencoded の想定: "api_deck_id=1&...". null の場合は出撃フラグのみ設定。
 				int deckId = -1;
 				if (!string.IsNullOrEmpty(requestBody))
 				{
 					try
 					{
-						// リクエストボディが "api_deck_id=1" の形式で来ることを想定してパース
 						var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
 						foreach (var p in pairs)
 						{
@@ -339,7 +337,6 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 
-				// 出撃デッキの記録（あれば）
 				if (deckId > 0)
 				{
 					try
@@ -348,36 +345,21 @@ namespace Grabacr07.KanColleWrapper
 						if (org != null && org.Fleets.ContainsKey(deckId))
 						{
 							org.Fleets[deckId].Sortie();
-							// 追加：出撃したデッキ ID を記録しておく
+							// 記録：出撃したデッキ ID を保存
 							this.sortieDeckIds.Add(deckId);
 
-							// 追加処理: 連合艦隊のときは第2艦隊も出撃としてマークする
-							// 条件は可能な限り寛容に：組織が連合フラグを持っている、または第2艦隊に艦が存在する場合
-							try
+							// 第1艦隊が出撃かつ組合せフラグが立っている場合のみ第2艦隊も出撃扱いにする
+							if (deckId == 1)
 							{
-								if (deckId == 1)
+								bool isCombined = false;
+								try { isCombined = org.Combined; } catch { isCombined = false; }
+
+								if (isCombined && org.Fleets.ContainsKey(2))
 								{
-									bool isCombined = false;
-									try { isCombined = org.Combined; } catch { /* プロパティが無い場合は無視 */ }
-
-									bool hasSecondFleet = org.Fleets.ContainsKey(2) && org.Fleets[2].Ships != null && org.Fleets[2].Ships.Length > 0;
-
-									if (isCombined || hasSecondFleet)
-									{
-										if (org.Fleets.ContainsKey(2))
-										{
-											org.Fleets[2].Sortie();
-											this.sortieDeckIds.Add(2);
-										}
-									}
+									org.Fleets[2].Sortie();
+									this.sortieDeckIds.Add(2);
 								}
 							}
-							catch
-							{
-							}
-						}
-						else
-						{
 						}
 					}
 					catch
@@ -385,7 +367,6 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 
-				// UI スレッドで出撃フラグを立てる（帰投処理は TryHandlePort 側で行う）
 				RunOnUi(() =>
 				{
 					try
@@ -400,7 +381,6 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
-
 			return true;
 		}
 

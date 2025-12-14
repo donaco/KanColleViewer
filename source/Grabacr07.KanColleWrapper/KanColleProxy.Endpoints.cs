@@ -429,5 +429,13 @@ namespace Grabacr07.KanColleWrapper
 		{
 			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/set_friendly_request"); }
 		}
+
+		/// <summary>
+		/// 追加：エンド ポイント "/kcsapi/api_port/airCorpsCondRecoveryWithTimer" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_api_port_airCorpsCondRecoveryWithTimer
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_port/airCorpsCondRecoveryWithTimer"); }
+		}
 	}
 }
