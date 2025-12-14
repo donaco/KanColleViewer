@@ -906,25 +906,29 @@ namespace Grabacr07.KanColleWrapper
 					{
 						try
 						{
-							if (shipDeck.api_ship_data != null) this.Homeport.Organization.Update(shipDeck.api_ship_data);
+							// 明示的に kcsapi_ship_deck 型にキャストして Update を呼ぶ（オーバーロードの誤選択を防ぐ）
+							this.Homeport.Organization.Update(shipDeck);
 
-							// 変更: api_deck_data が部分配列 (例: 1 要素) の場合、Organization.Update(kcsapi_deck[]) に渡すと
-							// Fleets コレクション全体が置き換わるため、個別要素ごとに Update(kcsapi_deck) を呼ぶようにします。
-							if (shipDeck.api_deck_data != null)
+							// UI の再評価を確実に促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+
+							// フリート状態の再計算・再通知
+							try
 							{
-								foreach (var deck in shipDeck.api_deck_data)
+								var org = this.Homeport?.Organization;
+								if (org != null)
 								{
-									try
+									foreach (var f in org.Fleets.Values)
 									{
-										this.Homeport.Organization.Update(deck); // 単一デッキ更新
-									}
-									catch
-									{
+										try { f.State.Calculate(); } catch { }
+										try { f.State.Update(); } catch { }
+										try { f.RaiseShipsUpdated(); } catch { }
 									}
 								}
 							}
+							catch { }
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});

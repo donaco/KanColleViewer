@@ -560,16 +560,23 @@ namespace Grabacr07.KanColleWrapper
 				Debug.WriteLine($"Organization.Homing: Homing fleet {target.Id} (IsInSortie after={target.IsInSortie})");
 			}
 		}
-
-		private void Update(kcsapi_ship_deck source)
+		/// <summary>
+		/// 出撃中に艦娘情報が更新された際に、その情報を反映
+		/// </summary>
+		internal void Update(kcsapi_ship_deck source)
 		{
+			if (source == null) return;
+
 			if (source.api_ship_data != null)
 			{
 				foreach (var ship in source.api_ship_data)
 				{
 					var target = this.Ships[ship.api_id];
+					if (target == null) continue;
+
 					target.Update(ship);
 
+					// 出撃中マーカー等を維持
 					if (this.evacuatedShipsIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Evacuation;
 					if (this.towShipIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Tow;
 				}
@@ -580,6 +587,8 @@ namespace Grabacr07.KanColleWrapper
 				foreach (var deck in source.api_deck_data)
 				{
 					var target = this.Fleets[deck.api_id];
+					if (target == null) continue;
+
 					target.Update(deck);
 				}
 			}
