@@ -233,6 +233,13 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
+			// 確認用ログ（後で削除）
+			try
+			{
+				Debug.WriteLine($"ProcessCaptured ENTER: url={url}, requestBody_len={(requestBody == null ? 0 : requestBody.Length)}, responseBody_len={(responseBody == null ? 0 : responseBody.Length)}");
+			}
+			catch { }
+
 			// 実処理は CapturedProcessor に委譲（初期化判定はこれで行う）
 			try
 			{
@@ -246,6 +253,14 @@ namespace Grabacr07.KanColleWrapper
 
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
+
+				// 確認用ログ（レスポンスのプレビューを出す）
+				try
+				{
+					var preview = normalized.Length > 300 ? normalized.Substring(0, 300) + "..." : normalized;
+					Debug.WriteLine($"ProcessCaptured: normalized preview length={normalized.Length}, preview={preview}");
+				}
+				catch { }
 
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
 				if (TryHandleMapStart(url, requestBody)) return;
@@ -319,9 +334,8 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						Debug.WriteLine("TryHandleMapStart: failed to parse requestBody: " + ex);
 					}
 				}
 
@@ -336,7 +350,6 @@ namespace Grabacr07.KanColleWrapper
 							org.Fleets[deckId].Sortie();
 							// 追加：出撃したデッキ ID を記録しておく
 							this.sortieDeckIds.Add(deckId);
-							Debug.WriteLine($"TryHandleMapStart: Fleet {deckId} marked as Sortie.");
 
 							// 追加処理: 連合艦隊のときは第2艦隊も出撃としてマークする
 							// 条件は可能な限り寛容に：組織が連合フラグを持っている、または第2艦隊に艦が存在する場合
@@ -355,24 +368,20 @@ namespace Grabacr07.KanColleWrapper
 										{
 											org.Fleets[2].Sortie();
 											this.sortieDeckIds.Add(2);
-											Debug.WriteLine("TryHandleMapStart: Fleet 2 also marked as Sortie (combined).");
 										}
 									}
 								}
 							}
-							catch (Exception exCombined)
+							catch
 							{
-								Debug.WriteLine("TryHandleMapStart: combined-fleet mark failed: " + exCombined);
 							}
 						}
 						else
 						{
-							Debug.WriteLine($"TryHandleMapStart: Fleet {deckId} not found to mark Sortie.");
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						Debug.WriteLine("TryHandleMapStart: marking fleet sortie failed: " + ex);
 					}
 				}
 
@@ -383,15 +392,13 @@ namespace Grabacr07.KanColleWrapper
 					{
 						this.IsInSortie = true;
 					}
-					catch (Exception ex)
+					catch
 					{
-						Debug.WriteLine("TryHandleMapStart.RunOnUi failed: " + ex);
 					}
 				});
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandleMapStart failed: " + ex);
 			}
 
 			return true;
@@ -405,7 +412,6 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
 				{
-					Debug.WriteLine($"TryHandlePort: deserialized port. api_ship_len={port.api_ship?.Length ?? 0}, api_deck_port_len={port.api_deck_port?.Length ?? 0}");
 					RunOnUi(() =>
 					{
 						try
@@ -419,16 +425,13 @@ namespace Grabacr07.KanColleWrapper
 
 							if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
 
-							Debug.WriteLine($"TryHandlePort: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
-
 							// 追加: UI バインディングが更新されないケースに備え、明示的に通知を出す
 							try
 							{
 								this.Homeport?.Organization?.NotifyUpdated();
 							}
-							catch (Exception exNotify)
+							catch
 							{
-								Debug.WriteLine("TryHandlePort: NotifyUpdated failed: " + exNotify);
 							}
 
 							// --- 追加: 各艦隊を明示的に再計算・再通知して UI を確実に更新 ---
@@ -448,21 +451,18 @@ namespace Grabacr07.KanColleWrapper
 											// View 側で監視されるイベントを確実に発火させる
 											f.RaiseShipsUpdated();
 										}
-										catch (Exception exFleet)
+										catch
 										{
-											Debug.WriteLine("TryHandlePort: fleet post-update failed: " + exFleet);
 										}
 									}
 								}
 							}
-							catch (Exception exRefresh)
+							catch
 							{
-								Debug.WriteLine("TryHandlePort: UI refresh loop failed: " + exRefresh);
 							}
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandlePort.RunOnUi failed: " + ex);
 						}
 
 						// TryHandlePort 内の RunOnUi の末尾付近に追加してください
@@ -479,9 +479,8 @@ namespace Grabacr07.KanColleWrapper
 									{
 										org.Fleets[returningDeckId].Homing();
 									}
-									catch (Exception ex)
+									catch
 									{
-										Debug.WriteLine("TryHandlePort: fleet Homing failed: " + ex);
 									}
 									// 処理済みは記録から削除
 									this.sortieDeckIds.Remove(returningDeckId);
@@ -491,21 +490,18 @@ namespace Grabacr07.KanColleWrapper
 							// Global な出撃フラグは、まだ出撃中のデッキが残っているかで決める
 							this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandlePort: post-processing failed: " + ex);
 						}
 
 					});
 				}
 				else
 				{
-					Debug.WriteLine("TryHandlePort: deserialization failed.");
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandlePort failed: " + ex);
 			}
 
 			return true;
@@ -520,16 +516,19 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
 				{
-					RunOnUi(() => { try { this.Homeport.Quests.Update(questlist); Debug.WriteLine("TryHandleQuestList: applied."); } catch (Exception ex) { Debug.WriteLine("TryHandleQuestList.RunOnUi failed: " + ex); } });
+					RunOnUi(() => { 
+						try { this.Homeport.Quests.Update(questlist);
+						} 
+						catch
+						{ 
+						} });
 				}
 				else
 				{
-					Debug.WriteLine("TryHandleQuestList: deserialization failed.");
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandleQuestList failed: " + ex);
 			}
 			return true;
 		}
@@ -651,104 +650,132 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (!url.Contains("/kcsapi/api_req_kaisou/slot_exchange_index")) return false;
 
+			// requestBody から ship id を先に探す（api_id, api_ship_id の両方を確認）
+			int shipId = -1;
+			if (!string.IsNullOrEmpty(requestBody))
+			{
+				var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+				foreach (var p in pairs)
+				{
+					var kv = p.Split(new[] { '=' }, 2);
+					if (kv.Length != 2) continue;
+					var key = kv[0];
+					var val = Uri.UnescapeDataString(kv[1]);
+					if (key == "api_id" || key == "api_ship_id")
+					{
+						int.TryParse(val, out shipId);
+						break;
+					}
+				}
+			}
+
+			// --- JSON 側を解析して api_slot を柔軟に抽出 ---
+			JToken root;
 			try
 			{
-				// 柔軟に api_slot を探す（api_data.api_slot / api_slot / 直配列）
-				JToken root;
+				root = JToken.Parse(normalized);
+			}
+			catch
+			{
+				// JSON 解析できなければ終了
+				return true;
+			}
+
+			JToken data = root["api_data"] ?? root;
+
+			JToken slotToken = null;
+
+			// 1) api_ship_data がある場合はそちらから探す（単一オブジェクト or 配列）
+			var shipData = data["api_ship_data"];
+			if (shipData != null)
+			{
+				if (shipData.Type == JTokenType.Object)
+				{
+					// 単一オブジェクト
+					slotToken = shipData["api_slot"];
+				}
+				else if (shipData.Type == JTokenType.Array)
+				{
+					// 配列の場合は shipId に一致する要素を探す。なければ最初の要素にフォールバック。
+					if (shipId > 0)
+					{
+						foreach (var elem in shipData.Children())
+						{
+							var idToken = elem["api_id"] ?? elem["api_ship_id"];
+							if (idToken != null && idToken.Type == JTokenType.Integer && idToken.Value<int>() == shipId)
+							{
+								slotToken = elem["api_slot"];
+								break;
+							}
+						}
+					}
+					if (slotToken == null)
+					{
+						// フォールバック: 最初の要素
+						var first = shipData.First;
+						if (first != null) slotToken = first["api_slot"];
+					}
+				}
+			}
+
+			// 2) 見つからなければ data.api_slot を探す
+			if (slotToken == null)
+			{
+				slotToken = data["api_slot"] ?? data.SelectToken("api_slot");
+			}
+
+			if (slotToken == null) return true;
+
+			// slotToken が配列であることを確認
+			JArray apiSlotArray = slotToken as JArray;
+			if (apiSlotArray == null)
+			{
+				// 場合によっては api_slot がオブジェクト内にある別形式の可能性もあるため失敗は無視
+				return true;
+			}
+
+			var apiSlot = apiSlotArray.Select(t => (int?)t ?? 0).ToArray();
+
+			// shipId がまだ不明なら、もし shipData が単一オブジェクトならそこから取得
+			if (shipId <= 0 && shipData != null && shipData.Type == JTokenType.Object)
+			{
+				var idTok = shipData["api_id"] ?? shipData["api_ship_id"];
+				if (idTok != null && idTok.Type == JTokenType.Integer) shipId = idTok.Value<int>();
+			}
+
+			if (shipId <= 0) return true;
+
+			RunOnUi(() =>
+			{
 				try
 				{
-					root = JToken.Parse(normalized);
+					var org = this.Homeport?.Organization;
+					var ship = org?.Ships?[shipId];
+					if (ship == null) return;
+
+					// RawData.api_slot を置き換えて UpdateSlots() を呼ぶ（Organization.ExchangeSlot と同等）
+					ship.RawData.api_slot = apiSlot;
+					ship.UpdateSlots();
+
+					// 所属艦隊を再計算・再通知
+					var fleet = org.GetFleet(ship.Id);
+					if (fleet != null)
+					{
+						try { fleet.State.Calculate(); } catch { }
+						try { fleet.State.Update(); } catch { }
+						try { fleet.RaiseShipsUpdated(); } catch { }
+					}
+
+					// 組織レベルの再通知で UI 再評価を促す
+					try { org.NotifyUpdated(); } catch { }
 				}
 				catch
 				{
-					// JSON 解析できなければ終了
-					return true;
 				}
-
-				JToken data = root["api_data"] ?? root;
-
-				JToken slotToken = null;
-				if (data.Type == JTokenType.Object)
-				{
-					slotToken = data["api_slot"] ?? data.SelectToken("api_data.api_slot") ?? data.SelectToken("api_slot");
-				}
-				else if (data.Type == JTokenType.Array)
-				{
-					slotToken = data;
-				}
-
-				if (slotToken == null) return true;
-
-				var apiSlotArray = slotToken.Type == JTokenType.Array ? slotToken as JArray : (slotToken["api_slot"] as JArray);
-				if (apiSlotArray == null) return true;
-
-				var apiSlot = apiSlotArray.Select(t => (int?)t ?? 0).ToArray();
-
-				// requestBody から ship id を探す（api_id, api_ship_id の両方を確認）
-				int shipId = -1;
-				if (!string.IsNullOrEmpty(requestBody))
-				{
-					var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
-					foreach (var p in pairs)
-					{
-						var kv = p.Split(new[] { '=' }, 2);
-						if (kv.Length != 2) continue;
-						var key = kv[0];
-						var val = Uri.UnescapeDataString(kv[1]);
-						if (key == "api_id" || key == "api_ship_id")
-						{
-							int.TryParse(val, out shipId);
-							break;
-						}
-					}
-				}
-
-				if (shipId <= 0) return true;
-
-				// 一時ログ（動作確認後に削除してください）
-				Debug.WriteLine($"TryHandleSlotExchangeIndex: shipId={shipId}, api_slot_len={apiSlot.Length}");
-
-				RunOnUi(() =>
-				{
-					try
-					{
-						var org = this.Homeport?.Organization;
-						var ship = org?.Ships?[shipId];
-						if (ship == null) return;
-
-						// RawData.api_slot を置き換えて UpdateSlots() を呼ぶ（Organization.ExchangeSlot と同等）
-						ship.RawData.api_slot = apiSlot;
-						ship.UpdateSlots();
-
-						// 所属艦隊を再計算・再通知
-						var fleet = org.GetFleet(ship.Id);
-						if (fleet != null)
-						{
-							try { fleet.State.Calculate(); } catch { }
-							try { fleet.State.Update(); } catch { }
-							try { fleet.RaiseShipsUpdated(); } catch { }
-						}
-
-						// 組織レベルの再通知で UI 再評価を促す
-						try { org.NotifyUpdated(); } catch { }
-
-						// 一時ログ
-						Debug.WriteLine("TryHandleSlotExchangeIndex: applied slot update to ship " + shipId);
-					}
-					catch (Exception ex)
-					{
-						Debug.WriteLine("TryHandleSlotExchangeIndex.RunOnUi failed: " + ex);
-					}
-				});
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine("TryHandleSlotExchangeIndex failed: " + ex);
-			}
+			});
 
 			return true;
 		}
-
 
 		private bool TryHandleDecks(string url, string normalized)
 		{
@@ -765,7 +792,6 @@ namespace Grabacr07.KanColleWrapper
 				// まず配列として試す
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_deck[]>(normalized, out var decks))
 				{
-					Debug.WriteLine($"TryHandleDecks: deserialized decks len={decks?.Length ?? 0}");
 					RunOnUi(() =>
 					{
 						try
@@ -779,24 +805,19 @@ namespace Grabacr07.KanColleWrapper
 									{
 										this.Homeport.Organization.Update(deck); // 単一デッキ更新を繰り返す
 									}
-									catch (Exception exDeck)
+									catch
 									{
-										Debug.WriteLine("TryHandleDecks: single-deck update failed: " + exDeck);
 									}
 								}
 							}
-
-
-                            Debug.WriteLine($"TryHandleDecks: applied array (per-deck). Fleets={this.Homeport?.Organization?.Fleets?.Count}");
 
 							// 強制的な UI 更新処理（Port ハンドラと同等の処理を行う）
 							try
 							{
 								this.Homeport?.Organization?.NotifyUpdated();
 							}
-							catch (Exception exNotify)
+							catch
 							{
-								Debug.WriteLine("TryHandleDecks: NotifyUpdated failed: " + exNotify);
 							}
 
 							try
@@ -812,21 +833,18 @@ namespace Grabacr07.KanColleWrapper
 											f.State.Update();
 											f.RaiseShipsUpdated();
 										}
-										catch (Exception exFleet)
+										catch
 										{
-											Debug.WriteLine("TryHandleDecks: fleet post-update failed: " + exFleet);
 										}
 									}
 								}
 							}
-							catch (Exception exRefresh)
+							catch
 							{
-								Debug.WriteLine("TryHandleDecks: UI refresh loop failed: " + exRefresh);
 							}
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandleDecks.RunOnUi failed: " + ex);
 						}
 					});
 
@@ -904,7 +922,6 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship_deck>(normalized, out var shipDeck))
 				{
-					Debug.WriteLine($"TryHandleShipDeck: deserialized. ship_data_len={shipDeck.api_ship_data?.Length ?? 0}, deck_data_len={shipDeck.api_deck_data?.Length ?? 0}");
 					RunOnUi(() =>
 					{
 						try
@@ -921,29 +938,23 @@ namespace Grabacr07.KanColleWrapper
 									{
 										this.Homeport.Organization.Update(deck); // 単一デッキ更新
 									}
-									catch (Exception exDeck)
+									catch
 									{
-										Debug.WriteLine("TryHandleShipDeck: single-deck update failed: " + exDeck);
 									}
 								}
 							}
-
-							Debug.WriteLine($"TryHandleShipDeck: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandleShipDeck.RunOnUi failed: " + ex);
 						}
 					});
 				}
 				else
 				{
-					Debug.WriteLine("TryHandleShipDeck: deserialization failed.");
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandleShipDeck failed: " + ex);
 			}
 			return true;
 		}
@@ -979,20 +990,16 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_battleresult>(normalized, out var br))
 				{
-					Debug.WriteLine("TryHandleBattleResult: parsed kcsapi_battleresult.");
 				}
 				else if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_combined_battle_battleresult>(normalized, out var cbr))
 				{
-					Debug.WriteLine("TryHandleBattleResult: parsed kcsapi_combined_battle_battleresult.");
 				}
 				else
 				{
-					Debug.WriteLine("TryHandleBattleResult: deserialization failed.");
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandleBattleResult parse failed: " + ex);
 			}
 
 			RunOnUi(() =>
@@ -1002,7 +1009,7 @@ namespace Grabacr07.KanColleWrapper
 					var org = this.Homeport?.Organization;
 					if (org == null)
 					{
-						Debug.WriteLine("TryHandleBattleResult: Homeport.Organization is null.");
+
 						return;
 					}
 
