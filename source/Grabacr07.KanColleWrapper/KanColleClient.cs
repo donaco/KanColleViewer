@@ -254,6 +254,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandlePort(url, normalized)) return;
 				if (TryHandleQuestList(url, normalized)) return;
 				if (TryHandleShipArray(url, normalized)) return;
+				if (TryHandleSlotExchangeIndex(url, normalized, requestBody)) return;
 				if (TryHandleShip3(url, normalized)) return;
 				if (TryHandleCharge(url, normalized)) return;
 				if (TryHandleDecks(url, normalized)) return;
@@ -292,7 +293,9 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		// 新規追加: map/start を処理して出撃フラグを設定するフォールバックハンドラ
+		/// <summary>
+		/// 出撃フラグ
+		/// </summary>
 		private bool TryHandleMapStart(string url, string requestBody)
 		{
 			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
@@ -507,7 +510,9 @@ namespace Grabacr07.KanColleWrapper
 
 			return true;
 		}
-
+		/// <summary>
+		/// 任務一覧
+		/// </summary>
 		private bool TryHandleQuestList(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/questlist")) return false;
@@ -532,40 +537,38 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleShipArray(string url, string normalized)
 		{
 			// 注意: "/kcsapi/api_get_member/ship_deck" は "/ship" を含むため誤マッチする。
-			//       そのため ship_deck を明示的に除外してから処理する。
+			//       "/ship3" も "/ship" を含むため誤マッチするので除外する。
 			if (!((url.Contains("/kcsapi/api_get_member/ship2") || url.Contains("/kcsapi/api_get_member/ship"))
-				   && !url.Contains("/kcsapi/api_get_member/ship_deck")))
+				   && !url.Contains("/kcsapi/api_get_member/ship_deck")
+				   && !url.Contains("/kcsapi/api_get_member/ship3")))
 				return false;
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship2[]>(normalized, out var ships))
 				{
-					Debug.WriteLine($"TryHandleShipArray: deserialized ships len={ships?.Length ?? 0}");
 					RunOnUi(() =>
 					{
 						try
 						{
 							this.Homeport.Organization.Update(ships);
-							Debug.WriteLine($"TryHandleShipArray: applied. Ships={this.Homeport?.Organization?.Ships?.Count}");
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandleShipArray.RunOnUi failed: " + ex);
 						}
 					});
 				}
 				else
 				{
-					Debug.WriteLine("TryHandleShipArray: deserialization failed.");
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("TryHandleShipArray failed: " + ex);
 			}
 			return true;
 		}
-
+		/// <summary>
+		/// 改装系1
+		/// </summary>
 		private bool TryHandleShip3(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/ship3")) return false;
@@ -573,32 +576,179 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship3>(normalized, out var s3))
 				{
-					Debug.WriteLine($"TryHandleShip3: deserialized. ship_data_len={s3.api_ship_data?.Length ?? 0}, deck_data_len={s3.api_deck_data?.Length ?? 0}");
 					RunOnUi(() =>
 					{
 						try
 						{
-							if (s3.api_ship_data != null) this.Homeport.Organization.Update(s3.api_ship_data);
-							if (s3.api_deck_data != null) this.Homeport.Organization.Update(s3.api_deck_data);
-							Debug.WriteLine($"TryHandleShip3: applied. Ships={this.Homeport?.Organization?.Ships?.Count}, Fleets={this.Homeport?.Organization?.Fleets?.Count}");
+							var org = this.Homeport?.Organization;
+							var updatedShipIds = new List<int>();
+
+							// ship データを個別に確実に反映
+							if (s3.api_ship_data != null)
+							{
+								foreach (var rawShip in s3.api_ship_data)
+								{
+									try
+									{
+										// 既存 Ship インスタンスがあれば直接更新
+										var existing = org?.Ships?[rawShip.api_id];
+										if (existing != null)
+										{
+											existing.Update(rawShip);
+										}
+										else
+										{
+											// もし存在しなければ既存の更新ルートにフォールバック
+											try { this.Homeport.Organization.Update(new[] { rawShip }); } catch { }
+										}
+
+										updatedShipIds.Add(rawShip.api_id);
+									}
+									catch { /* 個別失敗は無視して続行 */ }
+								}
+							}
+
+							// デッキ情報は個別デッキごとに更新
+							if (s3.api_deck_data != null)
+							{
+								foreach (var deck in s3.api_deck_data)
+								{
+									try { this.Homeport.Organization.Update(deck); } catch { }
+								}
+							}
+
+							// 更新された艦を含む艦隊のみ再計算・再通知
+							if (org != null && updatedShipIds.Count > 0)
+							{
+								var affectedFleets = org.Fleets.Values
+									.Where(f => f.Ships.Any(s => updatedShipIds.Contains(s.Id)))
+									.ToArray();
+
+								foreach (var f in affectedFleets)
+								{
+									try { f.State.Update(); } catch { }
+									try { f.State.Calculate(); } catch { }
+									try { f.RaiseShipsUpdated(); } catch { }
+								}
+							}
+
+							// 組織レベルで再通知して DataTemplate 等の再評価を促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch (Exception ex)
-						{
-							Debug.WriteLine("TryHandleShip3.RunOnUi failed: " + ex);
-						}
+						catch { /* swallow */ }
 					});
 				}
-				else
+			}
+			catch { /* swallow */ }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 改装系2 -装備スロット交換
+		/// </summary>
+		private bool TryHandleSlotExchangeIndex(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/slot_exchange_index")) return false;
+
+			try
+			{
+				// 柔軟に api_slot を探す（api_data.api_slot / api_slot / 直配列）
+				JToken root;
+				try
 				{
-					Debug.WriteLine("TryHandleShip3: deserialization failed.");
+					root = JToken.Parse(normalized);
 				}
+				catch
+				{
+					// JSON 解析できなければ終了
+					return true;
+				}
+
+				JToken data = root["api_data"] ?? root;
+
+				JToken slotToken = null;
+				if (data.Type == JTokenType.Object)
+				{
+					slotToken = data["api_slot"] ?? data.SelectToken("api_data.api_slot") ?? data.SelectToken("api_slot");
+				}
+				else if (data.Type == JTokenType.Array)
+				{
+					slotToken = data;
+				}
+
+				if (slotToken == null) return true;
+
+				var apiSlotArray = slotToken.Type == JTokenType.Array ? slotToken as JArray : (slotToken["api_slot"] as JArray);
+				if (apiSlotArray == null) return true;
+
+				var apiSlot = apiSlotArray.Select(t => (int?)t ?? 0).ToArray();
+
+				// requestBody から ship id を探す（api_id, api_ship_id の両方を確認）
+				int shipId = -1;
+				if (!string.IsNullOrEmpty(requestBody))
+				{
+					var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+					foreach (var p in pairs)
+					{
+						var kv = p.Split(new[] { '=' }, 2);
+						if (kv.Length != 2) continue;
+						var key = kv[0];
+						var val = Uri.UnescapeDataString(kv[1]);
+						if (key == "api_id" || key == "api_ship_id")
+						{
+							int.TryParse(val, out shipId);
+							break;
+						}
+					}
+				}
+
+				if (shipId <= 0) return true;
+
+				// 一時ログ（動作確認後に削除してください）
+				Debug.WriteLine($"TryHandleSlotExchangeIndex: shipId={shipId}, api_slot_len={apiSlot.Length}");
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+						var ship = org?.Ships?[shipId];
+						if (ship == null) return;
+
+						// RawData.api_slot を置き換えて UpdateSlots() を呼ぶ（Organization.ExchangeSlot と同等）
+						ship.RawData.api_slot = apiSlot;
+						ship.UpdateSlots();
+
+						// 所属艦隊を再計算・再通知
+						var fleet = org.GetFleet(ship.Id);
+						if (fleet != null)
+						{
+							try { fleet.State.Calculate(); } catch { }
+							try { fleet.State.Update(); } catch { }
+							try { fleet.RaiseShipsUpdated(); } catch { }
+						}
+
+						// 組織レベルの再通知で UI 再評価を促す
+						try { org.NotifyUpdated(); } catch { }
+
+						// 一時ログ
+						Debug.WriteLine("TryHandleSlotExchangeIndex: applied slot update to ship " + shipId);
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("TryHandleSlotExchangeIndex.RunOnUi failed: " + ex);
+					}
+				});
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine("TryHandleShip3 failed: " + ex);
+				Debug.WriteLine("TryHandleSlotExchangeIndex failed: " + ex);
 			}
+
 			return true;
 		}
+
 
 		private bool TryHandleDecks(string url, string normalized)
 		{

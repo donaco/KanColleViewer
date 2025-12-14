@@ -183,6 +183,54 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/can_preset_slot_select" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_can_preset_slot_select
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/can_preset_slot_select"); }
+		}
+
+		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/slotset" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_can_preset_slotset
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/slotset"); }
+		}
+
+		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/slotset_ex" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_can_preset_slotset_ex
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/slotset_ex"); }
+		}
+
+		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/unsetslot_all" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_unsetslot_all
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/unsetslot_all"); }
+		}
+
+		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/preset_slot_select" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_preset_slot_select
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/preset_slot_select"); }
+		}
+
+		/// <summary>
+		/// エンド ポイント "/api_req_kaisou/preset_slot_register" からのセッションを配信します。
+		/// </summary>
+		public IObservable<Session> api_req_kaisou_preset_slot_register
+		{
+			get { return this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/api_req_kaisou/preset_slot_register"); }
+		}
+
+		/// <summary>
 		/// エンド ポイント "/kcsapi/api_req_kousyou/getship" からのセッションを配信します。
 		/// </summary>
 		public IObservable<Session> api_req_kousyou_getship
