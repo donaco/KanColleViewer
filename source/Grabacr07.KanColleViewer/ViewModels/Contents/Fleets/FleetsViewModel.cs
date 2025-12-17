@@ -85,13 +85,25 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 
 		private void UpdateFleets()
 		{
+			// 選択を一時保存（ID ベース）
+			var previousSelectedId = this.SelectedFleet?.Id;
+
 			this.fleetListeners?.Dispose();
 			this.fleetListeners = new MultipleDisposable();
 
 			this.Fleets = KanColleClient.Current.Homeport.Organization.Fleets
 				.Select(kvp => this.ToViewModel(kvp.Value))
 				.ToArray();
-			this.SelectedFleet = this.Fleets.FirstOrDefault();
+
+			// 可能なら以前選択されていた艦隊を復元、それが無ければ先頭を選択
+			if (previousSelectedId.HasValue)
+			{
+				this.SelectedFleet = this.Fleets.FirstOrDefault(f => f.Id == previousSelectedId.Value) ?? this.Fleets.FirstOrDefault();
+			}
+			else
+			{
+				this.SelectedFleet = this.Fleets.FirstOrDefault();
+			}
 		}
 
 		private FleetViewModel ToViewModel(Fleet fleet)
