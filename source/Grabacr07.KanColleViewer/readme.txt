@@ -176,6 +176,7 @@ Application Insights
 
 
 ■更新履歴
+2025/12/17 - version 4.6 beta4 リリース
 2025/12/14 - version 4.6 beta3 リリース
 2025/12/10 - version 4.6 beta2 リリース
 2025/12/07 - version 4.6 beta1 リリース
