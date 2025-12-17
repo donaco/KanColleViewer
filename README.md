@@ -9,7 +9,7 @@
 
 提督業も忙しい！ (KanColleViewer) は、DMM.com が配信しているブラウザゲーム「艦隊これくしょん ～艦これ～」をより遊びやすくするためのツールです。
 
-詳しくは、[特設ページ](http://grabacr.net/kancolleviewer) をご覧ください。
+詳しくは、[特設ページ(WebArchive)](https://web.archive.org/web/20250122055413/http://grabacr.net/kancolleviewer) をご覧ください。
 
 
 

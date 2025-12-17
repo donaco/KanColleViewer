@@ -511,7 +511,9 @@ namespace Grabacr07.KanColleWrapper
 			}
 			return true;
 		}
-
+		/// <summary>
+		/// 艦娘の情報更新
+		/// </summary>
 		private bool TryHandleShipArray(string url, string normalized)
 		{
 			// 注意: "/kcsapi/api_get_member/ship_deck" は "/ship" を含むため誤マッチする。
@@ -520,6 +522,7 @@ namespace Grabacr07.KanColleWrapper
 				   && !url.Contains("/kcsapi/api_get_member/ship_deck")
 				   && !url.Contains("/kcsapi/api_get_member/ship3")))
 				return false;
+
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ship2[]>(normalized, out var ships))
@@ -528,15 +531,72 @@ namespace Grabacr07.KanColleWrapper
 					{
 						try
 						{
-							this.Homeport.Organization.Update(ships);
+							var org = this.Homeport?.Organization;
+							if (org == null)
+							{
+								// 組織が未初期化なら既存のルートで反映
+								try { this.Homeport.Organization.Update(ships); } catch { }
+								return;
+							}
+
+							var updatedIds = new HashSet<int>();
+
+							// 既存インスタンスがあれば直接 Update を呼び、なければ Organization.Update に任せる
+							var toCreate = new List<Models.Raw.kcsapi_ship2>();
+							foreach (var raw in ships)
+							{
+								if (raw == null) continue;
+								updatedIds.Add(raw.api_id);
+
+								var existing = org.Ships?[raw.api_id];
+								if (existing != null)
+								{
+									try
+									{
+										// 直接既存インスタンスを更新して通知を発火させる（確実な UI 更新）
+										existing.Update(raw);
+									}
+									catch
+									{
+										// 個別失敗は記録せずフォールバック
+										toCreate.Add(raw);
+									}
+								}
+								else
+								{
+									toCreate.Add(raw);
+								}
+							}
+
+							// 新規の Ship 情報はまとめて Organization.Update に任せる
+							if (toCreate.Count > 0)
+							{
+								try { this.Homeport.Organization.Update(toCreate.ToArray()); } catch { }
+							}
+
+							// 影響を受ける艦隊のみ再計算・再通知
+							if (updatedIds.Count > 0)
+							{
+								var affectedFleets = org.Fleets.Values
+									.Where(f => f.Ships.Any(s => s != null && updatedIds.Contains(s.Id)))
+									.ToArray();
+
+								foreach (var f in affectedFleets)
+								{
+									try { f.State.Update(); } catch { }
+									try { f.State.Calculate(); } catch { }
+									try { f.RaiseShipsUpdated(); } catch { }
+								}
+							}
+
+							// 組織レベルの再通知で DataTemplate 等の再評価を促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch
+						catch (Exception ex)
 						{
+							Debug.WriteLine("TryHandleShipArray.RunOnUi failed: " + ex);
 						}
 					});
-				}
-				else
-				{
 				}
 			}
 			catch
@@ -544,6 +604,7 @@ namespace Grabacr07.KanColleWrapper
 			}
 			return true;
 		}
+
 		/// <summary>
 		/// 改装系1
 		/// </summary>
@@ -1291,18 +1352,18 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		private bool TryHandleHenseiCombined(string url, string normalized)
 		{
-			if (!url.Contains("/kcsapi/api_req_hinsei/combined")) return false;
+			// 柔軟にマッチさせる（タイプミスや微妙なパス差異を吸収）
+			if (!url.Contains("api_req_hensei/combined")) return false;
 
 			try
 			{
-				// レスポンス例: { "api_result":1, "api_data": { "api_combined": 1 } }
+				// まず強く型付きで試す
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_hensei_combined>(normalized, out var data))
 				{
 					RunOnUi(() =>
 					{
 						try
 						{
-							// Homeport.Organization.Combined を更新して UI 再描画
 							this.Homeport.Organization.Combined = (data?.api_combined ?? 0) != 0;
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 							var org = this.Homeport?.Organization;
@@ -1316,10 +1377,43 @@ namespace Grabacr07.KanColleWrapper
 						}
 						catch { }
 					});
+					return true;
 				}
-			}
-			catch { }
 
+				// フォールバック: JSON をパースして api_data.api_combined を探す
+				JToken root;
+				try { root = JToken.Parse(normalized); } catch { return true; }
+				var dataTok = root["api_data"] ?? root;
+				var combinedTok = dataTok?["api_combined"] ?? dataTok?["api_combined_flag"] ?? dataTok?["api_combined_flg"];
+				if (combinedTok == null) return true;
+
+				int combined = 0;
+				int.TryParse(combinedTok.ToString(), out combined);
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						this.Homeport.Organization.Combined = combined != 0;
+						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						var org = this.Homeport?.Organization;
+						if (org != null)
+						{
+							foreach (var f in org.Fleets.Values)
+							{
+								try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
+							}
+						}
+					}
+					catch { }
+				});
+
+				return true;
+			}
+			catch
+			{
+				// swallow
+			}
 			return true;
 		}
 
