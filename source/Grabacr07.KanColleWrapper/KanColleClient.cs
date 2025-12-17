@@ -229,6 +229,9 @@ namespace Grabacr07.KanColleWrapper
 		// 直近に処理した api_req_hensei/change の deckId を一時保持する（requestBody が来ない時用）
 		private int lastChangeDeckId = -1;
 
+		// 直近に処理した建造ドック ID を保持（createship の requestBody が届く時用）
+		private int lastCreateKdockId = -1;
+
 		/// <summary>
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
@@ -265,17 +268,24 @@ namespace Grabacr07.KanColleWrapper
 				// preset_select は専用処理（※TryHandleDecks より前に配置）
 				if (TryHandlePresetSelect(url, normalized)) return;
 
-				// 艦隊名更新 (updatedeckname) は requestBody を使用して即時反映
+				// 艦隊名更新 は requestBody を使用して即時反映
 				if (TryHandleUpdatedeckname(url, normalized, requestBody)) return;
 
 				// 編成情報一般（deck / deck_port / change / preset_select など）
 				if (TryHandleDecks(url, normalized, requestBody)) return;
-
 				if (TryHandleShipDeck(url, normalized)) return;
 				if (TryHandlePresetDeck(url, normalized)) return;
 				if (TryHandleHenseiCombined(url, normalized)) return;
 				if (TryHandleSlotItems(url, normalized)) return;
+
+				// 建造系
+				if (TryHandleCreateShip(url, normalized, requestBody)) return;
+				if (TryHandleKdock(url, normalized)) return;
+				if (TryHandleGetShip(url, normalized)) return;
+
 				if (TryHandleBattleResult(url, normalized)) return;
+
+				// 入渠系
 				if (TryHandleNyukyoSpeedChange(url, requestBody)) return;
 				if (TryHandleNyukyoStart(url, requestBody)) return;
 				if (TryHandleNdockList(url, normalized)) return;
@@ -592,9 +602,8 @@ namespace Grabacr07.KanColleWrapper
 							// 組織レベルの再通知で DataTemplate 等の再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("TryHandleShipArray.RunOnUi failed: " + ex);
 						}
 					});
 				}
@@ -1538,6 +1547,271 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
+		/// 建造系1 建造ドック ID をキャッシュ
+		/// </summary>
+		private bool TryHandleCreateShip(string url, string normalized, string requestBody)
+		{
+			if (!(url.Contains("/kcsapi/api_req_kousyou/createship") || url.Contains("/kcsapi/api_req_kousyou/createship_speedchange")))
+				return false;
+
+			if (string.IsNullOrEmpty(requestBody)) return true;
+
+			try
+			{
+				var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+				foreach (var p in pairs)
+				{
+					var kv = p.Split(new[] { '=' }, 2);
+					if (kv.Length != 2) continue;
+					var key = kv[0];
+					var val = Uri.UnescapeDataString(kv[1]);
+					// 代表的なパラメータ名をチェック
+					if (key == "api_kdock_id" || key == "api_kdock" || key == "api_kdockno" || key == "api_kdock_id")
+					{
+						if (int.TryParse(val, out var id))
+						{
+							this.lastCreateKdockId = id;
+							break;
+						}
+					}
+				}
+			}
+			catch
+			{
+				// swallow
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 建造系2 ドック一覧
+		/// </summary>
+		private bool TryHandleKdock(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/kdock")) return false;
+
+			try
+			{
+				// 型デシリアライズを優先
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_kdock[]>(normalized, out var kdocks))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.Dockyard?.Update(kdocks);
+							// Dock の変化は UI に影響するため全体再通知・艦隊再計算
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+							var org = this.Homeport?.Organization;
+							if (org != null)
+							{
+								foreach (var f in org.Fleets.Values)
+								{
+									try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
+								}
+							}
+						}
+						catch { }
+					});
+					return true;
+				}
+
+				// フォールバック: JSON をパースして api_data を探す
+				JToken root;
+				try { root = JToken.Parse(normalized); } catch { return true; }
+				var data = root["api_data"] ?? root;
+				if (data == null) return true;
+				var kdockTok = data.Type == JTokenType.Array ? data : data["api_kdock"] ?? data.SelectToken("api_kdock");
+				if (kdockTok == null) return true;
+
+				var parsed = kdockTok.ToObject<kcsapi_kdock[]>();
+				if (parsed != null)
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.Dockyard?.Update(parsed);
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+							var org = this.Homeport?.Organization;
+							if (org != null)
+							{
+								foreach (var f in org.Fleets.Values)
+								{
+									try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
+								}
+							}
+						}
+						catch { }
+					});
+				}
+			}
+			catch
+			{
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// 建造系3 艦娘の入手処理
+		/// </summary>
+		private bool TryHandleGetShip(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_kousyou/getship")) return false;
+
+			JToken root;
+			try { root = JToken.Parse(normalized); } catch { return true; }
+			var data = root["api_data"] ?? root;
+			if (data == null) return true;
+
+			try
+			{
+				var kdockTok = data["api_kdock"];
+				var shipTok = data["api_ship"];
+				var slotTok = data["api_slotitem"];
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+
+						// --- kdock / 入手扱いの処理（可能なら kcsapi_kdock_getship として AddFromDock を呼ぶ） ---
+						var kdockProcessed = false;
+						if (kdockTok != null)
+						{
+							try
+							{
+								// Dock 表示用に従来の kcsapi_kdock[] にも更新する（UI のドック状態）
+								try
+								{
+									var kdocks = kdockTok.ToObject<kcsapi_kdock[]>();
+									if (kdocks != null) this.Homeport?.Dockyard?.Update(kdocks);
+								}
+								catch
+								{
+								}
+
+								// 可能なら kcsapi_kdock_getship[] として解析し、Itemyard.AddFromDock を呼ぶ
+								try
+								{
+									var kdocksGet = kdockTok.ToObject<kcsapi_kdock_getship[]>();
+									if (kdocksGet != null && kdocksGet.Length > 0)
+									{
+										foreach (var kd in kdocksGet)
+										{
+											try
+											{
+												// AddFromDock は差分追加を正しく処理する想定
+												this.Homeport?.Itemyard?.AddFromDock(kd);
+											}
+											catch
+											{
+											}
+										}
+										kdockProcessed = true;
+									}
+								}
+								catch
+								{
+									// パース失敗なら kdockProcessed は false のまま（フォールバック処理へ）
+								}
+							}
+							catch
+							{
+								// swallow
+							}
+						}
+
+						// --- 生成された艦を Organization に追加・更新 ---
+						if (shipTok != null)
+						{
+							try
+							{
+								var ship = shipTok.ToObject<kcsapi_ship2>();
+								if (ship != null)
+								{
+									try { this.Homeport.Organization.Update(new[] { ship }); } catch { }
+
+									// 生成艦の属する艦隊だけ再計算
+									try
+									{
+										var f = org?.GetFleet(ship.api_id);
+										if (f != null) { f.State.Update(); f.State.Calculate(); f.RaiseShipsUpdated(); }
+									}
+									catch { }
+								}
+							}
+							catch { }
+						}
+
+						// --- 装備アイテム更新 ---
+						// kdockProcessed が true の場合は AddFromDock() で装備追加が処理済みのはずなので
+						// slotTok による置換は行わない（丸ごと置換で既存装備が消える問題を防止）。
+						if (!kdockProcessed && slotTok != null)
+						{
+							try
+							{
+								var newItems = slotTok.ToObject<kcsapi_slotitem[]>();
+								if (newItems != null && newItems.Length > 0)
+								{
+									// 可能であれば既存アイテムとマージする試み（失敗時は単純更新にフォールバック）
+									try
+									{
+										var itemyard = this.Homeport?.Itemyard;
+										if (itemyard != null)
+										{
+											// 既存アイテムを MemberTable から抽出して kcsapi_slotitem[] に変換するのは型依存で複雑なため、
+											// ここでは安全側として「新規配列で Update」するが、kdockProcessed が true の場合はこの道は通らない。
+											this.Homeport?.Itemyard?.Update(newItems);
+										}
+										else
+										{
+											this.Homeport?.Itemyard?.Update(newItems);
+										}
+									}
+									catch
+									{
+										// フォールバック
+										try { this.Homeport?.Itemyard?.Update(newItems); } catch { }
+									}
+								}
+							}
+							catch
+							{
+								// swallow
+							}
+						}
+
+						// --- 組織レベルで通知して UI を更新 ---
+						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+
+						// 全フリート再計算（保険）
+						try
+						{
+							if (org != null)
+							{
+								foreach (var f2 in org.Fleets.Values)
+								{
+									try { f2.State.Calculate(); f2.State.Update(); f2.RaiseShipsUpdated(); } catch { }
+								}
+							}
+						}
+						catch { }
+					}
+					catch { }
+				});
+			}
+			catch
+			{
+			}
+
+			// 取得処理は完了したので true を返す
+			return true;
+		}
+
+		/// <summary>
 		/// 戦闘結果
 		/// </summary>
 		private bool TryHandleBattleResult(string url, string normalized)
@@ -1727,8 +2001,6 @@ namespace Grabacr07.KanColleWrapper
 							ship.Repair();
 							this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
 						}
-						// 通常入渠開始はドック一覧 (ndock) が後で来る想定なのでここでは無理に触らない
-						Debug.WriteLine($"TryHandleNyukyoStart: processed shipId={shipId}, highspeed={highspeed}");
 					}
 					catch
 					{
