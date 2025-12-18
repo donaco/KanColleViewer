@@ -5,13 +5,11 @@
 
 
 ■このソフトウェアについて
-
 「提督業も忙しい！」は、DMM.com が配信しているブラウザゲーム
 「艦隊これくしょん ～艦これ～」をより遊びやすくするためのツールです。
 
 
 ■主な機能
-
 ・高速修復材や高速建造材 (ゲーム内で確認しにくいやつ) のリアルタイム表示
 ・所属している艦娘の数、保有している装備の数のリアルタイム表示
 ・艦隊と、艦隊に属する艦娘の一覧表示
@@ -25,7 +23,6 @@
 
 
 ■動作環境
-
 Windows 11
 Windows 10
 Windows 8.1 64bit
@@ -43,32 +40,27 @@ Windows 10 の場合は標準でインストールされています。
 
 
 ■使用条件
-
 オープンソース / フリーソフトウェアです。無料でご利用頂けます。  
 ソースコードは、MIT ライセンスの下で GitHub にて公開しています。
 
 
 ■使用方法
-
 同梱の KanColleViewer.exe を起動してください。
 各画面の解説等は http://grabacr.net/kancolleviewer を参照してください。
 
 
 
 ■開発環境・言語
-
 C# + WPF で開発しています。
 GitHub Copilot を使用しています。
 開発環境は Windows 11 Pro + Visual Studio 2022 です。
 
 
 ■使用ライブラリ
-
 以下のライブラリを使用しています。
 
 Newtonsoft.Json
 (https://www.newtonsoft.com/json)
-
     ver 13.0.4 (2025/9/16)
     created James Newton-King 
     ・用途 : JSON デシリアライズ
@@ -77,36 +69,28 @@ Newtonsoft.Json
 
 Livet
 (http://ugaya40.hateblo.jp/entry/Livet)
-
     ・用途 : MVVM(Model/View/ViewModel)パターン用インフラストラクチャ
     ・ライセンス : zlib/libpng
 
 StatefulModel
 (http://ugaya40.hateblo.jp/entry/StatefulModel)
-
     ・用途 : M-V-Whatever の Model 向けインフラストラクチャ
     ・ライセンス : The MIT License (MIT)
 
 Nekoxy
 (https://github.com/veigr/Nekoxy)
-
     The MIT License (MIT)
-
     Copyright (c) 2015 veigr
-
     ・用途 : HTTP通信キャプチャ
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : Licenses/Nekoxy.txt
 
 TrotiNet
 (https://github.com/krys-g/TrotiNet)
-
     TrotiNet is a proxy library implemented in C#. It aims at delivering a simple,
     reusable framework for developing any sort of C# proxies.
-
     TrotiNet is distributed under the GNU Lesser General Public License v3.0
     (LGPL). See: http://www.gnu.org/licenses/lgpl.html
-
     ・用途 : ローカル HTTP Proxy
     ・ライセンス : GNU LESSER GENERAL PUBLIC LICENSE Version 3
     ・ライセンス全文 : Licenses/LGPL.txt , Licenses/GPL.txt
@@ -114,54 +98,42 @@ TrotiNet
 
 Apache log4net
 (https://logging.apache.org/log4net/)
-
     ・用途 : TrotiNet の依存ライブラリ (ログ出力用/未使用)
     ・ライセンス : Apache License Version 2.0
     ・ライセンス全文 : Licenses/Apache.txt
 
 Rx (Reactive Extensions)
 (https://rx.codeplex.com/)
-
     ・用途 : 非同期処理
     ・ライセンス : Apache License Version 2.0
     ・ライセンス全文 : Licenses/Apache.txt
 
 Desktop Toast
 (https://github.com/emoacht/DesktopToast)
-
     The MIT License (MIT)
-
     Copyright (c) 2014-2015 EMO
-
     ・用途 : トースト通知
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : Licenses/DesktopToast.txt
 
 .NET Core Audio APIs
 (https://netcoreaudio.codeplex.com/)
-
     The MIT License (MIT)
-
     Copyright (c) 2011 Vannatech
-
     ・用途 : 音量操作
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : Licenses/NETCoreAudioAPIs.txt
 
 CefSharp.Wpf
 (http://cefsharp.github.io/)
-
     ・用途 : 内蔵 Web ブラウザー
     ・ライセンス : The 3-Clause BSD License
     ・ライセンス全文 : Licenses/CefSharp.txt
 
 Application Insights
 (https://azure.microsoft.com/ja-jp/services/application-insights/)
-
     The MIT License (MIT)
-    
     Copyright (c) Microsoft Corporation
-
     ・用途 : クラッシュ ログ収集
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : Licenses/Application Insights.txt
@@ -169,7 +141,6 @@ Application Insights
 
 
 ■免責事項
-
 本ソフトウェアの使用は、すべて自己責任で行ってください。
 このソフトウェアを使用した結果生じた損害について、開発者は
 一切責任を負いません。

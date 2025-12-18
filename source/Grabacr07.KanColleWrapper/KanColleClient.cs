@@ -259,6 +259,12 @@ namespace Grabacr07.KanColleWrapper
 
 				// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
+
+				// 任務完了や個別素材/消費アイテムの更新
+				if (TryHandleClearItemGet(url, normalized)) return;
+				if (TryHandleMaterial(url, normalized)) return;
+				if (TryHandleUseItem(url, normalized)) return;
+
 				if (TryHandleQuestList(url, normalized)) return;
 				if (TryHandleShipArray(url, normalized)) return;
 				if (TryHandleSlotExchangeIndex(url, normalized, requestBody)) return;
@@ -390,8 +396,9 @@ namespace Grabacr07.KanColleWrapper
 			}
 			return true;
 		}
+
 		/// <summary>
-		/// 母港の処理系
+		/// 母港
 		/// </summary>
 		private bool TryHandlePort(string url, string normalized)
 		{
@@ -414,7 +421,7 @@ namespace Grabacr07.KanColleWrapper
 
 							if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
 
-							// 追加: UI バインディングが更新されないケースに備え、明示的に通知を出す
+							// UI バインディングが更新されないケースに備え、明示的に通知を出す
 							try
 							{
 								this.Homeport?.Organization?.NotifyUpdated();
@@ -423,7 +430,7 @@ namespace Grabacr07.KanColleWrapper
 							{
 							}
 
-							// --- 追加: 各艦隊を明示的に再計算・再通知して UI を確実に更新 ---
+							// 各艦隊を明示的に再計算・再通知して UI を確実に更新
 							try
 							{
 								var org = this.Homeport?.Organization;
@@ -433,11 +440,8 @@ namespace Grabacr07.KanColleWrapper
 									{
 										try
 										{
-											// 再計算して状態を整える
 											f.State.Calculate();
 											f.State.Update();
-
-											// View 側で監視されるイベントを確実に発火させる
 											f.RaiseShipsUpdated();
 										}
 										catch
@@ -454,13 +458,12 @@ namespace Grabacr07.KanColleWrapper
 						{
 						}
 
-						// TryHandlePort 内の RunOnUi の末尾付近に追加してください
+						// 出撃していたデッキを復帰させる処理とグローバル出撃フラグ更新
 						try
 						{
 							var org = this.Homeport?.Organization;
 							if (org != null)
 							{
-								// 記録済みの出撃デッキだけを対象に Homing() を呼ぶ（誤って遠征艦隊を戻さない）
 								var returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
 								foreach (var returningDeckId in returning)
 								{
@@ -471,22 +474,20 @@ namespace Grabacr07.KanColleWrapper
 									catch
 									{
 									}
-									// 処理済みは記録から削除
 									this.sortieDeckIds.Remove(returningDeckId);
 								}
 							}
 
-							// Global な出撃フラグは、まだ出撃中のデッキが残っているかで決める
 							this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
 						catch
 						{
 						}
-
 					});
 				}
 				else
 				{
+					// 解析失敗でも true を返してハンドリング済みとする（既存ハンドラと同様の挙動）
 				}
 			}
 			catch
@@ -495,6 +496,141 @@ namespace Grabacr07.KanColleWrapper
 
 			return true;
 		}
+
+		/// <summary>
+		/// 任務完了 + 資源・アイテム更新
+		/// </summary>
+		private bool TryHandleClearItemGet(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_quest/clearitemget")) return false;
+
+			try
+			{
+				JToken root;
+				try { root = JToken.Parse(normalized); } catch { return true; }
+				var data = root["api_data"] ?? root;
+				if (data == null) return true;
+
+				// api_material: int[] または api_get_material など、安定的に取得できる場合は Materials を更新
+				int[] apiMaterialArray = null;
+				var matTok = data["api_material"] ?? data["api_get_material"];
+				if (matTok != null && matTok.Type == JTokenType.Array)
+				{
+					try
+					{
+						apiMaterialArray = matTok.Select(t => (int?)t ?? 0).ToArray();
+					}
+					catch { apiMaterialArray = null; }
+				}
+
+				// UI スレッドで安全に反映
+				if (apiMaterialArray != null)
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							var materials = this.Homeport?.Materials;
+							if (materials != null)
+							{
+								// clearitemget の api_material は「増分」で来ることがあるため、
+								// 現在値に加算してから Materials.Update(int[]) の private メソッドを呼ぶ。
+								// (元実装は増分をそのまま渡していたため「145061 -> 200 -> 145261」のように一時的に増分だけが表示されてしまっていた)
+								int[] abs;
+								// 安全に index を扱う（api が長さ4でない場合はフォールバック）
+								if (apiMaterialArray.Length >= 4)
+								{
+									abs = new int[4];
+									abs[0] = materials.Fuel + apiMaterialArray[0];
+									abs[1] = materials.Ammunition + apiMaterialArray[1];
+									abs[2] = materials.Steel + apiMaterialArray[2];
+									abs[3] = materials.Bauxite + apiMaterialArray[3];
+								}
+								else
+								{
+									// 長さが不正なら既存の Update を呼ばず、表示更新だけ行う（安全側）
+									abs = null;
+								}
+
+								if (abs != null)
+								{
+									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+									mi?.Invoke(materials, new object[] { abs });
+								}
+							}
+						}
+						catch { }
+					});
+				}
+
+				// ボーナスアイテム(api_bounus) は後続の /api_get_member/slot_item 等で反映されることが多い。
+				// 複雑なパターンは別ハンドラに任せるためここでは UI 更新を促すだけにとどめる。
+				RunOnUi(() =>
+				{
+					try
+					{
+						this.Homeport?.Organization?.NotifyUpdated();
+					}
+					catch { }
+				});
+			}
+			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 資源
+		/// </summary>
+		private bool TryHandleMaterial(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/material")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_material[]>(normalized, out var mats))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.Materials.Update(mats);
+						}
+						catch { }
+					});
+				}
+			}
+			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// /kcsapi/api_get_member/useitem を CEF 経路で受け取ったときに Itemyard.Update(kcsapi_useitem[]) を呼ぶ。
+		/// </summary>
+		private bool TryHandleUseItem(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/useitem")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_useitem[]>(normalized, out var useitems))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.Itemyard.Update(useitems);
+						}
+						catch { }
+					});
+				}
+			}
+			catch { }
+
+			return true;
+		}
+
 		/// <summary>
 		/// 任務一覧
 		/// </summary>
@@ -505,12 +641,15 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
 				{
-					RunOnUi(() => { 
-						try { this.Homeport.Quests.Update(questlist);
-						} 
+					RunOnUi(() => {
+						try
+						{
+							this.Homeport.Quests.Update(questlist);
+						}
 						catch
-						{ 
-						} });
+						{
+						}
+					});
 				}
 				else
 				{
@@ -2013,7 +2152,7 @@ namespace Grabacr07.KanColleWrapper
 
 			return true;
 		}
-		
+
 		/// <summary>
 		/// 入渠系3 高速修復材
 		/// </summary>
