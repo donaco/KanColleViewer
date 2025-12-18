@@ -262,6 +262,7 @@ namespace Grabacr07.KanColleWrapper
 
 				// 任務完了や個別素材/消費アイテムの更新
 				if (TryHandleClearItemGet(url, normalized)) return;
+				if (TryHandleDestroyItem2(url, normalized, requestBody)) return;
 				if (TryHandleMaterial(url, normalized)) return;
 				if (TryHandleUseItem(url, normalized)) return;
 
@@ -627,6 +628,115 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 装備廃棄
+		/// </summary>
+		private bool TryHandleDestroyItem2(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kousyou/destroyitem2")) return false;
+
+			try
+			{
+				// 型付きで試す
+				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_destroyitem2>(normalized, out var di))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							// api_get_material を増分として扱い、現在の Materials に加算して反映する
+							var apiMat = di?.api_get_material;
+							if (apiMat != null && apiMat.Length >= 4)
+							{
+								try
+								{
+									var materials = this.Homeport?.Materials;
+									if (materials != null)
+									{
+										var abs = new int[4];
+										abs[0] = materials.Fuel + (apiMat.Length > 0 ? apiMat[0] : 0);
+										abs[1] = materials.Ammunition + (apiMat.Length > 1 ? apiMat[1] : 0);
+										abs[2] = materials.Steel + (apiMat.Length > 2 ? apiMat[2] : 0);
+										abs[3] = materials.Bauxite + (apiMat.Length > 3 ? apiMat[3] : 0);
+
+										var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+										mi?.Invoke(materials, new object[] { abs });
+									}
+								}
+								catch
+								{
+								}
+							}
+
+							// requestBody に api_slotitem_ids があれば装備を削除（CEF 経路であれば Itemyard の更新が届かないケースに対応）
+							if (!string.IsNullOrEmpty(requestBody))
+							{
+								try
+								{
+									var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+									foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+									{
+										var kv = pair.Split(new[] { '=' }, 2);
+										if (kv.Length == 2)
+										{
+											try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+										}
+									}
+
+									if (dict.TryGetValue("api_slotitem_ids", out var idsStr) && !string.IsNullOrEmpty(idsStr))
+									{
+										var parts = idsStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+										foreach (var p in parts)
+										{
+											if (int.TryParse(p, out var id))
+											{
+												try
+												{
+													// MemberTable.Remove が利用可能であれば直接削除
+													this.Homeport?.Itemyard?.SlotItems?.Remove(id);
+												}
+												catch
+												{
+												}
+											}
+										}
+
+										// Itemyard の内部通知を呼び出す（private メソッドをリフレクションで呼ぶ）
+										try
+										{
+											var iy = this.Homeport?.Itemyard;
+											if (iy != null)
+											{
+												var mi2 = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+												mi2?.Invoke(iy, null);
+											}
+										}
+										catch
+										{
+										}
+									}
+								}
+								catch
+								{
+								}
+							}
+
+							// UI 再評価を促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						}
+						catch
+						{
+						}
+					});
+				}
+			}
+			catch
+			{
+			}
 
 			return true;
 		}
