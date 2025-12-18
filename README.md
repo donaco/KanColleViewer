@@ -9,7 +9,9 @@
 
 提督業も忙しい！ (KanColleViewer) は、DMM.com が配信しているブラウザゲーム「艦隊これくしょん ～艦これ～」をより遊びやすくするためのツールです。
 
-詳しくは、[特設ページ(WebArchive)](https://web.archive.org/web/20250122055413/http://grabacr.net/kancolleviewer) をご覧ください。
+詳しくは、[特設ページ(WebArchive)](https://web.archive.org/web/20250122055413/http://grabacr.net/kancolleviewer) をご覧ください。  
+ダウンロード[Github - 最新リリース](https://github.com/donaco/KanColleViewer/releases/latest) からどうぞ。
+
 
 
 
@@ -41,7 +43,7 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 * Windows 8  64bit
 * Windows 7  64bit
 
-Windows 11 Pro でのみ動作確認を行っており、64bit OS のみサポートしています。
+Windows 11 Pro でのみ動作確認を行っており、64bit OS のみサポートしています。  
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。
 
 * [.NET Framework 4.6](http://www.microsoft.com/ja-jp/download/details.aspx?id=30653)
@@ -49,14 +51,14 @@ Windows 7 では、遠征や建造の終了時のトースト通知が動作し�
 Windows 8 またはそれ以前で使用する場合、.NET Framework 4.6 のインストールが必要です。
 Windows 10 の場合は標準でインストールされています。
 
-現在、艦これ本体のセキュア化に伴い暫定対応しています。
+現在、艦これ本体のセキュア化に伴い暫定対応しています。  
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 
 
 ### 開発環境・言語
 
-C# + WPF で開発しています。
-GitHub Copilot を使用しています。
+C# + WPF で開発しています。  
+GitHub Copilot を使用しています。  
 開発環境は Windows 11 Pro + Visual Studio 2022 です。
 
 ### ライセンス

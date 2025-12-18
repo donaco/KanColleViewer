@@ -22,6 +22,48 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
 		{
+			// メンテナンス時、埋め込みブラウザで画像だけ表示
+			try
+			{
+				var url = request?.Url;
+				if (!string.IsNullOrEmpty(url) && url.IndexOf("maintenance.png", StringComparison.OrdinalIgnoreCase) >= 0)
+				{
+					// ChromiumWebBrowser インスタンスにキャストできれば UI スレッドでナビゲート
+					try
+					{
+						var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
+						if (cb != null)
+						{
+							cb.Dispatcher.BeginInvoke(new Action(() =>
+							{
+								try
+								{
+									// 繰り返しナビゲートを避けるため簡易フラグを Tag に記録
+									const string flag = "maintenance_shown";
+									if (cb.Tag as string != flag)
+									{
+										cb.Tag = flag;
+										cb.Load(url);
+									}
+								}
+								catch
+								{
+									// swallow
+								}
+							}));
+						}
+					}
+					catch
+					{
+						// swallow
+					}
+				}
+			}
+			catch
+			{
+				// swallow
+			}
+
 			return new CustomResourceRequestHandler(onCaptured);
 		}
 	}
