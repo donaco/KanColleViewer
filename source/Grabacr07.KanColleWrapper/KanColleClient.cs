@@ -263,6 +263,7 @@ namespace Grabacr07.KanColleWrapper
 				// 任務完了や個別素材/消費アイテムの更新
 				if (TryHandleClearItemGet(url, normalized)) return;
 				if (TryHandleDestroyItem2(url, normalized, requestBody)) return;
+				if (TryHandleDestroyShip(url, normalized, requestBody)) return;
 				if (TryHandleMaterial(url, normalized)) return;
 				if (TryHandleUseItem(url, normalized)) return;
 
@@ -737,6 +738,154 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 解体（/api_req_kousyou/destroyship）を CEF 経路で受け取った場合に反映する。
+		/// </summary>
+		private bool TryHandleDestroyShip(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kousyou/destroyship")) return false;
+
+			try
+			{
+				// まずレスポンス側の api_material を解析（サーバ返却の形式に応じて扱う）
+				int[] apiMat = null;
+				try
+				{
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					var matTok = data?["api_material"];
+					if (matTok != null && matTok.Type == JTokenType.Array)
+					{
+						apiMat = matTok.Select(t => (int?)t ?? 0).ToArray();
+					}
+				}
+				catch
+				{
+					apiMat = null;
+				}
+
+				// api_unset_list の有無を確認（存在すれば「保管」扱い）
+				bool hasUnsetList = false;
+				try
+				{
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					var unset = data?["api_unset_list"];
+					if (unset != null && unset.HasValues) hasUnsetList = true;
+				}
+				catch
+				{
+					hasUnsetList = false;
+				}
+
+				// requestBody から解体対象艦 ID を取得
+				var shipIds = new List<int>();
+				if (!string.IsNullOrEmpty(requestBody))
+				{
+					try
+					{
+						var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+						var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+						foreach (var p in pairs)
+						{
+							var kv = p.Split(new[] { '=' }, 2);
+							if (kv.Length != 2) continue;
+							try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+						}
+
+						if (dict.TryGetValue("api_ship_id", out var ids) && !string.IsNullOrEmpty(ids))
+						{
+							foreach (var part in ids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+							{
+								if (int.TryParse(part, out var id)) shipIds.Add(id);
+							}
+						}
+					}
+					catch { }
+				}
+
+				// UI スレッドで反映
+				RunOnUi(() =>
+				{
+					try
+					{
+						// 資源の反映
+						// サーバから返ってくる api_material は「現在の絶対値」を返すことがあるため、
+						// 増分と誤認して現在値に加算すると二重加算になる。
+						// ここでは api_material を受け取ったらそのまま Materials.Update(int[]) を呼んで上書きする。
+						if (apiMat != null && apiMat.Length >= 4)
+						{
+							try
+							{
+								var materials = this.Homeport?.Materials;
+								if (materials != null)
+								{
+									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+									// サーバ値をそのまま渡す（絶対値更新）
+									mi?.Invoke(materials, new object[] { apiMat });
+								}
+							}
+							catch { }
+						}
+
+						// 解体対象の艦を Organization から削除
+						try
+						{
+							var org = this.Homeport?.Organization;
+							if (org != null && shipIds.Count > 0)
+							{
+								foreach (var shipId in shipIds)
+								{
+									try
+									{
+										var ship = org.Ships?[shipId];
+										if (ship == null)
+										{
+											// ID 指定だが既に削除済みか存在しない場合は MemberTable から直接 Remove を試す
+											org.Ships.Remove(shipId);
+											continue;
+										}
+
+										// 保管（api_unset_list がある）なら装備は残す -> Itemyard.RemoveFromShip を呼ばない
+										if (!hasUnsetList)
+										{
+											// 装備も一緒に消える場合
+											try { this.Homeport?.Itemyard?.RemoveFromShip(ship); } catch { }
+										}
+										// いずれにせよ Ship 自体は削除
+										try { org.Ships.Remove(ship); }
+										catch
+										{
+											// MemberTable.Remove(Ship) のオーバーロードがなければ id で削除
+											try { org.Ships.Remove(shipId); } catch { }
+										}
+									}
+									catch { }
+								}
+
+								// 艦娘一覧の変更通知
+								try { var mi2 = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic); mi2?.Invoke(org, null); }
+								catch
+								{
+									// フォールバック: NotifyUpdated
+									try { org.NotifyUpdated(); } catch { }
+								}
+							}
+						}
+						catch { }
+
+						// 装備数・組織の UI 再評価
+						try { this.Homeport?.Itemyard?.GetType().GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(this.Homeport?.Itemyard, null); } catch { }
+						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+					}
+					catch { }
+				});
+			}
+			catch { }
 
 			return true;
 		}
