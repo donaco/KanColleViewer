@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -90,8 +89,13 @@ namespace Grabacr07.KanColleWrapper
 		// Captured 処理を委譲するコンポーネント
 		private readonly CapturedProcessor capturedProcessor;
 
-		// 1) フィールド追加（capturedProcessor 宣言の近くに挿入）
 		private readonly HashSet<int> sortieDeckIds = new HashSet<int>();
+
+		// createship - kdock でキャッシュする消費資源マップ
+		private readonly Dictionary<int, int[]> pendingCreateMaterials = new Dictionary<int, int[]>();
+
+		// 高速建造材の即時適用済みドックを記録（重複減算防止）
+		private readonly HashSet<int> appliedBuildKdock = new HashSet<int>();
 
 		private KanColleClient()
 		{
@@ -154,18 +158,14 @@ namespace Grabacr07.KanColleWrapper
 					{
 						try
 						{
-							Debug.WriteLine("KanColleClient: ApiSessionSource fired.");
-							try { Debug.WriteLine($"  Session.ToString(): {s}"); } catch { }
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
-							Debug.WriteLine("KanColleClient: ApiSessionSource handler failed: " + ex);
 						}
 					});
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				Debug.WriteLine("KanColleClient: proxy debug subscription failed: " + ex);
 			}
 		}
 
@@ -264,6 +264,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleClearItemGet(url, normalized)) return;
 				if (TryHandleDestroyItem2(url, normalized, requestBody)) return;
 				if (TryHandleDestroyShip(url, normalized, requestBody)) return;
+				if (TryHandlePowerup(url, normalized, requestBody)) return;
 				if (TryHandleMaterial(url, normalized)) return;
 				if (TryHandleUseItem(url, normalized)) return;
 
@@ -410,6 +411,11 @@ namespace Grabacr07.KanColleWrapper
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
 				{
+					// JSON 側も柔軟にパースして api_slot_item 等を探すためのトークンを準備
+					JToken root = null;
+					JToken dataTok = null;
+					try { root = JToken.Parse(normalized); dataTok = root["api_data"] ?? root; } catch { root = null; dataTok = null; }
+
 					RunOnUi(() =>
 					{
 						try
@@ -422,6 +428,42 @@ namespace Grabacr07.KanColleWrapper
 							this.Homeport.Organization.Combined = port.api_combined_flag != 0;
 
 							if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
+
+							// 追加: JSON に api_slot_item が含まれている場合は Itemyard を更新する（kcsapi_port に未定義のため JToken 経由）
+							try
+							{
+								JToken slotTok = null;
+								if (dataTok != null)
+								{
+									slotTok = dataTok["api_slot_item"] ?? dataTok.SelectToken("api_slot_item");
+								}
+								// さらに root 直下を試す（念のためのフォールバック）
+								if (slotTok == null && root != null)
+								{
+									slotTok = root["api_slot_item"] ?? root.SelectToken("api_slot_item");
+								}
+
+								if (slotTok != null && slotTok.Type == JTokenType.Array)
+								{
+									try
+									{
+										var slotItems = slotTok.ToObject<kcsapi_slotitem[]>();
+										if (slotItems != null)
+										{
+											this.Homeport.Itemyard.Update(slotItems);
+											// 内部通知が必要なら呼び出す（安全側）
+											try
+											{
+												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+												mi?.Invoke(this.Homeport?.Itemyard, null);
+											}
+											catch { }
+										}
+									}
+									catch { }
+								}
+							}
+							catch { }
 
 							// UI バインディングが更新されないケースに備え、明示的に通知を出す
 							try
@@ -608,7 +650,7 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
-		/// /kcsapi/api_get_member/useitem を CEF 経路で受け取ったときに Itemyard.Update(kcsapi_useitem[]) を呼ぶ。
+		/// アイテム使用
 		/// </summary>
 		private bool TryHandleUseItem(string url, string normalized)
 		{
@@ -743,7 +785,7 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
-		/// 解体（/api_req_kousyou/destroyship）を CEF 経路で受け取った場合に反映する。
+		/// 解体
 		/// </summary>
 		private bool TryHandleDestroyShip(string url, string normalized, string requestBody)
 		{
@@ -881,6 +923,161 @@ namespace Grabacr07.KanColleWrapper
 						// 装備数・組織の UI 再評価
 						try { this.Homeport?.Itemyard?.GetType().GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(this.Homeport?.Itemyard, null); } catch { }
 						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+					}
+					catch { }
+				});
+			}
+			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 近代改修
+		/// </summary>
+		private bool TryHandlePowerup(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/powerup")) return false;
+
+			try
+			{
+				JToken root;
+				try { root = JToken.Parse(normalized); } catch { return true; }
+				var data = root["api_data"] ?? root;
+				if (data == null) return true;
+
+				var shipTok = data["api_ship"];
+				var deckTok = data["api_deck"];
+				var unsetListTok = data["api_unset_list"]; // 装備解除時に返るケースあり
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+
+						// 1) 更新された艦の反映（api_ship）
+						if (shipTok != null)
+						{
+							try
+							{
+								var shipRaw = shipTok.ToObject<kcsapi_ship2>();
+								if (shipRaw != null)
+								{
+									// Organization.Update(kcsapi_ship2[]) を使って個別更新
+									try { this.Homeport.Organization.Update(new[] { shipRaw }); } catch { }
+								}
+							}
+							catch { }
+						}
+
+						// 2) デッキ情報の反映（api_deck）
+						if (deckTok != null)
+						{
+							try
+							{
+								if (deckTok.Type == JTokenType.Array)
+								{
+									var decks = deckTok.ToObject<kcsapi_deck[]>();
+									if (decks != null)
+									{
+										foreach (var d in decks)
+										{
+											try { this.Homeport.Organization.Update(d); } catch { }
+										}
+									}
+								}
+								else
+								{
+									var deck = deckTok.ToObject<kcsapi_deck>();
+									if (deck != null)
+									{
+										try { this.Homeport.Organization.Update(deck); } catch { }
+									}
+								}
+							}
+							catch { }
+						}
+
+						// 3) 装備解除(api_unset_list) があれば該当装備 ID を Itemyard から削除
+						if (unsetListTok != null)
+						{
+							try
+							{
+								var iy = this.Homeport?.Itemyard;
+								if (iy != null)
+								{
+									// api_unset_list は配列要素があり、その中に api_slot_list 等で装備 ID 配列がある構造を想定
+									var idsToRemove = new List<int>();
+
+									if (unsetListTok.Type == JTokenType.Array)
+									{
+										foreach (var elem in unsetListTok.Children())
+										{
+											var slotList = elem["api_slot_list"] ?? elem["api_slot"] ?? elem["api_slot_list"];
+											if (slotList != null && slotList.Type == JTokenType.Array)
+											{
+												foreach (var t in slotList.Children())
+												{
+													try
+													{
+														var id = (int?)t ?? 0;
+														if (id > 0) idsToRemove.Add(id);
+													}
+													catch { }
+												}
+											}
+										}
+									}
+									else if (unsetListTok.Type == JTokenType.Object)
+									{
+										// 単一オブジェクト内の api_slot_list を探す
+										var slotList = unsetListTok["api_slot_list"] ?? unsetListTok["api_slot"];
+										if (slotList != null && slotList.Type == JTokenType.Array)
+										{
+											foreach (var t in slotList.Children())
+											{
+												try
+												{
+													var id = (int?)t ?? 0;
+													if (id > 0) idsToRemove.Add(id);
+												}
+												catch { }
+											}
+										}
+									}
+
+									// 実際に Itemyard から削除
+									if (idsToRemove.Count > 0)
+									{
+										foreach (var id in idsToRemove)
+										{
+											try { iy.SlotItems.Remove(id); } catch { }
+										}
+										// 内部通知を呼ぶ（private メソッド）
+										try
+										{
+											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+											mi?.Invoke(iy, null);
+										}
+										catch { }
+									}
+								}
+							}
+							catch { }
+						}
+
+						// 4) 組織・艦娘一覧の再通知（UI 更新）
+						try { org?.NotifyUpdated(); } catch { }
+						try
+						{
+							var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+							mi?.Invoke(org, null);
+						}
+						catch
+						{
+							try { org?.NotifyUpdated(); } catch { }
+						}
 					}
 					catch { }
 				});
@@ -1409,7 +1606,7 @@ namespace Grabacr07.KanColleWrapper
 						if (multi.TryGetValue("api_id", out var apiIdList) && apiIdList.Count > 0 && int.TryParse(apiIdList[0], out var parsedId))
 						{
 							deckId = parsedId;
-							this.lastChangeDeckId = deckId;
+						this.lastChangeDeckId = deckId;
 						}
 						else if (this.lastChangeDeckId != -1)
 						{
@@ -1954,23 +2151,57 @@ namespace Grabacr07.KanColleWrapper
 
 			if (string.IsNullOrEmpty(requestBody)) return true;
 
+			// dict と keyId を外側スコープで宣言して後続から参照できるようにする
+			Dictionary<string, string> dict = null;
+			int keyId = -1;
+
 			try
 			{
 				var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+				int kdockIdFound = -1;
+				int[] items = null;
+
+				// requestBody を dict にパース（ここで全てのキーを取得）
+				dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 				foreach (var p in pairs)
 				{
 					var kv = p.Split(new[] { '=' }, 2);
 					if (kv.Length != 2) continue;
-					var key = kv[0];
-					var val = Uri.UnescapeDataString(kv[1]);
-					// 代表的なパラメータ名をチェック
-					if (key == "api_kdock_id" || key == "api_kdock" || key == "api_kdockno" || key == "api_kdock_id")
+					try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+				}
+
+				// kdock id キャッシュ（可能なキー名をチェック）
+				if (dict.TryGetValue("api_kdock_id", out var kdVal) || dict.TryGetValue("api_kdock", out kdVal) || dict.TryGetValue("api_kdockno", out kdVal))
+				{
+					if (int.TryParse(kdVal, out var id))
 					{
-						if (int.TryParse(val, out var id))
-						{
-							this.lastCreateKdockId = id;
-							break;
-						}
+						this.lastCreateKdockId = id;
+						kdockIdFound = id;
+					}
+				}
+
+				// api_item1..api_item5 を抜き出す
+				var tmp = new List<int>();
+				for (int i = 1; i <= 5; i++)
+				{
+					if (dict.TryGetValue($"api_item{i}", out var s) && int.TryParse(s, out var v))
+					{
+						tmp.Add(v);
+					}
+					else
+					{
+						tmp.Add(0);
+					}
+				}
+				items = tmp.ToArray();
+
+				// kdockId を確定して pending に保存
+				keyId = kdockIdFound > 0 ? kdockIdFound : this.lastCreateKdockId;
+				if (keyId > 0 && items != null)
+				{
+					lock (this.pendingCreateMaterials)
+					{
+						this.pendingCreateMaterials[keyId] = items;
 					}
 				}
 			}
@@ -1978,6 +2209,87 @@ namespace Grabacr07.KanColleWrapper
 			{
 				// swallow
 			}
+
+			// createship_speedchange または api_highspeed=1 の検知 -> InstantBuildMaterials を即時減算し、適用済みフラグをセット
+			try
+			{
+				bool isSpeedChangeEndpoint = url.Contains("/createship_speedchange");
+				bool highspeedFlag = dict != null && dict.TryGetValue("api_highspeed", out var hv) && hv == "1";
+
+				if (isSpeedChangeEndpoint || highspeedFlag)
+				{
+					var kdId = keyId > 0 ? keyId : this.lastCreateKdockId;
+					if (kdId > 0)
+					{
+						lock (this.appliedBuildKdock)
+						{
+							if (!this.appliedBuildKdock.Contains(kdId)) this.appliedBuildKdock.Add(kdId);
+						}
+
+						// UI スレッドで即時に InstantBuildMaterials を 1 減算
+						RunOnUi(() =>
+						{
+							try
+							{
+								var materials = this.Homeport?.Materials;
+								if (materials != null)
+								{
+									var propBuild = typeof(Materials).GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+									if (propBuild != null)
+									{
+										var cur = (int)propBuild.GetValue(materials);
+										var next = Math.Max(0, cur - 1);
+										propBuild.SetValue(materials, next);
+									}
+								}
+							}
+							catch (Exception)
+							{
+							}
+						});
+					}
+				}
+			}
+			catch { }
+
+			// createship のレスポンスに資源情報が含まれていれば既存ロジックで反映（残す）
+			try
+			{
+				if (!string.IsNullOrEmpty(normalized))
+				{
+					JToken root;
+					try { root = JToken.Parse(normalized); }
+					catch { root = null; }
+
+					if (root != null)
+					{
+						var data = root["api_data"] ?? root;
+						var matTok = data?["api_material"] ?? data?["api_get_material"] ?? data?["api_materials"];
+						if (matTok != null && matTok.Type == JTokenType.Array)
+						{
+							try
+							{
+								var matArr = matTok.Select(t => (int?)t ?? 0).ToArray();
+								RunOnUi(() =>
+								{
+									try
+									{
+										var materials = this.Homeport?.Materials;
+										if (materials != null && matArr != null && matArr.Length >= 4)
+										{
+											var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+											mi?.Invoke(materials, new object[] { matArr });
+										}
+									}
+									catch { }
+								});
+							}
+							catch { }
+						}
+					}
+				}
+			}
+			catch { }
 
 			return true;
 		}
@@ -1999,6 +2311,16 @@ namespace Grabacr07.KanColleWrapper
 						try
 						{
 							this.Homeport?.Dockyard?.Update(kdocks);
+							// 各 kdock に対して pending があれば適用
+							try
+							{
+								foreach (var rawK in kdocks)
+								{
+									try { this.ApplyPendingCreateMaterialsForKdock(rawK.api_id, rawK.api_state); } catch { }
+								}
+							}
+							catch { }
+
 							// Dock の変化は UI に影響するため全体再通知・艦隊再計算
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 							var org = this.Homeport?.Organization;
@@ -2061,7 +2383,7 @@ namespace Grabacr07.KanColleWrapper
 			JToken root;
 			try { root = JToken.Parse(normalized); } catch { return true; }
 			var data = root["api_data"] ?? root;
-			if (data == null) return true;
+			if (data == null) { return true; }
 
 			try
 			{
@@ -2082,13 +2404,24 @@ namespace Grabacr07.KanColleWrapper
 							try
 							{
 								// Dock 表示用に従来の kcsapi_kdock[] にも更新する（UI のドック状態）
+								kcsapi_kdock[] kdocks = null;
 								try
 								{
-									var kdocks = kdockTok.ToObject<kcsapi_kdock[]>();
-									if (kdocks != null) this.Homeport?.Dockyard?.Update(kdocks);
+									kdocks = kdockTok.ToObject<kcsapi_kdock[]>();
+									if (kdocks != null)
+									{
+										this.Homeport?.Dockyard?.Update(kdocks);
+									}
 								}
-								catch
+								catch (Exception)
 								{
+								}
+
+								// kdock 配列から api_state マップを作成（kdock_getship に state が無い場合のフォールバック用）
+								Dictionary<int, int> kdockStateMap = null;
+								if (kdocks != null)
+								{
+									try { kdockStateMap = kdocks.ToDictionary(k => k.api_id, k => k.api_state); } catch { kdockStateMap = null; }
 								}
 
 								// 可能なら kcsapi_kdock_getship[] として解析し、Itemyard.AddFromDock を呼ぶ
@@ -2101,24 +2434,107 @@ namespace Grabacr07.KanColleWrapper
 										{
 											try
 											{
-												// AddFromDock は差分追加を正しく処理する想定
 												this.Homeport?.Itemyard?.AddFromDock(kd);
+
+												// kdock_getship に api_state が無い場合があるため、kdock 配列のマップを参照して state を取得する
+												int? state = null;
+												try
+												{
+													if (kdockStateMap != null && kdockStateMap.TryGetValue(kd.api_id, out var s)) state = s;
+												}
+												catch { state = null; }
+
+												// pending materials を適用（api_state を渡す）
+												try { this.ApplyPendingCreateMaterialsForKdock(kd.api_id, state); } catch { }
 											}
-											catch
+											catch (Exception)
 											{
 											}
 										}
 										kdockProcessed = true;
+
+										// slotTok は既に上で取得済み
+										try
+										{
+											if (slotTok != null)
+											{
+												var newItems = slotTok.Type == JTokenType.Array ? slotTok.ToObject<kcsapi_slotitem[]>() : null;
+
+												if (newItems != null && newItems.Length > 0)
+												{
+													try
+													{
+														var iy = this.Homeport?.Itemyard;
+														if (iy != null)
+														{
+															// 既存装備を重複追加しないように、未登録のものだけ追加する
+															foreach (var ni in newItems)
+															{
+																try
+																{
+																	if (ni == null) continue;
+																	if (!iy.SlotItems.ContainsKey(ni.api_id))
+																	{
+																		iy.SlotItems.Add(new SlotItem(ni));
+																	}
+																}
+																catch (Exception)
+																{
+																}
+															}
+
+															// 内部通知を確実に発行
+															try
+															{
+																var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+																mi?.Invoke(iy, null);
+															}
+															catch (Exception)
+															{
+															}
+														}
+														else
+														{
+															this.Homeport?.Itemyard?.Update(newItems);
+														}
+													}
+													catch (Exception)
+													{
+													}
+												}
+											}
+										}
+										catch (Exception)
+										{
+										}
+
+										// AddFromDock 後に内部通知を呼ぶ（保険）
+										try
+										{
+											var iy = this.Homeport?.Itemyard;
+											if (iy != null)
+											{
+												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+												if (mi != null)
+												{
+													mi.Invoke(iy, null);
+												}
+											}
+										}
+										catch (Exception)
+										{
+										}
+									}
+									else
+									{
 									}
 								}
-								catch
+								catch (Exception)
 								{
-									// パース失敗なら kdockProcessed は false のまま（フォールバック処理へ）
 								}
 							}
-							catch
+							catch (Exception)
 							{
-								// swallow
 							}
 						}
 
@@ -2130,23 +2546,60 @@ namespace Grabacr07.KanColleWrapper
 								var ship = shipTok.ToObject<kcsapi_ship2>();
 								if (ship != null)
 								{
-									try { this.Homeport.Organization.Update(new[] { ship }); } catch { }
+									// まず既存の Update で試す（既存艦の更新を優先）
+									try
+									{
+										this.Homeport.Organization.Update(new[] { ship });
+									}
+									catch (Exception)
+									{
+									}
 
-									// 生成艦の属する艦隊だけ再計算
+									// Organization.Update が新規追加を行わないケースに備え、
+									// Ships に存在しなければ明示的に追加して通知する（CEF 経路用フォールバック）
+									try
+									{
+										var exists = org?.Ships?[ship.api_id];
+										if (exists == null)
+										{
+											try
+											{
+												org?.Ships.Add(new Ship(this.Homeport, ship));
+												// private メソッド RaiseShipsChanged をリフレクションで呼ぶ
+												try
+												{
+													var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+													mi?.Invoke(org, null);
+												}
+												catch (Exception)
+												{
+													try { org?.NotifyUpdated(); } catch { }
+												}
+											}
+											catch (Exception)
+											{
+											}
+										}
+									}
+									catch (Exception)
+									{
+									}
+
+									// 生成艦の属する艦隊だけ再計算（GetFleet で取得できるなら）
 									try
 									{
 										var f = org?.GetFleet(ship.api_id);
 										if (f != null) { f.State.Update(); f.State.Calculate(); f.RaiseShipsUpdated(); }
 									}
-									catch { }
+									catch (Exception) { }
 								}
 							}
-							catch { }
+							catch (Exception)
+							{
+							}
 						}
 
-						// --- 装備アイテム更新 ---
-						// kdockProcessed が true の場合は AddFromDock() で装備追加が処理済みのはずなので
-						// slotTok による置換は行わない（丸ごと置換で既存装備が消える問題を防止）。
+						// --- 装備アイテム更新（kdockProcessed が false の場合はここで処理） ---
 						if (!kdockProcessed && slotTok != null)
 						{
 							try
@@ -2154,36 +2607,41 @@ namespace Grabacr07.KanColleWrapper
 								var newItems = slotTok.ToObject<kcsapi_slotitem[]>();
 								if (newItems != null && newItems.Length > 0)
 								{
-									// 可能であれば既存アイテムとマージする試み（失敗時は単純更新にフォールバック）
 									try
 									{
 										var itemyard = this.Homeport?.Itemyard;
 										if (itemyard != null)
 										{
-											// 既存アイテムを MemberTable から抽出して kcsapi_slotitem[] に変換するのは型依存で複雑なため、
-											// ここでは安全側として「新規配列で Update」するが、kdockProcessed が true の場合はこの道は通らない。
-											this.Homeport?.Itemyard?.Update(newItems);
+											this.Homeport.Itemyard.Update(newItems);
+											try
+											{
+												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+												if (mi != null) mi.Invoke(this.Homeport?.Itemyard, null);
+											}
+											catch (Exception)
+											{
+											}
 										}
 										else
 										{
 											this.Homeport?.Itemyard?.Update(newItems);
 										}
 									}
-									catch
+									catch (Exception)
 									{
-										// フォールバック
-										try { this.Homeport?.Itemyard?.Update(newItems); } catch { }
 									}
 								}
 							}
-							catch
+							catch (Exception)
 							{
-								// swallow
 							}
+						}
+						else if (kdockProcessed)
+						{
 						}
 
 						// --- 組織レベルで通知して UI を更新 ---
-						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						try { this.Homeport?.Organization?.NotifyUpdated(); } catch (Exception) { }
 
 						// 全フリート再計算（保険）
 						try
@@ -2192,21 +2650,112 @@ namespace Grabacr07.KanColleWrapper
 							{
 								foreach (var f2 in org.Fleets.Values)
 								{
-									try { f2.State.Calculate(); f2.State.Update(); f2.RaiseShipsUpdated(); } catch { }
+									try { f2.State.Calculate(); f2.State.Update(); f2.RaiseShipsUpdated(); } catch (Exception) { }
 								}
 							}
 						}
-						catch { }
+						catch (Exception) { }
 					}
-					catch { }
+					catch (Exception)
+					{
+					}
 				});
 			}
-			catch
+			catch (Exception)
 			{
 			}
 
 			// 取得処理は完了したので true を返す
 			return true;
+		}
+
+		/// <summary>
+		/// 建造系4 資源消費適用
+		/// </summary>
+		private void ApplyPendingCreateMaterialsForKdock(int kdockId, int? api_state = null)
+		{
+			try
+			{
+				int[] req = null;
+				lock (this.pendingCreateMaterials)
+				{
+					if (!this.pendingCreateMaterials.TryGetValue(kdockId, out req)) return;
+					this.pendingCreateMaterials.Remove(kdockId);
+				}
+
+				var materials = this.Homeport?.Materials;
+				if (materials == null || req == null) return;
+
+				// 1) 燃料/弾薬/鋼材/ボーキ を差し引く（負にならないようガード）
+				try
+				{
+					var newMat = new int[4];
+					newMat[0] = Math.Max(0, materials.Fuel - (req.Length > 0 ? req[0] : 0));
+					newMat[1] = Math.Max(0, materials.Ammunition - (req.Length > 1 ? req[1] : 0));
+					newMat[2] = Math.Max(0, materials.Steel - (req.Length > 2 ? req[2] : 0));
+					newMat[3] = Math.Max(0, materials.Bauxite - (req.Length > 3 ? req[3] : 0));
+
+					var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+					mi?.Invoke(materials, new object[] { newMat });
+				}
+				catch (Exception)
+				{
+				}
+
+				// 2) api_item5 は開発資材 (DevelopmentMaterials) として減算する
+				try
+				{
+					if (req.Length > 4)
+					{
+						var decDev = req[4];
+						if (decDev != 0)
+						{
+							var propDev = typeof(Materials).GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+							if (propDev != null)
+							{
+								var cur = (int)propDev.GetValue(materials);
+								var next = Math.Max(0, cur - decDev);
+								propDev.SetValue(materials, next);
+							}
+						}
+					}
+				}
+				catch (Exception)
+				{
+				}
+
+				// 3) api_state による InstantBuildMaterials の減算（api_state == 3 の場合は使用とみなして -1）
+				//    ただし、createship_speedchange 等ですでに即時減算済みなら二重減算しない
+				try
+				{
+					bool alreadyApplied = false;
+					lock (this.appliedBuildKdock)
+					{
+						if (this.appliedBuildKdock.Contains(kdockId))
+						{
+							alreadyApplied = true;
+							this.appliedBuildKdock.Remove(kdockId);
+						}
+					}
+
+					if (!alreadyApplied && api_state.HasValue && api_state.Value == 3)
+					{
+						var propBuild = typeof(Materials).GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+						if (propBuild != null)
+						{
+							var cur = (int)propBuild.GetValue(materials);
+							var next = Math.Max(0, cur - 1);
+							propBuild.SetValue(materials, next);
+						}
+					}
+				}
+				catch (Exception)
+				{
+				}
+			}
+			catch (Exception)
+			{
+			}
 		}
 
 		/// <summary>
@@ -2434,26 +2983,28 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 
-				if (!dict.ContainsKey("api_ndock_id")) return true;
-				if (!int.TryParse(dict["api_ndock_id"], out var ndockId)) return true;
+				if (!dict.ContainsKey("api_ndock_id")) return false;
 
-				RunOnUi(() =>
+				if (int.TryParse(dict["api_ndock_id"], out var ndockId))
 				{
-					try
+					RunOnUi(() =>
 					{
-						var dock = this.Homeport?.Repairyard?.Docks?[ndockId];
-						var ship = dock?.Ship;
-						if (dock != null) dock.Finish();
-						if (ship != null)
+						try
 						{
-							ship.Repair();
-							this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
+							var dock = this.Homeport?.Repairyard?.Docks?[ndockId];
+							var ship = dock?.Ship;
+							if (dock != null) dock.Finish();
+							if (ship != null)
+							{
+								ship.Repair();
+								this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
+							}
 						}
-					}
-					catch
-					{
-					}
-				});
+						catch
+						{
+						}
+					});
+				}
 			}
 			catch
 			{

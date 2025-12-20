@@ -147,48 +147,50 @@ Application Insights
 
 
 ■更新履歴
-2025/12/17 - version 4.6 beta4 リリース
-2025/12/14 - version 4.6 beta3 リリース
-2025/12/10 - version 4.6 beta2 リリース
-2025/12/07 - version 4.6 beta1 リリース
-2025/11/02 - version 4.6 alpha3 リリース
-2025/11/01 - version 4.6 alpha2 リリース
+2025/12/19 - version 4.6 beta5
+2025/12/17 - version 4.6 beta4
+2025/12/14 - version 4.6 beta3
+2025/12/10 - version 4.6 beta2
+2025/12/07 - version 4.6 beta1
+2025/11/02 - version 4.6 alpha3
+2025/11/01 - version 4.6 alpha2
 2025/10/26 - version 4.6 alpha1
-2020/03/28 - version 4.5.2 リリース
-2018/08/17 - version 4.5 リリース
-2016/06/20 - version 4.2.6 リリース
-2016/02/12 - version 4.2.1 リリース
-2016/02/08 - version 4.2 リリース
-2015/11/10 - version 4.1.6 リリース
-2015/10/30 - version 4.1.5 リリース
-2015/08/28 - version 4.1.3 リリース
-2015/08/20 - version 4.1.2 リリース
-2015/08/19 - version 4.1.1 リリース
-2015/08/12 - version 4.1.0 リリース
-2015/08/11 - version 4.0.1 リリース
-2015/08/11 - version 4.0 リリース
-2015/05/26 - version 3.8.2 リリース
-2015/05/18 - version 3.8 リリース
-2015/05/03 - version 3.7 リリース
-2015/02/07 - version 3.5 リリース
-2014/09/26 - version 3.4 リリース
-2014/08/12 - version 3.3 リリース
-2014/08/10 - version 3.2 リリース
-2014/08/09 - version 3.1 リリース
-2014/08/07 - version 3.0 リリース
-2014/05/16 - version 2.6 リリース
-2014/04/29 - version 2.6 beta rev.2 リリース
-2014/04/23 - version 2.6 beta リリース
-2014/03/21 - version 2.4 リリース
-2014/03/04 - version 2.3 リリース
-2014/03/02 - version 2.2 リリース
-2014/02/19 - version 2.1 リリース
-2014/02/06 - version 2.0.1 リリース
-2014/02/01 - version 2.0 リリース
-2014/01/20 - version 1.2.1 リリース
-2013/12/29 - version 1.2 リリース
-2013/12/27 - version 1.1 リリース
-2013/12/22 - version 1.0 リリース
+
+2020/03/28 - version 4.5.2
+2018/08/17 - version 4.5
+2016/06/20 - version 4.2.6
+2016/02/12 - version 4.2.1
+2016/02/08 - version 4.2
+2015/11/10 - version 4.1.6
+2015/10/30 - version 4.1.5
+2015/08/28 - version 4.1.3
+2015/08/20 - version 4.1.2
+2015/08/19 - version 4.1.1
+2015/08/12 - version 4.1.0
+2015/08/11 - version 4.0.1
+2015/08/11 - version 4.0
+2015/05/26 - version 3.8.2
+2015/05/18 - version 3.8
+2015/05/03 - version 3.7
+2015/02/07 - version 3.5
+2014/09/26 - version 3.4
+2014/08/12 - version 3.3
+2014/08/10 - version 3.2
+2014/08/09 - version 3.1
+2014/08/07 - version 3.0
+2014/05/16 - version 2.6
+2014/04/29 - version 2.6 beta rev.2
+2014/04/23 - version 2.6 beta 
+2014/03/21 - version 2.4
+2014/03/04 - version 2.3
+2014/03/02 - version 2.2
+2014/02/19 - version 2.1
+2014/02/06 - version 2.0.1
+2014/02/01 - version 2.0
+2014/01/20 - version 1.2.1
+2013/12/29 - version 1.2
+2013/12/27 - version 1.1
+2013/12/22 - version 1.0
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Product name: 提督業も忙しい！    
