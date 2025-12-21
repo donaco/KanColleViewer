@@ -23,15 +23,27 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public static async Task<SallyArea[]> GetAsync()
 		{
+			var source = Properties.Settings.Default.SallyAreaSource;
+			if (string.IsNullOrWhiteSpace(source))
+			{
+				System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: SallyAreaSource is empty.");
+				return new SallyArea[0];
+			}
+
+			if (!Uri.TryCreate(source, UriKind.Absolute, out var uri))
+			{
+				System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: invalid URI: " + source);
+				return new SallyArea[0];
+			}
+
 			using (var client = new HttpClient(Helper.GetProxyConfiguredHandler()))
 			{
 				try
 				{
-					var uri = new Uri(Properties.Settings.Default.SallyAreaSource);
-					var response = await client.GetAsync(uri);
+					var response = await client.GetAsync(uri).ConfigureAwait(false);
 					if (response.IsSuccessStatusCode)
 					{
-						var content = await response.Content.ReadAsStringAsync();
+						var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
 						// Newtonsoft.Json によるパースへ変更
 						JArray array;
@@ -59,10 +71,16 @@ namespace Grabacr07.KanColleViewer.Models
 						return result;
 					}
 				}
+				catch (HttpRequestException hrex)
+				{
+					// DNS 解決や接続エラーなどのネットワーク系例外
+					System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: HttpRequestException: " + hrex);
+					StatusService.Current.Notify("出撃海域の取得に失敗しました（ネットワークエラー）。");
+				}
 				catch (Exception ex)
 				{
 					System.Diagnostics.Debug.WriteLine(ex);
-					StatusService.Current.Notify("出撃海域の取得に失敗しました: " + ex);
+					StatusService.Current.Notify("出撃海域の取得に失敗しました: " + ex.Message);
 				}
 			}
 

@@ -63,7 +63,7 @@ namespace Grabacr07.KanColleViewer.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://kctadil.devcussion.net/viewer/sally.json")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string SallyAreaSource {
             get {
                 return ((string)(this["SallyAreaSource"]));
