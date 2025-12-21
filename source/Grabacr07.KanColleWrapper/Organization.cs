@@ -405,8 +405,81 @@ namespace Grabacr07.KanColleWrapper
 
 		private void DepriveSlotItem(kcsapi_slot_deprive source)
 		{
-			this.Ships[source.api_ship_data.api_unset_ship.api_id]?.Update(source.api_ship_data.api_unset_ship);
-			this.Ships[source.api_ship_data.api_set_ship.api_id]?.Update(source.api_ship_data.api_set_ship);
+			try
+			{
+				if (source == null || source.api_ship_data == null) return;
+
+				var unsetShipRaw = source.api_ship_data.api_unset_ship;
+				var setShipRaw = source.api_ship_data.api_set_ship;
+
+				// 1) 該当艦を更新（Ship.Update を使う）
+				if (unsetShipRaw != null)
+				{
+					var target = this.Ships[unsetShipRaw.api_id];
+					if (target != null)
+					{
+						try { target.Update(unsetShipRaw); } catch { }
+					}
+				}
+
+				if (setShipRaw != null)
+				{
+					var target = this.Ships[setShipRaw.api_id];
+					if (target != null)
+					{
+						try { target.Update(setShipRaw); } catch { }
+					}
+				}
+
+				// 2) api_unset_list にあれば Itemyard から該当装備を削除（移動ではなく外れた装備のケース）
+				try
+				{
+					var iy = this.homeport?.Itemyard;
+					var unsetList = source.api_unset_list?.api_slot_list;
+					if (iy != null && unsetList != null && unsetList.Length > 0)
+					{
+						foreach (var id in unsetList)
+						{
+							try { iy.SlotItems.Remove(id); } catch { }
+						}
+						try
+						{
+							typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+								?.Invoke(iy, null);
+						}
+						catch { }
+					}
+				}
+				catch { }
+
+				// 3) 影響を受ける艦隊を再計算・再通知
+				var affectedIds = new List<int>();
+				if (unsetShipRaw != null) affectedIds.Add(unsetShipRaw.api_id);
+				if (setShipRaw != null) affectedIds.Add(setShipRaw.api_id);
+
+				foreach (var id in affectedIds.Distinct())
+				{
+					try
+					{
+						var fleet = this.GetFleet(id);
+						if (fleet != null)
+						{
+							try { fleet.State.Update(); } catch { }
+							try { fleet.State.Calculate(); } catch { }
+							try { fleet.RaiseShipsUpdated(); } catch { }
+						}
+					}
+					catch { }
+				}
+
+				// 4) 組織レベルでも通知（UI 更新の確実化）
+				try { this.RaiseShipsChanged(); } catch { }
+				try { this.NotifyUpdated(); } catch { }
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("DepriveSlotItem failed: " + ex);
+			}
 		}
 
 		#endregion

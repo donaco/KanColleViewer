@@ -271,6 +271,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleQuestList(url, normalized)) return;
 				if (TryHandleShipArray(url, normalized)) return;
 				if (TryHandleSlotExchangeIndex(url, normalized, requestBody)) return;
+				if (TryHandleSlotDeprive(url, normalized, requestBody)) return;
 				if (TryHandleShip3(url, normalized)) return;
 				if (TryHandleCharge(url, normalized)) return;
 
@@ -1412,6 +1413,133 @@ namespace Grabacr07.KanColleWrapper
 
 					// 組織レベルの再通知で UI 再評価を促す
 					try { org.NotifyUpdated(); } catch { }
+				}
+				catch
+				{
+				}
+			});
+
+			return true;
+		}
+
+		/// <summary>
+		/// 改装系3 他艦 装備スロット解除
+		/// </summary>
+		private bool TryHandleSlotDeprive(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/slot_deprive")) return false;
+
+			JToken root;
+			try { root = JToken.Parse(normalized); } catch { return true; }
+			var data = root["api_data"] ?? root;
+			if (data == null) return true;
+
+			RunOnUi(() =>
+			{
+				try
+				{
+					var org = this.Homeport?.Organization;
+					if (org == null) return;
+
+					// api_ship_data.api_unset_ship / api_set_ship を個別に反映
+					var shipData = data["api_ship_data"];
+					var affected = new List<int>();
+
+					if (shipData != null)
+					{
+						try
+						{
+							var unsetTok = shipData["api_unset_ship"];
+							if (unsetTok != null && unsetTok.Type == JTokenType.Object)
+							{
+								var unsetShip = unsetTok.ToObject<kcsapi_ship2>();
+								if (unsetShip != null)
+								{
+									var existing = org.Ships[unsetShip.api_id];
+									if (existing != null)
+									{
+										existing.Update(unsetShip);
+									}
+									else
+									{
+										try { this.Homeport.Organization.Update(new[] { unsetShip }); } catch { }
+									}
+									affected.Add(unsetShip.api_id);
+								}
+							}
+						}
+						catch { }
+
+						try
+						{
+							var setTok = shipData["api_set_ship"];
+							if (setTok != null && setTok.Type == JTokenType.Object)
+							{
+								var setShip = setTok.ToObject<kcsapi_ship2>();
+								if (setShip != null)
+								{
+									var existing = org.Ships[setShip.api_id];
+									if (existing != null)
+									{
+										existing.Update(setShip);
+									}
+									else
+									{
+										try { this.Homeport.Organization.Update(new[] { setShip }); } catch { }
+									}
+									affected.Add(setShip.api_id);
+								}
+							}
+						}
+						catch { }
+					}
+
+					// 重要: api_unset_list に含まれる装備を Itemyard から削除しない。
+					// 削除してしまうと装備が移動された場合に UI 側で失われるため、
+					// 削除処理は廃止し、代わりに Itemyard の再描画通知のみ行う。
+					try
+					{
+						var unsetListTok = data["api_unset_list"] ?? data.SelectToken("api_unset_list");
+						var iy = this.Homeport?.Itemyard;
+						if (iy != null && unsetListTok != null)
+						{
+							// ここでは削除せず、UI の再描画だけを促す。
+							// 将来的に「装備が Inventory に戻る／移動する」などの厳密な処理が必要なら
+							// 受信 JSON の他フィールド（api_slotitem 等）を使って明示的に同期する。
+							try
+							{
+								var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+								mi?.Invoke(iy, null);
+							}
+							catch { }
+						}
+					}
+					catch { }
+
+					// 影響を受ける艦隊を再計算・再通知
+					foreach (var id in affected.Distinct())
+					{
+						try
+						{
+							var fleet = org.GetFleet(id);
+							if (fleet != null)
+							{
+								try { fleet.State.Update(); } catch { }
+								try { fleet.State.Calculate(); } catch { }
+								try { fleet.RaiseShipsUpdated(); } catch { }
+							}
+						}
+						catch { }
+					}
+
+					// 組織・艦娘一覧の再通知
+					try { org.NotifyUpdated(); } catch { }
+					try
+					{
+						var mi = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+						mi?.Invoke(org, null);
+					}
+					catch { }
 				}
 				catch
 				{
@@ -2872,7 +3000,6 @@ namespace Grabacr07.KanColleWrapper
 			return true;
 		}
 
-		#endregion
 		/// <summary>
 		/// 入渠系1 ドック一覧
 		/// </summary>
@@ -3081,5 +3208,6 @@ namespace Grabacr07.KanColleWrapper
 
 			return true;
 		}
+		#endregion
 	}
 }
