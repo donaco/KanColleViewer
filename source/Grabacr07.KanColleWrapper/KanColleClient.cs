@@ -425,6 +425,20 @@ namespace Grabacr07.KanColleWrapper
 					{
 						try
 						{
+							// Homeport が未初期化の場合は安全に作成する
+							if (this.Homeport == null)
+							{
+								try
+								{
+									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+								}
+								catch
+								{
+									// 初期化に失敗したら以降の処理をスキップ
+									return;
+								}
+							}
+
 							if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
 							if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
 							if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
@@ -1559,11 +1573,10 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleDecks(string url, string normalized, string requestBody)
 		{
 			// 追加エンドポイントを許可：deck / deck_port に加え、編成変更系 API も扱う
+			// 注意: preset_select / updatedeckname は専用ハンドラがあるためここでは除外する
 			if (!(url.Contains("/kcsapi/api_get_member/deck")
 			   || url.Contains("/kcsapi/api_get_member/deck_port")
-			   || url.Contains("/kcsapi/api_req_hensei/change")
-			   || url.Contains("/kcsapi/api_req_hensei/preset_select")
-			   || url.Contains("/kcsapi/api_req_member/updatedeckname")))
+			   || url.Contains("/kcsapi/api_req_hensei/change")))
 				return false;
 
 			try
