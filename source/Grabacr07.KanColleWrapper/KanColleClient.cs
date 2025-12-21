@@ -40,7 +40,19 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 母港の情報を取得します。
 		/// </summary>
-		public Homeport Homeport { get; private set; }
+		private Homeport _Homeport;
+		public Homeport Homeport
+		{
+			get { return this._Homeport; }
+			private set
+			{
+				if (this._Homeport != value)
+				{
+					this._Homeport = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
 
 		#region IsStarted 変更通知プロパティ
 
@@ -291,6 +303,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandlePresetDeck(url, normalized)) return;
 				if (TryHandleHenseiCombined(url, normalized)) return;
 				if (TryHandleSlotItems(url, normalized)) return;
+				if (TryHandleCreateItem(url, normalized, requestBody)) return;
 
 				// 建造系
 				if (TryHandleCreateShip(url, normalized, requestBody)) return;
@@ -432,7 +445,7 @@ namespace Grabacr07.KanColleWrapper
 								{
 									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
-								catch
+								catch 
 								{
 									// 初期化に失敗したら以降の処理をスキップ
 									return;
@@ -507,9 +520,7 @@ namespace Grabacr07.KanColleWrapper
 											f.State.Update();
 											f.RaiseShipsUpdated();
 										}
-										catch
-										{
-										}
+										catch { }
 									}
 								}
 							}
@@ -534,9 +545,7 @@ namespace Grabacr07.KanColleWrapper
 									{
 										org.Fleets[returningDeckId].Homing();
 									}
-									catch
-									{
-									}
+									catch {}
 									this.sortieDeckIds.Remove(returningDeckId);
 								}
 							}
@@ -961,142 +970,192 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				JToken root;
-				try { root = JToken.Parse(normalized); } catch { return true; }
+				try { root = JToken.Parse(normalized); }
+				catch
+				{
+					// 解析失敗は安全に終了（既存の挙動を維持）
+					return true;
+				}
 				var data = root["api_data"] ?? root;
 				if (data == null) return true;
 
-				var shipTok = data["api_ship"];
+				var shipTok = data["api_ship"] ?? data["api_ship_data"];
 				var deckTok = data["api_deck"];
 				var unsetListTok = data["api_unset_list"]; // 装備解除時に返るケースあり
+
+				// 装備配列が来ている可能性を探す（api_slot_item / api_slotitem 等）
+				JToken slotTok = null;
+				try
+				{
+					slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
+				}
+				catch { slotTok = null; }
 
 				RunOnUi(() =>
 				{
 					try
 					{
 						var org = this.Homeport?.Organization;
+						if (org == null) return;
 
-						// 1) 更新された艦の反映（api_ship）
-						if (shipTok != null)
+						var updatedShipIds = new List<int>();
+
+						// 1) api_ship を柔軟にハンドル（単一 or 配列）
+						try
 						{
-							try
+							if (shipTok != null)
 							{
-								var shipRaw = shipTok.ToObject<kcsapi_ship2>();
-								if (shipRaw != null)
+								if (shipTok.Type == JTokenType.Array)
 								{
-									// Organization.Update(kcsapi_ship2[]) を使って個別更新
-									try { this.Homeport.Organization.Update(new[] { shipRaw }); } catch { }
+									var rawShips = shipTok.ToObject<kcsapi_ship2[]>();
+									if (rawShips != null)
+									{
+										foreach (var raw in rawShips)
+										{
+											if (raw == null) continue;
+											try
+											{
+												var existing = org.Ships?[raw.api_id];
+												if (existing != null) existing.Update(raw);
+												else this.Homeport.Organization.Update(new[] { raw });
+												updatedShipIds.Add(raw.api_id);
+											}
+											catch { }
+										}
+									}
+								}
+								else if (shipTok.Type == JTokenType.Object)
+								{
+									var raw = shipTok.ToObject<kcsapi_ship2>();
+									if (raw != null)
+									{
+										try
+										{
+											var existing = org.Ships?[raw.api_id];
+											if (existing != null) existing.Update(raw);
+											else this.Homeport.Organization.Update(new[] { raw });
+											updatedShipIds.Add(raw.api_id);
+										}
+										catch { }
+									}
 								}
 							}
-							catch { }
 						}
+						catch { }
 
-						// 2) デッキ情報の反映（api_deck）
-						if (deckTok != null)
+						// 2) デッキ更新（配列 / 単一）
+						try
 						{
-							try
+							if (deckTok != null)
 							{
 								if (deckTok.Type == JTokenType.Array)
 								{
 									var decks = deckTok.ToObject<kcsapi_deck[]>();
 									if (decks != null)
 									{
-										foreach (var d in decks)
-										{
-											try { this.Homeport.Organization.Update(d); } catch { }
-										}
+										foreach (var d in decks) try { this.Homeport.Organization.Update(d); } catch { }
 									}
 								}
-								else
+								else if (deckTok.Type == JTokenType.Object)
 								{
 									var deck = deckTok.ToObject<kcsapi_deck>();
-									if (deck != null)
-									{
-										try { this.Homeport.Organization.Update(deck); } catch { }
-									}
+									if (deck != null) try { this.Homeport.Organization.Update(deck); } catch { }
 								}
 							}
-							catch { }
 						}
+						catch { }
 
-						// 3) 装備解除(api_unset_list) があれば該当装備 ID を Itemyard から削除
-						if (unsetListTok != null)
+						// 3) 装備アイテム更新：api_slot_item / api_slotitem があれば Itemyard を更新
+						try
 						{
-							try
+							if (slotTok != null && slotTok.Type == JTokenType.Array)
 							{
-								var iy = this.Homeport?.Itemyard;
-								if (iy != null)
+								try
 								{
-									// api_unset_list は配列要素があり、その中に api_slot_list 等で装備 ID 配列がある構造を想定
-									var idsToRemove = new List<int>();
+									var slotItems = slotTok.ToObject<kcsapi_slotitem[]>();
+									if (slotItems != null)
+									{
+										// 重複追加や欠損を避けるため Update を呼ぶ（既存ハンドラに合わせた処理）
+										this.Homeport?.Itemyard?.Update(slotItems);
 
-									if (unsetListTok.Type == JTokenType.Array)
-									{
-										foreach (var elem in unsetListTok.Children())
-										{
-											var slotList = elem["api_slot_list"] ?? elem["api_slot"] ?? elem["api_slot_list"];
-											if (slotList != null && slotList.Type == JTokenType.Array)
-											{
-												foreach (var t in slotList.Children())
-												{
-													try
-													{
-														var id = (int?)t ?? 0;
-														if (id > 0) idsToRemove.Add(id);
-													}
-													catch { }
-												}
-											}
-										}
-									}
-									else if (unsetListTok.Type == JTokenType.Object)
-									{
-										// 単一オブジェクト内の api_slot_list を探す
-										var slotList = unsetListTok["api_slot_list"] ?? unsetListTok["api_slot"];
-										if (slotList != null && slotList.Type == JTokenType.Array)
-										{
-											foreach (var t in slotList.Children())
-											{
-												try
-												{
-													var id = (int?)t ?? 0;
-													if (id > 0) idsToRemove.Add(id);
-												}
-												catch { }
-											}
-										}
-									}
-
-									// 実際に Itemyard から削除
-									if (idsToRemove.Count > 0)
-									{
-										foreach (var id in idsToRemove)
-										{
-											try { iy.SlotItems.Remove(id); } catch { }
-										}
-										// 内部通知を呼ぶ（private メソッド）
+										// 内部通知を確実に発行
 										try
 										{
 											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-											mi?.Invoke(iy, null);
+											mi?.Invoke(this.Homeport?.Itemyard, null);
 										}
 										catch { }
 									}
 								}
+								catch { }
 							}
-							catch { }
+							else if (slotTok != null && slotTok.Type == JTokenType.Object)
+							{
+								try
+								{
+									var single = slotTok.ToObject<kcsapi_slotitem>();
+									if (single != null)
+									{
+										this.Homeport?.Itemyard?.Update(new[] { single });
+										try
+										{
+											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+											mi?.Invoke(this.Homeport?.Itemyard, null);
+										}
+										catch { }
+									}
+								}
+								catch { }
+							}
 						}
+						catch { }
 
-						// 4) 組織・艦娘一覧の再通知（UI 更新）
-						try { org?.NotifyUpdated(); } catch { }
+						// 4) api_unset_list: 無条件削除は避け、装備一覧の再描画通知のみ行う（安全側）
+						try
+						{
+							if (unsetListTok != null)
+							{
+								try
+								{
+									var iy = this.Homeport?.Itemyard;
+									if (iy != null)
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(iy, null);
+									}
+								}
+								catch { }
+							}
+						}
+						catch { }
+
+						// 5) 影響艦隊のみ再計算・再通知
+						try
+						{
+							if (updatedShipIds.Count > 0)
+							{
+								var affectedFleets = org.Fleets.Values
+									.Where(f => f.Ships.Any(s => s != null && updatedShipIds.Contains(s.Id)))
+									.ToArray();
+
+								foreach (var f in affectedFleets)
+								{
+									try { f.State.Update(); } catch { }
+									try { f.State.Calculate(); } catch { }
+									try { f.RaiseShipsUpdated(); } catch { }
+								}
+							}
+						}
+						catch { }
+
+						// 6) 組織・UI レベルの最終通知
+						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						try
 						{
 							var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
 							mi?.Invoke(org, null);
 						}
-						catch
-						{
-							try { org?.NotifyUpdated(); } catch { }
-						}
+						catch { try { org?.NotifyUpdated(); } catch { } }
 					}
 					catch { }
 				});
@@ -2283,6 +2342,220 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
+			return true;
+		}
+
+		/// <summary>
+		/// 開発
+		/// </summary>
+		private bool TryHandleCreateItem(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kousyou/createitem")) return false;
+
+			JToken root;
+			try { root = JToken.Parse(normalized); } catch { return true; }
+			var data = root["api_data"] ?? root;
+			if (data == null) return true;
+
+			RunOnUi(() =>
+			{
+				try
+				{
+					// 1) 資源・資材更新: api_material が 4 か 8 長配列で来る場合の柔軟対応
+					try
+					{
+						var matTok = data["api_material"] ?? data["api_get_material"] ?? data["api_materials"];
+						if (matTok != null && matTok.Type == JTokenType.Array)
+						{
+							var arr = matTok.Select(t => (int?)t ?? 0).ToArray();
+							var materials = this.Homeport?.Materials;
+							if (materials != null && arr != null)
+							{
+								// 長さ8なら個別プロパティを更新（0..7 のマッピングは既存の Update(kcsapi_material[]) に合わせる）
+								if (arr.Length >= 8)
+								{
+									try
+									{
+										var ty = typeof(Materials);
+										ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[0]);
+										ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[1]);
+										ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[2]);
+										ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[3]);
+										// 既存コードのマッピングに合わせる：
+										// index4 -> InstantBuildMaterials
+										// index5 -> InstantRepairMaterials
+										// index6 -> DevelopmentMaterials
+										// index7 -> ImprovementMaterials
+										ty.GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[4]);
+										ty.GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[5]);
+										ty.GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[6]);
+										ty.GetProperty("ImprovementMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[7]);
+									}
+									catch { }
+								}
+								// 4 要素なら従来通り private Update(int[]) を呼ぶ
+								else if (arr.Length == 4)
+								{
+									try
+									{
+										var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+										mi?.Invoke(materials, new object[] { arr });
+									}
+									catch { }
+								}
+							}
+						}
+					}
+					catch { }
+
+					// 2) 生成された装備を反映: api_get_items / api_slot_item / api_slotitem などの複合対応
+					try
+					{
+						var iy = this.Homeport?.Itemyard;
+						if (iy != null)
+						{
+							// api_get_items (軽量形式)
+							var getItemsTok = data["api_get_items"] ?? data["api_get_item"] ?? data["api_get_item_list"];
+							if (getItemsTok != null && getItemsTok.Type == JTokenType.Array)
+							{
+								try
+								{
+									var list = new List<kcsapi_slotitem>();
+									foreach (var t in getItemsTok.Children())
+									{
+										try
+										{
+											var id = t["api_id"]?.Value<int>() ?? 0;
+											var sid = t["api_slotitem_id"]?.Value<int>() ?? 0;
+											if (id <= 0 || sid <= 0) continue;
+											list.Add(new kcsapi_slotitem
+											{
+												api_id = id,
+												api_slotitem_id = sid,
+												api_level = t["api_level"]?.Value<int>() ?? 0,
+												api_locked = t["api_locked"]?.Value<int>() ?? 0,
+												api_alv = t["api_alv"]?.Value<int>() ?? 0,
+											});
+										}
+										catch { }
+									}
+
+									if (list.Count > 0)
+									{
+										// 重複追加を避けつつ追加
+										foreach (var raw in list)
+										{
+											try
+											{
+												if (!iy.SlotItems.ContainsKey(raw.api_id))
+												{
+													iy.SlotItems.Add(new SlotItem(raw));
+												}
+											}
+											catch { }
+										}
+
+										// 通知
+										try
+										{
+											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+											mi?.Invoke(iy, null);
+										}
+										catch { }
+									}
+								}
+								catch { }
+							}
+
+							// api_slot_item / api_slotitem (フル情報)
+							var slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
+							if (slotTok != null && slotTok.Type == JTokenType.Array)
+							{
+								try
+								{
+									var rawItems = slotTok.ToObject<kcsapi_slotitem[]>();
+									if (rawItems != null && rawItems.Length > 0)
+									{
+										// 既存ハンドラに倣い Update を呼ぶケースはあるが、ここでは差分追加で扱う（CEF経路のフォールバック）
+										foreach (var r in rawItems)
+										{
+											try
+											{
+												if (!iy.SlotItems.ContainsKey(r.api_id))
+												{
+													iy.SlotItems.Add(new SlotItem(r));
+												}
+												else
+												{
+													// 既存なら情報を更新する
+													try { iy.SlotItems[r.api_id].Remodel(r.api_level, r.api_slotitem_id); } catch { }
+												}
+											}
+											catch { }
+										}
+
+										try
+										{
+											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+											mi?.Invoke(iy, null);
+										}
+										catch { }
+									}
+								}
+								catch { }
+							}
+
+							// 3) api_unset_items / api_unset_list があれば UI 再描画通知（削除は慎重に行う）
+							try
+							{
+								var unsetTok = data["api_unset_items"] ?? data["api_unset_list"] ?? data["api_unset_slot"];
+								if (unsetTok != null)
+								{
+									try
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(iy, null);
+									}
+									catch { }
+								}
+							}
+							catch { }
+						}
+					}
+					catch { }
+
+					// 4) Dockyard / CreatedSlotItem 更新（Dockyard.CreateSlotItem と同等の反映）
+					try
+					{
+						// kcsapi_createitem の api_slot_item が root 下にある場合、それを使って Dockyard.CreatedSlotItem と Dockyard の更新を促す
+						try
+						{
+							var createTok = data.ToObject<kcsapi_createitem>();
+							if (createTok != null)
+							{
+								// Dockyard 側で CreatedSlotItem 更新は proxy 経由で行われるが、CEF 経路ではここで生成情報を反映しておく
+								var dockyard = this.Homeport?.Dockyard;
+								if (dockyard != null)
+								{
+									try
+									{
+										// Dockyard.CreateSlotItem に相当する処理は内部 private のため簡易に CreatedSlotItem を作る
+										dockyard.GetType().GetProperty("CreatedSlotItem", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(dockyard, new CreatedSlotItem(createTok));
+									}
+									catch { }
+								}
+							}
+						}
+						catch { }
+					}
+					catch { }
+
+					// 最後に UI 全体更新を促す
+					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+				}
+				catch { }
+			});
+
 			return true;
 		}
 
