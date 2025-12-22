@@ -961,74 +961,87 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
-		/// 近代改修
+		/// 近代化改装
 		/// </summary>
 		private bool TryHandlePowerup(string url, string normalized, string requestBody)
 		{
 			if (!url.Contains("/kcsapi/api_req_kaisou/powerup")) return false;
 
+			JToken root;
+			try { root = JToken.Parse(normalized); }
+			catch
+			{
+				// 解析失敗は安全に終了（既存の挙動を維持）
+				return true;
+			}
+			var data = root["api_data"] ?? root;
+			if (data == null) return true;
+
+			var shipTok = data["api_ship"] ?? data["api_ship_data"];
+			var deckTok = data["api_deck"];
+			var unsetListTok = data["api_unset_list"]; // 装備解除時に返るケースあり
+
+			// 装備配列が来ている可能性を探す（api_slot_item / api_slotitem 等）
+			JToken slotTok = null;
 			try
 			{
-				JToken root;
-				try { root = JToken.Parse(normalized); }
-				catch
-				{
-					// 解析失敗は安全に終了（既存の挙動を維持）
-					return true;
-				}
-				var data = root["api_data"] ?? root;
-				if (data == null) return true;
+				slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
+			}
+			catch { slotTok = null; }
 
-				var shipTok = data["api_ship"] ?? data["api_ship_data"];
-				var deckTok = data["api_deck"];
-				var unsetListTok = data["api_unset_list"]; // 装備解除時に返るケースあり
-
-				// 装備配列が来ている可能性を探す（api_slot_item / api_slotitem 等）
-				JToken slotTok = null;
+			// requestBody から api_id_items を取り出して削除対象ID配列を用意する（CEF 経路で使う）
+			// 注: powerup の api_id_items は「餌にした艦の ID」の場合があるため、実行時に艦テーブルに存在するかで判定する。
+			int[] apiIdItemsRaw = null;
+			if (!string.IsNullOrEmpty(requestBody))
+			{
 				try
 				{
-					slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
-				}
-				catch { slotTok = null; }
-
-				RunOnUi(() =>
-				{
-					try
+					var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+					foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
 					{
-						var org = this.Homeport?.Organization;
-						if (org == null) return;
+						var kv = pair.Split(new[] { '=' }, 2);
+						if (kv.Length != 2) continue;
+						try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
+					}
 
-						var updatedShipIds = new List<int>();
-
-						// 1) api_ship を柔軟にハンドル（単一 or 配列）
+					if (dict.TryGetValue("api_id_items", out var idsStr) && !string.IsNullOrEmpty(idsStr))
+					{
 						try
 						{
-							if (shipTok != null)
+							apiIdItemsRaw = idsStr
+								.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+								.Select(s => { int v; return int.TryParse(s, out v) ? v : 0; })
+								.Where(v => v > 0)
+								.ToArray();
+						}
+						catch { apiIdItemsRaw = null; }
+					}
+				}
+				catch { apiIdItemsRaw = null; }
+			}
+
+			RunOnUi(() =>
+			{
+				try
+				{
+					var org = this.Homeport?.Organization;
+					if (org == null) return;
+
+					var updatedShipIds = new List<int>();
+
+					// 1) api_ship を柔軟にハンドル（単一 or 配列）
+					try
+					{
+						if (shipTok != null)
+						{
+							if (shipTok.Type == JTokenType.Array)
 							{
-								if (shipTok.Type == JTokenType.Array)
+								var rawShips = shipTok.ToObject<kcsapi_ship2[]>();
+								if (rawShips != null)
 								{
-									var rawShips = shipTok.ToObject<kcsapi_ship2[]>();
-									if (rawShips != null)
+									foreach (var raw in rawShips)
 									{
-										foreach (var raw in rawShips)
-										{
-											if (raw == null) continue;
-											try
-											{
-												var existing = org.Ships?[raw.api_id];
-												if (existing != null) existing.Update(raw);
-												else this.Homeport.Organization.Update(new[] { raw });
-												updatedShipIds.Add(raw.api_id);
-											}
-											catch { }
-										}
-									}
-								}
-								else if (shipTok.Type == JTokenType.Object)
-								{
-									var raw = shipTok.ToObject<kcsapi_ship2>();
-									if (raw != null)
-									{
+										if (raw == null) continue;
 										try
 										{
 											var existing = org.Ships?[raw.api_id];
@@ -1040,127 +1053,255 @@ namespace Grabacr07.KanColleWrapper
 									}
 								}
 							}
-						}
-						catch { }
-
-						// 2) デッキ更新（配列 / 単一）
-						try
-						{
-							if (deckTok != null)
+							else if (shipTok.Type == JTokenType.Object)
 							{
-								if (deckTok.Type == JTokenType.Array)
+								var raw = shipTok.ToObject<kcsapi_ship2>();
+								if (raw != null)
 								{
-									var decks = deckTok.ToObject<kcsapi_deck[]>();
-									if (decks != null)
+									try
 									{
-										foreach (var d in decks) try { this.Homeport.Organization.Update(d); } catch { }
+										var existing = org.Ships?[raw.api_id];
+										if (existing != null) existing.Update(raw);
+										else this.Homeport.Organization.Update(new[] { raw });
+										updatedShipIds.Add(raw.api_id);
 									}
-								}
-								else if (deckTok.Type == JTokenType.Object)
-								{
-									var deck = deckTok.ToObject<kcsapi_deck>();
-									if (deck != null) try { this.Homeport.Organization.Update(deck); } catch { }
+									catch { }
 								}
 							}
 						}
-						catch { }
-
-						// 3) 装備アイテム更新：api_slot_item / api_slotitem があれば Itemyard を更新
-						try
-						{
-							if (slotTok != null && slotTok.Type == JTokenType.Array)
-							{
-								try
-								{
-									var slotItems = slotTok.ToObject<kcsapi_slotitem[]>();
-									if (slotItems != null)
-									{
-										// 重複追加や欠損を避けるため Update を呼ぶ（既存ハンドラに合わせた処理）
-										this.Homeport?.Itemyard?.Update(slotItems);
-
-										// 内部通知を確実に発行
-										try
-										{
-											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-											mi?.Invoke(this.Homeport?.Itemyard, null);
-										}
-										catch { }
-									}
-								}
-								catch { }
-							}
-							else if (slotTok != null && slotTok.Type == JTokenType.Object)
-							{
-								try
-								{
-									var single = slotTok.ToObject<kcsapi_slotitem>();
-									if (single != null)
-									{
-										this.Homeport?.Itemyard?.Update(new[] { single });
-										try
-										{
-											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-											mi?.Invoke(this.Homeport?.Itemyard, null);
-										}
-										catch { }
-									}
-								}
-								catch { }
-							}
-						}
-						catch { }
-
-						// 4) api_unset_list: 無条件削除は避け、装備一覧の再描画通知のみ行う（安全側）
-						try
-						{
-							if (unsetListTok != null)
-							{
-								try
-								{
-									var iy = this.Homeport?.Itemyard;
-									if (iy != null)
-									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(iy, null);
-									}
-								}
-								catch { }
-							}
-						}
-						catch { }
-
-						// 5) 影響艦隊のみ再計算・再通知
-						try
-						{
-							if (updatedShipIds.Count > 0)
-							{
-								var affectedFleets = org.Fleets.Values
-									.Where(f => f.Ships.Any(s => s != null && updatedShipIds.Contains(s.Id)))
-									.ToArray();
-
-								foreach (var f in affectedFleets)
-								{
-									try { f.State.Update(); } catch { }
-									try { f.State.Calculate(); } catch { }
-									try { f.RaiseShipsUpdated(); } catch { }
-								}
-							}
-						}
-						catch { }
-
-						// 6) 組織・UI レベルの最終通知
-						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-						try
-						{
-							var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-							mi?.Invoke(org, null);
-						}
-						catch { try { org?.NotifyUpdated(); } catch { } }
 					}
 					catch { }
-				});
-			}
-			catch { }
+
+					// 2) デッキ更新（配列 / 単一）
+					try
+					{
+						if (deckTok != null)
+						{
+							if (deckTok.Type == JTokenType.Array)
+							{
+								var decks = deckTok.ToObject<kcsapi_deck[]>();
+								if (decks != null)
+								{
+									foreach (var d in decks) try { this.Homeport.Organization.Update(d); } catch { }
+								}
+							}
+							else if (deckTok.Type == JTokenType.Object)
+							{
+								var deck = deckTok.ToObject<kcsapi_deck>();
+								if (deck != null) try { this.Homeport.Organization.Update(deck); } catch { }
+							}
+						}
+					}
+					catch { }
+
+					// 3) 装備アイテム更新：api_slot_item / api_slotitem があれば Itemyard を更新
+					try
+					{
+						var iy = this.Homeport?.Itemyard;
+						if (slotTok != null && slotTok.Type == JTokenType.Array)
+						{
+							try
+							{
+								var slotItems = slotTok.ToObject<kcsapi_slotitem[]>();
+								if (slotItems != null)
+								{
+									// 既存ハンドラに合わせ Update を呼ぶ
+									iy?.Update(slotItems);
+
+									// 内部通知を確実に発行
+									try
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(this.Homeport?.Itemyard, null);
+									}
+									catch { }
+								}
+							}
+							catch { }
+						}
+						else if (slotTok != null && slotTok.Type == JTokenType.Object)
+						{
+							try
+							{
+								var single = slotTok.ToObject<kcsapi_slotitem>();
+								if (single != null)
+								{
+									iy?.Update(new[] { single });
+									try
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(this.Homeport?.Itemyard, null);
+									}
+									catch { }
+								}
+							}
+							catch { }
+						}
+
+						// 追加: requestBody にあった api_id_items を「艦 ID のみ」として扱う（Organization.Powerup と同様）。
+						// 装備 ID を直接削除しない（装備解除後の api_unset_list による誤削除防止）。
+						if (apiIdItemsRaw != null && apiIdItemsRaw.Length > 0)
+						{
+							try
+							{
+								var shipsToRemove = new List<Ship>();
+								try
+								{
+									foreach (var id in apiIdItemsRaw)
+									{
+										try
+										{
+											if (org.Ships.ContainsKey(id))
+											{
+												var s = org.Ships[id];
+												if (s != null) shipsToRemove.Add(s);
+											}
+										}
+										catch { }
+									}
+								}
+								catch { }
+
+								var isUnsetList = unsetListTok != null;
+
+								foreach (var ship in shipsToRemove)
+								{
+									try
+									{
+										// 装備解除フラグがある場合は Itemyard から削除しない（装備が母港へ戻っただけのケース）
+										if (!isUnsetList)
+										{
+											try { this.Homeport?.Itemyard?.RemoveFromShip(ship); } catch { }
+										}
+										else
+										{
+											// 装備解除時はスロットを再同期して UI の喪失を防ぐ
+											try { ship.UpdateSlots(); } catch { }
+										}
+
+										// api_id_items が実際に艦の ID を表す場合は艦自体を Organization から削除する
+										try { org.Ships.Remove(ship); }
+										catch
+										{
+											try { org.Ships.Remove(ship.Id); } catch { }
+										}
+									}
+									catch { }
+								}
+
+								// Itemyard の再描画通知（装備解除時は必須、通常時も保険として呼ぶ）
+								try
+								{
+									var iy2 = this.Homeport?.Itemyard;
+									var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+									mi?.Invoke(iy2, null);
+								}
+								catch { }
+
+								// 艦娘一覧の変更通知（既存実装に合わせる）
+								try
+								{
+									var mi2 = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+									mi2?.Invoke(org, null);
+								}
+								catch { try { org.NotifyUpdated(); } catch { } }
+							}
+							catch { }
+						}
+					}
+					catch { }
+
+					// 4) api_unset_list: 無条件削除は避け、装備一覧の再描画通知のみ行う（安全側）
+					try
+					{
+						if (unsetListTok != null)
+						{
+							try
+							{
+								var iy = this.Homeport?.Itemyard;
+								if (iy != null)
+								{
+									var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+									mi?.Invoke(iy, null);
+								}
+							}
+							catch { }
+						}
+					}
+					catch { }
+
+					// 追加: 診断ログ（暫定）
+					try
+					{
+						var sb = new System.Text.StringBuilder();
+						sb.AppendFormat("TryHandlePowerup: slotTok={0}, unsetList={1}, api_id_items={2}, slotItemsCount={3}",
+							slotTok != null, unsetListTok != null, apiIdItemsRaw?.Length ?? 0, this.Homeport?.Itemyard?.SlotItems?.Count ?? -1);
+
+						// 各艦の slot に対して Itemyard に存在するかを列挙（問題特定用）
+						try
+						{
+							foreach (var s in org.Ships.Values)
+							{
+								try
+								{
+									var ids = s.RawData.api_slot ?? new int[0];
+									foreach (var id in ids)
+									{
+										if (id <= 0) continue;
+										bool has = this.Homeport?.Itemyard?.SlotItems?.ContainsKey(id) ?? false;
+									}
+								}
+								catch { }
+							}
+						}
+						catch { }
+					}
+					catch { }
+
+					// 5) 影響艦隊のみ再計算・再通知（ship 更新反映）
+					try
+					{
+						if (updatedShipIds.Count > 0)
+						{
+							var affectedFleets = org.Fleets.Values
+								.Where(f => f.Ships.Any(s => s != null && updatedShipIds.Contains(s.Id)))
+								.ToArray();
+
+							foreach (var f in affectedFleets)
+							{
+								try { f.State.Update(); } catch { }
+								try { f.State.Calculate(); } catch { }
+								try { f.RaiseShipsUpdated(); } catch { }
+							}
+						}
+					}
+					catch { }
+
+					// 最終保険: Itemyard の現在状態に合わせ艦娘の Slot を再構築して UI を確実に再同期する（装備消失の回避策）
+					try
+					{
+						foreach (var s in org.Ships.Values)
+						{
+							try { s.UpdateSlots(); } catch { }
+						}
+						foreach (var f in org.Fleets.Values)
+						{
+							try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
+						}
+					}
+					catch { }
+
+					// 6) 組織・UI レベルの最終通知
+					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+					try
+					{
+						var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+						mi?.Invoke(org, null);
+					}
+					catch { try { org?.NotifyUpdated(); } catch { } }
+				}
+				catch { }
+			});
 
 			return true;
 		}
