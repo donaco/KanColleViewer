@@ -69,7 +69,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				instance.scrollViewer.Content = newBrowser;
 			}
 
-			System.Diagnostics.Debug.WriteLine($"WebBrowserPropertyChangedCallback called - newBrowser != null: {newBrowser != null}");
 		}
 
 		#endregion
@@ -212,28 +211,24 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 											//Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody);
 											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody);
 										}
-										catch (Exception ex)
+										catch
 										{
-											Debug.WriteLine("ProcessCaptured invoke failed: " + ex);
 										}
 									});
 								}
 							}
-							catch (Exception ex)
+							catch
 							{
-								Debug.WriteLine("AttachRequestHandler failed (UI thread): " + ex);
 							}
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						Debug.WriteLine("HandleLoadEnd (UI delegate) failed: " + ex);
 					}
 				}));
 			}
-			catch (Exception ex)
+			catch
 			{
-				Debug.WriteLine("HandleLoadEnd top-level failed: " + ex);
 			}
 
 			if (e.Frame.IsMain)
@@ -291,7 +286,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			handler.FocusChanged += hasFocus =>
 			{
 				this.focusInInputbox = hasFocus;
-				System.Diagnostics.Debug.WriteLine($"focusInInputbox: {hasFocus}");
 			};
 
 			this.WebBrowser.JavascriptObjectRepository.Register(handler.Id, handler, true);

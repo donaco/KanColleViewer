@@ -228,9 +228,8 @@ namespace Grabacr07.KanColleWrapper
 				this.RaisePropertyChanged(nameof(this.Fleets));
 				this.RaisePropertyChanged(nameof(this.Combined));
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine("Organization.NotifyUpdated failed: " + ex);
 			}
 		}
 
@@ -476,9 +475,8 @@ namespace Grabacr07.KanColleWrapper
 				try { this.RaiseShipsChanged(); } catch { }
 				try { this.NotifyUpdated(); } catch { }
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine("DepriveSlotItem failed: " + ex);
 			}
 		}
 

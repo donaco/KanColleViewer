@@ -489,12 +489,16 @@
 			</Grid.ColumnDefinitions>
 
 			<DockPanel>
+				<!-- TODO: 暫定対処。ListBoxItem の祖先参照バインドが不安定なため HorizontalContentAlignment/VerticalContentAlignment を固定している。
+							将来的に共通の ItemContainerStyle にまとめ、祖先参照バインドを安全に置き換えること。 -->
 				<ListBox DockPanel.Dock="Top"
-						 ItemsSource="{Binding Fleets}"
-						 SelectedValue="{Binding SelectedFleet}"
-						 SelectionMode="Single"
-						 Background="Transparent"
-						 Margin="4">
+						ItemsSource="{Binding Fleets}"
+						SelectedValue="{Binding SelectedFleet}"
+						SelectionMode="Single"
+						Background="Transparent"
+						Margin="4"
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Center">
 					<ListBox.Template>
 						<ControlTemplate TargetType="{x:Type ListBox}">
 							<Border BorderThickness="0,1,1,1"
@@ -504,14 +508,14 @@
 							</Border>
 						</ControlTemplate>
 					</ListBox.Template>
+
 					<ListBox.ItemContainerStyle>
 						<Style TargetType="{x:Type ListBoxItem}">
-							<Setter Property="MinHeight"
-									Value="38" />
-							<Setter Property="Foreground"
-									Value="{DynamicResource ActiveForegroundBrushKey}" />
-							<Setter Property="IsSelected"
-									Value="{Binding IsSelected}" />
+							<Setter Property="MinHeight" Value="38" />
+							<Setter Property="Foreground" Value="{DynamicResource ActiveForegroundBrushKey}" />
+							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+							<Setter Property="VerticalContentAlignment" Value="Center" />
+							<Setter Property="IsSelected" Value="{Binding IsSelected}" />
 							<Setter Property="Template">
 								<Setter.Value>
 									<ControlTemplate TargetType="{x:Type ListBoxItem}">
@@ -526,23 +530,18 @@
 							<Setter Property="FocusVisualStyle"
 									Value="{DynamicResource {x:Static SystemParameters.FocusVisualStyleKey}}" />
 							<Style.Triggers>
-								<Trigger Property="IsMouseOver"
-										 Value="True">
-									<Setter Property="Background"
-											Value="{DynamicResource AccentHighlightBrushKey}" />
-									<Setter Property="Foreground"
-											Value="{DynamicResource AccentForegroundBrushKey}" />
+								<Trigger Property="IsMouseOver" Value="True">
+									<Setter Property="Background" Value="{DynamicResource AccentHighlightBrushKey}" />
+									<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
 								</Trigger>
-								<Trigger Property="IsSelected"
-										 Value="True">
-									<Setter Property="Background"
-											Value="{DynamicResource AccentBrushKey}" />
-									<Setter Property="Foreground"
-											Value="{DynamicResource AccentForegroundBrushKey}" />
+								<Trigger Property="IsSelected" Value="True">
+									<Setter Property="Background" Value="{DynamicResource AccentBrushKey}" />
+									<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
 								</Trigger>
 							</Style.Triggers>
 						</Style>
 					</ListBox.ItemContainerStyle>
+
 					<ListBox.Resources>
 						<DataTemplate DataType="{x:Type fleetsVm:FleetViewModel}">
 							<Border Padding="16,8">
