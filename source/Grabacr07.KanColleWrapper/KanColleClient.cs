@@ -310,6 +310,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleKdock(url, normalized)) return;
 				if (TryHandleGetShip(url, normalized)) return;
 
+				if (TryHandleRemodelSlot(url, normalized, requestBody)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
 
 				// 入渠系
@@ -990,7 +991,7 @@ namespace Grabacr07.KanColleWrapper
 			catch { slotTok = null; }
 
 			// requestBody から api_id_items を取り出して削除対象ID配列を用意する（CEF 経路で使う）
-			// 注: powerup の api_id_items は「餌にした艦の ID」の場合があるため、実行時に艦テーブルに存在するかで判定する。
+			// 注: powerup の api_id_items は「改修素材にした艦の ID」の場合があるため、実行時に艦テーブルに存在するかで判定
 			int[] apiIdItemsRaw = null;
 			if (!string.IsNullOrEmpty(requestBody))
 			{
@@ -1230,7 +1231,6 @@ namespace Grabacr07.KanColleWrapper
 					}
 					catch { }
 
-					// 追加: 診断ログ（暫定）
 					try
 					{
 						var sb = new System.Text.StringBuilder();
@@ -3315,6 +3315,137 @@ namespace Grabacr07.KanColleWrapper
 			catch (Exception)
 			{
 			}
+		}
+
+		/// <summary>
+		/// 装備改修
+		/// </summary>
+		private bool TryHandleRemodelSlot(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kousyou/remodel_slot")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_remodel_slot>(normalized, out var rem))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							var iy = this.Homeport?.Itemyard;
+							var materials = this.Homeport?.Materials;
+
+							// 1) 資源反映 (api_after_material)
+							try
+							{
+								if (rem.api_after_material != null)
+								{
+									var arr = rem.api_after_material;
+									if (materials != null)
+									{
+										// 長さ8 -> 個別プロパティ更新
+										if (arr.Length >= 8)
+										{
+											var ty = typeof(Materials);
+											try
+											{
+												ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[0]);
+												ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[1]);
+												ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[2]);
+												ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[3]);
+												ty.GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[4]);
+												ty.GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[5]);
+												ty.GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[6]);
+												ty.GetProperty("ImprovementMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[7]);
+											}
+											catch { }
+										}
+										else if (arr.Length >= 4)
+										{
+											try
+											{
+												var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+												mi?.Invoke(materials, new object[] { new[] { arr[0], arr[1], arr[2], arr[3] } });
+											}
+											catch { }
+										}
+									}
+								}
+							}
+							catch { }
+
+							// 2) api_after_slot の反映（生成・改修された装備）
+							try
+							{
+								if (rem.api_after_slot != null && iy != null)
+								{
+									var a = rem.api_after_slot;
+									// kcsapi_slotitem に合わせて一時オブジェクトを作る
+									var raw = new kcsapi_slotitem
+									{
+										api_id = a.api_id,
+										api_slotitem_id = a.api_slotitem_id,
+										api_level = a.api_level,
+										api_locked = a.api_locked,
+										api_alv = 0
+									};
+
+									try
+									{
+										if (iy.SlotItems.ContainsKey(raw.api_id))
+										{
+											// 既存なら Remodel を呼ぶ（UI バインディングを発火）
+											try { iy.SlotItems[raw.api_id].Remodel(raw.api_level, raw.api_slotitem_id); } catch { }
+										}
+										else
+										{
+											try { iy.SlotItems.Add(new SlotItem(raw)); } catch { }
+										}
+									}
+									catch { }
+
+									// 通知
+									try
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(iy, null);
+									}
+									catch { }
+								}
+							}
+							catch { }
+
+							// 3) api_use_slot_id: 使用（消費）された装備 ID の削除（存在すれば MemberTable から削除）
+							try
+							{
+								if (rem.api_use_slot_id != null && rem.api_use_slot_id.Length > 0 && iy != null)
+								{
+									foreach (var id in rem.api_use_slot_id)
+									{
+										try { iy.SlotItems.Remove(id); } catch { }
+									}
+									try
+									{
+										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+										mi?.Invoke(iy, null);
+									}
+									catch { }
+								}
+							}
+							catch { }
+
+							// 最後に組織レベルの更新通知で UI を確実に再描画
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						}
+						catch { }
+					});
+
+					return true;
+				}
+			}
+			catch { }
+
+			return true;
 		}
 
 		/// <summary>
