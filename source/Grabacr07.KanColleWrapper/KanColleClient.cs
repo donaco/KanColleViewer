@@ -286,9 +286,14 @@ namespace Grabacr07.KanColleWrapper
 
 				if (TryHandleQuestList(url, normalized)) return;
 				if (TryHandleShipArray(url, normalized)) return;
+
+				// 装備系
 				if (TryHandleSlotExchangeIndex(url, normalized, requestBody)) return;
 				if (TryHandleSlotDeprive(url, normalized, requestBody)) return;
+				if (TryHandleOpenExslot(url, normalized, requestBody)) return;
+				if (TryHandleSlotsetEx(url, normalized, requestBody)) return;
 				if (TryHandleShip3(url, normalized)) return;
+
 				if (TryHandleCharge(url, normalized)) return;
 
 				// preset_select は専用処理（※TryHandleDecks より前に配置）
@@ -446,7 +451,7 @@ namespace Grabacr07.KanColleWrapper
 								{
 									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
-								catch 
+								catch
 								{
 									// 初期化に失敗したら以降の処理をスキップ
 									return;
@@ -546,7 +551,7 @@ namespace Grabacr07.KanColleWrapper
 									{
 										org.Fleets[returningDeckId].Homing();
 									}
-									catch {}
+									catch { }
 									this.sortieDeckIds.Remove(returningDeckId);
 								}
 							}
@@ -1762,6 +1767,216 @@ namespace Grabacr07.KanColleWrapper
 				catch
 				{
 				}
+			});
+
+			return true;
+		}
+
+		/// <summary>
+		/// 改装系4 拡張スロット開放
+		/// </summary>
+		private bool TryHandleOpenExslot(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/open_exslot")) return false;
+
+			// 成功レスポンスかどうかを確認
+			bool isSuccess = false;
+			try
+			{
+				var root = JToken.Parse(normalized);
+				isSuccess = root["api_result"] != null && root["api_result"].Value<int>() == 1;
+			}
+			catch
+			{
+				isSuccess = false;
+			}
+
+			if (!isSuccess) return true;
+
+			// requestBody から api_ship_id を取得
+			int shipId = -1;
+			if (!string.IsNullOrEmpty(requestBody))
+			{
+				try
+				{
+					var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+					foreach (var p in pairs)
+					{
+						var kv = p.Split(new[] { '=' }, 2);
+						if (kv.Length != 2) continue;
+						if (kv[0] == "api_ship_id" && int.TryParse(Uri.UnescapeDataString(kv[1]), out var id))
+						{
+							shipId = id;
+							break;
+						}
+					}
+				}
+				catch { }
+			}
+
+			if (shipId <= 0) return true;
+
+			// UI 更新
+			RunOnUi(() =>
+			{
+				try
+				{
+					var org = this.Homeport?.Organization;
+					var ship = org?.Ships?[shipId];
+					if (ship == null) return;
+
+					try
+					{
+						// RawData に対して安全に拡張スロットを追加（末尾に -1 / 0 を付与）
+						var raw = ship.RawData;
+
+						var oldSlots = raw.api_slot ?? new int[0];
+						var oldOnslots = raw.api_onslot ?? new int[0];
+
+						var newSlots = new int[oldSlots.Length + 1];
+						Array.Copy(oldSlots, newSlots, oldSlots.Length);
+						newSlots[newSlots.Length - 1] = -1;
+
+						var newOn = new int[oldOnslots.Length + 1];
+						Array.Copy(oldOnslots, newOn, oldOnslots.Length);
+						newOn[newOn.Length - 1] = 0;
+
+						raw.api_slot = newSlots;
+						raw.api_onslot = newOn;
+						raw.api_slotnum = Math.Max(raw.api_slotnum, newSlots.Length);
+
+						// Slot の再構築と艦隊再計算
+						ship.UpdateSlots();
+
+						var fleet = org.GetFleet(ship.Id);
+						if (fleet != null)
+						{
+							try { fleet.State.Calculate(); } catch { }
+							try { fleet.State.Update(); } catch { }
+							try { fleet.RaiseShipsUpdated(); } catch { }
+						}
+
+						try { org.NotifyUpdated(); } catch { }
+					}
+					catch { }
+				}
+				catch { }
+			});
+
+			return true;
+		}
+
+		/// <summary>
+		/// 改装系5 拡張スロットへの装備設定
+		/// </summary>
+		private bool TryHandleSlotsetEx(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/slotset_ex")) return false;
+
+			// requestBody から api_ship_id / api_slot_ex を試しに取得
+			int shipId = -1;
+			int slotExId = int.MinValue;
+			if (!string.IsNullOrEmpty(requestBody))
+			{
+				try
+				{
+					var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+					foreach (var p in pairs)
+					{
+						var kv = p.Split(new[] { '=' }, 2);
+						if (kv.Length != 2) continue;
+						var key = kv[0];
+						var val = Uri.UnescapeDataString(kv[1]);
+						if (key == "api_ship_id") int.TryParse(val, out shipId);
+						if (key == "api_slot_ex" || key == "api_slot_ex_id") int.TryParse(val, out slotExId);
+					}
+				}
+				catch { }
+			}
+
+			// レスポンス側から api_data.api_slot_ex 等が来ていればそれを優先する
+			try
+			{
+				var root = JToken.Parse(normalized);
+				var data = root["api_data"] ?? root;
+				if (data != null)
+				{
+					var tok = data["api_slot_ex"] ?? data.SelectToken("api_ship.api_slot_ex");
+					if (tok != null && tok.Type == JTokenType.Integer)
+					{
+						int parsed = tok.Value<int>();
+						slotExId = parsed;
+					}
+
+					// 要素が api_ship_data 配列の場合は該当艦から探す（保険）
+					var shipData = data["api_ship_data"];
+					if (shipData != null)
+					{
+						if (shipData.Type == JTokenType.Object)
+						{
+							var s = shipData;
+							var idTok = s["api_id"] ?? s["api_ship_id"];
+							if (idTok != null && idTok.Type == JTokenType.Integer && shipId <= 0) shipId = idTok.Value<int>();
+							var exTok = s["api_slot_ex"];
+							if (exTok != null && exTok.Type == JTokenType.Integer) slotExId = exTok.Value<int>();
+						}
+						else if (shipData.Type == JTokenType.Array && shipId > 0)
+						{
+							foreach (var elem in shipData.Children())
+							{
+								var idTok = elem["api_id"] ?? elem["api_ship_id"];
+								if (idTok != null && idTok.Type == JTokenType.Integer && idTok.Value<int>() == shipId)
+								{
+									var exTok = elem["api_slot_ex"];
+									if (exTok != null && exTok.Type == JTokenType.Integer) slotExId = exTok.Value<int>();
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch { }
+
+			if (shipId <= 0) return true;
+
+			// UI 更新
+			RunOnUi(() =>
+			{
+				try
+				{
+					var org = this.Homeport?.Organization;
+					var ship = org?.Ships?[shipId];
+					if (ship == null) return;
+
+					try
+					{
+						if (slotExId != int.MinValue)
+						{
+							ship.RawData.api_slot_ex = slotExId;
+						}
+						else
+						{
+							// 情報がない場合は -1 にしておく（保険）
+							ship.RawData.api_slot_ex = -1;
+						}
+
+						// Slot の再構築と艦隊再計算
+						ship.UpdateSlots();
+
+						var fleet = org.GetFleet(ship.Id);
+						if (fleet != null)
+						{
+							try { fleet.State.Calculate(); } catch { }
+							try { fleet.State.Update(); } catch { }
+							try { fleet.RaiseShipsUpdated(); } catch { }
+						}
+
+						try { org.NotifyUpdated(); } catch { }
+					}
+					catch { }
+				}
+				catch { }
 			});
 
 			return true;
