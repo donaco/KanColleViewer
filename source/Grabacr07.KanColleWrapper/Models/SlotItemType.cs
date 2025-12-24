@@ -19,21 +19,21 @@ namespace Grabacr07.KanColleWrapper.Models
 		大型電探 = 13,
 		ソナー = 14,
 		爆雷 = 15,
-		追加装甲 = 16,
+		増設バルジ_ = 16,
 		機関部強化 = 17,
-		対空強化弾 = 18,
-		対艦強化弾 = 19,
+		三式弾 = 18,
+		徹甲弾 = 19,
 		VT信管 = 20,
 		対空機銃 = 21,
-		特殊潜航艇 = 22,
+		甲標的 = 22,
 		応急修理要員 = 23,
-		上陸用舟艇 = 24,
-		オートジャイロ = 25,
+		大発動艇 = 24,
+		回転翼機 = 25,
 		対潜哨戒機 = 26,
-		追加装甲_中型 = 27,
-		追加装甲_大型 = 28,
+		増設バルジ = 27,
+		大型バルジ = 28,
 		探照灯 = 29,
-		簡易輸送部材 = 30,
+		ドラム缶 = 30,
 		艦艇修理施設 = 31,
 		潜水艦魚雷 = 32,
 		照明弾 = 33,
@@ -49,15 +49,23 @@ namespace Grabacr07.KanColleWrapper.Models
 		戦闘糧食 = 43,
 		補給物資 = 44,
 		水上戦闘機 = 45,
-		特型内火艇 = 46,
+		内火艇 = 46,
 		陸上攻撃機 = 47,
 		局地戦闘機 = 48,
+		陸上偵察機 = 49,
+		輸送機材 = 50,
+		潜水艦装備 = 51,
+		陸戦部隊 = 52,
+		大型陸上機 = 53,
+		水上艦装備 = 54,
 		噴式戦闘機 = 56,
 		噴式戦闘爆撃機 = 57,
 		噴式攻撃機 = 58,
 		噴式偵察機 = 59,
+		噴式戦闘爆撃機II = 91,
 		大型電探_II = 93,
 		艦上偵察機_II = 94,
+		副砲II = 95,
 	}
 
 	public static class SlotItemTypeExtensions
@@ -74,11 +82,12 @@ namespace Grabacr07.KanColleWrapper.Models
 				case SlotItemType.水上偵察機:
 				case SlotItemType.水上爆撃機:
 				case SlotItemType.水上戦闘機:
-				case SlotItemType.オートジャイロ:
+				case SlotItemType.回転翼機:
 				case SlotItemType.対潜哨戒機:
 				case SlotItemType.大型飛行艇:
 				case SlotItemType.噴式戦闘機:
 				case SlotItemType.噴式戦闘爆撃機:
+				case SlotItemType.噴式戦闘爆撃機II:
 				case SlotItemType.噴式攻撃機:
 				case SlotItemType.噴式偵察機:
 					return true;

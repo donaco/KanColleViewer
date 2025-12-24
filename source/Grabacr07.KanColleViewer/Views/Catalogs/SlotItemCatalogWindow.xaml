@@ -69,6 +69,64 @@
 		<!-- #endregion -->
 
 		<DockPanel Grid.Row="1">
+			<!-- フィルター設定（艦娘一覧の UI を踏襲） -->
+			<Expander DockPanel.Dock="Top"
+					  Margin="8,8,8,0"
+					  IsExpanded="True">
+				<Expander.Header>
+					<TextBlock Text="フィルター設定"
+							   Style="{DynamicResource HeaderTextStyleKey}"
+							   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+				</Expander.Header>
+
+				<StackPanel>
+					<Border BorderThickness=".99"
+							BorderBrush="{DynamicResource BorderBrushKey}"
+							Padding="5">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" SharedSizeGroup="FilterName" />
+								<ColumnDefinition Width="10" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="*" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Margin="0,2">
+								<Run Text="装備種別" />
+								<Run Text=":" />
+							</TextBlock>
+
+							<CheckBox Grid.Row="0"
+									  Grid.Column="2"
+									  Content="すべて選択"
+									  IsChecked="{Binding CheckAllSlotItemTypes, Mode=TwoWay}"
+									  Margin="0,2" />
+
+							<ItemsControl Grid.Row="1"
+										  Grid.Column="2"
+										  ItemsSource="{Binding SlotItemTypes}">
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<WrapPanel />
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate>
+										<CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+												  Margin="0,2,15,2">
+											<TextBlock Text="{Binding DisplayName, Mode=OneWay}" />
+										</CheckBox>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</Grid>
+					</Border>
+				</StackPanel>
+			</Expander>
+
 			<Border DockPanel.Dock="Top"
 					Margin="8,8,8,0">
 				<metro2:CallMethodButton Content="表示の更新"

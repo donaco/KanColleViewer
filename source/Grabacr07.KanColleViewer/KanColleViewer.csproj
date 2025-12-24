@@ -234,6 +234,7 @@
     <Compile Include="Models\TaskbarProgress.cs" />
     <Compile Include="Models\Volume.cs" />
     <Compile Include="Models\Migration\_KanColleClientSettings.cs" />
+    <Compile Include="ViewModels\Catalogs\SlotItemTypeViewModel.cs" />
     <Compile Include="ViewModels\Composition\LoadFailedPluginViewModel.cs" />
     <Compile Include="ViewModels\Contents\ShipSpeedExtensions.cs" />
     <Compile Include="ViewModels\InformationWindowViewModel.cs" />
