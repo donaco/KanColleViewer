@@ -244,5 +244,55 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// 陸上対潜機。
 		/// </summary>
 		LandBasedAntiSubmarineAttacker = 47,
+
+		/// <summary>
+		/// 重爆撃機
+		/// </summary>
+		HeavyBomber = 49,
+
+		/// <summary>
+		/// 夜間水上偵察機
+		/// </summary>
+		NgihtReconSeaplane = 50,
+
+		/// <summary>
+		/// 夜間瑞雲
+		/// </summary>
+		NgihtZuiun = 51,
+
+		/// <summary>
+		/// 陸戦部隊
+		/// </summary>
+		GroundTroops = 52,
+
+		/// <summary>
+		/// 煙幕
+		/// </summary>
+		SmokeScreen = 54,
+
+		/// <summary>
+		/// 阻害気球。
+		/// </summary>
+		InhibitionBalloon = 55,
+
+		/// <summary>
+		/// 噴式局地戦闘機。
+		/// </summary>
+		JetInterceptorFighter = 56,
+
+		/// <summary>
+		/// 後進翼局地戦闘機。
+		/// </summary>
+		AsternInterceptorFighter = 57,
+
+		/// <summary>
+		/// 夜間爆撃機
+		/// </summary>
+		NightBomber = 58,
+
+		/// <summary>
+		/// 噴式戦闘爆撃機
+		/// </summary>
+		JetPowerededBomber3 = 59,
 	}
 }

@@ -144,7 +144,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				SlotItemType.応急修理要員,
 				SlotItemType.水上艦要員,
 				SlotItemType.航空要員,
-				SlotItemType.補給物資,
+				SlotItemType.洋上補給,
 
 				SlotItemType.陸上攻撃機,
 				SlotItemType.大型陸上機,
