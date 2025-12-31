@@ -601,6 +601,78 @@ namespace Grabacr07.KanColleWrapper
 					catch { apiMaterialArray = null; }
 				}
 
+				// 装備枠の増加を推測して即時反映
+				try
+				{
+					var bonusTok = data["api_bounus"] ?? data["api_bonus"];
+					if (bonusTok != null && bonusTok.Type == JTokenType.Array)
+					{
+						int deltaCapacity = 0;
+						foreach (var b in bonusTok.Children())
+						{
+							try
+							{
+								// 安全にフィールドを抽出（api_count / api_type / api_item.api_id 等）
+								var typeTok = b["api_type"];
+								var countTok = b["api_count"];
+								var itemTok = b["api_item"] ?? b["api_item_id"];
+
+								int type = typeTok?.Value<int>() ?? -1;
+								int count = countTok?.Value<int>() ?? 0;
+								int itemId = 0;
+								if (itemTok != null)
+								{
+									// api_item がオブジェクトの場合と単純値の場合の両対応
+									if (itemTok.Type == JTokenType.Object)
+										itemId = itemTok["api_id"]?.Value<int>() ?? 0;
+									else if (itemTok.Type == JTokenType.Integer)
+										itemId = itemTok.Value<int>();
+								}
+
+								// ヒューリスティック:
+								// - api_type == 13 は装備関連のボーナスである可能性が高い（サンプル参照）
+								// - または既知の bonus api_id (例: 901/902) を個別に扱う
+								if (itemId == 901)
+									deltaCapacity += 1;  // 901 は固定 +1
+								else if (itemId == 902)
+									deltaCapacity += 2;  // 902 は固定 +2（もしそういう仕様なら）
+								else if (type == 13)
+									deltaCapacity += Math.Max(0, count);  // その他は count を使用
+							}
+							catch { /* swallow */ }
+						}
+
+						if (deltaCapacity > 0)
+						{
+							// Admiral.api_max_slotitem を安全に増加させて UI に即時反映する
+							RunOnUi(() =>
+							{
+								try
+								{
+									var adm = this.Homeport?.Admiral;
+									if (adm == null) return;
+
+									// kcsapi_basic をクローンして api_max_slotitem を増加させ、Homeport.UpdateAdmiral で置換する。
+									// 直接 RawData を書き換えるより安定して通知が飛ぶ。
+									try
+									{
+										var json = JsonConvert.SerializeObject(adm.RawData);
+										var cloned = JsonConvert.DeserializeObject<Models.Raw.kcsapi_basic>(json);
+										if (cloned != null)
+										{
+											cloned.api_max_slotitem = (cloned.api_max_slotitem) + deltaCapacity;
+											this.Homeport.UpdateAdmiral(cloned);
+										}
+									}
+									catch { /* swallow */ }
+								}
+								catch { /* swallow */ }
+							});
+						}
+					}
+				}
+				catch { /* swallow */ }
+
 				// UI スレッドで安全に反映
 				if (apiMaterialArray != null)
 				{
