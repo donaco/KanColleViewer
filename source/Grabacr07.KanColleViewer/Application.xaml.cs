@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows;
 using CefSharp;
 using Grabacr07.KanColleViewer.Composition;
@@ -156,17 +157,56 @@ namespace Grabacr07.KanColleViewer
 
 			base.OnSessionEnding(e);
 		}
-
+		#region アプリ終了処理
 		protected override void OnExit(ExitEventArgs e)
 		{
-			Cef.Shutdown();
-			
-
 			this.ChangeState(ApplicationState.Terminate);
+
+			try
+			{
+				// CefSharp の完全シャットダウンを待つ
+				System.Diagnostics.Debug.WriteLine("Application: Shutting down CefSharp...");
+				Cef.Shutdown();
+
+				// CefSharp のシャットダウン完了を待機（最大5秒）
+				var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+				while (Cef.IsInitialized && stopwatch.ElapsedMilliseconds < 5000)
+				{
+					Thread.Sleep(100);
+				}
+				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown completed in {stopwatch.ElapsedMilliseconds}ms");
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown error: {ex}");
+			}
+
+			try
+			{
+				// Dispose を先に実行してリソース解放
+				System.Diagnostics.Debug.WriteLine("Application: Disposing resources...");
+				this.compositeDisposable.Dispose();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
+			}
+
 			base.OnExit(e);
 
-			this.compositeDisposable.Dispose();
+			// 強制的にプロセスを終了（最終手段）
+			// 通常は必要ないが、バックグラウンドスレッドが残っている場合の保険
+			try
+			{
+				System.Diagnostics.Debug.WriteLine("Application: Forcing process exit...");
+				Environment.Exit(0);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: Force exit error: {ex}");
+			}
 		}
+		#endregion
 
 		/// <summary>
 		/// <see cref="State"/> プロパティを更新し、<see cref="INotifyPropertyChanged.PropertyChanged"/> イベントを発生させます。
