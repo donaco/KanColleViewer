@@ -75,13 +75,33 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 				.AddTo(this);
 		}
 
+		#region 艦隊ウィンドウを安全に表示
+		/// <summary>
+		///	null チェックと例外処理を追加して、艦隊ウィンドウを安全に表示
+		///	</summary>
 		public void ShowFleetWindow()
 		{
-			var fleetwd = new FleetWindowViewModel();
-			var message = new TransitionMessage(fleetwd, TransitionMode.Normal, "FleetWindow.Show");
-			this.Messenger.Raise(message);
-		}
+			try
+			{
+				// null チェックを追加
+				if (KanColleClient.Current?.Homeport?.Organization == null)
+				{
+					System.Diagnostics.Debug.WriteLine("Organization is null when trying to show fleet window.");
+					return;
+				}
 
+				var fleetwd = new FleetWindowViewModel();
+				var message = new TransitionMessage(fleetwd, TransitionMode.Normal, "FleetWindow.Show");
+				this.Messenger.Raise(message);
+			}
+			catch (Exception ex)
+			{
+				// ログ出力（ファイルまたはデバッグ出力）
+				System.Diagnostics.Debug.WriteLine($"Error in ShowFleetWindow: {ex}");
+				// 必要に応じてユーザーにメッセージを表示
+			}
+		}
+		#endregion
 
 		private void UpdateFleets()
 		{

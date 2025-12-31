@@ -1,11 +1,12 @@
+using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
+using Grabacr07.KanColleWrapper;
+using Livet.Messaging;
+using MetroTrilithon.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
-using Grabacr07.KanColleWrapper;
-using MetroTrilithon.Mvvm;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
@@ -63,13 +64,26 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.Title = "艦隊詳細";
 			this.Fleets = new ItemViewModel[0];
 
-			KanColleClient.Current.Homeport.Organization
-				.Subscribe(nameof(Organization.Fleets), this.InitializeFleets)
-				.Subscribe(nameof(Organization.Combined), this.UpdateFleets)
-				.Subscribe(nameof(Organization.CombinedFleet), this.UpdateFleets)
-				.AddTo(this);
+			try
+			{
+				if (KanColleClient.Current?.Homeport?.Organization == null)
+				{
+					System.Diagnostics.Debug.WriteLine("Organization is null in FleetWindowViewModel constructor.");
+					return;
+				}
 
-			this.InitializeFleets();
+				KanColleClient.Current.Homeport.Organization
+					.Subscribe(nameof(Organization.Fleets), this.InitializeFleets)
+					.Subscribe(nameof(Organization.Combined), this.UpdateFleets)
+					.Subscribe(nameof(Organization.CombinedFleet), this.UpdateFleets)
+					.AddTo(this);
+
+				this.InitializeFleets();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error in FleetWindowViewModel constructor: {ex}");
+			}
 		}
 
 
@@ -79,6 +93,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.UpdateFleets();
 		}
 
+		#region 艦隊表示の更新
 		private void UpdateFleets()
 		{
 			// 現在の選択を一時保存（Fleet の ID が取れればそれを使う）
@@ -128,5 +143,6 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				}
 			}
 		}
+		#endregion
 	}
 }
