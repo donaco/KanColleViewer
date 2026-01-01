@@ -17,8 +17,9 @@ namespace Grabacr07.KanColleWrapper
 
 		/// <summary>
 		/// <see cref="SlotItems"/> の装備数を取得します。
+		/// ゲーム表示に合わせ、一部の消費系装備 (応急修理要員/戦闘糧食/洋上補給) は除外してカウントします。
 		/// </summary>
-		public int SlotItemsCount => this.SlotItems.Count;
+		public int SlotItemsCount => this.SlotItems.Values.Count(si => !IsExcludedFromDisplay(si));
 
 		#region SlotItems 変更通知プロパティ
 
@@ -92,7 +93,7 @@ namespace Grabacr07.KanColleWrapper
 		internal void Update(kcsapi_slotitem[] source)
 		{
 			this.SlotItems = new MemberTable<SlotItem>(source.Select(x => new SlotItem(x)));
-			foreach(var ship in this.homeport.Organization.Ships.Values) ship.UpdateSlots();
+			foreach (var ship in this.homeport.Organization.Ships.Values) ship.UpdateSlots();
 		}
 
 		internal void Update(kcsapi_useitem[] source)
@@ -172,6 +173,21 @@ namespace Grabacr07.KanColleWrapper
 		{
 			this.RaisePropertyChanged(nameof(this.SlotItems));
 			this.RaisePropertyChanged(nameof(this.SlotItemsCount));
+		}
+
+		// ゲーム表示に合わせてカウントから除外するタイプを判定します。
+		private static bool IsExcludedFromDisplay(SlotItem si)
+		{
+			if (si == null) return false;
+			switch (si.Info?.Type)
+			{
+				case SlotItemType.応急修理要員: // 23
+				case SlotItemType.戦闘糧食:     // 43
+				case SlotItemType.洋上補給:     // 44
+					return true;
+				default:
+					return false;
+			}
 		}
 	}
 }
