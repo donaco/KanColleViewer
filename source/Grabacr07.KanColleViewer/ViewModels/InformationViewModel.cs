@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.ViewModels.Contents;
+using Grabacr07.KanColleViewer.ViewModels.Contents.AirBases;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
 using Grabacr07.KanColleViewer.ViewModels.Dev;
 using Grabacr07.KanColleViewer.ViewModels.Settings;
@@ -17,6 +18,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		public OverviewViewModel Overview { get; }
 		public FleetsViewModel Fleets { get; }
+		public AirBasesViewModel AirBases { get; }
 		public ShipyardViewModel Shipyard { get; }
 		public QuestsViewModel Quests { get; }
 		public ExpeditionsViewModel Expeditions { get; }
@@ -59,6 +61,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			{
 				(this.Overview = new OverviewViewModel(this).AddTo(this)),
 				(this.Fleets = new FleetsViewModel().AddTo(this)),
+				(this.AirBases = new AirBasesViewModel().AddTo(this)),
 				(this.Shipyard = new ShipyardViewModel().AddTo(this)),
 				(this.Quests = new QuestsViewModel().AddTo(this)),
 				(this.Expeditions = new ExpeditionsViewModel(this.Fleets).AddTo(this)),

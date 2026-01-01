@@ -465,4 +465,7 @@
   <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
     <value>中破以上の艦娘</value>
   </data>
+  <data name="AirBases_Untaken" xml:space="preserve">
+    <value>ゲーム内で [海域選択] 画面を開いて、基地航空隊を取得してください。</value>
+  </data>
 </root>

@@ -1,13 +1,13 @@
+using Grabacr07.KanColleWrapper.Models;
+using Grabacr07.KanColleWrapper.Models.Raw;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq; // 追加
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using Grabacr07.KanColleWrapper.Models;
-using Grabacr07.KanColleWrapper.Models.Raw;
-using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq; // 追加
 using System.Windows; // 追加
 
 namespace Grabacr07.KanColleWrapper
@@ -46,6 +46,11 @@ namespace Grabacr07.KanColleWrapper
 		/// 任務情報を取得します。
 		/// </summary>
 		public Quests Quests { get; }
+
+		/// <summary>
+		/// 基地航空隊（航空隊）の情報を取得します。
+		/// </summary>
+		public AirBases AirBases { get; }
 
 		// UI スレッドへ安全に実行するヘルパー
 		private static void RunOnUi(Action action)
@@ -98,6 +103,7 @@ namespace Grabacr07.KanColleWrapper
 			this.Repairyard = new Repairyard(this, proxy);
 			this.Dockyard = new Dockyard(proxy);
 			this.Quests = new Quests(proxy);
+			this.AirBases = new AirBases();
 
 			// port は UI スレッドで反映する
 			proxy.api_port.TryParse<kcsapi_port>().Subscribe(x =>
@@ -111,6 +117,114 @@ namespace Grabacr07.KanColleWrapper
 					this.Organization.Combined = x.Data.api_combined_flag != 0;
 					this.Materials.Update(x.Data.api_material);
 				});
+			});
+
+			proxy.ApiSessionSource.Subscribe(session =>
+			{
+				try
+				{
+					var path = session.Request?.PathAndQuery ?? "<null>";
+					var len = session.Response?.Body?.Length ?? 0;
+
+					if (len <= 0) return;
+
+					// バイト列 → 文字列
+					var raw = System.Text.Encoding.UTF8.GetString(session.Response.Body);
+					raw = Internal.Extensions.NormalizeSvDataString(raw) ?? raw;
+
+					// 航空隊 / mapinfo を含むレスポンスを検出してパース
+					if (raw.Contains("\"api_air_base\"") || raw.Contains("\"api_map_info\""))
+					{
+						JToken root = null;
+						try { root = JToken.Parse(raw); } catch { root = null; }
+						if (root == null) return;
+
+						var data = root["api_data"] ?? root;
+						if (data == null) return;
+
+						var airBaseTok = data["api_air_base"];
+						var expandedTok = data["api_air_base_expanded_info"];
+
+						if (airBaseTok != null)
+						{
+							kcsapi_air_base[] ab = null;
+							kcsapi_air_base_expanded_info[] abi = null;
+							try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
+							try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
+
+							if (ab != null)
+							{
+								RunOnUi(() =>
+								{
+									try
+									{
+
+										this.AirBases?.Update(ab, abi);
+									}
+									catch
+									{
+									}
+								});
+							}
+						}
+					}
+				}
+				catch
+				{
+				}
+			});
+
+			// 生セッションから api_air_base 系を取り出して AirBases を更新する
+			proxy.api_port.Subscribe(session =>
+			{
+				try
+				{
+					// Session の Response.Body を参照してレスポンスボディを取得
+					var responseBody = session.Response.Body;
+					if (responseBody == null || responseBody.Length == 0) return;
+
+					// レスポンスボディを文字列に変換
+					var raw = System.Text.Encoding.UTF8.GetString(responseBody);
+					if (string.IsNullOrEmpty(raw)) return;
+
+					// "svdata=" プレフィックスを削除（ゲーム API の標準フォーマット）
+					raw = Internal.Extensions.NormalizeSvDataString(raw) ?? raw;
+
+					JToken root = null;
+					try { root = JToken.Parse(raw); } catch { root = null; }
+					if (root == null) return;
+
+					var data = root["api_data"] ?? root;
+					if (data == null) return;
+
+					var airBaseTok = data["api_air_base"] ?? data.SelectToken("api_air_base");
+					if (airBaseTok == null) return;
+
+					var airBaseExpandedTok = data["api_air_base_expanded_info"] ?? data.SelectToken("api_air_base_expanded_info");
+
+					kcsapi_air_base[] ab = null;
+					kcsapi_air_base_expanded_info[] abi = null;
+
+					try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
+					try { abi = airBaseExpandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
+
+					if (ab != null)
+					{
+						RunOnUi(() =>
+						{
+							try
+							{
+								this.AirBases?.Update(ab, abi);
+							}
+							catch
+							{
+							}
+						});
+					}
+				}
+				catch
+				{
+				}
 			});
 
 			// 個別 basic も UI スレッドで反映

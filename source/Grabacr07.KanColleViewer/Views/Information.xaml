@@ -16,6 +16,7 @@
 			 xmlns:devVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Dev"
 			 xmlns:dev="clr-namespace:Grabacr07.KanColleViewer.Views.Dev"
 			 xmlns:vm1="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
+			 xmlns:airBasesVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.AirBases"
 			 mc:Ignorable="d"
 			 d:DesignWidth="800"
 			 d:DesignHeight="400"
@@ -88,6 +89,9 @@
 				</DataTemplate>
 				<DataTemplate DataType="{x:Type vmFleets:FleetsViewModel}">
 					<contents:Fleets />
+				</DataTemplate>
+				<DataTemplate DataType="{x:Type airBasesVm:AirBasesViewModel}">
+					<contents:AirBases />
 				</DataTemplate>
 				<DataTemplate DataType="{x:Type vmContents:ShipyardViewModel}">
 					<contents:Shipyard />

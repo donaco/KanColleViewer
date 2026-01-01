@@ -272,6 +272,7 @@ namespace Grabacr07.KanColleWrapper
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
 				if (TryHandleMapStart(url, requestBody)) return;
+				if (TryHandleMapInfo(url, normalized)) return;
 
 				// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
@@ -421,6 +422,57 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
+			return true;
+		}
+
+		/// <summary>
+		/// 基地航空隊
+		/// </summary>
+		private bool TryHandleMapInfo(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/mapinfo")) return false;
+
+			try
+			{
+				JToken root = null;
+				try { root = JToken.Parse(normalized); } catch { root = null; }
+				var data = root?["api_data"] ?? root;
+				if (data == null) return true;
+
+				var airBaseTok = data["api_air_base"] ?? data.SelectToken("api_air_base");
+				if (airBaseTok == null) return true;
+
+				var expandedTok = data["api_air_base_expanded_info"] ?? data.SelectToken("api_air_base_expanded_info");
+
+				kcsapi_air_base[] ab = null;
+				kcsapi_air_base_expanded_info[] abi = null;
+
+				try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
+				try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
+
+				if (ab != null)
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							// Homeport が未初期化の可能性があるので安全に作成してから反映
+							if (this.Homeport == null) this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+							this.Homeport?.AirBases?.Update(ab, abi);
+							System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Updated AirBases with {ab.Length} entries");
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Update failed: {ex}");
+						}
+					});
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Exception: {ex}");
+			}
+
 			return true;
 		}
 

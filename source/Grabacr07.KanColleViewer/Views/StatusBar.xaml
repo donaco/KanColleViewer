@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Grabacr07.KanColleViewer.Views.StatusBar"
+<UserControl x:Class="Grabacr07.KanColleViewer.Views.StatusBar"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,6 +7,7 @@
 			 xmlns:vm="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 			 xmlns:vmFleets="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.Fleets"
 			 xmlns:vmContents="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
+			 xmlns:airBasesVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.AirBases"
 			 xmlns:dev="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Dev"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
@@ -68,6 +69,7 @@
 								   MinWidth="85" />
 					</StackPanel>
 				</DataTemplate>
+				<DataTemplate DataType="{x:Type airBasesVm:AirBasesViewModel}" />
 				<DataTemplate DataType="{x:Type vmContents:ShipyardViewModel}" />
 				<DataTemplate DataType="{x:Type vmContents:QuestsViewModel}" />
 				<DataTemplate DataType="{x:Type vmContents:ExpeditionsViewModel}" />

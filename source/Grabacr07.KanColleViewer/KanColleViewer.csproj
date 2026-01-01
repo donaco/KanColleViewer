@@ -236,6 +236,9 @@
     <Compile Include="Models\Migration\_KanColleClientSettings.cs" />
     <Compile Include="ViewModels\Catalogs\SlotItemTypeViewModel.cs" />
     <Compile Include="ViewModels\Composition\LoadFailedPluginViewModel.cs" />
+    <Compile Include="ViewModels\Contents\AirBases\AirBasesViewModel.cs" />
+    <Compile Include="ViewModels\Contents\AirBases\AirBaseViewModel.cs" />
+    <Compile Include="ViewModels\Contents\AirBases\AirBaseInfoViewModel.cs" />
     <Compile Include="ViewModels\Contents\ShipSpeedExtensions.cs" />
     <Compile Include="ViewModels\InformationWindowViewModel.cs" />
     <Compile Include="ViewModels\KanColleWindowViewModel.cs" />
@@ -303,6 +306,9 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Contents\AirBases.xaml.cs">
+      <DependentUpon>AirBases.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Contents\StateDetailIndicator.xaml.cs">
       <DependentUpon>StateDetailIndicator.xaml</DependentUpon>
     </Compile>
@@ -314,6 +320,8 @@
     </Compile>
     <Compile Include="Views\Controls\MetroComboBox.cs" />
     <Compile Include="Views\Converters\RangeToBooleanConverter.cs" />
+    <Compile Include="Views\Converters\StringToSlotItemIconTypeConverter.cs" />
+    <Compile Include="Views\Converters\StringToVisibilityConverter.cs" />
     <Compile Include="Views\InformationWindow.xaml.cs">
       <DependentUpon>InformationWindow.xaml</DependentUpon>
     </Compile>
@@ -447,6 +455,9 @@
     </Page>
     <Page Include="Views\Catalogs\SlotItemCatalogWindow.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Contents\AirBases.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Contents\StateDetailIndicator.xaml">

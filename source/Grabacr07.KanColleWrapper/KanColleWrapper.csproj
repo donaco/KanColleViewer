@@ -141,6 +141,7 @@
   <ItemGroup>
     <Compile Include="ApiDataDeserializer.cs" />
     <Compile Include="CapturedProcessor.cs" />
+    <Compile Include="AirBases.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
     <Compile Include="Annotations\DarkAttribute.cs" />
     <Compile Include="Annotations\ElementalAttribute.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="DisposableNotifier.cs" />
     <Compile Include="Dockyard.cs" />
     <Compile Include="EnumerableEx.cs" />
+    <Compile Include="Models\AirBaseInfo.cs" />
     <Compile Include="Models\CombinedFleet.cs" />
     <Compile Include="Models\FleetSpeed.cs" />
     <Compile Include="Models\FleetState.cs" />
@@ -163,6 +165,9 @@
     <Compile Include="Models\ConditionRejuvenatedEventArgs.cs" />
     <Compile Include="Models\CreatedSlotItem.cs" />
     <Compile Include="Models\FleetCondition.cs" />
+    <Compile Include="Models\Raw\kcsapi_air_base.cs" />
+    <Compile Include="Models\Raw\kcsapi_mapinfo.cs" />
+    <Compile Include="Models\Raw\kcsapi_air_base_expanded_info.cs" />
     <Compile Include="Models\Raw\kcsapi_mst_mapcell.cs" />
     <Compile Include="Models\Raw\kcsapi_require_info.cs" />
     <Compile Include="Models\Raw\kcsapi_ship_deck.cs" />
