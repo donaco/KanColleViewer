@@ -334,6 +334,7 @@ namespace Grabacr07.KanColleWrapper
 
 				// 基地航空隊
 				if (TryHandleSetPlane(url, normalized, requestBody)) return;
+				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
 				// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch { /* swallow */ }
@@ -4445,6 +4446,104 @@ namespace Grabacr07.KanColleWrapper
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// 基地航空隊 名称・出撃状態の変更
+		/// </summary>
+		private bool TryHandleAirCorpsChangeOrSet(string url, string normalized, string requestBody)
+		{
+			if (!(url.IndexOf("/kcsapi/api_req_air_corps/change_name", StringComparison.OrdinalIgnoreCase) >= 0
+				|| url.IndexOf("/kcsapi/api_req_air_corps/set_action", StringComparison.OrdinalIgnoreCase) >= 0))
+				return false;
+
+			try
+			{
+				// requestBody を安全にパース
+				var q = System.Web.HttpUtility.ParseQueryString(requestBody ?? "");
+
+				int ParseInt(params string[] keys)
+				{
+					foreach (var k in keys)
+					{
+						var v = q[k];
+						if (!string.IsNullOrEmpty(v) && int.TryParse(v, out var n)) return n;
+					}
+					return 0;
+				}
+
+				int areaId = ParseInt("api_area_id", "api_area");
+				int baseId = ParseInt("api_base_id", "api_baseid", "api_rid");
+				int actionKind = ParseInt("api_action_kind", "api_action", "action_kind");
+				var name = q["api_name"] ?? q["name"] ?? string.Empty;
+
+				// レスポンスに api_air_base が含まれていれば、それで丸ごと更新する（より確実）
+				try
+				{
+					if (!string.IsNullOrEmpty(normalized))
+					{
+						var root = JToken.Parse(normalized);
+						var data = root["api_data"] ?? root;
+						var airBaseTok = data?["api_air_base"] ?? data?.SelectToken("api_air_base");
+						var expandedTok = data?["api_air_base_expanded_info"] ?? data?.SelectToken("api_air_base_expanded_info");
+
+						if (airBaseTok != null)
+						{
+							kcsapi_air_base[] ab = null;
+							kcsapi_air_base_expanded_info[] abi = null;
+							try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
+							try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
+
+							if (ab != null)
+							{
+								RunOnUi(() =>
+								{
+									try { this.Homeport?.AirBases?.Update(ab, abi); }
+									catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[TryHandleAirCorps] Update fallback error: {ex}"); }
+								});
+
+								// 既にレスポンスで更新したので終了しても良い
+								return true;
+							}
+						}
+					}
+				}
+				catch { /* フォールバック失敗しても続行 */ }
+
+				// requestBody から得られた情報で個別更新を試みる
+				if (areaId > 0 && baseId > 0)
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							if (url.IndexOf("/change_name", StringComparison.OrdinalIgnoreCase) >= 0)
+							{
+								this.Homeport?.AirBases?.ApplyChangeName(areaId, baseId, name);
+							}
+							else if (url.IndexOf("/set_action", StringComparison.OrdinalIgnoreCase) >= 0)
+							{
+								this.Homeport?.AirBases?.ApplySetAction(areaId, baseId, actionKind);
+							}
+
+							// 念のため UI 全体更新も促す
+							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"[TryHandleAirCorps] Apply change error: {ex}");
+						}
+					});
+
+					return true;
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[TryHandleAirCorps] Exception: {ex}");
+			}
+
+			return true; // endpoint にマッチしているためハンドル済み扱いにする
 		}
 
 		#endregion

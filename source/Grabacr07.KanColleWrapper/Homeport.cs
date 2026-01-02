@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows; // 追加
+using System.Web;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -227,6 +228,70 @@ namespace Grabacr07.KanColleWrapper
 				}
 			});
 
+			// --- 追加: change_name / set_action の成功レスポンスを検知して即時反映 ---
+			proxy.ApiSessionSource
+				.Where(s => (s.Request?.PathAndQuery ?? "").StartsWith("/kcsapi/api_req_air_corps/", StringComparison.OrdinalIgnoreCase))
+				.Subscribe(session =>
+				{
+					try
+					{
+						// レスポンスを svdata として解析し、成功フラグを確認する
+						SvData sv;
+						if (!SvData.TryParse(session, out sv)) return;
+						if (!sv.IsSuccess) return;
+
+						// リクエストボディからパラメータを取得
+						var body = session.Request?.BodyAsString ?? session.Request?.BodyAsString ?? "";
+						var q = HttpUtility.ParseQueryString(body);
+
+						// path で振り分け
+						var path = session.Request?.PathAndQuery ?? "";
+
+						if (path.IndexOf("/change_name", StringComparison.OrdinalIgnoreCase) >= 0)
+						{
+							// 想定パラメータ: api_area_id, api_base_id, api_name
+							int areaId = ParseIntFromQuery(q, "api_area_id", "api_area");
+							int baseId = ParseIntFromQuery(q, "api_base_id", "api_baseid", "api_rid");
+							var name = q["api_name"] ?? q["name"] ?? "";
+
+							if (areaId > 0 && baseId > 0)
+							{
+								RunOnUi(() =>
+								{
+									try
+									{
+										this.AirBases?.ApplyChangeName(areaId, baseId, name);
+									}
+									catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Homeport.change_name apply] {ex}"); }
+								});
+							}
+						}
+						else if (path.IndexOf("/set_action", StringComparison.OrdinalIgnoreCase) >= 0)
+						{
+							// 想定パラメータ: api_area_id, api_base_id, api_action_kind
+							int areaId = ParseIntFromQuery(q, "api_area_id", "api_area");
+							int baseId = ParseIntFromQuery(q, "api_base_id", "api_baseid", "api_rid");
+							int actionKind = ParseIntFromQuery(q, "api_action_kind", "api_action", "action_kind");
+
+							if (areaId > 0 && baseId > 0)
+							{
+								RunOnUi(() =>
+								{
+									try
+									{
+										this.AirBases?.ApplySetAction(areaId, baseId, actionKind);
+									}
+									catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Homeport.set_action apply] {ex}"); }
+								});
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[Homeport.ApiSessionSource air_corps handler] {ex}");
+					}
+				});
+
 			// 個別 basic も UI スレッドで反映
 			proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
 			{
@@ -234,6 +299,17 @@ namespace Grabacr07.KanColleWrapper
 			});
 
 			proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment);
+		}
+
+		private static int ParseIntFromQuery(System.Collections.Specialized.NameValueCollection q, params string[] keys)
+		{
+			foreach (var k in keys)
+			{
+				var v = q[k];
+				int n;
+				if (!string.IsNullOrEmpty(v) && int.TryParse(v, out n)) return n;
+			}
+			return 0;
 		}
 
 		internal void UpdateAdmiral(kcsapi_basic data)

@@ -77,6 +77,48 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.AreaGroup = new MemberTable<AirBase>(airBasesByArea.Values);
 			System.Diagnostics.Debug.WriteLine($"[AirBases.Update] Set AreaGroup to {this.AreaGroup.Count} items.");
 		}
+
+		#region API-driven updates (change_name / set_action)
+
+		/// <summary>
+		/// API の change_name による名称変更を反映します（UI スレッドで呼んでください）。
+		/// </summary>
+		internal void ApplyChangeName(int areaId, int baseId, string newName)
+		{
+			try
+			{
+				if (this.AreaGroup == null) return;
+				if (!this.AreaGroup.ContainsKey(areaId)) return;
+
+				var target = this.AreaGroup[areaId];
+				target?.UpdateName(baseId, newName);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBases.ApplyChangeName] Error: {ex}");
+			}
+		}
+
+		/// <summary>
+		/// API の set_action による出撃状態変更を反映します（UI スレッドで呼んでください）。
+		/// </summary>
+		internal void ApplySetAction(int areaId, int baseId, int actionKind)
+		{
+			try
+			{
+				if (this.AreaGroup == null) return;
+				if (!this.AreaGroup.ContainsKey(areaId)) return;
+
+				var target = this.AreaGroup[areaId];
+				target?.UpdateAction(baseId, actionKind);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBases.ApplySetAction] Error: {ex}");
+			}
+		}
+
+		#endregion
 	}
 
 	/// <summary>
@@ -293,6 +335,56 @@ namespace Grabacr07.KanColleWrapper.Models
 
 			return icons.ToArray();
 		}
+		#endregion
+
+		#region 航空隊　名前・状態の個別更新
+
+		/// <summary>
+		/// 指定基地の名前を更新して AirBaseInfos / AirBaseNames を再構築・通知します。
+		/// </summary>
+		internal void UpdateName(int baseId, string newName)
+		{
+			try
+			{
+				var target = this._rawData?.FirstOrDefault(x => x.api_rid == baseId);
+				if (target == null) return;
+
+				target.api_name = newName ?? target.api_name;
+
+				// 再構築・通知
+				this.RebuildAirBaseInfos();
+				this.AirBaseNames = this._rawData?.Select(x => x.api_name).ToArray() ?? new string[0];
+				this.RaisePropertyChanged(nameof(this.AirBaseNames));
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateName] Error: {ex}");
+			}
+		}
+
+		/// <summary>
+		/// 出撃状態を更新して AirBaseInfos / ActionKind を再構築・通知します。
+		/// </summary>
+		internal void UpdateAction(int baseId, int actionKind)
+		{
+			try
+			{
+				var target = this._rawData?.FirstOrDefault(x => x.api_rid == baseId);
+				if (target == null) return;
+
+				target.api_action_kind = actionKind;
+
+				// 再構築・通知
+				this.RebuildAirBaseInfos();
+				this.ActionKind = this._rawData?.FirstOrDefault()?.api_action_kind ?? 0;
+				this.RaisePropertyChanged(nameof(this.ActionKind));
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateAction] Error: {ex}");
+			}
+		}
+
 		#endregion
 
 		#region 海域IDから海域名を取得
