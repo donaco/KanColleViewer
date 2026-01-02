@@ -8,6 +8,10 @@ namespace Grabacr07.KanColleWrapper.Models
 {
 	public enum SlotItemIconType
 	{
+		/// <summary>
+		/// 不明または空きスロット。
+		/// </summary>
+		Empty = 0,
 		Unknown = 0,
 
 		/// <summary>

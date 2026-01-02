@@ -23,8 +23,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		// 追加: 表示するホストのサフィックス（例: "kancolle-server.com"）
 		// null または空文字列ならフィルタなし（従来の挙動）
-		//public string HostSuffixFilter { get; set; } = null; // フィルターなし
-		public string HostSuffixFilter { get; set; } = "kancolle-server.com";
+		public string HostSuffixFilter { get; set; } = null; // フィルターなし
+		//public string HostSuffixFilter { get; set; } = "kancolle-server.com";
 
 		public void Add(CapturedHttp entry)
 		{

@@ -339,7 +339,7 @@
 															   Panel.ZIndex="1"
 															   Width="Auto"
 															   Height="Auto"
-															   Padding="1" />
+															   Padding="1,-2" />
 												</Grid>
 												<DataTemplate.Triggers>
 													<DataTrigger Binding="{Binding Equipped}"

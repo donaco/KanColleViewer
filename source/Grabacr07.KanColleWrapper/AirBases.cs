@@ -243,7 +243,10 @@ namespace Grabacr07.KanColleWrapper.Models
 					.Take(4)
 					.Select(p => p.api_slotid)
 					.ToArray() ?? new int[0],
-				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info)
+				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
+				EquipmentNames = GetEquipmentNames(x.api_plane_info),
+				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
+				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info)
 			}).ToArray() ?? new AirBaseInfo[0];
 
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
@@ -261,10 +264,10 @@ namespace Grabacr07.KanColleWrapper.Models
 				try
 				{
 					var slotId = plane.api_slotid;
-					// api_slotid が 0 以下の場合は空文字列を追加
+					// api_slotid が 0 以下の場合は "Empty" を追加
 					if (slotId <= 0)
 					{
-						icons.Add("");
+						icons.Add("Empty");
 						continue;
 					}
 
@@ -284,7 +287,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				}
 				catch
 				{
-					icons.Add("");
+					icons.Add("Empty");
 				}
 			}
 
@@ -309,6 +312,193 @@ namespace Grabacr07.KanColleWrapper.Models
 				default:
 					return $"海域 {areaId}";
 			}
+		}
+		#endregion
+
+		#region スロット変更時、情報更新
+		internal void UpdateFromSetPlane(kcsapi_plane_info[] planeInfo, ApiDistance distance, int baseId)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return;
+
+			try
+			{
+				// 対象航空隊（api_rid → api_base_id に変更）を特定
+				var targetBase = this._rawData?.FirstOrDefault(x => x.api_rid == baseId);
+				if (targetBase == null)
+				{
+					System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Target base with baseId={baseId} not found in area {this.AreaId}");
+					return;
+				}
+
+				// 行動半径を更新
+				if (distance != null)
+				{
+					targetBase.api_distance = distance;
+					System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Updated distance for area {this.AreaId}, baseId {baseId}: base={distance.api_base}, bonus={distance.api_bonus}");
+				}
+
+				// 各 api_plane_info で指定されたスロットを更新
+				foreach (var newPlane in planeInfo)
+				{
+					try
+					{
+						// 対応する既存の api_plane_info を探して更新
+						var existingPlane = targetBase.api_plane_info?.FirstOrDefault(p => p.api_squadron_id == newPlane.api_squadron_id);
+						if (existingPlane != null)
+						{
+							existingPlane.api_slotid = newPlane.api_slotid;
+							existingPlane.api_count = newPlane.api_count;
+							existingPlane.api_max_count = newPlane.api_max_count;
+							existingPlane.api_state = newPlane.api_state;
+							System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Updated area {this.AreaId}, baseId {baseId}, squadron {newPlane.api_squadron_id}: slotid={newPlane.api_slotid}");
+						}
+					}
+					catch
+					{
+					}
+				}
+
+				// AirBaseInfos を再計算して通知
+				RebuildAirBaseInfos();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Error: {ex}");
+			}
+		}
+		#endregion
+
+		#region スロット更新時、行動半径を再計算
+		private void RebuildAirBaseInfos()
+		{
+			try
+			{
+				this.AirBaseInfos = this._rawData?.Select(x => new AirBaseInfo
+				{
+					Name = x.api_name,
+					ActionKind = x.api_action_kind,
+					Distance = (x.api_distance?.api_base ?? 0) + (x.api_distance?.api_bonus ?? 0),
+					EquipmentSlotIds = x.api_plane_info?
+						.Take(4)
+						.Select(p => p.api_slotid)
+						.ToArray() ?? new int[0],
+					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
+					EquipmentNames = GetEquipmentNames(x.api_plane_info),
+					EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
+					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info)
+				}).ToArray() ?? new AirBaseInfo[0];
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBase.RebuildAirBaseInfos] Error: {ex}");
+			}
+		}
+		#endregion
+
+		#region 装備名の取得
+		private static string[] GetEquipmentNames(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new string[0];
+
+			var names = new System.Collections.Generic.List<string>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						names.Add("");
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					if (slotItem != null && slotItem.Info != null)
+					{
+						names.Add(slotItem.Info.Name);
+					}
+					else
+					{
+						names.Add("");
+					}
+				}
+				catch
+				{
+					names.Add("");
+				}
+			}
+
+			return names.ToArray();
+		}
+		#endregion
+
+		#region 装備改修値の取得
+		private static int[] GetEquipmentLevels(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var levels = new System.Collections.Generic.List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						levels.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					levels.Add(slotItem?.Level ?? 0);
+				}
+				catch
+				{
+					levels.Add(0);
+				}
+			}
+
+			return levels.ToArray();
+		}
+		#endregion
+
+		#region  装備熟練度の取得
+		private static int[] GetEquipmentAlvs(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var alvs = new System.Collections.Generic.List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						alvs.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					alvs.Add(slotItem?.Proficiency ?? 0);
+				}
+				catch
+				{
+					alvs.Add(0);
+				}
+			}
+
+			return alvs.ToArray();
 		}
 		#endregion
 

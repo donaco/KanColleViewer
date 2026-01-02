@@ -175,9 +175,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			this.UpdateProperties();
 
 			var listener = new PropertyChangedEventListener(airBase)
-		{
-			(sender, args) => this.UpdateProperties(),
-		};
+			{
+				(sender, args) => this.UpdateProperties(),
+			};
 			this.CompositeDisposable.Add(listener);
 		}
 
@@ -192,8 +192,18 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			this.ActionKindText = GetActionKindText(this.source.ActionKind);
 
 			// 各基地情報を ViewModel に変換
-			this.AirBaseInfos = this.source.AirBaseInfos?.Select(x => new AirBaseInfoViewModel(x.Name, x.ActionKind, x.Distance, x.EquipmentSlotIds, x.EquipmentIconTypes)).ToArray() ?? new AirBaseInfoViewModel[0];
+			this.AirBaseInfos = this.source.AirBaseInfos?.Select(x => new AirBaseInfoViewModel(
+				name: x.Name,
+				actionKind: x.ActionKind,
+				distance: x.Distance,
+				equipmentSlotIds: x.EquipmentSlotIds,
+				equipmentIconTypes: x.EquipmentIconTypes,
+				equipmentNames: x.EquipmentNames,
+				equipmentLevels: x.EquipmentLevels,
+				equipmentAlvs: x.EquipmentAlvs
+			)).ToArray() ?? new AirBaseInfoViewModel[0];
 		}
+
 		private static string GetActionKindText(int actionKind)
 		{
 			switch (actionKind)

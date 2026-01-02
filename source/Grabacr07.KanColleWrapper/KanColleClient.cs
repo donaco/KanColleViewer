@@ -254,8 +254,16 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
+			// 最初に必ず出力される診断
+			System.Diagnostics.Debug.WriteLine($"[ProcessCaptured-ENTRY] url={url}");
 
-			// 実処理は CapturedProcessor に委譲（初期化判定はこれで行う）
+			// 診断ログ：すべての URL を出力
+			try
+			{
+				System.Diagnostics.Debug.WriteLine($"[ProcessCaptured] Called with URL: {url}");
+			}
+			catch { }
+
 			try
 			{
 				this.capturedProcessor.Process(url, responseBody);
@@ -324,6 +332,8 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleNyukyoSpeedChange(url, normalized, requestBody)) return;
 				if (TryHandleNdockList(url, normalized)) return;
 
+				// 基地航空隊
+				if (TryHandleSetPlane(url, normalized, requestBody)) return;
 				// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch { /* swallow */ }
@@ -4326,6 +4336,117 @@ namespace Grabacr07.KanColleWrapper
 
 			return true;
 		}
+
+		/// <summary>
+		/// 基地航空隊のスロット変更
+		/// </summary>
+		private bool TryHandleSetPlane(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_air_corps/set_plane")) return false;
+
+			try
+			{
+				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Called");
+
+				// requestBody から api_area_id と api_base_id を抽出
+				int areaId = -1;
+				int baseId = -1;
+				if (!string.IsNullOrEmpty(requestBody))
+				{
+					try
+					{
+						var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+						foreach (var p in pairs)
+						{
+							var kv = p.Split(new[] { '=' }, 2);
+							if (kv.Length != 2) continue;
+							var key = kv[0];
+							var val = Uri.UnescapeDataString(kv[1]);
+							if (key == "api_area_id") int.TryParse(val, out areaId);
+							if (key == "api_base_id") int.TryParse(val, out baseId);
+						}
+					}
+					catch { }
+				}
+
+				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted areaId={areaId}, baseId={baseId}");
+
+				if (areaId <= 0 || baseId <= 0)
+				{
+					System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Invalid areaId or baseId");
+					return true;
+				}
+
+				// レスポンスから api_plane_info と api_distance を抽出
+				JToken root;
+				try { root = JToken.Parse(normalized); } catch { return true; }
+				var data = root["api_data"] ?? root;
+				if (data == null) return true;
+
+				kcsapi_plane_info[] planeInfo = null;
+				ApiDistance distance = null;
+
+				try
+				{
+					var planeTok = data["api_plane_info"];
+					if (planeTok != null && planeTok.Type == JTokenType.Array)
+					{
+						planeInfo = planeTok.ToObject<kcsapi_plane_info[]>();
+						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted {planeInfo?.Length ?? 0} plane info");
+					}
+				}
+				catch { planeInfo = null; }
+
+				try
+				{
+					var distanceTok = data["api_distance"];
+					if (distanceTok != null && distanceTok.Type == JTokenType.Object)
+					{
+						distance = distanceTok.ToObject<ApiDistance>();
+						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted distance: base={distance?.api_base}, bonus={distance?.api_bonus}");
+					}
+				}
+				catch { distance = null; }
+
+				if (planeInfo == null && distance == null)
+				{
+					System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] No plane info or distance found");
+					return true;
+				}
+
+				// UI スレッドで航空隊情報を一時更新
+				RunOnUi(() =>
+				{
+					try
+					{
+						var airBases = this.Homeport?.AirBases;
+						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] AirBases={airBases != null}");
+
+						if (airBases == null) return;
+
+						var airBase = airBases.AreaGroup?[areaId];
+						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] AirBase for area {areaId}={airBase != null}");
+
+						if (airBase != null)
+						{
+							airBase.UpdateFromSetPlane(planeInfo, distance, baseId);
+							System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Successfully updated AirBase");
+						}
+					}
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Error: {ex}");
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Exception: {ex}");
+			}
+
+			return true;
+		}
+
 		#endregion
 	}
 }
