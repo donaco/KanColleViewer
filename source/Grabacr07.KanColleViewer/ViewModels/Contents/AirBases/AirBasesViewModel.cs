@@ -45,7 +45,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			protected set { }
 		}
 
-		#region AirBases 変更通知プロパティ
+		#region AirBases
 
 		private AirBaseViewModel[] _AirBases;
 
@@ -57,6 +57,25 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				if (this._AirBases != value)
 				{
 					this._AirBases = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region SelectedAirBase
+
+		private AirBaseViewModel _SelectedAirBase;
+
+		public AirBaseViewModel SelectedAirBase
+		{
+			get { return this._SelectedAirBase; }
+			set
+			{
+				if (this._SelectedAirBase != value)
+				{
+					this._SelectedAirBase = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -160,6 +179,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				if (areaGroup == null)
 				{
 					this.AirBases = new AirBaseViewModel[0];
+					this.SelectedAirBase = null;
 					this.IsEmpty = true;
 					return;
 				}
@@ -171,6 +191,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 				this.IsEmpty = this.AirBases.Length == 0;
 
+				// 先頭を選択
+				this.SelectedAirBase = this.AirBases.FirstOrDefault();
+
 				foreach (var ab in this.AirBases)
 				{
 					this.airBaseListeners.Add(ab);
@@ -180,6 +203,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			catch
 			{
 				this.AirBases = new AirBaseViewModel[0];
+				this.SelectedAirBase = null;
 				this.IsEmpty = true;
 			}
 		}
