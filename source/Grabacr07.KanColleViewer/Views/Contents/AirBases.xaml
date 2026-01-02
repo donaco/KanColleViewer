@@ -19,6 +19,9 @@
 		<converters:StringToSlotItemIconTypeConverter x:Key="StringToSlotItemIconTypeConverter" />
 		<converters:RangeToBooleanConverter x:Key="RangeToBooleanConverter" />
 		<BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+		<Style x:Key="MaintenanceLevelTextStyle" TargetType="TextBlock" BasedOn="{StaticResource EmphaticTextStyleKey}">
+			<Setter Property="FontSize" Value="16" />
+		</Style>
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -43,11 +46,20 @@
 						 Style="{DynamicResource HorizontalFlatListBoxStyleKey}">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate DataType="{x:Type airBases:AirBaseViewModel}">
-							<Border Padding="10,0,10,0"
+							<Border Padding="10,0,12,0"
 									Background="Transparent">
-								<TextBlock Text="{Binding AreaName, Mode=OneWay}"
-										   Style="{DynamicResource HeaderTextStyleKey}"
-										   Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" />
+								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+									<!-- 海域タイル -->
+									<Border Width="14"
+											Height="14"
+											Background="White"
+											Margin="0,2,3,0"
+											CornerRadius="0" />
+									<!-- 海域名 -->
+									<TextBlock Text="{Binding AreaName, Mode=OneWay}"
+											   Style="{DynamicResource HeaderTextStyleKey}"
+											   Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" />
+								</StackPanel>
 							</Border>
 						</DataTemplate>
 					</ItemsControl.ItemTemplate>
@@ -58,7 +70,7 @@
 							  VerticalScrollBarVisibility="Auto"
 							  PanningMode="Both"
 							  DataContext="{Binding SelectedAirBase}">
-					<Grid>
+					<Grid Grid.IsSharedSizeScope="True">
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto" />
 							<RowDefinition Height="*" />
@@ -81,11 +93,11 @@
 								</Style>
 							</StackPanel.Style>
 							<TextBlock Text="整備Lv."
-									  Padding="10,5"
+									  Padding="10,4,0,4"
 									  Style="{DynamicResource DefaultTextStyleKey}" />
 							<TextBlock Text="{Binding MaintenanceLevel, Mode=OneWay}"
-									  Style="{DynamicResource EmphaticTextStyleKey}"
-									  Margin="5,0,0,0" />
+									  Style="{StaticResource MaintenanceLevelTextStyle}"
+									  Margin="2,-3,0,0" />
 						</StackPanel>
 
 						<!-- 航空隊情報 -->
@@ -94,32 +106,77 @@
 									 Margin="0">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate DataType="{x:Type airBases:AirBaseInfoViewModel}">
-									<Border Padding="10,8"
+									<Border Padding="10,8,0,4"
 											Background="Transparent"
 											BorderThickness="0,0,0,1"
-											BorderBrush="{DynamicResource SeparatorBrushKey}">
-										<StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-											<!-- 出撃状態を表示 -->
-											<TextBlock Text="{Binding ActionKindText, Mode=OneWay}"
-													  Style="{DynamicResource DefaultTextStyleKey}"
-													  Foreground="{DynamicResource AccentBrushKey}"
+											Margin="10,-7,10,5"
+											BorderBrush="#5a5a5b">
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto" SharedSizeGroup="ActionKind" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="Distance" />
+												<ColumnDefinition Width="*" SharedSizeGroup="Equipment" />
+											</Grid.ColumnDefinitions>
+
+											<!-- 出撃状態を表示（背景色を ActionKind に合わせて変更） -->
+											<TextBlock Grid.Column="0"
+													  Text="{Binding ActionKindText, Mode=OneWay}"
 													  FontSize="14"
 													  MinWidth="30"
-													  Margin="10,0,10,0" />
+													  Margin="6,0,14,1"
+													  VerticalAlignment="Center"
+													  Padding="8,2,8,3">
+												<TextBlock.Style>
+													<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
+														<Setter Property="Background" Value="Transparent" />
+														<Setter Property="Foreground" Value="White" />
+														<Style.Triggers>
+															<DataTrigger Binding="{Binding ActionKind}" Value="1">
+																<!-- 出撃: 赤 -->
+																<Setter Property="Background" Value="#FFB40000" />
+															</DataTrigger>
+															<DataTrigger Binding="{Binding ActionKind}" Value="2">
+																<!-- 防空: 黄 + 文字色を黒に -->
+																<Setter Property="Background" Value="#FFFFEA00" />
+																<Setter Property="Foreground" Value="Black" />
+															</DataTrigger>
+															<DataTrigger Binding="{Binding ActionKind}" Value="3">
+																<!-- 退避: 青 -->
+																<Setter Property="Background" Value="#0079e9" />
+															</DataTrigger>
+															<DataTrigger Binding="{Binding ActionKind}" Value="4">
+																<!-- 休息: 緑 -->
+																<Setter Property="Background" Value="#FF286414" />
+															</DataTrigger>
+															<DataTrigger Binding="{Binding ActionKind}" Value="0">
+																<!-- 待機: 変更無し -->
+																<Setter Property="Background" Value="Transparent" />
+															</DataTrigger>
+														</Style.Triggers>
+													</Style>
+												</TextBlock.Style>
+											</TextBlock>
+
 											<!-- 航空隊名 -->
-											<TextBlock Text="{Binding Name, Mode=OneWay}"
+											<TextBlock Grid.Column="1"
+													  Text="{Binding Name, Mode=OneWay}"
 													  Style="{DynamicResource DefaultTextStyleKey}"
 													  Foreground="{DynamicResource ActiveForegroundBrushKey}"
-													  FontSize="20" />
+													  FontSize="21"
+													  Margin="0,0,10,0" />
 											<!-- 行動半径を表示 -->
-											<TextBlock Text="{Binding Distance, Mode=OneWay, StringFormat='半径:{0}'}"
+											<TextBlock Grid.Column="2"
+													  Text="{Binding Distance, Mode=OneWay, StringFormat='半径:{0}'}"
 													  Style="{DynamicResource DefaultTextStyleKey}"
 													  Foreground="{DynamicResource ActiveForegroundBrushKey}"
 													  FontSize="12"
-													  Margin="10,0,0,0" />
+													  Margin="10,0,0,0"
+													  VerticalAlignment="Center" />
 											<!-- 装備スロット -->
-											<ItemsControl ItemsSource="{Binding EquipmentSlots, Mode=OneWay}"
-														 Margin="10,0,0,0">
+											<ItemsControl Grid.Column="3"
+														  ItemsSource="{Binding EquipmentSlots, Mode=OneWay}"
+														  Margin="10,0,0,0">
 												<ItemsControl.Template>
 													<ControlTemplate TargetType="{x:Type ItemsControl}">
 														<StackPanel IsItemsHost="True"
@@ -161,40 +218,26 @@
 																					<Setter Property="Fill"
 																							Value="#FF98B3CE" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="1">
-																					<Setter Property="Data"
-																							Value="M7,2 L9,2 9,14 7,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="1">
+																					<Setter Property="Data" Value="M7,2 L9,2 9,14 7,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="2">
-																					<Setter Property="Data"
-																							Value="M5,2 L7,2 7,14 5,14Z M8,2 L10,2 10,14 8,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="2">
+																					<Setter Property="Data" Value="M5,2 L7,2 7,14 5,14Z M8,2 L10,2 10,14 8,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="3">
-																					<Setter Property="Data"
-																							Value="M4,2 L6,2 6,14 4,14Z M7,2 L9,2 9,14 7,14Z M10,2 L12,2 12,14 10,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="3">
+																					<Setter Property="Data" Value="M4,2 L6,2 6,14 4,14Z M7,2 L9,2 9,14 7,14Z M10,2 L12,2 12,14 10,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="4">
-																					<Setter Property="Data"
-																							Value="M5.5,2 L7.5,2 10.5,14 8.5,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="4">
+																					<Setter Property="Data" Value="M5.5,2 L7.5,2 10.5,14 8.5,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="5">
-																					<Setter Property="Data"
-																							Value="M4,2 L6,2 9,14 7,14Z M7,2 L9,2 12,14 10,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="5">
+																					<Setter Property="Data" Value="M4,2 L6,2 9,14 7,14Z M7,2 L9,2 12,14 10,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="6">
-																					<Setter Property="Data"
-																							Value="M2,2 L4,2 7,14 5,14Z M5.5,2 L7.5,2 10.5,14 8.5,14Z M9,2 L11,2 14,14 12,14Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="6">
+																					<Setter Property="Data" Value="M2,2 L4,2 7,14 5,14Z M5.5,2 L7.5,2 10.5,14 8.5,14Z M9,2 L11,2 14,14 12,14Z" />
 																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}"
-																							 Value="7">
-																					<Setter Property="Data"
-																							Value="M4,2 L6,2 9,8 6,14 4,14 7,8Z M8,2 L10,2 13,8 10,14 8,14 11,8Z" />
+																				<DataTrigger Binding="{Binding Alv}" Value="7">
+																					<Setter Property="Data" Value="M4,2 L6,2 9,8 6,14 4,14 7,8Z M8,2 L10,2 13,8 10,14 8,14 11,8Z" />
 																				</DataTrigger>
 																			</Style.Triggers>
 																		</Style>
@@ -216,23 +259,17 @@
 															</Border>
 														</Grid>
 														<DataTemplate.Triggers>
-															<DataTrigger Binding="{Binding LevelText, Mode=OneWay}"
-																		 Value="">
-																<Setter TargetName="ItemLevelBlock"
-																		Property="Visibility"
-																		Value="Collapsed" />
+															<DataTrigger Binding="{Binding LevelText, Mode=OneWay}" Value="">
+																<Setter TargetName="ItemLevelBlock" Property="Visibility" Value="Collapsed" />
 															</DataTrigger>
-															<DataTrigger Binding="{Binding Alv}"
-																		 Value="0">
-																<Setter TargetName="ItemProficiencyBlock"
-																		Property="Visibility"
-																		Value="Collapsed" />
+															<DataTrigger Binding="{Binding Alv}" Value="0">
+																<Setter TargetName="ItemProficiencyBlock" Property="Visibility" Value="Collapsed" />
 															</DataTrigger>
 														</DataTemplate.Triggers>
 													</DataTemplate>
 												</ItemsControl.ItemTemplate>
 											</ItemsControl>
-										</StackPanel>
+										</Grid>
 									</Border>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
