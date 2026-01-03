@@ -9,7 +9,7 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		// 航空隊名
 		public string Name { get; set; }
-		
+
 		// 出撃状態(出撃・退避　等)
 		public int ActionKind { get; set; }
 
@@ -18,10 +18,10 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		// 装備ID
 		public int[] EquipmentSlotIds { get; set; }
-		
+
 		// 装備アイコンタイプ
 		public string[] EquipmentIconTypes { get; set; }
-		
+
 		// 装備名
 		public string[] EquipmentNames { get; set; }
 
@@ -30,5 +30,11 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		// 熟練度
 		public int[] EquipmentAlvs { get; set; }
+
+		// 対空値
+		public int[] EquipmentAntiAirs { get; set; }
+
+		// 搭載数
+		public int[] EquipmentCounts { get; set; }
 	}
 }

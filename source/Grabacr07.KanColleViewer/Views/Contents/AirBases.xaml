@@ -9,10 +9,23 @@
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:System="clr-namespace:System;assembly=mscorlib"
 			 xmlns:converters="clr-namespace:Grabacr07.KanColleViewer.Views.Converters"
+			 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
+			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"
+			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=MetroTrilithon.Desktop"
 			 mc:Ignorable="d"
 			 d:DesignWidth="800"
 			 d:DesignHeight="400"
 			 d:DataContext="{d:DesignInstance airBases:AirBasesViewModel}">
+
+	<i:Interaction.Triggers>
+		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
+										 MessageKey="AirBaseWindow.Show">
+			<livet:TransitionInteractionMessageAction Mode="NewOrActive"
+													  WindowType="views:AirBaseWindow"
+													  IsOwned="False" />
+		</livet:InteractionMessageTrigger>
+	</i:Interaction.Triggers>
 
 	<UserControl.Resources>
 		<converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
@@ -23,265 +36,286 @@
 			<Setter Property="FontSize" Value="16" />
 		</Style>
 	</UserControl.Resources>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
 
-		<ScrollViewer Grid.Row="0"
-					  Grid.RowSpan="2"
+		<!-- 行0: 海域タブ（ListBox） -->
+		<ListBox Grid.Row="0"
+				 Grid.Column="0"
+				 Padding="0"
+				 Margin="0,-4,0,0"
+				 ItemsSource="{Binding AirBases, Mode=OneWay}"
+				 SelectedValue="{Binding SelectedAirBase, Mode=TwoWay}"
+				 Style="{DynamicResource HorizontalFlatListBoxStyleKey}">
+			<ItemsControl.ItemTemplate>
+				<DataTemplate DataType="{x:Type airBases:AirBaseViewModel}">
+					<Border Padding="10,0,12,0"
+							Background="Transparent">
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+							<!-- 海域タイル -->
+							<Border Width="14"
+									Height="14"
+									Background="White"
+									Margin="0,2,3,0"
+									CornerRadius="0" />
+							<!-- 海域名 -->
+							<TextBlock Text="{Binding AreaName, Mode=OneWay}"
+									   Style="{DynamicResource HeaderTextStyleKey}"
+									   Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" />
+						</StackPanel>
+					</Border>
+				</DataTemplate>
+			</ItemsControl.ItemTemplate>
+		</ListBox>
+
+		<!-- 行0-1, 列1: 基地詳細ボタン（rowspan="2"相当） -->
+		<metro2:CallMethodButton Grid.Row="0"
+								 Grid.RowSpan="2"
+								 Grid.Column="1"
+								 Content="基地詳細"
+								 Margin="10,-7,10,0"
+								 Padding="12,16,12,16"
+								 VerticalAlignment="Center"
+								 MethodName="ShowAirBaseWindow"
+								 MethodTarget="{Binding}" />
+
+		<!-- 行1: 整備レベル -->
+		<StackPanel Grid.Row="1"
+					Grid.Column="0"
+					Orientation="Horizontal"
+					Margin="10,5,0,8"
+					VerticalAlignment="Center"
+					Background="#3f3f46"
+					DataContext="{Binding SelectedAirBase}">
+			<StackPanel.Style>
+				<Style TargetType="StackPanel">
+					<Setter Property="Visibility" Value="Visible" />
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding}" Value="{x:Null}">
+							<Setter Property="Visibility" Value="Collapsed" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</StackPanel.Style>
+			<TextBlock Text="整備Lv."
+					   Padding="8,4,0,4"
+					   Style="{DynamicResource DefaultTextStyleKey}" />
+			<TextBlock Text="{Binding MaintenanceLevel, Mode=OneWay}"
+					   Style="{StaticResource MaintenanceLevelTextStyle}"
+					   Margin="2,-3,0,0" />
+		</StackPanel>
+
+		<!-- 行2: 航空隊情報（colspan="2"相当） -->
+		<ScrollViewer Grid.Row="2"
+					  Grid.Column="0"
+					  Grid.ColumnSpan="2"
 					  VerticalScrollBarVisibility="Auto"
 					  PanningMode="Both">
-			<Grid>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="*" />
-				</Grid.RowDefinitions>
+			<ItemsControl ItemsSource="{Binding SelectedAirBase.AirBaseInfos, Mode=OneWay}"
+						  Margin="0"
+						  Grid.IsSharedSizeScope="True">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemContainerStyle>
+					<Style TargetType="ContentPresenter">
+						<Setter Property="HorizontalAlignment" Value="Stretch"/>
+					</Style>
+				</ItemsControl.ItemContainerStyle>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate DataType="{x:Type airBases:AirBaseInfoViewModel}">
+						<Border Padding="10,1,10,4"
+								Background="Transparent"
+								BorderThickness="0,0,0,1"
+								Margin="0,0,10,5"
+								BorderBrush="#5a5a5b"
+								HorizontalAlignment="Stretch">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" SharedSizeGroup="ActionKind" />
+									<ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
+									<ColumnDefinition Width="Auto" SharedSizeGroup="Distance" />
+									<ColumnDefinition Width="*" />
+								</Grid.ColumnDefinitions>
 
-				<!-- 海域タブ（ListBox） -->
-				<ListBox Grid.Row="0"
-						 ItemsSource="{Binding AirBases, Mode=OneWay}"
-						 SelectedValue="{Binding SelectedAirBase, Mode=TwoWay}"
-						 Style="{DynamicResource HorizontalFlatListBoxStyleKey}">
-					<ItemsControl.ItemTemplate>
-						<DataTemplate DataType="{x:Type airBases:AirBaseViewModel}">
-							<Border Padding="10,0,12,0"
-									Background="Transparent">
-								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-									<!-- 海域タイル -->
-									<Border Width="14"
-											Height="14"
-											Background="White"
-											Margin="0,2,3,0"
-											CornerRadius="0" />
-									<!-- 海域名 -->
-									<TextBlock Text="{Binding AreaName, Mode=OneWay}"
-											   Style="{DynamicResource HeaderTextStyleKey}"
-											   Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" />
-								</StackPanel>
-							</Border>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ListBox>
+								<!-- 出撃状態を表示 -->
+								<TextBlock Grid.Column="0"
+										   Text="{Binding ActionKindText, Mode=OneWay}"
+										   FontSize="14"
+										   MinWidth="30"
+										   Margin="6,0,14,1"
+										   VerticalAlignment="Center"
+										   Padding="8,2,8,3">
+									<TextBlock.Style>
+										<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
+											<Setter Property="Background" Value="Transparent" />
+											<Setter Property="Foreground" Value="White" />
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding ActionKind}" Value="1">
+													<Setter Property="Background" Value="#FFB40000" />
+												</DataTrigger>
+												<DataTrigger Binding="{Binding ActionKind}" Value="2">
+													<Setter Property="Background" Value="#FFFFEA00" />
+													<Setter Property="Foreground" Value="Black" />
+												</DataTrigger>
+												<DataTrigger Binding="{Binding ActionKind}" Value="3">
+													<Setter Property="Background" Value="#0079e9" />
+												</DataTrigger>
+												<DataTrigger Binding="{Binding ActionKind}" Value="4">
+													<Setter Property="Background" Value="#FF286414" />
+												</DataTrigger>
+												<DataTrigger Binding="{Binding ActionKind}" Value="0">
+													<Setter Property="Background" Value="Transparent" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</TextBlock.Style>
+								</TextBlock>
 
-				<!-- 海域コンテンツ -->
-				<ScrollViewer Grid.Row="1"
-							  VerticalScrollBarVisibility="Auto"
-							  PanningMode="Both"
-							  DataContext="{Binding SelectedAirBase}">
-					<Grid Grid.IsSharedSizeScope="True">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="*" />
-						</Grid.RowDefinitions>
+								<!-- 航空隊名 -->
+								<TextBlock Grid.Column="1"
+										   Text="{Binding Name, Mode=OneWay}"
+										   Style="{DynamicResource DefaultTextStyleKey}"
+										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+										   FontSize="21"
+										   Margin="0,0,10,0" />
+								<!-- 行動半径 -->
+								<TextBlock Grid.Column="2"
+										   Text="{Binding Distance, Mode=OneWay, StringFormat='半径:{0}'}"
+										   Style="{DynamicResource DefaultTextStyleKey}"
+										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+										   FontSize="12"
+										   Margin="10,0,10,15"
+										   VerticalAlignment="Center" />
 
-						<!-- 整備レベル -->
-						<StackPanel Grid.Row="0"
-								   Orientation="Horizontal"
-								   Margin="10,8"
-								   VerticalAlignment="Center"
-								   Background="#3f3f46">
-							<StackPanel.Style>
-								<Style TargetType="StackPanel">
-									<Setter Property="Visibility" Value="Visible" />
-									<Style.Triggers>
-										<DataTrigger Binding="{Binding}" Value="{x:Null}">
-											<Setter Property="Visibility" Value="Collapsed" />
-										</DataTrigger>
-									</Style.Triggers>
-								</Style>
-							</StackPanel.Style>
-							<TextBlock Text="整備Lv."
-									  Padding="10,4,0,4"
-									  Style="{DynamicResource DefaultTextStyleKey}" />
-							<TextBlock Text="{Binding MaintenanceLevel, Mode=OneWay}"
-									  Style="{StaticResource MaintenanceLevelTextStyle}"
-									  Margin="2,-3,0,0" />
-						</StackPanel>
+								<!-- 制空 -->
+								<TextBlock Grid.Column="2"
+										   Text="{Binding AirPower, Mode=OneWay, StringFormat='制空:{0}'}"
+										   Style="{DynamicResource DefaultTextStyleKey}"
+										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+										   FontSize="12"
+										   Width="57"
+										   Margin="10,15,10,0"
+										   VerticalAlignment="Top" />
+								<!-- 装備スロット -->
+								<ItemsControl Grid.Column="3"
+											  ItemsSource="{Binding EquipmentSlots, Mode=OneWay}"
+											  Margin="10,0,0,0">
+									<ItemsControl.Template>
+										<ControlTemplate TargetType="{x:Type ItemsControl}">
+											<StackPanel IsItemsHost="True"
+														Orientation="Horizontal" />
+										</ControlTemplate>
+									</ItemsControl.Template>
+									<ItemsControl.ItemTemplate>
+										<DataTemplate DataType="{x:Type airBases:EquipmentSlotViewModel}">
+											<!-- ツールチップ付きで装備アイコンを表示 -->
+											<Grid x:Name="Elements"
+												  ToolTip="{Binding ToolTipText, Mode=OneWay}"
+												  Background="Transparent"
+												  Margin="2,0">
+												<kcvc:SlotItemIcon Type="{Binding IconType, Mode=OneWay}"
+																   Width="30"
+																   Height="30" />
 
-						<!-- 航空隊情報 -->
-						<ItemsControl Grid.Row="1"
-									 ItemsSource="{Binding AirBaseInfos, Mode=OneWay}"
-									 Margin="0">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate DataType="{x:Type airBases:AirBaseInfoViewModel}">
-									<Border Padding="10,8,0,4"
-											Background="Transparent"
-											BorderThickness="0,0,0,1"
-											Margin="10,-7,10,5"
-											BorderBrush="#5a5a5b">
-										<Grid>
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="Auto" SharedSizeGroup="ActionKind" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="Distance" />
-												<ColumnDefinition Width="*" SharedSizeGroup="Equipment" />
-											</Grid.ColumnDefinitions>
+												<!-- 熟練度を右上に表示 -->
+												<Grid x:Name="ItemProficiencyBlock"
+													  Background="#66000000"
+													  VerticalAlignment="Top"
+													  HorizontalAlignment="Right"
+													  Panel.ZIndex="1"
+													  Width="12"
+													  Height="12">
+													<Path Stretch="Uniform"
+														  VerticalAlignment="Center"
+														  HorizontalAlignment="Center"
+														  Panel.ZIndex="1"
+														  Width="10"
+														  Height="10">
+														<Path.Style>
+															<Style TargetType="{x:Type Path}">
+																<Setter Property="Fill"
+																		Value="#FFD49C0F" />
+																<Style.Triggers>
+																	<DataTrigger Binding="{Binding Alv, Converter={StaticResource RangeToBooleanConverter}, ConverterParameter=1-3}"
+																				 Value="True">
+																		<Setter Property="Fill"
+																				Value="#FF98B3CE" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="1">
+																		<Setter Property="Data" Value="M7,2 L9,2 9,14 7,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="2">
+																		<Setter Property="Data" Value="M5,2 L7,2 7,14 5,14Z M8,2 L10,2 10,14 8,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="3">
+																		<Setter Property="Data" Value="M4,2 L6,2 6,14 4,14Z M7,2 L9,2 9,14 7,14Z M10,2 L12,2 12,14 10,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="4">
+																		<Setter Property="Data" Value="M5.5,2 L7.5,2 10.5,14 8.5,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="5">
+																		<Setter Property="Data" Value="M4,2 L6,2 9,14 7,14Z M7,2 L9,2 12,14 10,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="6">
+																		<Setter Property="Data" Value="M2,2 L4,2 7,14 5,14Z M5.5,2 L7.5,2 10.5,14 8.5,14Z M9,2 L11,2 14,14 12,14Z" />
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Alv}" Value="7">
+																		<Setter Property="Data" Value="M4,2 L6,2 9,8 6,14 4,14 7,8Z M8,2 L10,2 13,8 10,14 8,14 11,8Z" />
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</Path.Style>
+													</Path>
+												</Grid>
 
-											<!-- 出撃状態を表示（背景色を ActionKind に合わせて変更） -->
-											<TextBlock Grid.Column="0"
-													  Text="{Binding ActionKindText, Mode=OneWay}"
-													  FontSize="14"
-													  MinWidth="30"
-													  Margin="6,0,14,1"
-													  VerticalAlignment="Center"
-													  Padding="8,2,8,3">
-												<TextBlock.Style>
-													<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
-														<Setter Property="Background" Value="Transparent" />
-														<Setter Property="Foreground" Value="White" />
-														<Style.Triggers>
-															<DataTrigger Binding="{Binding ActionKind}" Value="1">
-																<!-- 出撃: 赤 -->
-																<Setter Property="Background" Value="#FFB40000" />
-															</DataTrigger>
-															<DataTrigger Binding="{Binding ActionKind}" Value="2">
-																<!-- 防空: 黄 + 文字色を黒に -->
-																<Setter Property="Background" Value="#FFFFEA00" />
-																<Setter Property="Foreground" Value="Black" />
-															</DataTrigger>
-															<DataTrigger Binding="{Binding ActionKind}" Value="3">
-																<!-- 退避: 青 -->
-																<Setter Property="Background" Value="#0079e9" />
-															</DataTrigger>
-															<DataTrigger Binding="{Binding ActionKind}" Value="4">
-																<!-- 休息: 緑 -->
-																<Setter Property="Background" Value="#FF286414" />
-															</DataTrigger>
-															<DataTrigger Binding="{Binding ActionKind}" Value="0">
-																<!-- 待機: 変更無し -->
-																<Setter Property="Background" Value="Transparent" />
-															</DataTrigger>
-														</Style.Triggers>
-													</Style>
-												</TextBlock.Style>
-											</TextBlock>
-
-											<!-- 航空隊名 -->
-											<TextBlock Grid.Column="1"
-													  Text="{Binding Name, Mode=OneWay}"
-													  Style="{DynamicResource DefaultTextStyleKey}"
-													  Foreground="{DynamicResource ActiveForegroundBrushKey}"
-													  FontSize="21"
-													  Margin="0,0,10,0" />
-											<!-- 行動半径を表示 -->
-											<TextBlock Grid.Column="2"
-													  Text="{Binding Distance, Mode=OneWay, StringFormat='半径:{0}'}"
-													  Style="{DynamicResource DefaultTextStyleKey}"
-													  Foreground="{DynamicResource ActiveForegroundBrushKey}"
-													  FontSize="12"
-													  Margin="10,0,0,0"
-													  VerticalAlignment="Center" />
-											<!-- 装備スロット -->
-											<ItemsControl Grid.Column="3"
-														  ItemsSource="{Binding EquipmentSlots, Mode=OneWay}"
-														  Margin="10,0,0,0">
-												<ItemsControl.Template>
-													<ControlTemplate TargetType="{x:Type ItemsControl}">
-														<StackPanel IsItemsHost="True"
-																   Orientation="Horizontal" />
-													</ControlTemplate>
-												</ItemsControl.Template>
-												<ItemsControl.ItemTemplate>
-													<DataTemplate DataType="{x:Type airBases:EquipmentSlotViewModel}">
-														<!-- ツールチップ付きで装備アイコンを表示 -->
-														<Grid x:Name="Elements"
-															  ToolTip="{Binding ToolTipText, Mode=OneWay}"
-															  Background="Transparent"
-															  Margin="2,0">
-															<kcvc:SlotItemIcon Type="{Binding IconType, Mode=OneWay}"
-																			   Width="30"
-																			   Height="30" />
-
-															<!-- 熟練度を右上に表示 -->
-															<Grid x:Name="ItemProficiencyBlock"
-																  Background="#66000000"
-																  VerticalAlignment="Top"
-																  HorizontalAlignment="Right"
-																  Panel.ZIndex="1"
-																  Width="12"
-																  Height="12">
-																<Path Stretch="Uniform"
-																	  VerticalAlignment="Center"
-																	  HorizontalAlignment="Center"
-																	  Panel.ZIndex="1"
-																	  Width="10"
-																	  Height="10">
-																	<Path.Style>
-																		<Style TargetType="{x:Type Path}">
-																			<Setter Property="Fill"
-																					Value="#FFD49C0F" />
-																			<Style.Triggers>
-																				<DataTrigger Binding="{Binding Alv, Converter={StaticResource RangeToBooleanConverter}, ConverterParameter=1-3}"
-																							 Value="True">
-																					<Setter Property="Fill"
-																							Value="#FF98B3CE" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="1">
-																					<Setter Property="Data" Value="M7,2 L9,2 9,14 7,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="2">
-																					<Setter Property="Data" Value="M5,2 L7,2 7,14 5,14Z M8,2 L10,2 10,14 8,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="3">
-																					<Setter Property="Data" Value="M4,2 L6,2 6,14 4,14Z M7,2 L9,2 9,14 7,14Z M10,2 L12,2 12,14 10,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="4">
-																					<Setter Property="Data" Value="M5.5,2 L7.5,2 10.5,14 8.5,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="5">
-																					<Setter Property="Data" Value="M4,2 L6,2 9,14 7,14Z M7,2 L9,2 12,14 10,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="6">
-																					<Setter Property="Data" Value="M2,2 L4,2 7,14 5,14Z M5.5,2 L7.5,2 10.5,14 8.5,14Z M9,2 L11,2 14,14 12,14Z" />
-																				</DataTrigger>
-																				<DataTrigger Binding="{Binding Alv}" Value="7">
-																					<Setter Property="Data" Value="M4,2 L6,2 9,8 6,14 4,14 7,8Z M8,2 L10,2 13,8 10,14 8,14 11,8Z" />
-																				</DataTrigger>
-																			</Style.Triggers>
-																		</Style>
-																	</Path.Style>
-																</Path>
-															</Grid>
-
-															<!-- 改修値を下端に表示 -->
-															<Border Background="#33000000"
-																	VerticalAlignment="Bottom"
-																	HorizontalAlignment="Right"
-																	Panel.ZIndex="1"
-																	Padding="1,0"
-																	Margin="0,0,0,-2">
-																<TextBlock x:Name="ItemLevelBlock"
-																		   Foreground="White"
-																		   Text="{Binding LevelText, Mode=OneWay}"
-																		   FontSize="9" />
-															</Border>
-														</Grid>
-														<DataTemplate.Triggers>
-															<DataTrigger Binding="{Binding LevelText, Mode=OneWay}" Value="">
-																<Setter TargetName="ItemLevelBlock" Property="Visibility" Value="Collapsed" />
-															</DataTrigger>
-															<DataTrigger Binding="{Binding Alv}" Value="0">
-																<Setter TargetName="ItemProficiencyBlock" Property="Visibility" Value="Collapsed" />
-															</DataTrigger>
-														</DataTemplate.Triggers>
-													</DataTemplate>
-												</ItemsControl.ItemTemplate>
-											</ItemsControl>
-										</Grid>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-					</Grid>
-				</ScrollViewer>
-			</Grid>
+												<!-- 改修値を下端に表示 -->
+												<Border Background="#33000000"
+														VerticalAlignment="Bottom"
+														HorizontalAlignment="Right"
+														Panel.ZIndex="1"
+														Padding="1,0"
+														Margin="0,0,0,-2">
+													<TextBlock x:Name="ItemLevelBlock"
+															   Foreground="White"
+															   Text="{Binding LevelText, Mode=OneWay}"
+															   FontSize="9" />
+												</Border>
+											</Grid>
+											<DataTemplate.Triggers>
+												<DataTrigger Binding="{Binding LevelText, Mode=OneWay}" Value="">
+													<Setter TargetName="ItemLevelBlock" Property="Visibility" Value="Collapsed" />
+												</DataTrigger>
+												<DataTrigger Binding="{Binding Alv}" Value="0">
+													<Setter TargetName="ItemProficiencyBlock" Property="Visibility" Value="Collapsed" />
+												</DataTrigger>
+											</DataTemplate.Triggers>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
 		</ScrollViewer>
 
 		<!-- 未取得メッセージ -->
 		<TextBlock Grid.Row="0"
-				   Grid.RowSpan="2"
+				   Grid.RowSpan="3"
+				   Grid.Column="0"
+				   Grid.ColumnSpan="2"
 				   Text="{Binding Resources.AirBases_Untaken, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource DefaultTextStyleKey}"
 				   HorizontalAlignment="Center"

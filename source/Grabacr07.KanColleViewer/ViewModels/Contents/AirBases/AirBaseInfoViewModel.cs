@@ -16,6 +16,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		/// </summary>
 		public EquipmentSlotViewModel[] EquipmentSlots { get; }
 
+		/// <summary>
+		/// 制空値
+		/// </summary>
+		public int AirPower { get; }
+
 		public string ActionKindText
 		{
 			get
@@ -40,7 +45,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			string[] equipmentIconTypes,
 			string[] equipmentNames,
 			int[] equipmentLevels,
-			int[] equipmentAlvs)
+			int[] equipmentAlvs,
+			int[] equipmentAntiAirs,
+			int[] equipmentCounts)
 		{
 			this.Name = name;
 			this.ActionKind = actionKind;
@@ -59,11 +66,132 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 					name: equipmentNames?[i] ?? "",
 					level: equipmentLevels?[i] ?? 0,
 					alv: equipmentAlvs?[i] ?? 0,
-					iconType: equipmentIconTypes?[i] ?? "Empty"  // 空きスロットは "Empty"
+					iconType: equipmentIconTypes?[i] ?? "Empty",
+					antiAir: equipmentAntiAirs?[i] ?? 0,
+					count: equipmentCounts?[i] ?? 0
 				);
 			}
 
 			this.EquipmentSlots = slots;
+
+			// 制空値を計算
+			this.AirPower = CalculateAirPower(slots);
+		}
+
+		/// <summary>
+		/// 制空値を計算する
+		/// </summary>
+		private static int CalculateAirPower(EquipmentSlotViewModel[] slots)
+		{
+			double totalAirPower = 0;
+
+			foreach (var slot in slots)
+			{
+				if (slot.Count <= 0 || string.IsNullOrEmpty(slot.Name))
+					continue;
+
+				// 改修値補正
+				double levelBonus = GetLevelBonus(slot.IconType, slot.Level);
+
+				// 内部熟練度
+				int internalAlv = GetInternalAlv(slot.Alv);
+
+				// 制空ボーナス
+				int airPowerBonus = GetAirPowerBonus(slot.IconType, internalAlv);
+
+				// 制空値 = (対空 + 改修値補正) × √搭載数 + √(内部熟練度/10) + 制空ボーナス
+				double slotAirPower = (slot.AntiAir + levelBonus) * Math.Sqrt(slot.Count)
+									+ Math.Sqrt(internalAlv / 10.0)
+									+ airPowerBonus;
+
+				totalAirPower += Math.Floor(slotAirPower);
+			}
+
+			return (int)totalAirPower;
+		}
+
+		/// <summary>
+		/// 改修値補正を取得する
+		/// </summary>
+		private static double GetLevelBonus(string iconType, int level)
+		{
+			if (level <= 0) return 0;
+
+			// 陸上攻撃機、大型陸上機
+			if (iconType == "LandBasedAttacker" || iconType == "HeavyBomber")
+			{
+				// ★1=0.5, ★2=0.7, ... ★10=1.58 (√level × 0.5)
+				return Math.Sqrt(level) * 0.5;
+			}
+
+			// 艦上戦闘機、陸軍戦闘機、局地戦闘機、水上戦闘機、夜間戦闘機
+			if (iconType == "Fighter" || iconType == "NightFighter" ||
+				iconType == "SeaplaneFighter" ||
+				iconType == "LandBasedFighter" ||
+				iconType == "InterceptorFighter" || iconType == "JetInterceptorFighter" || iconType == "AsternInterceptorFighter")
+			{
+				// ★1=0.2, ★2=0.4, ... ★10=2.0 (level × 0.2)
+				return level * 0.2;
+			}
+
+			// その他
+			return 0;
+		}
+
+		/// <summary>
+		/// 熟練度(Alv)から内部熟練度を取得する
+		/// </summary>
+		private static int GetInternalAlv(int alv)
+		{
+			// 各熟練度の中央値を使用
+			switch (alv)
+			{
+				case 0: return 0;
+				case 1: return 10;
+				case 2: return 25;
+				case 3: return 40;
+				case 4: return 55;
+				case 5: return 70;
+				case 6: return 85;
+				case 7: return 100;
+				default: return 0;
+			}
+		}
+
+		/// <summary>
+		/// 制空ボーナスを取得する
+		/// </summary>
+		private static int GetAirPowerBonus(string iconType, int internalAlv)
+		{
+			// 艦上戦闘機、水上戦闘機、陸軍戦闘機、局地戦闘機
+			if (iconType == "Fighter" || iconType == "NightFighter" ||
+				iconType == "SeaplaneFighter" ||
+				iconType == "LandBasedFighter" ||
+				iconType == "InterceptorFighter" || iconType == "JetInterceptorFighter" || iconType == "AsternInterceptorFighter")
+			{
+				if (internalAlv >= 100) return 22;
+				if (internalAlv >= 85) return 14;
+				if (internalAlv >= 70) return 14;
+				if (internalAlv >= 55) return 9;
+				if (internalAlv >= 40) return 5;
+				if (internalAlv >= 25) return 2;
+				return 0;
+			}
+
+			// 水上爆撃機
+			if (iconType == "ReconSeaplane" || iconType == "NgihtZuiun")
+			{
+				if (internalAlv >= 100) return 6;
+				if (internalAlv >= 85) return 3;
+				if (internalAlv >= 70) return 3;
+				if (internalAlv >= 55) return 1;
+				if (internalAlv >= 40) return 1;
+				if (internalAlv >= 25) return 1;
+				return 0;
+			}
+
+			// その他
+			return 0;
 		}
 	}
 
@@ -77,26 +205,28 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		public int Level { get; }
 		public int Alv { get; }
 		public string IconType { get; }
+		public int AntiAir { get; }
+		public int Count { get; }
 
 		/// <summary>
 		/// ツールチップ表示用のテキスト
-		/// 例: "彩雲 ★+2 (熟練度7)"
 		/// </summary>
 		public string ToolTipText { get; }
 
 		/// <summary>
 		/// アイコン下部に表示する改修値テキスト
-		/// 例: "★+2" または "★MAX"
 		/// </summary>
 		public string LevelText { get; }
 
-		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType)
+		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType, int antiAir, int count)
 		{
 			this.SlotId = slotId;
 			this.Name = name;
 			this.Level = level;
 			this.Alv = alv;
 			this.IconType = iconType;
+			this.AntiAir = antiAir;
+			this.Count = count;
 
 			// 改修値テキストを構築
 			if (level >= 10)

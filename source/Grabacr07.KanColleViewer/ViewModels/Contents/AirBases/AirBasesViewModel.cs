@@ -6,6 +6,7 @@ using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Livet;
 using Livet.EventListeners;
+using Livet.Messaging;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using StatefulModel;
@@ -216,6 +217,33 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			}
 
 			base.Dispose(disposing);
+		}
+
+		/// <summary>
+		/// 基地詳細ウィンドウを表示する（選択中の基地を渡す）
+		/// </summary>
+		public void ShowAirBaseWindow()
+		{
+			try
+			{
+				if (this.SelectedAirBase == null)
+				{
+					System.Diagnostics.Debug.WriteLine("SelectedAirBase is null");
+					return;
+				}
+
+				System.Diagnostics.Debug.WriteLine($"ShowAirBaseWindow called with SelectedAirBase: {this.SelectedAirBase.AreaName}");
+
+				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this.SelectedAirBase);
+				var message = new TransitionMessage(vm, TransitionMode.Normal, "AirBaseWindow.Show");
+				this.Messenger.Raise(message);
+
+				System.Diagnostics.Debug.WriteLine("Messenger.Raise called successfully");
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"ShowAirBaseWindow error: {ex}");
+			}
 		}
 	}
 }

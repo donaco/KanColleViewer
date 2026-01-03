@@ -288,7 +288,9 @@ namespace Grabacr07.KanColleWrapper.Models
 				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 				EquipmentNames = GetEquipmentNames(x.api_plane_info),
 				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
-				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info)
+				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
+				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
+				EquipmentCounts = GetEquipmentCounts(x.api_plane_info)
 			}).ToArray() ?? new AirBaseInfo[0];
 
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
@@ -478,7 +480,9 @@ namespace Grabacr07.KanColleWrapper.Models
 					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 					EquipmentNames = GetEquipmentNames(x.api_plane_info),
 					EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
-					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info)
+					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
+					EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
+					EquipmentCounts = GetEquipmentCounts(x.api_plane_info)
 				}).ToArray() ?? new AirBaseInfo[0];
 			}
 			catch (Exception ex)
@@ -494,7 +498,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return new string[0];
 
-			var names = new System.Collections.Generic.List<string>();
+			var names = new List<string>();
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -534,7 +538,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return new int[0];
 
-			var levels = new System.Collections.Generic.List<int>();
+			var levels = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -561,13 +565,13 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 		#endregion
 
-		#region  装備熟練度の取得
+		#region 装備熟練度の取得
 		private static int[] GetEquipmentAlvs(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
 				return new int[0];
 
-			var alvs = new System.Collections.Generic.List<int>();
+			var alvs = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -591,6 +595,62 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 
 			return alvs.ToArray();
+		}
+		#endregion
+
+		#region 装備対空値の取得
+		private static int[] GetEquipmentAntiAirs(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var antiAirs = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						antiAirs.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					antiAirs.Add(slotItem?.Info?.AA ?? 0);
+				}
+				catch
+				{
+					antiAirs.Add(0);
+				}
+			}
+
+			return antiAirs.ToArray();
+		}
+		#endregion
+
+		#region 搭載数の取得
+		private static int[] GetEquipmentCounts(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var counts = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					counts.Add(plane.api_count);
+				}
+				catch
+				{
+					counts.Add(0);
+				}
+			}
+
+			return counts.ToArray();
 		}
 		#endregion
 

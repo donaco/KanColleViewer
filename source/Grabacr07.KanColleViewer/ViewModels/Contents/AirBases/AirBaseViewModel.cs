@@ -200,7 +200,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				equipmentIconTypes: x.EquipmentIconTypes,
 				equipmentNames: x.EquipmentNames,
 				equipmentLevels: x.EquipmentLevels,
-				equipmentAlvs: x.EquipmentAlvs
+				equipmentAlvs: x.EquipmentAlvs,
+				equipmentAntiAirs: x.EquipmentAntiAirs,
+				equipmentCounts: x.EquipmentCounts
 			)).ToArray() ?? new AirBaseInfoViewModel[0];
 		}
 

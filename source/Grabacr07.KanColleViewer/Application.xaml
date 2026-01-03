@@ -3,6 +3,8 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:s="clr-namespace:System;assembly=mscorlib"
 			 xmlns:converters="http://schemes.grabacr.net/winfx/2015/personal/converters"
+			 xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
+			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"
 			 ShutdownMode="OnMainWindowClose">
 	<Application.Resources>
 		<ResourceDictionary>
@@ -26,6 +28,11 @@
 			<converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
 
 			<s:Double x:Key="StatusbarHeight">23</s:Double>
+
+			<!-- 基地詳細ウィンドウの DataTemplate 登録 -->
+			<DataTemplate DataType="{x:Type viewModels:AirBaseWindowViewModel}">
+				<views:AirBaseWindow />
+			</DataTemplate>
 		</ResourceDictionary>
 	</Application.Resources>
 </Application>
