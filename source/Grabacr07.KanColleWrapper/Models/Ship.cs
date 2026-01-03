@@ -363,6 +363,13 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.UpdateRawData(rawData);
 
 			this.Info = KanColleClient.Current.Master.Ships[rawData.api_ship_id] ?? ShipInfo.Dummy;
+
+			// 追加: Info.RawData が null の場合のガード
+			if (this.Info?.RawData == null)
+			{
+				return;
+			}
+
 			this.HP = new LimitedValue(this.RawData.api_nowhp, this.RawData.api_maxhp, 0);
 			this.Fuel = new LimitedValue(this.RawData.api_fuel, this.Info.RawData.api_fuel_max, 0);
 			this.Bull = new LimitedValue(this.RawData.api_bull, this.Info.RawData.api_bull_max, 0);
@@ -383,14 +390,19 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public void UpdateSlots()
 		{
+			// 追加: null チェック強化
 			this.Slots = this.RawData.api_slot
 				.Select(id => this.homeport.Itemyard.SlotItems[id])
-				.Select((t, i) => new ShipSlot(t, this.Info.RawData.api_maxeq.Get(i) ?? 0, this.RawData.api_onslot.Get(i) ?? 0))
+				.Where(x => x != null)  // null 装備をフィルタリング
+				.Select((t, i) => new ShipSlot(t, this.Info?.RawData?.api_maxeq.Get(i) ?? 0, this.RawData.api_onslot.Get(i) ?? 0))
 				.ToArray();
-			this.ExSlot = new ShipSlot(this.homeport.Itemyard.SlotItems[this.RawData.api_slot_ex], 0, 0);
+
+			var exSlotItem = this.homeport.Itemyard.SlotItems[this.RawData.api_slot_ex];
+			this.ExSlot = exSlotItem != null ? new ShipSlot(exSlotItem, 0, 0) : new ShipSlot(null, 0, 0);
+
 			this.EquippedItems = this.EnumerateAllEquippedItems().ToArray();
 
-			if (this.EquippedItems.Any(x => x.Item.Info.Type == SlotItemType.応急修理要員))
+			if (this.EquippedItems.Any(x => x.Item?.Info?.Type == SlotItemType.応急修理要員))
 			{
 				this.Situation |= ShipSituation.DamageControlled;
 			}

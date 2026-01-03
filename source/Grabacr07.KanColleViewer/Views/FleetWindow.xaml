@@ -528,7 +528,7 @@
 									<ControlTemplate TargetType="{x:Type ListBoxItem}">
 										<Border Background="{TemplateBinding Background}"
 												BorderBrush="{DynamicResource ActiveBorderBrushKey}"
-												BorderThickness="1,0,0,0">
+												BorderThickness="0,0,0,0">
 											<ContentPresenter />
 										</Border>
 									</ControlTemplate>

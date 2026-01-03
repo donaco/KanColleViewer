@@ -12,8 +12,8 @@
 				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   mc:Ignorable="d"
 				   Title="{Binding Title}"
-				   Width="800"
-				   Height="725"
+				   Width="955"
+				   Height="405"
 				   FontSize="12"
 				   Background="{DynamicResource ThemeBrushKey}"
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
@@ -77,8 +77,10 @@
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 
-			<!-- 左側: 海域タブリスト -->
-			<ListBox Grid.Column="0"
+				<!-- 左側: 海域タブリスト -->
+				<StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,0,4" MinWidth="228">
+				<ListBox Grid.Column="0"
+					  DockPanel.Dock="Top"
 								ItemsSource="{Binding AirBases, Mode=OneWay}"
 								SelectedItem="{Binding SelectedAirBase, Mode=TwoWay}"
 								Margin="4"
@@ -86,62 +88,95 @@
 								VerticalContentAlignment="Center"
 								MinWidth="100"
 								Background="{DynamicResource ThemeBrushKey}">
-				<ListBox.Template>
-					<ControlTemplate TargetType="{x:Type ListBox}">
-						<Border BorderThickness="1,1,1,1"
+					<ListBox.Template>
+						<ControlTemplate TargetType="{x:Type ListBox}">
+							<Border BorderThickness="1,1,1,1"
 								BorderBrush="{DynamicResource ActiveBorderBrushKey}"
 								Background="{TemplateBinding Background}">
-							<StackPanel IsItemsHost="True"
+								<StackPanel IsItemsHost="True"
 									   Orientation="Vertical" />
-						</Border>
-					</ControlTemplate>
-				</ListBox.Template>
+							</Border>
+						</ControlTemplate>
+					</ListBox.Template>
 
-				<ListBox.ItemContainerStyle>
-					<Style TargetType="{x:Type ListBoxItem}">
-						<Setter Property="MinHeight" Value="38" />
-						<Setter Property="Foreground" Value="{DynamicResource ActiveForegroundBrushKey}" />
-						<Setter Property="HorizontalContentAlignment" Value="Stretch" />
-						<Setter Property="VerticalContentAlignment" Value="Center" />
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="{x:Type ListBoxItem}">
-									<Border Background="{TemplateBinding Background}"
+					<ListBox.ItemContainerStyle>
+						<Style TargetType="{x:Type ListBoxItem}">
+							<Setter Property="MinHeight" Value="38" />
+							<Setter Property="Foreground" Value="{DynamicResource ActiveForegroundBrushKey}" />
+							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+							<Setter Property="VerticalContentAlignment" Value="Center" />
+							<Setter Property="Template">
+								<Setter.Value>
+									<ControlTemplate TargetType="{x:Type ListBoxItem}">
+										<Border Background="{TemplateBinding Background}"
 											BorderBrush="{DynamicResource ActiveBorderBrushKey}"
-											BorderThickness="0,0,0,1">
-										<ContentPresenter />
-									</Border>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-						<Style.Triggers>
-							<Trigger Property="IsMouseOver" Value="True">
-								<Setter Property="Background" Value="{DynamicResource AccentHighlightBrushKey}" />
-								<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
-							</Trigger>
-							<Trigger Property="IsSelected" Value="True">
-								<Setter Property="Background" Value="{DynamicResource AccentBrushKey}" />
-								<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
-							</Trigger>
-						</Style.Triggers>
-					</Style>
-				</ListBox.ItemContainerStyle>
+											BorderThickness="0,0,0,0">
+											<ContentPresenter />
+										</Border>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+							<Style.Triggers>
+								<Trigger Property="IsMouseOver" Value="True">
+									<Setter Property="Background" Value="{DynamicResource AccentHighlightBrushKey}" />
+									<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
+								</Trigger>
+								<Trigger Property="IsSelected" Value="True">
+									<Setter Property="Background" Value="{DynamicResource AccentBrushKey}" />
+									<Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrushKey}" />
+								</Trigger>
+							</Style.Triggers>
+						</Style>
+					</ListBox.ItemContainerStyle>
 
-				<ListBox.ItemTemplate>
-					<DataTemplate DataType="{x:Type airBases:AirBaseViewModel}">
-						<Border Padding="16,8">
-							<TextBlock Text="{Binding AreaName}"
+					<ListBox.ItemTemplate>
+						<DataTemplate DataType="{x:Type airBases:AirBaseViewModel}">
+							<Border Padding="16,8">
+								<TextBlock Text="{Binding AreaName}"
 									   HorizontalAlignment="Center"
 									   Style="{DynamicResource EmphaticTextStyleKey}" />
-						</Border>
-					</DataTemplate>
-				</ListBox.ItemTemplate>
-			</ListBox>
-			
-			<!-- 右側: 海域詳細情報 -->
+							</Border>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+				<!-- 追加表示: 選択海域の集計情報（ListBox の下に表示されます） -->
+				<Border Margin="4" Padding="8,6" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness=".99">
+					<Grid  HorizontalAlignment="Center">
+						<TextBlock Grid.Row="0" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2" FontSize="16">
+								<Run Text="※制空値は不正確、検証中。" />
+						</TextBlock>
+					</Grid>
+				</Border>
+				<!-- 追加表示: 選択海域の集計情報（ListBox の下に表示されます）
+				<Border Margin="4" Padding="8,6" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness=".99">
+					<Grid  HorizontalAlignment="Center">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Grid.Row="0" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2">
+								<Run Text="行動半径" /><Run Text=":" />
+							</TextBlock>
+							<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedAirBase.MaxDistance, Mode=OneWay}" Style="{DynamicResource EmphaticTextStyleKey}" Margin="4,2" />
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2">
+								<Run Text="制空値" /><Run Text=":" />
+							</TextBlock>
+							<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedAirBase.TotalAirPower, Mode=OneWay}" Style="{DynamicResource EmphaticTextStyleKey}" Margin="4,2" />
+						</Grid>
+					</Border>
+				 -->
+				</StackPanel>
+
+				<!-- 右側: 海域詳細情報 -->
 			<Border Grid.Column="1"
 					DataContext="{Binding SelectedAirBase}"
-					Margin="4">
+					Margin="0,4,0,0">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
@@ -162,13 +197,50 @@
 												Margin="4,0,4,5"
 												BorderBrush="{DynamicResource BorderBrushKey}"
 												BorderThickness=".99">
-											<StackPanel>
-												<TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" />
-												<TextBlock Text="{Binding ActionKindText}" FontSize="13" Margin="0,2,0,0" />
-												<TextBlock Text="{Binding Distance, StringFormat='半径: {0}'}" FontSize="13" Foreground="#c8c8c8" Margin="0,2,0,0"/>
-												<TextBlock Text="{Binding AirPower, StringFormat='制空: {0}'}" FontSize="13" Foreground="#c8c8c8" Margin="0,2,0,0"/>
-												<!-- 装備スロット -->
-												<ItemsControl ItemsSource="{Binding EquipmentSlots}" Margin="0,6,0,0">
+											<Grid>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="*" />
+												</Grid.ColumnDefinitions>
+												<Grid.RowDefinitions>
+													<RowDefinition Height="Auto" />
+													<RowDefinition Height="Auto" />
+												</Grid.RowDefinitions>
+
+												<!-- 左上: 航空隊名（rowspan=2） -->
+												<TextBlock Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+														   Text="{Binding Name}" 
+														   FontSize="20"
+														   VerticalAlignment="Center"
+														   Margin="0,0,20,0" />
+
+												<!-- 上段: 半径 -->
+												<TextBlock Grid.Row="0" Grid.Column="1"
+														   Text="{Binding Distance, StringFormat='半径: {0}'}" 
+														   FontSize="13" 
+														   Foreground="#c8c8c8"
+														   VerticalAlignment="Center"
+														   Margin="0,0,8,0" />
+
+												<!-- 上段: 制空 -->
+												<TextBlock Grid.Row="0" Grid.Column="2"
+														   Text="{Binding AirPower, StringFormat='制空: {0}'}" 
+														   FontSize="13" 
+														   Foreground="#c8c8c8"
+														   VerticalAlignment="Center"
+														   Margin="0,0,20,0" />
+
+												<!-- 右上: 装備スロット（rowspan=2） -->
+												<ItemsControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"
+															  ItemsSource="{Binding EquipmentSlots}"
+															  Margin="0,0,0,0">
+													<ItemsControl.ItemsPanel>
+														<ItemsPanelTemplate>
+															<StackPanel Orientation="Vertical" />
+														</ItemsPanelTemplate>
+													</ItemsControl.ItemsPanel>
 													<ItemsControl.ItemTemplate>
 														<DataTemplate>
 															<StackPanel Orientation="Horizontal" Margin="2,0" VerticalAlignment="Center">
@@ -230,7 +302,41 @@
 														</DataTemplate>
 													</ItemsControl.ItemTemplate>
 												</ItemsControl>
-											</StackPanel>
+
+												<!-- 下段: 出撃情報（colspan=2） -->
+												<TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+														   Text="{Binding ActionKindText}" 
+														   HorizontalAlignment="Center"
+														   FontSize="14" 
+														   Margin="0,-38,18,0"
+														   Padding="38,5,38,5"
+														   MinWidth="30">
+													<TextBlock.Style>
+														<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
+															<Setter Property="Background" Value="Transparent" />
+															<Setter Property="Foreground" Value="White" />
+															<Style.Triggers>
+																<DataTrigger Binding="{Binding ActionKind}" Value="1">
+																	<Setter Property="Background" Value="#FFB40000" />
+																</DataTrigger>
+																<DataTrigger Binding="{Binding ActionKind}" Value="2">
+																	<Setter Property="Background" Value="#FFFFEA00" />
+																	<Setter Property="Foreground" Value="Black" />
+																</DataTrigger>
+																<DataTrigger Binding="{Binding ActionKind}" Value="3">
+																	<Setter Property="Background" Value="#0079e9" />
+																</DataTrigger>
+																<DataTrigger Binding="{Binding ActionKind}" Value="4">
+																	<Setter Property="Background" Value="#FF286414" />
+																</DataTrigger>
+																<DataTrigger Binding="{Binding ActionKind}" Value="0">
+																	<Setter Property="Background" Value="#5d5d63" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+													</TextBlock.Style>
+												</TextBlock>
+											</Grid>
 										</Border>
 									</DataTemplate>
 								</ItemsControl.ItemTemplate>

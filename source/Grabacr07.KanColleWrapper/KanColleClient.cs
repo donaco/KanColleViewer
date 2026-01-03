@@ -254,16 +254,6 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
-			// 最初に必ず出力される診断
-			System.Diagnostics.Debug.WriteLine($"[ProcessCaptured-ENTRY] url={url}");
-
-			// 診断ログ：すべての URL を出力
-			try
-			{
-				System.Diagnostics.Debug.WriteLine($"[ProcessCaptured] Called with URL: {url}");
-			}
-			catch { }
-
 			try
 			{
 				this.capturedProcessor.Process(url, responseBody);

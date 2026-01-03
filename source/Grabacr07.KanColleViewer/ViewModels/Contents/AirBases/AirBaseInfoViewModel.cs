@@ -145,7 +145,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		/// </summary>
 		private static int GetInternalAlv(int alv)
 		{
-			// 各熟練度の中央値を使用
+			// 各熟練度の最大値を使用
 			switch (alv)
 			{
 				case 0: return 0;

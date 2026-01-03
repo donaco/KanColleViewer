@@ -147,6 +147,7 @@ Application Insights
 
 
 ■更新履歴
+2026/01/03 - version 4.6.2
 2025/12/24 - version 4.6.1
 2025/12/22 - version 4.6
 2025/12/19 - version 4.6 beta5
