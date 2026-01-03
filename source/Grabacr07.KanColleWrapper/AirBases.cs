@@ -49,7 +49,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (airBases == null || airBases.Length == 0)
 			{
 				this.AreaGroup = new MemberTable<AirBase>();
-				System.Diagnostics.Debug.WriteLine($"[AirBases.Update] airBases is null or empty, cleared AreaGroup.");
+				System.Diagnostics.Debug.WriteLine($"[AirBases.Update] airbases is null or empty, cleared AreaGroup.");
 				return;
 			}
 
@@ -290,7 +290,8 @@ namespace Grabacr07.KanColleWrapper.Models
 				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
 				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
 				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
-				EquipmentCounts = GetEquipmentCounts(x.api_plane_info)
+				EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
+				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 			}).ToArray() ?? new AirBaseInfo[0];
 
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
@@ -482,7 +483,8 @@ namespace Grabacr07.KanColleWrapper.Models
 					EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
 					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
 					EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
-					EquipmentCounts = GetEquipmentCounts(x.api_plane_info)
+					EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
+					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 				}).ToArray() ?? new AirBaseInfo[0];
 			}
 			catch (Exception ex)
@@ -498,7 +500,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return new string[0];
 
-			var names = new List<string>();
+			var names = new System.Collections.Generic.List<string>();
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -651,6 +653,27 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 
 			return counts.ToArray();
+		}
+
+		private static int[] GetEquipmentMaxCounts(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var maxCounts = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					maxCounts.Add(plane.api_max_count);
+				}
+				catch
+				{
+					maxCounts.Add(0);
+				}
+			}
+
+			return maxCounts.ToArray();
 		}
 		#endregion
 

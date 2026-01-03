@@ -9,16 +9,18 @@
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:airBases="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.AirBases"
 				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
+				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   mc:Ignorable="d"
 				   Title="{Binding Title}"
 				   Width="520"
-				   Height="420"
+				   Height="725"
 				   FontSize="12"
 				   Background="{DynamicResource ThemeBrushKey}"
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 				   WindowStartupLocation="CenterOwner"
+				   Topmost="{Binding Settings.TopMost.Value}"
 				   d:DataContext="{d:DesignInstance viewModels:AirBaseWindowViewModel}">
-	
+
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="ContentRendered">
 			<livet:LivetCallMethodAction MethodTarget="{Binding}" MethodName="Initialize" />
@@ -29,43 +31,138 @@
 		</i:EventTrigger>
 	</i:Interaction.Triggers>
 
-	<Grid Margin="8">
+	<!-- キャプションバー：FleetWindow と同様の構造に統一 -->
+	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 
-		<!-- ヘッダ -->
-		<TextBlock Text="{Binding SelectedAirBase.AreaName}" FontSize="18" FontWeight="Bold" Margin="4"/>
-		<TextBlock Grid.Row="1" Text="{Binding SelectedAirBase.BaseCount, StringFormat='基地数: {0}'}" Margin="4,0,4,8"/>
+		<Border metro:MetroWindow.IsCaptionBar="True"
+				Panel.ZIndex="100">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
 
-		<!-- 内容: 各基地（AirBaseInfoViewModel）を ItemsControl で表示 -->
-		<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-			<ItemsControl ItemsSource="{Binding SelectedAirBase.AirBaseInfos}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate DataType="{x:Type airBases:AirBaseInfoViewModel}">
-						<Border Padding="8" Margin="4" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="0,0,0,1">
-							<StackPanel>
-								<TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" />
-								<TextBlock Text="{Binding ActionKindText}" FontSize="13" Margin="0,2,0,0" />
-								<TextBlock Text="{Binding Distance, StringFormat='行動半径: {0}'}" FontSize="12" Margin="0,2,0,0"/>
-								<!-- 装備スロットは既存テンプレートに合わせ簡易表示 -->
-								<ItemsControl ItemsSource="{Binding EquipmentSlots}" Margin="0,6,0,0">
-									<ItemsControl.ItemTemplate>
-										<DataTemplate>
-											<StackPanel Orientation="Horizontal" Margin="2,0">
-												<kcvc:SlotItemIcon Type="{Binding IconType}" Width="24" Height="24" Margin="2,0"/>
-												<TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="6,0"/>
-											</StackPanel>
-										</DataTemplate>
-									</ItemsControl.ItemTemplate>
-								</ItemsControl>
-							</StackPanel>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
+				<kcvc:AppIcon Width="36"
+							  Height="36"
+							  Background="Transparent"
+							  AnchorVisibility="Collapsed"
+							  BandVisibility="Collapsed" />
+
+				<TextBlock Grid.Column="1"
+						   Text="{Binding Title}"
+						   Style="{DynamicResource CaptionTextStyleKey}"
+						   Margin="2,0,8,0" />
+
+				<!-- 追加: 最前面固定ピンボタン + システムボタン -->
+				<StackPanel Grid.Column="2"
+							Orientation="Horizontal"
+							VerticalAlignment="Top"
+							WindowChrome.IsHitTestVisibleInChrome="True">
+					<metro:CaptionButton IsChecked="{Binding Settings.TopMost.Value, Mode=TwoWay}"
+										 ToolTip="{Binding Resources.Settings_Window_TopMost, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+										 Style="{DynamicResource PinButtonStyleKey}" />
+					<metro:SystemButtons HorizontalAlignment="Right" VerticalAlignment="Top" />
+				</StackPanel>
+			</Grid>
+		</Border>
+
+		<!-- 既存コンテンツをキャプション下に配置 -->
+		<Grid Grid.Row="1" Margin="8">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<!-- ヘッダ -->
+			<TextBlock Text="{Binding SelectedAirBase.AreaName}" FontSize="18" FontWeight="Bold" Margin="4"/>
+
+			<!-- 内容: 各基地（AirBaseInfoViewModel）を ItemsControl で表示 -->
+			<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+				<ItemsControl ItemsSource="{Binding SelectedAirBase.AirBaseInfos}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type airBases:AirBaseInfoViewModel}">
+							<Border 
+								Padding="8" 
+								Margin="0,0,0,5" 
+								BorderBrush="{DynamicResource BorderBrushKey}" 
+								BorderThickness=".99">
+								<StackPanel>
+									<TextBlock Text="{Binding Name}" FontSize="20" />
+									<TextBlock Text="{Binding ActionKindText}" FontSize="14" Margin="0,2,0,0" />
+									<TextBlock Text="{Binding Distance, StringFormat='半径: {0}'}" FontSize="14" Margin="0,2,0,0"/>
+									<TextBlock Text="{Binding AirPower, StringFormat='制空: {0}'}" FontSize="14" Margin="0,2,0,0"/>
+									<!-- 装備スロットは既存テンプレートに合わせ簡易表示 -->
+									<ItemsControl ItemsSource="{Binding EquipmentSlots}" Margin="0,6,0,0">
+										<ItemsControl.ItemTemplate>
+											<DataTemplate>
+												<StackPanel Orientation="Horizontal" Margin="2,0" VerticalAlignment="Center">
+													<!-- 搭載数表示（常に2桁で表示） -->
+													<TextBlock VerticalAlignment="Center" Margin="2,0,6,0" FontSize="12">
+														<TextBlock.Text>
+															<MultiBinding StringFormat="[{0:00} / {1:00}]">
+																<Binding Path="Count" />
+																<Binding Path="MaxCount" />
+															</MultiBinding>
+														</TextBlock.Text>
+													</TextBlock>
+
+													<kcvc:SlotItemIcon Type="{Binding IconType}" Width="24" Height="24" Margin="2,0"/>
+
+													<!-- 装備名 + 改修値 + 熟練度（フォントサイズを明示） -->
+													<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+														<TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" />
+
+														<!-- 改修値（LevelText）: 空文字なら非表示 -->
+														<TextBlock Text="{Binding LevelText}"
+																   Foreground="#FF45A9A5"
+																   Margin="6,0,0,0"
+																   VerticalAlignment="Center"
+																   FontSize="12">
+															<TextBlock.Style>
+																<Style TargetType="TextBlock">
+																	<Setter Property="Visibility" Value="Visible" />
+																	<Style.Triggers>
+																		<DataTrigger Binding="{Binding LevelText}" Value="">
+																			<Setter Property="Visibility" Value="Collapsed" />
+																		</DataTrigger>
+																	</Style.Triggers>
+																</Style>
+															</TextBlock.Style>
+														</TextBlock>
+
+														<!-- 熟練度表示 (Alv): 0 のときは非表示 -->
+														<TextBlock Margin="6,0,0,0"
+																   VerticalAlignment="Center"
+																   Text="{Binding Alv, StringFormat=(熟練度 {0})}"
+																   FontSize="12">
+															<TextBlock.Style>
+																<Style TargetType="TextBlock">
+																	<Setter Property="Visibility" Value="Visible" />
+																	<Style.Triggers>
+																		<DataTrigger Binding="{Binding Alv}" Value="0">
+																			<Setter Property="Visibility" Value="Collapsed" />
+																		</DataTrigger>
+																	</Style.Triggers>
+																</Style>
+															</TextBlock.Style>
+														</TextBlock>
+													</StackPanel>
+												</StackPanel>
+											</DataTemplate>
+										</ItemsControl.ItemTemplate>
+									</ItemsControl>
+								</StackPanel>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Grid>
 	</Grid>
 </metro:MetroWindow>

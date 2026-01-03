@@ -423,9 +423,6 @@
     <Compile Include="Win32\DVTARGETDEVICE.cs" />
     <Compile Include="Win32\IServiceProvider.cs" />
     <Compile Include="Win32\RECT.cs" />
-    <Compile Include="Window1.xaml.cs">
-      <DependentUpon>Window1.xaml</DependentUpon>
-    </Compile>
     <Compile Include="WindowService.cs" />
     <Page Include="Styles\Controls.xaml">
       <SubType>Designer</SubType>
@@ -623,10 +620,6 @@
     <Compile Include="Views\Information.xaml.cs">
       <DependentUpon>Information.xaml</DependentUpon>
     </Compile>
-    <Page Include="Window1.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

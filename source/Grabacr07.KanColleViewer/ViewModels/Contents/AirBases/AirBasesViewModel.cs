@@ -93,7 +93,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				var client = KanColleClient.Current;
 				if (client == null)
 				{
-					System.Diagnostics.Debug.WriteLine("KanColleClient.Current is null in AirBasesViewModel constructor.");
 					return;
 				}
 
@@ -101,7 +100,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				// Homeport が既に存在するなら接続して初期化。
 				if (client.Homeport == null)
 				{
-					System.Diagnostics.Debug.WriteLine("Homeport is null; subscribing to KanColleClient.Homeport changes.");
 					// Homeport プロパティがセットされたら Attach を試みる
 					client.Subscribe(nameof(KanColleClient.Homeport), () =>
 					{
@@ -112,9 +110,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 								AttachToHomeport();
 							}
 						}
-						catch (Exception ex)
+						catch
 						{
-							System.Diagnostics.Debug.WriteLine($"AirBasesViewModel: AttachToHomeport failed: {ex}");
 						}
 					}).AddTo(this);
 				}
@@ -123,9 +120,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 					AttachToHomeport();
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine($"Error in AirBasesTabViewModel constructor: {ex}");
 			}
 		}
 
@@ -228,21 +224,15 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			{
 				if (this.SelectedAirBase == null)
 				{
-					System.Diagnostics.Debug.WriteLine("SelectedAirBase is null");
 					return;
 				}
-
-				System.Diagnostics.Debug.WriteLine($"ShowAirBaseWindow called with SelectedAirBase: {this.SelectedAirBase.AreaName}");
-
 				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this.SelectedAirBase);
 				var message = new TransitionMessage(vm, TransitionMode.Normal, "AirBaseWindow.Show");
 				this.Messenger.Raise(message);
 
-				System.Diagnostics.Debug.WriteLine("Messenger.Raise called successfully");
 			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine($"ShowAirBaseWindow error: {ex}");
+			catch
+			{				
 			}
 		}
 	}

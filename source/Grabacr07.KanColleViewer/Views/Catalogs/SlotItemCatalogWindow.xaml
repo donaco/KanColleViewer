@@ -69,7 +69,7 @@
 		<!-- #endregion -->
 
 		<DockPanel Grid.Row="1">
-			<!-- フィルター設定（艦娘一覧の UI を踏襲） -->
+			<!-- フィルター設定 -->
 			<Expander DockPanel.Dock="Top"
 					  Margin="8,8,8,0"
 					  IsExpanded="True">

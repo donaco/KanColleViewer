@@ -1,3 +1,4 @@
+using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
 using Grabacr07.KanColleWrapper;
 using Livet.Messaging;
@@ -58,11 +59,16 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#endregion
 
+		// 追加: ウィンドウ個別設定 (TopMost 等)
+		public FleetWindowSettings Settings { get; }
 
 		public FleetWindowViewModel()
 		{
 			this.Title = "艦隊詳細";
 			this.Fleets = new ItemViewModel[0];
+
+			// Settings を初期化（TopMost を保持）
+			this.Settings = new FleetWindowSettings();
 
 			try
 			{

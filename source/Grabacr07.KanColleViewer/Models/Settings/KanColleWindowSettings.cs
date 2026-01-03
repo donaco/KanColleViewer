@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// メイン ウィンドウの情報表示部分のドック位置を示す設定値を取得します。
 		/// </summary>
 		public SerializableProperty<Dock> Dock => this.Cache(key => new SerializableProperty<Dock>(key, Providers.Local, System.Windows.Controls.Dock.Bottom));
-		
+
 		/// <summary>
 		/// メイン ウィンドウを自動的にリサイズするかどうかを示す設定値を取得します。
 		/// </summary>
@@ -26,7 +26,15 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 	}
 
+	// 艦娘一覧 用のウィンドウ設定
 	public class ShipCatalogWindowSettings : WindowSettings { }
 
+	// 装備一覧 用のウィンドウ設定
 	public class SlotItemCatalogWindowSettings : WindowSettings { }
+
+	// 艦隊詳細 用のウィンドウ設定
+	public class FleetWindowSettings : WindowSettings { }
+
+	// 基地詳細 用のウィンドウ設定
+	public class AirBaseWindowSettings : WindowSettings { }
 }

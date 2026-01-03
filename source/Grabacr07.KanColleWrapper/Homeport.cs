@@ -262,7 +262,9 @@ namespace Grabacr07.KanColleWrapper
 									{
 										this.AirBases?.ApplyChangeName(areaId, baseId, name);
 									}
-									catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Homeport.change_name apply] {ex}"); }
+									catch
+									{
+									}
 								});
 							}
 						}
@@ -281,14 +283,15 @@ namespace Grabacr07.KanColleWrapper
 									{
 										this.AirBases?.ApplySetAction(areaId, baseId, actionKind);
 									}
-									catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Homeport.set_action apply] {ex}"); }
+									catch
+									{
+									}
 								});
 							}
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						System.Diagnostics.Debug.WriteLine($"[Homeport.ApiSessionSource air_corps handler] {ex}");
 					}
 				});
 

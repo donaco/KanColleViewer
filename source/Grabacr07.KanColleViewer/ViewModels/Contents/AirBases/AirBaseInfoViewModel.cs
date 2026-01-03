@@ -47,7 +47,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			int[] equipmentLevels,
 			int[] equipmentAlvs,
 			int[] equipmentAntiAirs,
-			int[] equipmentCounts)
+			int[] equipmentCounts,
+			int[] equipmentMaxCounts)
 		{
 			this.Name = name;
 			this.ActionKind = actionKind;
@@ -68,7 +69,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 					alv: equipmentAlvs?[i] ?? 0,
 					iconType: equipmentIconTypes?[i] ?? "Empty",
 					antiAir: equipmentAntiAirs?[i] ?? 0,
-					count: equipmentCounts?[i] ?? 0
+					count: equipmentCounts?[i] ?? 0,
+					maxCount: equipmentMaxCounts?[i] ?? 0
 				);
 			}
 
@@ -207,6 +209,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		public string IconType { get; }
 		public int AntiAir { get; }
 		public int Count { get; }
+		public int MaxCount { get; }
 
 		/// <summary>
 		/// ツールチップ表示用のテキスト
@@ -218,7 +221,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		/// </summary>
 		public string LevelText { get; }
 
-		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType, int antiAir, int count)
+		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType, int antiAir, int count, int maxCount)
 		{
 			this.SlotId = slotId;
 			this.Name = name;
@@ -227,6 +230,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			this.IconType = iconType;
 			this.AntiAir = antiAir;
 			this.Count = count;
+			this.MaxCount = maxCount;
 
 			// 改修値テキストを構築
 			if (level >= 10)

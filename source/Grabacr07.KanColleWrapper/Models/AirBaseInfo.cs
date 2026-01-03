@@ -31,10 +31,13 @@ namespace Grabacr07.KanColleWrapper.Models
 		// 熟練度
 		public int[] EquipmentAlvs { get; set; }
 
-		// 対空値
+		// 対空
 		public int[] EquipmentAntiAirs { get; set; }
 
-		// 搭載数
+		// 現在搭載数 (api_count)
 		public int[] EquipmentCounts { get; set; }
+
+		// 最大搭載数 (api_max_count)
+		public int[] EquipmentMaxCounts { get; set; }
 	}
 }
