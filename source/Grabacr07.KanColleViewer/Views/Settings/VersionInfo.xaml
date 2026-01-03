@@ -64,15 +64,15 @@
 					Grid.Column="0">
 			<TextBlock FontFamily="Segoe UI">
 				<Run Text="Project home:" />
-				<metro2:HyperlinkEx Uri="http://grabacr.net/kancolleviewer">
-					<Run Text="http://grabacr.net/kancolleviewer" />
+				<metro2:HyperlinkEx Uri="https://github.com/donaco/KanColleViewer">
+					<Run Text="https://github.com/donaco/KanColleViewer" />
 				</metro2:HyperlinkEx>
 
 				<LineBreak />
 
 				<Run Text="Source code:" />
-				<metro2:HyperlinkEx Uri="https://github.com/Grabacr07/KanColleViewer">
-					<Run Text="https://github.com/Grabacr07/KanColleViewer" />
+				<metro2:HyperlinkEx Uri="https://github.com/donaco/KanColleViewer">
+					<Run Text="https://github.com/donaco/KanColleViewer" />
 				</metro2:HyperlinkEx>
 
 				<LineBreak />
@@ -135,12 +135,14 @@
 				   TextWrapping="Wrap">
 			<Run Text="{Binding Source={x:Static models:ProductInfo.Copyright}, Mode=OneWay}" />
 			<LineBreak />
+			<Run Text="Copyright © 2025 - 2026 Donaco" />
+			<LineBreak />
 			<Run Text="{Binding Source={x:Static models:ProductInfo.Product}, Mode=OneWay}" />
 			<Run Text="is" />
 			<Run Text="OSS"
 				 ToolTip="Open Source Software" />
 			<Run Text="released under" />
-			<metro2:HyperlinkEx Uri="https://github.com/Grabacr07/KanColleViewer/blob/master/LICENSE.txt">
+			<metro2:HyperlinkEx Uri="https://github.com/Grabacr07/KanColleViewer/blob/develop/LICENSE.txt">
 				<Run Text="The MIT License." />
 			</metro2:HyperlinkEx>
 		</TextBlock>

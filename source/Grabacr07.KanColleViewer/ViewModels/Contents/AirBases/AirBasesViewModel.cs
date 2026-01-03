@@ -226,13 +226,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				{
 					return;
 				}
-				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this.SelectedAirBase);
+				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this);  // this（AirBasesViewModel）を渡す
 				var message = new TransitionMessage(vm, TransitionMode.Normal, "AirBaseWindow.Show");
 				this.Messenger.Raise(message);
 
 			}
 			catch
-			{				
+			{
 			}
 		}
 	}

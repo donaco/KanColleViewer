@@ -167,6 +167,46 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#endregion
 
+		#region 表示用集計プロパティ
+
+		private int _MaxDistance;
+
+		/// <summary>
+		/// その海域の最大行動半径
+		/// </summary>
+		public int MaxDistance
+		{
+			get { return this._MaxDistance; }
+			private set
+			{
+				if (this._MaxDistance != value)
+				{
+					this._MaxDistance = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		private int _TotalAirPower;
+
+		/// <summary>
+		/// その海域の制空値合計（各基地の制空値を合算）
+		/// </summary>
+		public int TotalAirPower
+		{
+			get { return this._TotalAirPower; }
+			private set
+			{
+				if (this._TotalAirPower != value)
+				{
+					this._TotalAirPower = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 
 		public AirBaseViewModel(AirBase airBase)
 		{
@@ -205,6 +245,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				equipmentCounts: x.EquipmentCounts,
 				equipmentMaxCounts: x.EquipmentMaxCounts
 			)).ToArray() ?? new AirBaseInfoViewModel[0];
+
+			// 追加: 集計値を更新
+			this.MaxDistance = this.AirBaseInfos.Length > 0 ? this.AirBaseInfos.Max(x => x.Distance) : 0;
+			this.TotalAirPower = this.AirBaseInfos.Length > 0 ? this.AirBaseInfos.Sum(x => x.AirPower) : 0;
 		}
 
 		private static string GetActionKindText(int actionKind)
