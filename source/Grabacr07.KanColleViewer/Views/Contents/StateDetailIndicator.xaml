@@ -81,7 +81,7 @@
 										<EasingColorKeyFrame KeyTime="0:0:0.3"
 															 Value="#FFB40000" />
 									</ColorAnimationUsingKeyFrames>
-									<ObjectAnimationUsingKeyFrames Storyboard.TargetName="Text"
+									<ObjectAnimationUsingKeyFrames Storyboard.TargetName="WarningText"
 																   Storyboard.TargetProperty="Text">
 										<DiscreteObjectKeyFrame KeyTime="0"
 																Value="大破した艦娘がいます！！！" />
@@ -94,45 +94,51 @@
 					<Border x:Name="Border"
 							Background="Transparent"
 							Padding="8,4">
-						<TextBlock x:Name="Text"
-								   Text="艦隊は出撃中です！"
-								   Style="{DynamicResource DefaultTextStyleKey}"
-								   Foreground="{DynamicResource ActiveForegroundBrushKey}">
-							<i:Interaction.Behaviors>
-								<ei:DataStateBehavior Binding="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
-													  Value="True"
-													  TrueState="Blinking"
-													  FalseState="Normal" />
-							</i:Interaction.Behaviors>
-							<!-- 何故か☝の DataStateBehavior が最初だけ走ってくれない (◞‸◟) -->
-							<!-- ので、☟で最初の GoToState をやっておく -->
-							<i:Interaction.Triggers>
-								<i:EventTrigger EventName="Loaded">
-									<i:Interaction.Behaviors>
-										<ei:ConditionBehavior>
-											<ei:ConditionalExpression>
-												<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
-																		RightOperand="True"
-																		Operator="Equal" />
-											</ei:ConditionalExpression>
-										</ei:ConditionBehavior>
-									</i:Interaction.Behaviors>
-									<ei:GoToStateAction StateName="Blinking" />
-								</i:EventTrigger>
-								<i:EventTrigger EventName="Loaded">
-									<i:Interaction.Behaviors>
-										<ei:ConditionBehavior>
-											<ei:ConditionalExpression>
-												<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
-																		RightOperand="True"
-																		Operator="NotEqual" />
-											</ei:ConditionalExpression>
-										</ei:ConditionBehavior>
-									</i:Interaction.Behaviors>
-									<ei:GoToStateAction StateName="Normal" />
-								</i:EventTrigger>
-							</i:Interaction.Triggers>
-						</TextBlock>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock x:Name="WarningText"
+									   Text="艦隊は出撃中です！"
+									   Style="{DynamicResource DefaultTextStyleKey}"
+									   Foreground="{DynamicResource ActiveForegroundBrushKey}">
+								<i:Interaction.Behaviors>
+									<ei:DataStateBehavior Binding="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+														  Value="True"
+														  TrueState="Blinking"
+														  FalseState="Normal" />
+								</i:Interaction.Behaviors>
+								<i:Interaction.Triggers>
+									<i:EventTrigger EventName="Loaded">
+										<i:Interaction.Behaviors>
+											<ei:ConditionBehavior>
+												<ei:ConditionalExpression>
+													<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+																			RightOperand="True"
+																			Operator="Equal" />
+												</ei:ConditionalExpression>
+											</ei:ConditionBehavior>
+										</i:Interaction.Behaviors>
+										<ei:GoToStateAction StateName="Blinking" />
+									</i:EventTrigger>
+									<i:EventTrigger EventName="Loaded">
+										<i:Interaction.Behaviors>
+											<ei:ConditionBehavior>
+												<ei:ConditionalExpression>
+													<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+																			RightOperand="True"
+																			Operator="NotEqual" />
+												</ei:ConditionalExpression>
+											</ei:ConditionBehavior>
+										</i:Interaction.Behaviors>
+										<ei:GoToStateAction StateName="Normal" />
+									</i:EventTrigger>
+								</i:Interaction.Triggers>
+							</TextBlock>
+							<!-- マップ位置表示 -->
+							<TextBlock Text="{Binding SortieInfo.DisplayText, FallbackValue=''}"
+									   Style="{DynamicResource DefaultTextStyleKey}"
+									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   Margin="8,0,0,0"
+									   Visibility="{Binding SortieInfo.IsActive, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+						</StackPanel>
 					</Border>
 				</Grid>
 			</DataTemplate>

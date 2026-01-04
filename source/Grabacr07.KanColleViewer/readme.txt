@@ -53,7 +53,7 @@ Windows 10 の場合は標準でインストールされています。
 ■開発環境・言語
 C# + WPF で開発しています。
 GitHub Copilot を使用しています。
-開発環境は Windows 11 Pro + Visual Studio 2022 です。
+開発環境は Windows 11 Pro + Visual Studio 2022 + Adobe Creative Cloud です。
 
 
 ■使用ライブラリ

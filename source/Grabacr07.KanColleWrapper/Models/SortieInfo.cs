@@ -1,0 +1,208 @@
+using System;
+
+namespace Grabacr07.KanColleWrapper.Models
+{
+	/// <summary>
+	/// 出撃中のマップ位置情報を保持します。
+	/// </summary>
+	public class SortieInfo : Notifier
+	{
+		#region MapAreaId 変更通知プロパティ
+
+		private int _MapAreaId;
+
+		/// <summary>
+		/// 海域 ID を取得します (例: 6)
+		/// </summary>
+		public int MapAreaId
+		{
+			get { return this._MapAreaId; }
+			set
+			{
+				if (this._MapAreaId != value)
+				{
+					this._MapAreaId = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
+		#region MapInfoNo 変更通知プロパティ
+
+		private int _MapInfoNo;
+
+		/// <summary>
+		/// マップ番号を取得します (例: 2 → 6-2)
+		/// </summary>
+		public int MapInfoNo
+		{
+			get { return this._MapInfoNo; }
+			set
+			{
+				if (this._MapInfoNo != value)
+				{
+					this._MapInfoNo = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
+		#region CellNo 変更通知プロパティ
+
+		private int? _CellNo;
+
+		/// <summary>
+		/// 現在のセル番号を取得します (例: 2 → 6-2-2)
+		/// </summary>
+		public int? CellNo
+		{
+			get { return this._CellNo; }
+			set
+			{
+				if (this._CellNo != value)
+				{
+					this._CellNo = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
+		#region WinRank 変更通知プロパティ
+
+		private string _WinRank;
+
+		/// <summary>
+		/// 戦闘結果のランクを取得します (例: "S", "A", "B" など)
+		/// </summary>
+		public string WinRank
+		{
+			get { return this._WinRank; }
+			set
+			{
+				if (this._WinRank != value)
+				{
+					this._WinRank = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
+		#region IsActive 変更通知プロパティ
+
+		private bool _IsActive;
+
+		/// <summary>
+		/// 出撃中かどうかを取得します。
+		/// </summary>
+		public bool IsActive
+		{
+			get { return this._IsActive; }
+			set
+			{
+				if (this._IsActive != value)
+				{
+					this._IsActive = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// 表示用テキストを取得します。
+		/// 例: "6-2"（start時）, "6-2-2"（battle時）, "6-2-2 [S]"（battleresult時）
+		/// </summary>
+		public string DisplayText
+		{
+			get
+			{
+				if (!this.IsActive) return string.Empty;
+
+				// ベーステキスト: 海域-マップ番号
+				var baseText = $"{this.MapAreaId}-{this.MapInfoNo}";
+
+				// セル番号がある場合のみ追加
+				if (this.CellNo.HasValue)
+				{
+					baseText += $"-{this.CellNo.Value}";
+				}
+
+				// ランクがある場合のみ追加
+				if (!string.IsNullOrEmpty(this.WinRank))
+				{
+					baseText += $" [{this.WinRank}]";
+				}
+
+				return baseText;
+			}
+		}
+
+		/// <summary>
+		/// 出撃開始時に呼び出します (api_req_map/start)
+		/// start取得時は api_no を表示しません
+		/// </summary>
+		public void Start(int mapAreaId, int mapInfoNo, int cellNo)
+		{
+			this.MapAreaId = mapAreaId;
+			this.MapInfoNo = mapInfoNo;
+			// CellNo は設定しない（start時は表示しない）
+			this.CellNo = null;
+			this.WinRank = null;
+			this.IsActive = true;
+		}
+
+		/// <summary>
+		/// 戦闘開始時に呼び出します (api_req_sortie/battle など)
+		/// cellNo を表示開始し、WinRank をクリアします
+		/// </summary>
+		public void EnterBattle(int cellNo)
+		{
+			// battle時にセル番号を設定（表示開始）
+			this.CellNo = cellNo;
+			this.WinRank = null;
+		}
+
+		/// <summary>
+		/// 戦闘結果時に呼び出します (api_req_sortie/battleresult)
+		/// </summary>
+		public void SetBattleResult(string winRank)
+		{
+			this.WinRank = winRank;
+		}
+
+		/// <summary>
+		/// 次のセルへ移動時に呼び出します (api_req_map/next)
+		/// </summary>
+		public void Next(int cellNo)
+		{
+			this.CellNo = cellNo;
+			this.WinRank = null;
+		}
+
+		/// <summary>
+		/// 母港帰還時に呼び出します (api_port/port)
+		/// </summary>
+		public void Reset()
+		{
+			this.MapAreaId = 0;
+			this.MapInfoNo = 0;
+			this.CellNo = null;
+			this.WinRank = null;
+			this.IsActive = false;
+		}
+	}
+}

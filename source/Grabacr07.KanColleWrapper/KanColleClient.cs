@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -95,6 +96,15 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 		}
+
+		#endregion
+
+		#region SortieInfo プロパティ
+
+		/// <summary>
+		/// 出撃中のマップ位置情報を取得します。
+		/// </summary>
+		public SortieInfo SortieInfo { get; } = new SortieInfo();
 
 		#endregion
 
@@ -248,6 +258,9 @@ namespace Grabacr07.KanColleWrapper
 		// 直近に処理した建造ドック ID を保持（createship の requestBody が届く時用）
 		private int lastCreateKdockId = -1;
 
+		// start/next で取得した cellNo をキャッシュ（battle で使用）
+		private int cachedCellNo = 0;
+
 		/// <summary>
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
@@ -269,7 +282,9 @@ namespace Grabacr07.KanColleWrapper
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
-				if (TryHandleMapStart(url, requestBody)) return;
+				if (TryHandleMapStart(url, requestBody, normalized)) return;
+				if (TryHandleBattle(url, normalized)) return;
+				if (TryHandleMapNext(url, normalized)) return;
 				if (TryHandleMapInfo(url, normalized)) return;
 
 				// 小さな処理に分割して判定（早期 return ）
@@ -352,9 +367,9 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
-		/// 出撃フラグ
+		/// 出撃開始 (api_req_map/start)
 		/// </summary>
-		private bool TryHandleMapStart(string url, string requestBody)
+		private bool TryHandleMapStart(string url, string requestBody, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
 			try
@@ -388,10 +403,8 @@ namespace Grabacr07.KanColleWrapper
 						if (org != null && org.Fleets.ContainsKey(deckId))
 						{
 							org.Fleets[deckId].Sortie();
-							// 記録：出撃したデッキ ID を保存
 							this.sortieDeckIds.Add(deckId);
 
-							// 第1艦隊が出撃かつ組合せフラグが立っている場合のみ第2艦隊も出撃扱いにする
 							if (deckId == 1)
 							{
 								bool isCombined = false;
@@ -410,6 +423,39 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 
+				// SortieInfo の更新（出撃開始）- cellNo は取得するがキャッシュするのみ
+				try
+				{
+					if (!string.IsNullOrEmpty(normalized))
+					{
+						var root = JToken.Parse(normalized);
+						var data = root["api_data"] ?? root;
+						if (data != null)
+						{
+							int mapAreaId = data["api_maparea_id"]?.Value<int>() ?? 0;
+							int mapInfoNo = data["api_mapinfo_no"]?.Value<int>() ?? 0;
+							int cellNo = data["api_no"]?.Value<int>() ?? 0;
+
+							// cellNo をキャッシュ（battle 時に使用）
+							this.cachedCellNo = cellNo;
+
+							if (mapAreaId > 0 && mapInfoNo > 0)
+							{
+								RunOnUi(() =>
+								{
+									try
+									{
+										// cellNo パラメータを渡さない（表示しない）
+										this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
+									}
+									catch { }
+								});
+							}
+						}
+					}
+				}
+				catch { }
+
 				RunOnUi(() =>
 				{
 					try
@@ -424,6 +470,193 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
+			return true;
+		}
+
+		/// <summary>
+		/// 次の海域へ進撃 (api_req_map/next)
+		/// </summary>
+		private bool TryHandleMapNext(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_map/next")) return false;
+
+			try
+			{
+				if (!string.IsNullOrEmpty(normalized))
+				{
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					if (data != null)
+					{
+						int cellNo = data["api_no"]?.Value<int>() ?? 0;
+
+						// cellNo をキャッシュ（battle 時に使用）するが、表示は更新しない
+						if (cellNo > 0)
+						{
+							this.cachedCellNo = cellNo;
+						}
+					}
+				}
+			}
+			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 戦闘開始（各種 battle API）
+		/// </summary>
+		private bool TryHandleBattle(string url, string normalized)
+		{
+			// battle 系 API をまとめて判定
+			if (!(url.Contains("/kcsapi/api_req_sortie/battle")
+				|| url.Contains("/kcsapi/api_req_battle_midnight")
+				|| url.Contains("/kcsapi/api_req_combined_battle/")))
+				return false;
+
+			// battleresult は別ハンドラで処理するため除外
+			if (url.Contains("battleresult")) return false;
+
+			// キャッシュされた cellNo を使用して表示開始
+			RunOnUi(() =>
+			{
+				try
+				{
+					if (this.cachedCellNo > 0)
+					{
+						this.SortieInfo.EnterBattle(this.cachedCellNo);
+					}
+				}
+				catch { }
+			});
+
+			return true;
+		}
+
+
+		/// <summary>
+		/// 戦闘結果　BattleResult
+		/// </summary>
+		private bool TryHandleBattleResult(string url, string normalized)
+		{
+			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
+
+			// ローカル変数として型付きで宣言
+			Models.Raw.kcsapi_battleresult brLocal = null;
+			Models.Raw.kcsapi_combined_battle_battleresult cbrLocal = null;
+
+			// 解析は試すが、主目的は UI の強制再描画
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_battleresult>(normalized, out brLocal))
+				{
+				}
+				else if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_combined_battle_battleresult>(normalized, out cbrLocal))
+				{
+				}
+				else
+				{
+				}
+			}
+			catch
+			{
+			}
+
+			// 戦闘結果の WinRank を SortieInfo に反映（RunOnUi の外で先に取得）
+			string winRank = null;
+			try
+			{
+				if (brLocal != null)
+				{
+					winRank = brLocal.api_win_rank;
+				}
+				else if (cbrLocal != null)
+				{
+					winRank = cbrLocal.api_win_rank;
+				}
+				else
+				{
+					// フォールバック: JSON から直接取得
+					try
+					{
+						var root = JToken.Parse(normalized);
+						var data = root["api_data"] ?? root;
+						winRank = data?["api_win_rank"]?.Value<string>();
+					}
+					catch { }
+				}
+			}
+			catch { }
+
+			RunOnUi(() =>
+			{
+				try
+				{
+					var org = this.Homeport?.Organization;
+					if (org == null)
+					{
+						return;
+					}
+
+					// 出撃フラグに依らず全フリートを強制更新（CEF 経路では出撃検知が漏れるためのフォールバック）
+					foreach (var fleet in org.Fleets.Values)
+					{
+						try
+						{
+							fleet.State.Update();
+							fleet.State.Calculate();
+							fleet.RaiseShipsUpdated();
+						}
+						catch
+						{
+						}
+					}
+
+					// 組織レベルでも明示通知
+					try
+					{
+						this.Homeport?.Organization?.NotifyUpdated();
+					}
+					catch
+					{
+					}
+
+					// UI スレッドキューの低優先度で再通知を行う
+					try
+					{
+						if (Application.Current != null && Application.Current.Dispatcher != null)
+						{
+							Application.Current.Dispatcher.InvokeAsync(() =>
+							{
+								try
+								{
+									this.Homeport?.Organization?.NotifyUpdated();
+								}
+								catch
+								{
+								}
+							}, System.Windows.Threading.DispatcherPriority.Background);
+						}
+					}
+					catch
+					{
+					}
+
+					// WinRank を SortieInfo に反映
+					if (!string.IsNullOrEmpty(winRank))
+					{
+						try
+						{
+							this.SortieInfo.SetBattleResult(winRank);
+						}
+						catch { }
+					}
+				}
+				catch
+				{
+				}
+			});
+
 			return true;
 		}
 
@@ -615,6 +848,13 @@ namespace Grabacr07.KanColleWrapper
 						catch
 						{
 						}
+
+						// SortieInfo をリセット
+						try
+						{
+							this.SortieInfo.Reset();
+						}
+						catch { }
 					});
 				}
 				else
@@ -3785,120 +4025,6 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 			catch { }
-
-			return true;
-		}
-
-		/// <summary>
-		/// 戦闘結果
-		/// </summary>
-		private bool TryHandleBattleResult(string url, string normalized)
-		{
-			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
-
-			// 解析は試すが、主目的は UI の強制再描画
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_battleresult>(normalized, out var br))
-				{
-				}
-				else if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_combined_battle_battleresult>(normalized, out var cbr))
-				{
-				}
-				else
-				{
-				}
-			}
-			catch
-			{
-			}
-
-			RunOnUi(() =>
-			{
-				try
-				{
-					var org = this.Homeport?.Organization;
-					if (org == null)
-					{
-
-						return;
-					}
-
-					// --- 追加: 更新前の各艦隊状態を出力（診断用） ---
-					foreach (var f in org.Fleets.Values)
-					{
-						try
-						{
-							var expeditionState = f.Expedition != null ? f.Expedition.IsInExecution.ToString() : "null";
-							var situation = f.State != null ? f.State.Situation.ToString() : "(null)";
-						}
-						catch { }
-					}
-
-					// 出撃フラグに依らず全フリートを強制更新（CEF 経路では出撃検知が漏れるためのフォールバック）
-					foreach (var fleet in org.Fleets.Values)
-					{
-						try
-						{
-							fleet.State.Update();
-							fleet.State.Calculate();
-							fleet.RaiseShipsUpdated();
-						}
-						catch
-						{
-						}
-					}
-
-					// 追加: 組織レベルでも明示通知
-					try
-					{
-						this.Homeport?.Organization?.NotifyUpdated();
-					}
-					catch
-					{
-					}
-
-					// 既にある NotifyUpdated 呼び出しの直後に以下を追加してください。
-					// UI のメッセージループが落ち着いたあとに再通知することで
-					// DataTemplate やバインディングの再評価を確実に促します。
-					try
-					{
-						// UI スレッドキューの低優先度で再通知を行う
-						if (Application.Current != null && Application.Current.Dispatcher != null)
-						{
-							Application.Current.Dispatcher.InvokeAsync(() =>
-							{
-								try
-								{
-									this.Homeport?.Organization?.NotifyUpdated();
-								}
-								catch
-								{
-								}
-							}, System.Windows.Threading.DispatcherPriority.Background);
-						}
-					}
-					catch
-					{
-					}
-
-
-
-					// --- 追加: 更新後の各艦隊状態を出力（診断用） ---
-					foreach (var f in org.Fleets.Values)
-					{
-						try
-						{
-							var expeditionState = f.Expedition != null ? f.Expedition.IsInExecution.ToString() : "null";
-							var situation = f.State != null ? f.State.Situation.ToString() : "(null)";
-						}
-						catch { }
-					}
-				}
-				catch
-				{
-				}
-			});
 
 			return true;
 		}
