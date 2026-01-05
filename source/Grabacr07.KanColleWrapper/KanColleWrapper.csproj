@@ -157,6 +157,7 @@
     <Compile Include="Models\FleetState.cs" />
     <Compile Include="Models\MapArea.cs" />
     <Compile Include="Models\MapCell.cs" />
+    <Compile Include="Models\MapCellNameProvider.cs" />
     <Compile Include="Models\MapInfo.cs" />
     <Compile Include="Models\Mission.cs" />
     <Compile Include="Itemyard.cs" />
@@ -297,6 +298,7 @@
       <Name>MetroTrilithon</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
@@ -306,4 +308,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <None Include="MapCellNames.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

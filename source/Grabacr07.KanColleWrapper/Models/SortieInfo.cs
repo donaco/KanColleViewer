@@ -124,7 +124,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 表示用テキストを取得します。
-		/// 例: "6-2"（start時）, "6-2-2"（battle時）, "6-2-2 [S]"（battleresult時）
+		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S]"（battleresult時）
 		/// </summary>
 		public string DisplayText
 		{
@@ -138,7 +138,8 @@ namespace Grabacr07.KanColleWrapper.Models
 				// セル番号がある場合のみ追加
 				if (this.CellNo.HasValue)
 				{
-					baseText += $"-{this.CellNo.Value}";
+					var cellName = MapCellNameProvider.GetCellName(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
+					baseText += $"-{cellName}";
 				}
 
 				// ランクがある場合のみ追加
