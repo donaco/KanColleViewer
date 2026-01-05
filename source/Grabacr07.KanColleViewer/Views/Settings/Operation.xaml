@@ -107,5 +107,15 @@
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+
+		<TextBlock Text="出撃情報"
+				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
+
+		<StackPanel Margin="20,0,0,0">
+			<CheckBox Content="出撃中のマップ位置、戦闘結果を表示する（例: 1-5-D [S]）"
+					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
+		</StackPanel>
+
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 	</StackPanel>
 </UserControl>

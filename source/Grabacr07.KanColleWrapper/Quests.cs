@@ -124,9 +124,8 @@ namespace Grabacr07.KanColleWrapper
 				{
 					root = JObject.Parse(json);
 				}
-				catch (JsonException jex)
+				catch (JsonException)
 				{
-					Debug.WriteLine("Quests.Serialize: JObject.Parse failed: " + jex);
 					return null;
 				}
 
@@ -172,9 +171,8 @@ namespace Grabacr07.KanColleWrapper
 							// 一部 API の -1 埋めなどで失敗することがある（従来の実装と同じく無視）
 							Debug.WriteLine(sex.Message);
 						}
-						catch (Exception ex)
+						catch
 						{
-							Debug.WriteLine("Quests.Serialize: serializer failed: " + ex);
 						}
 
 						// フォールバック：Newtonsoft で直接マッピング
@@ -183,9 +181,8 @@ namespace Grabacr07.KanColleWrapper
 							var obj2 = item.ToObject<kcsapi_quest>();
 							if (obj2 != null) list.Add(obj2);
 						}
-						catch (Exception ex2)
+						catch
 						{
-							Debug.WriteLine("Quests.Serialize: ToObject<kcsapi_quest> failed: " + ex2);
 						}
 					}
 

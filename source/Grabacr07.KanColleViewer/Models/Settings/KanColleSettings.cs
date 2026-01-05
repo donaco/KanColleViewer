@@ -105,6 +105,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> AutoFleetSelectWhenSortie { get; } 
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
+		/// <summary>
+		/// 出撃中のマップ位置表示を表示するかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> ShowSortieInfo { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
+
 		#region instance members
 
 		public event PropertyChangedEventHandler PropertyChanged;

@@ -9,6 +9,7 @@
 			 xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
 			 xmlns:kcvv="http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
+			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vm="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 			 xmlns:fleets="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.Fleets"
 			 mc:Ignorable="d"
@@ -132,12 +133,25 @@
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
 							</TextBlock>
-							<!-- マップ位置表示 -->
-							<TextBlock Text="{Binding SortieInfo.DisplayText, FallbackValue=''}"
-									   Style="{DynamicResource DefaultTextStyleKey}"
+							<!-- マップ位置表示（設定で表示/非表示を切り替え） -->
+							<TextBlock x:Name="SortieInfoText"
+									   Text="{Binding SortieInfo.DisplayText, FallbackValue=''}"
 									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-									   Margin="8,0,0,0"
-									   Visibility="{Binding SortieInfo.IsActive, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+									   Margin="8,0,0,0">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
+										<Setter Property="Visibility" Value="Visible" />
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding SortieInfo.IsActive}" Value="False">
+												<Setter Property="Visibility" Value="Collapsed" />
+											</DataTrigger>
+											<DataTrigger Binding="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" Value="False">
+												<Setter Property="Visibility" Value="Collapsed" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
 						</StackPanel>
 					</Border>
 				</Grid>

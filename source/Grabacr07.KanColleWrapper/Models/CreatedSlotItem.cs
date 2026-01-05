@@ -24,7 +24,6 @@ namespace Grabacr07.KanColleWrapper.Models
 				var master = KanColleClient.Current?.Master;
 				if (master == null)
 				{
-					System.Diagnostics.Debug.WriteLine("CreatedSlotItem: Master is null. rawData may arrive before start2.");
 					this.SlotItemInfo = null;
 					return;
 				}
@@ -73,13 +72,11 @@ namespace Grabacr07.KanColleWrapper.Models
 						}
 						else
 						{
-							System.Diagnostics.Debug.WriteLine("CreatedSlotItem: slotitem id {0} not found in Master.SlotItems", slotitemId);
 							this.SlotItemInfo = null;
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						System.Diagnostics.Debug.WriteLine("CreatedSlotItem: lookup failed: {0}", ex);
 						this.SlotItemInfo = null;
 					}
 				}

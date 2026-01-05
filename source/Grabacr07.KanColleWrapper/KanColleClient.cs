@@ -694,18 +694,16 @@ namespace Grabacr07.KanColleWrapper
 							// Homeport が未初期化の可能性があるので安全に作成してから反映
 							if (this.Homeport == null) this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 							this.Homeport?.AirBases?.Update(ab, abi);
-							System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Updated AirBases with {ab.Length} entries");
+
 						}
-						catch (Exception ex)
+						catch
 						{
-							System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Update failed: {ex}");
 						}
 					});
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine($"[TryHandleMapInfo] Exception: {ex}");
 			}
 
 			return true;
@@ -4464,7 +4462,6 @@ namespace Grabacr07.KanColleWrapper
 
 			try
 			{
-				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Called");
 
 				// requestBody から api_area_id と api_base_id を抽出
 				int areaId = -1;
@@ -4487,11 +4484,8 @@ namespace Grabacr07.KanColleWrapper
 					catch { }
 				}
 
-				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted areaId={areaId}, baseId={baseId}");
-
 				if (areaId <= 0 || baseId <= 0)
 				{
-					System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Invalid areaId or baseId");
 					return true;
 				}
 
@@ -4510,7 +4504,6 @@ namespace Grabacr07.KanColleWrapper
 					if (planeTok != null && planeTok.Type == JTokenType.Array)
 					{
 						planeInfo = planeTok.ToObject<kcsapi_plane_info[]>();
-						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted {planeInfo?.Length ?? 0} plane info");
 					}
 				}
 				catch { planeInfo = null; }
@@ -4521,14 +4514,12 @@ namespace Grabacr07.KanColleWrapper
 					if (distanceTok != null && distanceTok.Type == JTokenType.Object)
 					{
 						distance = distanceTok.ToObject<ApiDistance>();
-						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Extracted distance: base={distance?.api_base}, bonus={distance?.api_bonus}");
 					}
 				}
 				catch { distance = null; }
 
 				if (planeInfo == null && distance == null)
 				{
-					System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] No plane info or distance found");
 					return true;
 				}
 
@@ -4538,28 +4529,23 @@ namespace Grabacr07.KanColleWrapper
 					try
 					{
 						var airBases = this.Homeport?.AirBases;
-						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] AirBases={airBases != null}");
 
 						if (airBases == null) return;
 
 						var airBase = airBases.AreaGroup?[areaId];
-						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] AirBase for area {areaId}={airBase != null}");
 
 						if (airBase != null)
 						{
 							airBase.UpdateFromSetPlane(planeInfo, distance, baseId);
-							System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Successfully updated AirBase");
 						}
 					}
-					catch (Exception ex)
+					catch
 					{
-						System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Error: {ex}");
 					}
 				});
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine($"[TryHandleSetPlane] Exception: {ex}");
 			}
 
 			return true;

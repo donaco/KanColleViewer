@@ -26,7 +26,6 @@ namespace Grabacr07.KanColleViewer.Models
 			var source = Properties.Settings.Default.SallyAreaSource;
 			if (string.IsNullOrWhiteSpace(source))
 			{
-				System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: SallyAreaSource is empty.");
 				return new SallyArea[0];
 			}
 
@@ -51,9 +50,8 @@ namespace Grabacr07.KanColleViewer.Models
 						{
 							array = JArray.Parse(content);
 						}
-						catch (Exception jex)
+						catch (Exception)
 						{
-							System.Diagnostics.Debug.WriteLine("SallyArea.GetAsync: JArray.Parse failed: " + jex);
 							return new SallyArea[0];
 						}
 
