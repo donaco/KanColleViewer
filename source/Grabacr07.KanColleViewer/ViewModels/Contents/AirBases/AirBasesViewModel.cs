@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Livet;
@@ -215,8 +216,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			base.Dispose(disposing);
 		}
 
+		// 基地詳細ウィンドウのインスタンスを保持
+		private static Window airBaseWindowInstance;
+
 		/// <summary>
 		/// 基地詳細ウィンドウを表示する（選択中の基地を渡す）
+		/// 既に開いている場合はアクティブにする
 		/// </summary>
 		public void ShowAirBaseWindow()
 		{
@@ -226,13 +231,31 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				{
 					return;
 				}
-				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this);  // this（AirBasesViewModel）を渡す
-				var message = new TransitionMessage(vm, TransitionMode.Normal, "AirBaseWindow.Show");
-				this.Messenger.Raise(message);
 
+				// 既存のウィンドウがあり、閉じられていない場合はアクティブにする
+				if (airBaseWindowInstance != null && airBaseWindowInstance.IsLoaded)
+				{
+					airBaseWindowInstance.Activate();
+					if (airBaseWindowInstance.WindowState == WindowState.Minimized)
+					{
+						airBaseWindowInstance.WindowState = WindowState.Normal;
+					}
+					return;
+				}
+
+				// 新しいウィンドウを作成
+				var vm = new Grabacr07.KanColleViewer.ViewModels.AirBaseWindowViewModel(this);
+				var window = new Grabacr07.KanColleViewer.Views.AirBaseWindow { DataContext = vm };
+
+				// ウィンドウが閉じられたらインスタンスをクリア
+				window.Closed += (s, e) => airBaseWindowInstance = null;
+
+				airBaseWindowInstance = window;
+				window.Show();
 			}
-			catch
+			catch (Exception ex)
 			{
+				System.Diagnostics.Debug.WriteLine($"Error in ShowAirBaseWindow: {ex}");
 			}
 		}
 	}

@@ -147,8 +147,8 @@
 						</TextBlock>
 					</Grid>
 				</Border>
-
-				<!-- 右側: 海域詳細情報 -->
+			</StackPanel>
+			<!-- 右側: 海域詳細情報 -->
 			<Border Grid.Column="1"
 					DataContext="{Binding SelectedAirBase}"
 					Margin="0,4,0,0">

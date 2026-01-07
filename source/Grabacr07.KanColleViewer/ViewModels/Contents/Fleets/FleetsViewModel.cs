@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Grabacr07.KanColleViewer.Models.Settings;
+using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Livet.Messaging;
@@ -15,6 +17,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 	public class FleetsViewModel : TabItemViewModel
 	{
 		private MultipleDisposable fleetListeners;
+
+		// 艦隊詳細ウィンドウのインスタンスを保持
+		private static Window fleetWindowInstance;
 
 		public override string Name
 		{
@@ -78,6 +83,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		#region 艦隊ウィンドウを安全に表示
 		/// <summary>
 		///	null チェックと例外処理を追加して、艦隊ウィンドウを安全に表示
+		///	既に開いている場合はアクティブにする
 		///	</summary>
 		public void ShowFleetWindow()
 		{
@@ -90,15 +96,30 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 					return;
 				}
 
-				var fleetwd = new FleetWindowViewModel();
-				var message = new TransitionMessage(fleetwd, TransitionMode.Normal, "FleetWindow.Show");
-				this.Messenger.Raise(message);
+				// 既存のウィンドウがあり、閉じられていない場合はアクティブにする
+				if (fleetWindowInstance != null && fleetWindowInstance.IsLoaded)
+				{
+					fleetWindowInstance.Activate();
+					if (fleetWindowInstance.WindowState == WindowState.Minimized)
+					{
+						fleetWindowInstance.WindowState = WindowState.Normal;
+					}
+					return;
+				}
+
+				// 新しいウィンドウを作成
+				var vm = new FleetWindowViewModel();
+				var window = new FleetWindow { DataContext = vm };
+
+				// ウィンドウが閉じられたらインスタンスをクリア
+				window.Closed += (s, e) => fleetWindowInstance = null;
+
+				fleetWindowInstance = window;
+				window.Show();
 			}
 			catch (Exception ex)
 			{
-				// ログ出力（ファイルまたはデバッグ出力）
 				System.Diagnostics.Debug.WriteLine($"Error in ShowFleetWindow: {ex}");
-				// 必要に応じてユーザーにメッセージを表示
 			}
 		}
 		#endregion
