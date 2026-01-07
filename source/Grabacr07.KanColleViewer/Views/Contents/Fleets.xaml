@@ -75,13 +75,33 @@
 										   DataContext="{Binding SelectedFleet}"
 										   Margin="10,3" />
 
+			<!-- 艦隊詳細ボタン: Fleets が存在し、SelectedFleet が null でない場合のみ有効 -->
 			<metro2:CallMethodButton Grid.Row="0"
 									 Grid.RowSpan="2"
 									 Grid.Column="1"
 									 Content="艦隊詳細"
 									 Margin="0,0,10,3"
 									 Padding="12,8"
-									 MethodName="ShowFleetWindow" />
+									 MethodName="ShowFleetWindow">
+				<metro2:CallMethodButton.Style>
+					<Style TargetType="{x:Type metro2:CallMethodButton}" BasedOn="{StaticResource {x:Type metro2:CallMethodButton}}">
+						<Setter Property="IsEnabled" Value="True" />
+						<Style.Triggers>
+							<!-- Fleets が null または空の場合は無効 -->
+							<DataTrigger Binding="{Binding Fleets}" Value="{x:Null}">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+							<DataTrigger Binding="{Binding Fleets.Length}" Value="0">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+							<!-- SelectedFleet が null の場合は無効 -->
+							<DataTrigger Binding="{Binding SelectedFleet}" Value="{x:Null}">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</metro2:CallMethodButton.Style>
+			</metro2:CallMethodButton>
 
 			<Grid Grid.Row="3"
 				  Grid.Column="0"

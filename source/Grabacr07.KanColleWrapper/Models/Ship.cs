@@ -364,9 +364,16 @@ namespace Grabacr07.KanColleWrapper.Models
 
 			this.Info = KanColleClient.Current.Master.Ships[rawData.api_ship_id] ?? ShipInfo.Dummy;
 
-			// 追加: Info.RawData が null の場合のガード
-			if (this.Info?.RawData == null)
+			// Info または Info.RawData が null の場合は早期リターン
+			if (this.Info == null || this.Info.RawData == null)
 			{
+				// 最低限の値を設定して終了
+				this.HP = new LimitedValue(this.RawData.api_nowhp, this.RawData.api_maxhp, 0);
+				this.Fuel = new LimitedValue(this.RawData.api_fuel, this.RawData.api_fuel, 0);
+				this.Bull = new LimitedValue(this.RawData.api_bull, this.RawData.api_bull, 0);
+				this.Slots = new ShipSlot[0];
+				this.ExSlot = new ShipSlot(null, 0, 0);
+				this.EquippedItems = new ShipSlot[0];
 				return;
 			}
 
@@ -374,7 +381,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.Fuel = new LimitedValue(this.RawData.api_fuel, this.Info.RawData.api_fuel_max, 0);
 			this.Bull = new LimitedValue(this.RawData.api_bull, this.Info.RawData.api_bull_max, 0);
 
-			if (this.RawData.api_kyouka.Length >= 5)
+			if (this.RawData.api_kyouka != null && this.RawData.api_kyouka.Length >= 5)
 			{
 				this.Firepower = new ModernizableStatus(this.Info.RawData.api_houg, this.RawData.api_kyouka[0]);
 				this.Torpedo = new ModernizableStatus(this.Info.RawData.api_raig, this.RawData.api_kyouka[1]);
@@ -390,11 +397,28 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public void UpdateSlots()
 		{
-			// 追加: null チェック強化
+			// null チェック強化
+			if (this.RawData.api_slot == null)
+			{
+				this.Slots = new ShipSlot[0];
+				this.ExSlot = new ShipSlot(null, 0, 0);
+				this.EquippedItems = new ShipSlot[0];
+				return;
+			}
+
+			// homeport または Itemyard が null の場合のガード
+			if (this.homeport?.Itemyard?.SlotItems == null)
+			{
+				this.Slots = new ShipSlot[0];
+				this.ExSlot = new ShipSlot(null, 0, 0);
+				this.EquippedItems = new ShipSlot[0];
+				return;
+			}
+
 			this.Slots = this.RawData.api_slot
 				.Select(id => this.homeport.Itemyard.SlotItems[id])
 				.Where(x => x != null)  // null 装備をフィルタリング
-				.Select((t, i) => new ShipSlot(t, this.Info?.RawData?.api_maxeq.Get(i) ?? 0, this.RawData.api_onslot.Get(i) ?? 0))
+				.Select((t, i) => new ShipSlot(t, this.Info?.RawData?.api_maxeq?.Get(i) ?? 0, this.RawData.api_onslot?.Get(i) ?? 0))
 				.ToArray();
 
 			var exSlotItem = this.homeport.Itemyard.SlotItems[this.RawData.api_slot_ex];
