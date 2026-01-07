@@ -55,7 +55,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		TorpedoBomber = 8,
 
 		/// <summary>
-		/// 偵察機。
+		/// 艦上偵察機。
 		/// </summary>
 		ReconPlane = 9,
 

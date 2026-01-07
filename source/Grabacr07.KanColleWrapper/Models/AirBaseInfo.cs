@@ -19,8 +19,14 @@ namespace Grabacr07.KanColleWrapper.Models
 		// 装備ID
 		public int[] EquipmentSlotIds { get; set; }
 
-		// 装備アイコンタイプ
+		// 装備マスターID (api_slotitem_id)
+		public int[] EquipmentSlotItemIds { get; set; }
+
+		// 装備アイコンタイプ (表示用、従来互換)
 		public string[] EquipmentIconTypes { get; set; }
+
+		// 装備種別 (SlotItemType の int 値)
+		public int[] EquipmentTypes { get; set; }
 
 		// 装備名
 		public string[] EquipmentNames { get; set; }
@@ -33,6 +39,12 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		// 対空
 		public int[] EquipmentAntiAirs { get; set; }
+
+		// 迎撃値 (api_houm)
+		public int[] EquipmentIntercepts { get; set; }
+
+		// 対爆値 (api_houk)
+		public int[] EquipmentAntibombs { get; set; }
 
 		// 現在搭載数 (api_count)
 		public int[] EquipmentCounts { get; set; }

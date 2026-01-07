@@ -286,10 +286,14 @@ namespace Grabacr07.KanColleWrapper.Models
 					.Select(p => p.api_slotid)
 					.ToArray() ?? new int[0],
 				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
+				EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
+				EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
 				EquipmentNames = GetEquipmentNames(x.api_plane_info),
 				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
 				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
 				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
+				EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
+				EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
 				EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
 				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 			}).ToArray() ?? new AirBaseInfo[0];
@@ -297,7 +301,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
 		}
 
-		#region 装備スロットからアイコンタイプの配列を解決
+		#region 装備スロットのIconType を取得
 		private static string[] GetEquipmentIconTypes(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
@@ -337,6 +341,74 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 
 			return icons.ToArray();
+		}
+		#endregion
+
+		#region 装備スロットの(SlotItemType)の取得
+		private static int[] GetEquipmentTypes(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var types = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						types.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					// SlotItemType (api_type[2]) を取得
+					types.Add((int)(slotItem?.Info?.Type ?? 0));
+				}
+				catch
+				{
+					types.Add(0);
+				}
+			}
+
+			return types.ToArray();
+		}
+		#endregion
+
+		#region 装備スロットの装備ID(api_slotitem_id)を取得
+		private static int[] GetEquipmentSlotItemIds(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var ids = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						ids.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					// 装備マスターID (api_slotitem_id) を取得
+					ids.Add(slotItem?.Info?.Id ?? 0);
+				}
+				catch
+				{
+					ids.Add(0);
+				}
+			}
+
+			return ids.ToArray();
 		}
 		#endregion
 
@@ -478,11 +550,15 @@ namespace Grabacr07.KanColleWrapper.Models
 						.Take(4)
 						.Select(p => p.api_slotid)
 						.ToArray() ?? new int[0],
+					EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
 					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
+					EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
 					EquipmentNames = GetEquipmentNames(x.api_plane_info),
 					EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
 					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
 					EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
+					EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
+					EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
 					EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
 					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 				}).ToArray() ?? new AirBaseInfo[0];
@@ -630,6 +706,74 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 
 			return antiAirs.ToArray();
+		}
+		#endregion
+
+		#region 装備迎撃値の取得
+		private static int[] GetEquipmentIntercepts(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var intercepts = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						intercepts.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					// api_houm が迎撃値
+					intercepts.Add(slotItem?.Info?.RawData?.api_houm ?? 0);
+				}
+				catch
+				{
+					intercepts.Add(0);
+				}
+			}
+
+			return intercepts.ToArray();
+		}
+		#endregion
+
+		#region 装備対爆値の取得
+		private static int[] GetEquipmentAntibombs(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var antibombs = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					var slotId = plane.api_slotid;
+					if (slotId <= 0)
+					{
+						antibombs.Add(0);
+						continue;
+					}
+
+					var homeport = KanColleClient.Current?.Homeport;
+					var slotItem = homeport?.Itemyard?.SlotItems?[slotId];
+
+					// api_houk が対爆値
+					antibombs.Add(slotItem?.Info?.RawData?.api_houk ?? 0);
+				}
+				catch
+				{
+					antibombs.Add(0);
+				}
+			}
+
+			return antibombs.ToArray();
 		}
 		#endregion
 

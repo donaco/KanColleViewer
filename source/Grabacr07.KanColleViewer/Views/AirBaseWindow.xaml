@@ -143,35 +143,10 @@
 				<Border Margin="4" Padding="8,6" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness=".99">
 					<Grid  HorizontalAlignment="Center">
 						<TextBlock Grid.Row="0" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2" FontSize="16">
-								<Run Text="※制空値は不正確、検証中。" />
+								<Run Text="※制空値は参考値です。" />
 						</TextBlock>
 					</Grid>
 				</Border>
-				<!-- 追加表示: 選択海域の集計情報（ListBox の下に表示されます）
-				<Border Margin="4" Padding="8,6" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness=".99">
-					<Grid  HorizontalAlignment="Center">
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto" />
-								<ColumnDefinition Width="*" />
-							</Grid.ColumnDefinitions>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-							</Grid.RowDefinitions>
-
-							<TextBlock Grid.Row="0" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2">
-								<Run Text="行動半径" /><Run Text=":" />
-							</TextBlock>
-							<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedAirBase.MaxDistance, Mode=OneWay}" Style="{DynamicResource EmphaticTextStyleKey}" Margin="4,2" />
-
-							<TextBlock Grid.Row="1" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2">
-								<Run Text="制空値" /><Run Text=":" />
-							</TextBlock>
-							<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedAirBase.TotalAirPower, Mode=OneWay}" Style="{DynamicResource EmphaticTextStyleKey}" Margin="4,2" />
-						</Grid>
-					</Border>
-				 -->
-				</StackPanel>
 
 				<!-- 右側: 海域詳細情報 -->
 			<Border Grid.Column="1"
@@ -256,6 +231,24 @@
 																	</TextBlock.Text>
 																</TextBlock>
 
+																<!-- スロット制空値（搭載数の右横）
+																<TextBlock VerticalAlignment="Center" Margin="0,0,6,0"
+																		   Foreground="#FFD49C0F"
+																		   FontSize="12"
+																		   Text="{Binding SlotAirPower, StringFormat='+{0}'}">
+																	<TextBlock.Style>
+																		<Style TargetType="TextBlock">
+																			<Setter Property="Visibility" Value="Visible" />
+																			<Style.Triggers>
+																				<DataTrigger Binding="{Binding SlotAirPower}" Value="0">
+																					<Setter Property="Visibility" Value="Collapsed" />
+																				</DataTrigger>
+																			</Style.Triggers>
+																		</Style>
+																	</TextBlock.Style>
+																</TextBlock>
+																 -->
+																
 																<kcvc:SlotItemIcon Type="{Binding IconType}" Width="24" Height="24" Margin="2,0"/>
 
 																<!-- 装備名 + 改修値 + 熟練度 -->

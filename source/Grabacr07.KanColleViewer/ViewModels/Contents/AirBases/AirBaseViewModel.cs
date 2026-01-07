@@ -237,11 +237,15 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				actionKind: x.ActionKind,
 				distance: x.Distance,
 				equipmentSlotIds: x.EquipmentSlotIds,
+				equipmentSlotItemIds: x.EquipmentSlotItemIds,
 				equipmentIconTypes: x.EquipmentIconTypes,
+				equipmentTypes: x.EquipmentTypes,
 				equipmentNames: x.EquipmentNames,
 				equipmentLevels: x.EquipmentLevels,
 				equipmentAlvs: x.EquipmentAlvs,
 				equipmentAntiAirs: x.EquipmentAntiAirs,
+				equipmentIntercepts: x.EquipmentIntercepts,
+				equipmentAntibombs: x.EquipmentAntibombs,
 				equipmentCounts: x.EquipmentCounts,
 				equipmentMaxCounts: x.EquipmentMaxCounts
 			)).ToArray() ?? new AirBaseInfoViewModel[0];
