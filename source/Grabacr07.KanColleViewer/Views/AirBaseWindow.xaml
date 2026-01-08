@@ -248,9 +248,35 @@
 																	</TextBlock.Style>
 																</TextBlock>
 																 -->
-																
-																<kcvc:SlotItemIcon Type="{Binding IconType}" Width="24" Height="24" Margin="2,0"/>
 
+																<!-- Cond を四角いタイルとして表示 -->
+																<Border VerticalAlignment="Center" Margin="0,0,4,0" Width="14" Height="14" CornerRadius="0">
+																	<Border.Style>
+																		<Style TargetType="Border">
+																			<Setter Property="Background" Value="White" />
+																			<Style.Triggers>
+																				<!-- Cond = 1: White -->
+																				<DataTrigger Binding="{Binding Cond}" Value="1">
+																					<Setter Property="Background" Value="White" />
+																				</DataTrigger>
+																				<!-- Cond = 2: Orange -->
+																				<DataTrigger Binding="{Binding Cond}" Value="2">
+																					<Setter Property="Background" Value="Orange" />
+																				</DataTrigger>
+																				<!-- Cond = 3: Red -->
+																				<DataTrigger Binding="{Binding Cond}" Value="3">
+																					<Setter Property="Background" Value="Red" />
+																				</DataTrigger>
+																				<!-- Cond = 0: White（デフォルト） -->
+																			</Style.Triggers>
+																		</Style>
+																	</Border.Style>
+																	<Border BorderThickness="1" BorderBrush="#FF666666" />
+																</Border>
+
+																<!-- 装備アイコン -->
+																<kcvc:SlotItemIcon Type="{Binding IconType}" Width="24" Height="24" Margin="2,0"/>
+																
 																<!-- 装備名 + 改修値 + 熟練度 -->
 																<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
 																	<TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" />

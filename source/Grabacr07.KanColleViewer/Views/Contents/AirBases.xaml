@@ -146,6 +146,7 @@
 									<ColumnDefinition Width="Auto" SharedSizeGroup="ActionKind" />
 									<ColumnDefinition Width="Auto" SharedSizeGroup="Name" />
 									<ColumnDefinition Width="Auto" SharedSizeGroup="Distance" />
+									<ColumnDefinition Width="Auto" SharedSizeGroup="MaxCond" />
 									<ColumnDefinition Width="*" />
 								</Grid.ColumnDefinitions>
 
@@ -206,10 +207,66 @@
 										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 										   FontSize="12"
 										   Width="57"
-										   Margin="10,15,10,0"
+										   Margin="10,15,0,0"
 										   VerticalAlignment="Top" />
+
+								<!-- Cond 表示（タイル + テキスト） -->
+								<StackPanel Grid.Column="3"
+											Orientation="Vertical"
+											VerticalAlignment="Center"
+											HorizontalAlignment="Left"
+											Margin="10,0,0,0">
+									<!-- 上段: タイル + 数値（横並び） -->
+									<StackPanel Orientation="Horizontal"
+												HorizontalAlignment="Left">
+										<!-- Cond タイル -->
+										<Border Width="14"
+												Height="14"
+												CornerRadius="0"
+												VerticalAlignment="Center">
+											<Border.Style>
+												<Style TargetType="Border">
+													<Setter Property="Background" Value="White" />
+													<Style.Triggers>
+														<DataTrigger Binding="{Binding MaxCond}" Value="0">
+															<Setter Property="Background" Value="White" />
+														</DataTrigger>
+														<!-- MaxCond = 1: White -->
+														<DataTrigger Binding="{Binding MaxCond}" Value="1">
+															<Setter Property="Background" Value="White" />
+														</DataTrigger>
+														<!-- MaxCond = 2: Orange -->
+														<DataTrigger Binding="{Binding MaxCond}" Value="2">
+															<Setter Property="Background" Value="Orange" />
+														</DataTrigger>
+														<!-- MaxCond = 3: Red -->
+														<DataTrigger Binding="{Binding MaxCond}" Value="3">
+															<Setter Property="Background" Value="Red" />
+														</DataTrigger>
+													</Style.Triggers>
+												</Style>
+											</Border.Style>
+											<Border BorderThickness="1" BorderBrush="#FF666666" />
+										</Border>
+										<!-- 数値 -->
+										<TextBlock Text="{Binding MaxCond}"
+												   Style="{DynamicResource DefaultTextStyleKey}"
+												   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+												   FontSize="16"
+												   VerticalAlignment="Center"
+												   Margin="4,-2,0,0" />
+									</StackPanel>
+									<!-- 下段: condition ラベル -->
+									<TextBlock Text="condition"
+											   Style="{DynamicResource DefaultTextStyleKey}"
+											   Foreground="#c8c8c8"
+											   FontSize="9"
+											   HorizontalAlignment="Left"
+											   Margin="0,0,0,0" />
+								</StackPanel>
+
 								<!-- 装備スロット -->
-								<ItemsControl Grid.Column="3"
+								<ItemsControl Grid.Column="4"
 											  ItemsSource="{Binding EquipmentSlots, Mode=OneWay}"
 											  Margin="10,0,0,0">
 									<ItemsControl.Template>

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
+using System.Diagnostics;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 {
@@ -16,7 +17,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		private const int 艦上偵察機 = 9;
 		private const int 水上偵察機 = 10;
 		private const int 水上爆撃機 = 11;
-		private const int 回転翼機   = 25;
+		private const int 回転翼機 = 25;
 		private const int 対潜哨戒機 = 26;
 		private const int 水上戦闘機 = 45;
 		private const int 陸上攻撃機 = 47;
@@ -252,6 +253,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		public int AirPower { get; }
 		public double ReconBonus { get; }
 
+		/// <summary>
+		/// 装備スロットの中で最も高い Cond 値を取得
+		/// </summary>
+		public int MaxCond { get; }
+
 		public string ActionKindText
 		{
 			get
@@ -283,7 +289,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			int[] equipmentIntercepts,
 			int[] equipmentAntibombs,
 			int[] equipmentCounts,
-			int[] equipmentMaxCounts)
+			int[] equipmentMaxCounts,
+			int[] equipmentConds)
 		{
 			this.Name = name;
 			this.ActionKind = actionKind;
@@ -310,11 +317,15 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 					antibomb: equipmentAntibombs?[i] ?? 0,
 					count: equipmentCounts?[i] ?? 0,
 					maxCount: equipmentMaxCounts?[i] ?? 0,
+					cond: equipmentConds?[i] ?? 0,
 					actionKind: actionKind
 				);
 			}
 
 			this.EquipmentSlots = slots;
+
+			// 最大 Cond 値を計算（装備がある場合のみ）
+			this.MaxCond = slots.Length > 0 ? slots.Max(s => s.Cond) : 0;
 
 			// 出撃時のボーナス（今後の拡張用、現在は出撃時ボーナスがない場合）
 			double sortieBonus = AirPowerCalculator.GetReconBonus(this.EquipmentSlotItemIds, actionKind);
@@ -341,11 +352,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		public int Antibomb { get; }
 		public int Count { get; }
 		public int MaxCount { get; }
+		public int Cond { get; }
 		public string ToolTipText { get; }
 		public string LevelText { get; }
 		public int SlotAirPower { get; }
 
-		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType, int slotItemType, int antiAir, int intercept, int antibomb, int count, int maxCount, int actionKind)
+		public EquipmentSlotViewModel(int slotId, string name, int level, int alv, string iconType, int slotItemType, int antiAir, int intercept, int antibomb, int count, int maxCount, int cond, int actionKind)
 		{
 			this.SlotId = slotId;
 			this.Name = name;
@@ -358,6 +370,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			this.Antibomb = antibomb;
 			this.Count = count;
 			this.MaxCount = maxCount;
+			this.Cond = cond;
 
 			this.LevelText = level >= 10 ? "★max" : level > 0 ? $"★+{level}" : "";
 			this.SlotAirPower = AirPowerCalculator.CalculateSlotAirPower(slotItemType, antiAir, level, alv, count, intercept, antibomb, actionKind);

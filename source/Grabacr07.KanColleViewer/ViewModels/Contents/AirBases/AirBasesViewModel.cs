@@ -173,6 +173,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 			try
 			{
+				// 現在選択中の AreaId を保持
+				var currentSelectedAreaId = this.SelectedAirBase?.AreaId;
+
 				var areaGroup = KanColleClient.Current?.Homeport?.AirBases?.AreaGroup;
 				if (areaGroup == null)
 				{
@@ -189,8 +192,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 				this.IsEmpty = this.AirBases.Length == 0;
 
-				// 先頭を選択
-				this.SelectedAirBase = this.AirBases.FirstOrDefault();
+				// 以前選択していた AreaId と同じ海域を再選択（なければ先頭）
+				if (currentSelectedAreaId.HasValue)
+				{
+					this.SelectedAirBase = this.AirBases.FirstOrDefault(x => x.AreaId == currentSelectedAreaId.Value)
+										?? this.AirBases.FirstOrDefault();
+				}
+				else
+				{
+					this.SelectedAirBase = this.AirBases.FirstOrDefault();
+				}
 
 				foreach (var ab in this.AirBases)
 				{

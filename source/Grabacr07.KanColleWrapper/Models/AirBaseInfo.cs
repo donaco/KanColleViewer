@@ -22,6 +22,9 @@ namespace Grabacr07.KanColleWrapper.Models
 		// 装備マスターID (api_slotitem_id)
 		public int[] EquipmentSlotItemIds { get; set; }
 
+		// 装備 Cond 値 (api_cond)
+		public int[] EquipmentConds { get; set; }
+
 		// 装備アイコンタイプ (表示用、従来互換)
 		public string[] EquipmentIconTypes { get; set; }
 

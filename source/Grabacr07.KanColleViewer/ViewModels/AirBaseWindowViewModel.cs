@@ -67,6 +67,8 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 			// AirBases と SelectedAirBase をバインド（配列をObservableCollectionに変換）
 			this.AirBases = new ObservableCollection<AirBaseViewModel>(airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>());
+
+			// 初期選択: ウィンドウを開いた時点の選択状態をコピー（以後は連動しない）
 			this.SelectedAirBase = airBasesVM.SelectedAirBase;
 
 			// 基地詳細ボタンコマンド
@@ -79,16 +81,28 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			});
 
 			// SourceのプロパティChangedをサブスクライブ
+			// AirBases の更新のみ監視し、SelectedAirBase は連動させない
 			this.source.PropertyChanged += (sender, e) =>
 			{
 				if (e.PropertyName == nameof(AirBasesViewModel.AirBases))
 				{
+					// 現在の選択を保持
+					var currentSelectedAreaId = this.SelectedAirBase?.AreaId;
+
 					this.AirBases = new ObservableCollection<AirBaseViewModel>(airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>());
+
+					// AirBases が更新された場合、同じ AreaId の項目を再選択（なければ先頭）
+					if (currentSelectedAreaId.HasValue)
+					{
+						this.SelectedAirBase = this.AirBases.FirstOrDefault(x => x.AreaId == currentSelectedAreaId.Value)
+											?? this.AirBases.FirstOrDefault();
+					}
+					else
+					{
+						this.SelectedAirBase = this.AirBases.FirstOrDefault();
+					}
 				}
-				if (e.PropertyName == nameof(AirBasesViewModel.SelectedAirBase))
-				{
-					this.SelectedAirBase = airBasesVM.SelectedAirBase;
-				}
+				// SelectedAirBase の変更は監視しない（連動させない）
 			};
 		}
 	}

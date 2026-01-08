@@ -247,6 +247,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				equipmentIntercepts: x.EquipmentIntercepts,
 				equipmentAntibombs: x.EquipmentAntibombs,
 				equipmentCounts: x.EquipmentCounts,
+				equipmentConds: x.EquipmentConds,
 				equipmentMaxCounts: x.EquipmentMaxCounts
 			)).ToArray() ?? new AirBaseInfoViewModel[0];
 

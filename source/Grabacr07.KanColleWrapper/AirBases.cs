@@ -285,8 +285,8 @@ namespace Grabacr07.KanColleWrapper.Models
 					.Take(4)
 					.Select(p => p.api_slotid)
 					.ToArray() ?? new int[0],
-				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 				EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
+				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 				EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
 				EquipmentNames = GetEquipmentNames(x.api_plane_info),
 				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
@@ -294,6 +294,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
 				EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
 				EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
+				EquipmentConds = GetEquipmentConds(x.api_plane_info),
 				EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
 				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 			}).ToArray() ?? new AirBaseInfo[0];
@@ -490,7 +491,6 @@ namespace Grabacr07.KanColleWrapper.Models
 
 			try
 			{
-				// 対象航空隊（api_rid → api_base_id に変更）を特定
 				var targetBase = this._rawData?.FirstOrDefault(x => x.api_rid == baseId);
 				if (targetBase == null)
 				{
@@ -498,19 +498,15 @@ namespace Grabacr07.KanColleWrapper.Models
 					return;
 				}
 
-				// 行動半径を更新
 				if (distance != null)
 				{
 					targetBase.api_distance = distance;
-					System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Updated distance for area {this.AreaId}, baseId {baseId}: base={distance.api_base}, bonus={distance.api_bonus}");
 				}
 
-				// 各 api_plane_info で指定されたスロットを更新
 				foreach (var newPlane in planeInfo)
 				{
 					try
 					{
-						// 対応する既存の api_plane_info を探して更新
 						var existingPlane = targetBase.api_plane_info?.FirstOrDefault(p => p.api_squadron_id == newPlane.api_squadron_id);
 						if (existingPlane != null)
 						{
@@ -518,15 +514,26 @@ namespace Grabacr07.KanColleWrapper.Models
 							existingPlane.api_count = newPlane.api_count;
 							existingPlane.api_max_count = newPlane.api_max_count;
 							existingPlane.api_state = newPlane.api_state;
-							System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Updated area {this.AreaId}, baseId {baseId}, squadron {newPlane.api_squadron_id}: slotid={newPlane.api_slotid}");
+
+							// 追加: api_cond を反映（mapinfo が持つ場合や set_plane が送る場合に備える）
+							try
+							{
+								existingPlane.api_cond = newPlane.api_cond;
+							}
+							catch
+							{
+								// 念のため例外吸収。フィールドが存在しない等のケースを避ける。
+							}
+
+							System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] Updated area {this.AreaId}, baseId {baseId}, squadron {newPlane.api_squadron_id}: slotid={newPlane.api_slotid}, cond={existingPlane.api_cond}");
 						}
 					}
-					catch
+					catch (Exception exInner)
 					{
+						System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSetPlane] inner error: {exInner}");
 					}
 				}
 
-				// AirBaseInfos を再計算して通知
 				RebuildAirBaseInfos();
 			}
 			catch (Exception ex)
@@ -560,6 +567,7 @@ namespace Grabacr07.KanColleWrapper.Models
 					EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
 					EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
 					EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
+					EquipmentConds = GetEquipmentConds(x.api_plane_info),
 					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
 				}).ToArray() ?? new AirBaseInfo[0];
 			}
@@ -818,6 +826,90 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 
 			return maxCounts.ToArray();
+		}
+		#endregion
+
+		#region 搭載数の取得(補給時)
+		/// <summary>
+		/// 補給 API のレスポンスから搭載数を更新します。
+		/// </summary>
+		internal void UpdateFromSupply(kcsapi_plane_info[] planeInfo, ApiDistance distance)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return;
+
+			try
+			{
+				bool updated = false;
+
+				// 全基地の全スロットを走査して一致する squadron_id を更新
+				foreach (var baseData in this._rawData)
+				{
+					if (baseData.api_plane_info == null) continue;
+
+					// 距離情報がある場合は更新
+					if (distance != null)
+					{
+						baseData.api_distance = distance;
+					}
+
+					foreach (var newPlane in planeInfo)
+					{
+						var existingPlane = baseData.api_plane_info.FirstOrDefault(p => p.api_squadron_id == newPlane.api_squadron_id);
+						if (existingPlane != null)
+						{
+							// 搭載数を更新
+							existingPlane.api_count = newPlane.api_count;
+							existingPlane.api_max_count = newPlane.api_max_count;
+							existingPlane.api_state = newPlane.api_state;
+
+							// Cond も更新（補給で Cond がリセットされる場合がある）
+							try
+							{
+								existingPlane.api_cond = newPlane.api_cond;
+							}
+							catch { }
+
+							updated = true;
+
+							System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSupply] Updated area {this.AreaId}, squadron {newPlane.api_squadron_id}: count={newPlane.api_count}/{newPlane.api_max_count}, cond={newPlane.api_cond}");
+						}
+					}
+				}
+
+				// 更新があった場合のみ AirBaseInfos を再構築
+				if (updated)
+				{
+					RebuildAirBaseInfos();
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[AirBase.UpdateFromSupply] Error: {ex}");
+			}
+		}
+		#endregion
+
+		#region 装備 Cond 値の取得
+		private static int[] GetEquipmentConds(kcsapi_plane_info[] planeInfo)
+		{
+			if (planeInfo == null || planeInfo.Length == 0)
+				return new int[0];
+
+			var conds = new List<int>();
+			foreach (var plane in planeInfo.Take(4))
+			{
+				try
+				{
+					conds.Add(plane?.api_cond ?? 0);
+				}
+				catch
+				{
+					conds.Add(0);
+				}
+			}
+
+			return conds.ToArray();
 		}
 		#endregion
 

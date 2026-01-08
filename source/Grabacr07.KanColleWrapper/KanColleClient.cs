@@ -533,7 +533,6 @@ namespace Grabacr07.KanColleWrapper
 			return true;
 		}
 
-
 		/// <summary>
 		/// 戦闘結果　BattleResult
 		/// </summary>
@@ -1704,6 +1703,7 @@ namespace Grabacr07.KanColleWrapper
 			}
 			return true;
 		}
+
 		/// <summary>
 		/// 艦娘の情報更新
 		/// </summary>
@@ -4680,8 +4680,29 @@ namespace Grabacr07.KanColleWrapper
 				}
 				catch { afterBauxite = null; }
 
-				// 値がなければ特に処理する必要なし（既存ハンドラと同挙動）
-				if (!afterFuel.HasValue && !afterBauxite.HasValue) return true;
+				// api_plane_info を取得
+				kcsapi_plane_info[] planeInfo = null;
+				try
+				{
+					var planeTok = data["api_plane_info"];
+					if (planeTok != null && planeTok.Type == JTokenType.Array)
+					{
+						planeInfo = planeTok.ToObject<kcsapi_plane_info[]>();
+					}
+				}
+				catch { planeInfo = null; }
+
+				// api_distance を取得
+				ApiDistance distance = null;
+				try
+				{
+					var distanceTok = data["api_distance"];
+					if (distanceTok != null && distanceTok.Type == JTokenType.Object)
+					{
+						distance = distanceTok.ToObject<ApiDistance>();
+					}
+				}
+				catch { distance = null; }
 
 				// UI スレッドで安全に反映
 				RunOnUi(() =>
@@ -4689,66 +4710,86 @@ namespace Grabacr07.KanColleWrapper
 					try
 					{
 						var materials = this.Homeport?.Materials;
-						if (materials == null) return;
 
-						// 現在値を取得（リフレクションで安全にアクセス）
-						int curFuel = 0, curAmmo = 0, curSteel = 0, curBaux = 0;
-						try
+						// 資源の更新
+						if (materials != null && (afterFuel.HasValue || afterBauxite.HasValue))
 						{
-							var ty = typeof(Materials);
-							var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							var pAmmo = ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							var pSteel = ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-							if (pFuel != null) curFuel = (int)pFuel.GetValue(materials);
-							if (pAmmo != null) curAmmo = (int)pAmmo.GetValue(materials);
-							if (pSteel != null) curSteel = (int)pSteel.GetValue(materials);
-							if (pBaux != null) curBaux = (int)pBaux.GetValue(materials);
-						}
-						catch { }
-
-						// 反映する新値を決定
-						int newFuel = afterFuel ?? curFuel;
-						int newBaux = afterBauxite ?? curBaux;
-
-						// 可能なら個別プロパティにセット、それが無ければ private Update(int[]) を使って上書き
-						try
-						{
-							var ty = typeof(Materials);
-							var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-							bool setFuel = false, setBaux = false;
-
-							if (afterFuel.HasValue && pFuel != null)
+							int curFuel = 0, curAmmo = 0, curSteel = 0, curBaux = 0;
+							try
 							{
-								pFuel.SetValue(materials, newFuel);
-								setFuel = true;
+								var ty = typeof(Materials);
+								var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+								var pAmmo = ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+								var pSteel = ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+								var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+								if (pFuel != null) curFuel = (int)pFuel.GetValue(materials);
+								if (pAmmo != null) curAmmo = (int)pAmmo.GetValue(materials);
+								if (pSteel != null) curSteel = (int)pSteel.GetValue(materials);
+								if (pBaux != null) curBaux = (int)pBaux.GetValue(materials);
 							}
-							if (afterBauxite.HasValue && pBaux != null)
-							{
-								pBaux.SetValue(materials, newBaux);
-								setBaux = true;
-							}
+							catch { }
 
-							// どちらかプロパティでセットできなかった場合は Update(int[]) で上書き
-							if (!(setFuel && setBaux))
+							int newFuel = afterFuel ?? curFuel;
+							int newBaux = afterBauxite ?? curBaux;
+
+							try
 							{
-								// 保持したい既存の ammo/steel を利用して配列を作る
-								var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-								if (mi != null)
+								var ty = typeof(Materials);
+								var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+								var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+								bool setFuel = false, setBaux = false;
+
+								if (afterFuel.HasValue && pFuel != null)
 								{
-									var arr = new int[4];
-									arr[0] = newFuel;
-									arr[1] = curAmmo;
-									arr[2] = curSteel;
-									arr[3] = newBaux;
-									mi.Invoke(materials, new object[] { arr });
+									pFuel.SetValue(materials, newFuel);
+									setFuel = true;
+								}
+								if (afterBauxite.HasValue && pBaux != null)
+								{
+									pBaux.SetValue(materials, newBaux);
+									setBaux = true;
+								}
+
+								if (!(setFuel && setBaux))
+								{
+									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
+									if (mi != null)
+									{
+										var arr = new int[4];
+										arr[0] = newFuel;
+										arr[1] = curAmmo;
+										arr[2] = curSteel;
+										arr[3] = newBaux;
+										mi.Invoke(materials, new object[] { arr });
+									}
 								}
 							}
+							catch { }
 						}
-						catch { }
+
+						// 航空隊の搭載数を更新（api_plane_info がある場合）
+						if (planeInfo != null && planeInfo.Length > 0)
+						{
+							try
+							{
+								var airBases = this.Homeport?.AirBases;
+								if (airBases != null)
+								{
+									// 全海域の全基地に対して搭載数を更新
+									foreach (var kvp in airBases.AreaGroup)
+									{
+										try
+										{
+											kvp.Value?.UpdateFromSupply(planeInfo, distance);
+										}
+										catch { }
+									}
+								}
+							}
+							catch { }
+						}
 
 						// UI 全体更新を促す
 						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
