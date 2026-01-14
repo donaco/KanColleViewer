@@ -164,17 +164,17 @@
 											<Setter Property="Foreground" Value="White" />
 											<Style.Triggers>
 												<DataTrigger Binding="{Binding ActionKind}" Value="1">
-													<Setter Property="Background" Value="#FFB40000" />
+													<Setter Property="Background" Value="#b53b36" />
 												</DataTrigger>
 												<DataTrigger Binding="{Binding ActionKind}" Value="2">
-													<Setter Property="Background" Value="#FFFFEA00" />
+													<Setter Property="Background" Value="#caa736" />
 													<Setter Property="Foreground" Value="Black" />
 												</DataTrigger>
 												<DataTrigger Binding="{Binding ActionKind}" Value="3">
-													<Setter Property="Background" Value="#0079e9" />
+													<Setter Property="Background" Value="#3ba09d" />
 												</DataTrigger>
 												<DataTrigger Binding="{Binding ActionKind}" Value="4">
-													<Setter Property="Background" Value="#FF286414" />
+													<Setter Property="Background" Value="#82b659" />
 												</DataTrigger>
 												<DataTrigger Binding="{Binding ActionKind}" Value="0">
 													<Setter Property="Background" Value="#5d5d63" />
