@@ -423,7 +423,7 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 
-				// SortieInfo の更新（出撃開始）- cellNo は取得するがキャッシュするのみ
+				// SortieInfo の更新（出撃開始）
 				try
 				{
 					if (!string.IsNullOrEmpty(normalized))
@@ -445,8 +445,19 @@ namespace Grabacr07.KanColleWrapper
 								{
 									try
 									{
-										// cellNo パラメータを渡さない（表示しない）
-										this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
+										// 設定に応じて cellNo を表示するかどうかを切り替え
+										var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+										if (showOnArrival && cellNo > 0)
+										{
+											// セル到達時に表示（Start + Next で CellNo を設定）
+											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
+											this.SortieInfo.Next(cellNo);
+										}
+										else
+										{
+											// 従来動作: cellNo は表示しない
+											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
+										}
 									}
 									catch { }
 								});
@@ -490,10 +501,24 @@ namespace Grabacr07.KanColleWrapper
 					{
 						int cellNo = data["api_no"]?.Value<int>() ?? 0;
 
-						// cellNo をキャッシュ（battle 時に使用）するが、表示は更新しない
 						if (cellNo > 0)
 						{
+							// cellNo をキャッシュ（battle 時に使用）
 							this.cachedCellNo = cellNo;
+
+							// 設定に応じて即座に表示するかどうかを切り替え
+							var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+							if (showOnArrival)
+							{
+								RunOnUi(() =>
+								{
+									try
+									{
+										this.SortieInfo.Next(cellNo);
+									}
+									catch { }
+								});
+							}
 						}
 					}
 				}
@@ -517,18 +542,24 @@ namespace Grabacr07.KanColleWrapper
 			// battleresult は別ハンドラで処理するため除外
 			if (url.Contains("battleresult")) return false;
 
-			// キャッシュされた cellNo を使用して表示開始
-			RunOnUi(() =>
+			// 設定に応じてキャッシュされた cellNo を使用して表示開始
+			var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+
+			// showOnArrival が false の場合のみ battle 時に cellNo を表示開始
+			if (!showOnArrival)
 			{
-				try
+				RunOnUi(() =>
 				{
-					if (this.cachedCellNo > 0)
+					try
 					{
-						this.SortieInfo.EnterBattle(this.cachedCellNo);
+						if (this.cachedCellNo > 0)
+						{
+							this.SortieInfo.EnterBattle(this.cachedCellNo);
+						}
 					}
-				}
-				catch { }
-			});
+					catch { }
+				});
+			}
 
 			return true;
 		}

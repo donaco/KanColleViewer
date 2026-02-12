@@ -114,6 +114,11 @@
 		<StackPanel Margin="20,0,0,0">
 			<CheckBox Content="出撃中のマップ位置、戦闘結果を表示する（例: 1-5-D [S]）"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
+
+			<Border Height="8" />
+			<CheckBox Content="マップ位置を取得時に表示する（チェックなし: 戦闘開始時に表示）"
+					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowCellOnArrival}, Path=Value}"
+					  IsEnabled="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -22,6 +22,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 		public bool IsViewRangeCalcIncludeFirstFleet { get; set; }
 		public bool IsViewRangeCalcIncludeSecondFleet { get; set; }
 		public bool CheckFlagshipIsRepairShip { get; set; }
+		public bool ShowCellOnArrival { get; set; }
 
 		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
 		{

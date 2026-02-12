@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -29,5 +29,10 @@ namespace Grabacr07.KanColleWrapper
 		/// 艦隊ステータスにおいて、旗艦が工作艦かどうかを確認するかどうかを示す値を取得します。
 		/// </summary>
 		bool CheckFlagshipIsRepairShip { get; }
+
+		/// <summary>
+		/// マップ位置の表示を、戦闘開始時ではなくセル到達時（start/next）に更新するかどうかを取得します。
+		/// </summary>
+		bool ShowCellOnArrival { get; }
 	}
 }

@@ -111,6 +111,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> ShowSortieInfo { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
+		/// <summary>
+		/// マップ位置の表示を、戦闘開始時ではなくセル到達時（start/next）に更新するかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> ShowCellOnArrival { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+
 		#region instance members
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -144,6 +150,8 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		bool IKanColleClientSettings.IsViewRangeCalcIncludeSecondFleet => IsViewRangeCalcIncludeSecondFleet.Value;
 
 		bool IKanColleClientSettings.CheckFlagshipIsRepairShip => CheckFlagshipIsNotRepairShip.Value;
+
+		bool IKanColleClientSettings.ShowCellOnArrival => ShowCellOnArrival.Value;
 
 		#endregion
 
