@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -89,7 +89,7 @@ namespace Grabacr07.KanColleViewer.Composition
 		public void Initialize()
 		{
 			var currentDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
-			if (currentDir == null) // なんじゃそりゃ
+			if (currentDir == null)
 			{
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;

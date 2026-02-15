@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models.Raw;
@@ -59,10 +58,12 @@ namespace Counter
 	{
 		public ItemDestroyCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_kousyou_destroyitem2
-				.TryParse()
-				.Where(x => x.IsSuccess)
-				.Subscribe(_ => this.Count++);
+			// KanColleClient のイベントを購読
+			KanColleClient.Current.ItemDestroyed += (sender, e) =>
+			{
+				System.Diagnostics.Debug.WriteLine("[Counter] ItemDestroyed イベント発火!");
+				this.Count++;
+			};
 
 			this.Text = "装備を破棄した回数";
 		}
@@ -72,25 +73,27 @@ namespace Counter
 	{
 		public SupplyCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_hokyu_charge
-				.TryParse()
-				.Where(x => x.IsSuccess)
-				.Subscribe(_ => this.Count++);
+			// KanColleClient のイベントを購読
+			KanColleClient.Current.SupplyCompleted += (sender, e) =>
+			{
+				System.Diagnostics.Debug.WriteLine("[Counter] SupplyCompleted イベント発火!");
+				this.Count++;
+			};
 
 			this.Text = "艦娘に補給した回数";
 		}
 	}
 
-
 	public class MissionCounter : CounterBase
 	{
 		public MissionCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_mission_result
-				.TryParse<kcsapi_mission_result>()
-				.Where(x => x.IsSuccess)
-				.Where(x => x.Data.api_clear_result == 1 || x.Data.api_clear_result == 2)
-				.Subscribe(_ => this.Count++);
+			// KanColleClient のイベントを購読
+			KanColleClient.Current.MissionSucceeded += (sender, e) =>
+			{
+				System.Diagnostics.Debug.WriteLine("[Counter] MissionSucceeded イベント発火!");
+				this.Count++;
+			};
 
 			this.Text = "遠征に成功した回数";
 		}

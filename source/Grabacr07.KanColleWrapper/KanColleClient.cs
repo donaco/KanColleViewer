@@ -13,7 +13,7 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows; // 追加
+using System.Windows;
 using System.Xml.Linq;
 
 namespace Grabacr07.KanColleWrapper
@@ -105,6 +105,25 @@ namespace Grabacr07.KanColleWrapper
 		/// 出撃中のマップ位置情報を取得します。
 		/// </summary>
 		public SortieInfo SortieInfo { get; } = new SortieInfo();
+
+		#endregion
+
+		#region カウンタープラグイン用
+
+		/// <summary>
+		/// 補給が行われた時に発生します。
+		/// </summary>
+		public event EventHandler SupplyCompleted;
+
+		/// <summary>
+		/// 装備が破棄された時に発生します。
+		/// </summary>
+		public event EventHandler ItemDestroyed;
+
+		/// <summary>
+		/// 遠征が成功した時に発生します。(api_clear_result == 1 or 2)
+		/// </summary>
+		public event EventHandler MissionSucceeded;
 
 		#endregion
 
@@ -341,6 +360,8 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleAirCorpsSupply(url, normalized)) return;
 				if (TryHandleSetPlane(url, normalized, requestBody)) return;
 				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
+
+				if (TryHandleMissionResult(url, normalized)) return;
 				// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch { /* swallow */ }
@@ -951,15 +972,18 @@ namespace Grabacr07.KanColleWrapper
 										itemId = itemTok.Value<int>();
 								}
 
-								// ヒューリスティック:
-								// - api_type == 13 は装備関連のボーナスである可能性が高い（サンプル参照）
-								// - または既知の bonus api_id (例: 901/902) を個別に扱う
-								if (itemId == 901)
-									deltaCapacity += 1;  // 901 は固定 +1
-								else if (itemId == 902)
-									deltaCapacity += 2;  // 902 は固定 +2（もしそういう仕様なら）
+								// api_id: 901〜940 の場合、下2桁が装備枠増加数を表すと推測
+								// 例: 901 → +1, 902 → +2, 912 → +12, 920 → +20 など
+								if (itemId >= 901 && itemId <= 940)
+								{
+									int slotIncrease = itemId - 900;
+									deltaCapacity += slotIncrease;
+								}
 								else if (type == 13)
-									deltaCapacity += Math.Max(0, count);  // その他は count を使用
+								{
+									// その他は count を使用（従来のフォールバック）
+									deltaCapacity += Math.Max(0, count);
+								}
 							}
 							catch { /* swallow */ }
 						}
@@ -1198,6 +1222,9 @@ namespace Grabacr07.KanColleWrapper
 
 							// UI 再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+
+							// カウンタープラグイン用イベント発火
+							try { this.ItemDestroyed?.Invoke(this, EventArgs.Empty); } catch { }
 						}
 						catch
 						{
@@ -4470,6 +4497,9 @@ namespace Grabacr07.KanColleWrapper
 
 							// 全体の UI 再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
+
+							// カウンタープラグイン用イベント発火
+							try { this.SupplyCompleted?.Invoke(this, EventArgs.Empty); } catch { }
 						}
 						catch
 						{
@@ -4827,6 +4857,32 @@ namespace Grabacr07.KanColleWrapper
 					}
 					catch { }
 				});
+			}
+			catch { }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 遠征結果 (api_req_mission/result)
+		/// </summary>
+		private bool TryHandleMissionResult(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_mission/result")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_mission_result>(normalized, out var result))
+				{
+					// api_clear_result: 0=失敗, 1=成功, 2=大成功
+					if (result.api_clear_result == 1 || result.api_clear_result == 2)
+					{
+						RunOnUi(() =>
+						{
+							try { this.MissionSucceeded?.Invoke(this, EventArgs.Empty); } catch { }
+						});
+					}
+				}
 			}
 			catch { }
 

@@ -126,10 +126,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins"
-xcopy /Y "$(TargetDir)*.*" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)"
-move "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\$(TargetName).*" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins"</PostBuildEvent>
-  </PropertyGroup>
+  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2>nul
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"</PostBuildEvent>
+</PropertyGroup>
+<PropertyGroup>
+  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2>nul
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
+mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2>nul
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
+</PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
