@@ -838,13 +838,13 @@
 													   InnerRadius="1"
 													   Stretch="Fill"
 													   Stroke="Black"
-													   StrokeThickness="2"
+													   StrokeThickness="6"
 													   Fill="#FFFDC313"
-													   Width="126"
-													   Height="146"
+													   Width="110"
+													   Height="124"
 													   HorizontalAlignment="Left"
 													   VerticalAlignment="Top"
-													   Margin="61.033,60.606,0,0" />
+													   Margin="84,50,0,0" />
 								</Grid>
 							</Viewbox>
 						</ControlTemplate>
@@ -869,13 +869,13 @@
 													   InnerRadius="1"
 													   Stretch="Fill"
 													   Stroke="Black"
-													   StrokeThickness="2"
+													   StrokeThickness="6"
 													   Fill="#FFFDC313"
-													   Width="126"
-													   Height="146"
+													   Width="110"
+													   Height="124"
 													   HorizontalAlignment="Left"
 													   VerticalAlignment="Top"
-													   Margin="61.033,60.606,0,0" />
+													   Margin="84,50,0,0" />
 									<!-- Margin="91.033,50.606,0,0" /> -->
 								</Grid>
 							</Viewbox>
@@ -1085,11 +1085,11 @@
 													   Stroke="Black"
 													   StrokeThickness="2"
 													   Fill="#2e8d07"
-													   Width="36"
+													   Width="34"
 													   Height="38"
 													   HorizontalAlignment="Left"
 													   VerticalAlignment="Top"
-													   Margin="24,20,0,0" />
+													   Margin="25,20,0,0" />
 								</Grid>
 								</Canvas>
 							</Viewbox>
@@ -1257,10 +1257,10 @@
 													   StrokeThickness="2"
 													   Fill="#72b73d"
 													   Width="30"
-													   Height="32"
+													   Height="34"
 													   HorizontalAlignment="Left"
 													   VerticalAlignment="Top"
-													   Margin="22,21,0,0" />
+													   Margin="22,17,0,0" />
 									</Canvas>
 								</Grid>
 							</Viewbox>
@@ -1313,9 +1313,9 @@
 														   InnerRadius="1"
 														   Stretch="Fill"
 														   Stroke="Black"
-														   StrokeThickness="1"
+														   StrokeThickness="2"
 														   Fill="#c0c2c3"
-													   Width="36"
+													   Width="34"
 													   Height="38"
 													   HorizontalAlignment="Left"
 													   VerticalAlignment="Bottom"
