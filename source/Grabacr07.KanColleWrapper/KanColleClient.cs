@@ -308,6 +308,7 @@ namespace Grabacr07.KanColleWrapper
 
 				// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
+				if (TryHandleBasic(url, normalized)) return;
 
 				// 任務完了や個別素材/消費アイテムの更新
 				if (TryHandleClearItemGet(url, normalized)) return;
@@ -914,6 +915,32 @@ namespace Grabacr07.KanColleWrapper
 			catch
 			{
 			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 提督情報 (api_get_member/basic)
+		/// </summary>
+		private bool TryHandleBasic(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/basic")) return false;
+
+			try
+			{
+				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_basic>(normalized, out var basic))
+				{
+					RunOnUi(() =>
+					{
+						try
+						{
+							this.Homeport?.UpdateAdmiral(basic);
+						}
+						catch { }
+					});
+				}
+			}
+			catch { }
 
 			return true;
 		}
