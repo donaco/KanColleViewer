@@ -138,5 +138,5 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 > Copyright (c) Microsoft Corporation
 * **用途 :** クラッシュ ログ収集
 * **ライセンス :** The MIT License (MIT)
-* **ライセンス全文 :** [licenses/Application Insights.txt](licenses/Application Insights.txt)
+* **ライセンス全文 :** [licenses/Application%20Insights.txt](licenses/Application%20Insights.txt)
 
