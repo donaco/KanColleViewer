@@ -362,7 +362,8 @@ namespace Grabacr07.KanColleWrapper.Models
 		{
 			this.UpdateRawData(rawData);
 
-			this.Info = KanColleClient.Current.Master.Ships[rawData.api_ship_id] ?? ShipInfo.Dummy;
+			var master = KanColleClient.Current.Master;
+			this.Info = master?.Ships[rawData.api_ship_id] ?? ShipInfo.Dummy;
 
 			// Info または Info.RawData が null の場合は早期リターン
 			if (this.Info == null || this.Info.RawData == null)
