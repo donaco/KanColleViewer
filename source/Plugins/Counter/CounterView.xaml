@@ -66,7 +66,7 @@
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
 
-			<!-- 出撃履歴 ヘッダー + クリアボタン -->
+			<!-- 出撃履歴 ヘッダー + クリアボタン + BOSSのみボタン -->
 			<Border DockPanel.Dock="Top"
 					Margin="8,12,4,0"
 					Padding="0,0,0,8"
@@ -74,13 +74,21 @@
 					BorderBrush="{DynamicResource BorderBrushKey}">
 				<Grid>
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="162" />
+						<ColumnDefinition Width="75" />
+						<ColumnDefinition Width="100" />
+						<ColumnDefinition Width="0" />
 						<ColumnDefinition Width="Auto" />
 					</Grid.ColumnDefinitions>
 					<TextBlock Text="出撃履歴"
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   FontWeight="Bold" />
 					<metro2:CallMethodButton Grid.Column="1"
+											 MethodName="ToggleBossOnly"
+											 DataContext="{Binding SortieHistory}">
+						<TextBlock Text="{Binding BossOnlyText}"
+								   Style="{DynamicResource DefaultTextStyleKey}" />
+					</metro2:CallMethodButton>
+					<metro2:CallMethodButton Grid.Column="3"
 											 Content="クリア"
 											 MethodName="Reset"
 											 DataContext="{Binding SortieHistory}" />

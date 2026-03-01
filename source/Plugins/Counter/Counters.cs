@@ -333,7 +333,7 @@ namespace Counter
 
 	/// <summary>
 	/// 直近の出撃履歴を保持・表示するカウンターです。
-	/// 戦闘結果（WinRank）を受け取るたびに即座に履歴を追加します。
+	/// BossOnly が true の場合、ボスセルでの戦闘結果のみを記録します。
 	/// </summary>
 	public class SortieHistoryCounter : NotificationObject
 	{
@@ -347,6 +347,34 @@ namespace Counter
 
 		// 海域-セルごとの集計データ（キー検索用）
 		private readonly Dictionary<string, SortieAreaCount> _areaCountMap;
+
+		#region BossOnly 変更通知プロパティ
+
+		private bool _BossOnly;
+
+		/// <summary>
+		/// true の場合、ボスセルでの戦闘結果のみをカウント・履歴に追加します。
+		/// </summary>
+		public bool BossOnly
+		{
+			get { return this._BossOnly; }
+			set
+			{
+				if (this._BossOnly != value)
+				{
+					this._BossOnly = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.BossOnlyText));
+				}
+			}
+		}
+
+		/// <summary>
+		/// ボタン表示用テキスト
+		/// </summary>
+		public string BossOnlyText => this.BossOnly ? "ボスのみ:有効中" : "ボスのみ:無効中";
+
+		#endregion
 
 		#region History 変更通知プロパティ
 
@@ -409,6 +437,15 @@ namespace Counter
 			this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
 		}
 
+		/// <summary>
+		/// BossOnly トグルを切り替えるメソッドです（XAML の CallMethodButton から呼び出されます）。
+		/// </summary>
+		public void ToggleBossOnly()
+		{
+			this.BossOnly = !this.BossOnly;
+			System.Diagnostics.Debug.WriteLine($"[SortieHistory] BossOnly = {this.BossOnly}");
+		}
+
 		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			var sortieInfo = (SortieInfo)sender;
@@ -441,6 +478,18 @@ namespace Counter
 						if (liveCellNo.HasValue && liveCellNo.Value > 0)
 						{
 							cellNo = liveCellNo;
+						}
+
+						// BossOnly フィルター: MapCellNames.json のセル名に "(BOSS)" が含まれるかで判定
+						if (this.BossOnly)
+						{
+							if (!cellNo.HasValue
+								|| !MapCellNameProvider.IsBossCell(this._currentMapAreaId, this._currentMapInfoNo, cellNo.Value))
+							{
+								System.Diagnostics.Debug.WriteLine(
+									$"[SortieHistory] BossOnly フィルター: {this._currentMapAreaId}-{this._currentMapInfoNo} cellNo={cellNo} → ボスセルではないためスキップ");
+								break;
+							}
 						}
 
 						this.AddRecord(

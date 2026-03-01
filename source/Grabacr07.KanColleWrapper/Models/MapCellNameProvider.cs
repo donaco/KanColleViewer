@@ -58,6 +58,21 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 
 		/// <summary>
+		/// 指定したセルがボスセルかどうかを判定します。
+		/// MapCellNames.json のセル名に "(BOSS)" が含まれていれば true を返します。
+		/// </summary>
+		/// <param name="mapAreaId">海域ID（例: 7）</param>
+		/// <param name="mapInfoNo">マップ番号（例: 4）</param>
+		/// <param name="cellNo">セル番号</param>
+		/// <returns>ボスセルであれば true</returns>
+		public static bool IsBossCell(int mapAreaId, int mapInfoNo, int cellNo)
+		{
+			var cellName = GetCellName(mapAreaId, mapInfoNo, cellNo);
+			return cellName != null
+				&& cellName.IndexOf("(BOSS)", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		/// <summary>
 		/// JSON ファイルが変更されていれば再読み込みします。
 		/// </summary>
 		private static void TryReloadIfModified()

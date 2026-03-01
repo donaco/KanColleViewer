@@ -471,13 +471,11 @@ namespace Grabacr07.KanColleWrapper
 										var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
 										if (showOnArrival && cellNo > 0)
 										{
-											// セル到達時に表示（Start + Next で CellNo を設定）
 											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
 											this.SortieInfo.Next(cellNo);
 										}
 										else
 										{
-											// 従来動作: cellNo は表示しない
 											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
 										}
 									}
