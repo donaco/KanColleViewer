@@ -129,6 +129,16 @@
 								<TextBlock Text="ボスマスのみをカウントする"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
+
+							<!-- 区切り線 -->
+							<Border Height=".99"
+									Background="{DynamicResource BorderBrushKey}"
+									Margin="0,6" />
+
+							<!-- ポップアップボタン -->
+							<metro2:CallMethodButton Content="別ウィンドウで表示"
+													 MethodName="OpenPopupWindow"
+													 HorizontalAlignment="Stretch" />
 						</StackPanel>
 					</GroupBox>
 

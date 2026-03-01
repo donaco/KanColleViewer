@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Livet;
 
 namespace Counter
 {
 	public class CounterViewModel : ViewModel
 	{
+		/// <summary>
+		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
+		/// </summary>
+		private CounterWindow _popupWindow;
+
 		#region Counters 変更通知プロパティ
 
 		private ObservableCollection<CounterBase> _Counters;
@@ -108,5 +114,50 @@ namespace Counter
 		}
 
 		#endregion
+
+		#region IsTopMost 変更通知プロパティ
+
+		private bool _IsTopMost = true;
+
+		/// <summary>
+		/// ポップアップウィンドウを最前面に固定するかどうかを切り替えます。
+		/// </summary>
+		public bool IsTopMost
+		{
+			get { return this._IsTopMost; }
+			set
+			{
+				if (this._IsTopMost != value)
+				{
+					this._IsTopMost = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// ポップアップウィンドウを開きます。
+		/// 既に開いている場合はアクティブにします。
+		/// XAML の CallMethodButton から呼び出されます。
+		/// </summary>
+		public void OpenPopupWindow()
+		{
+			if (this._popupWindow != null && this._popupWindow.IsLoaded)
+			{
+				// 既に開いている → アクティブにする
+				this._popupWindow.Activate();
+				return;
+			}
+
+			this._popupWindow = new CounterWindow
+			{
+				DataContext = this,
+			};
+
+			this._popupWindow.Closed += (s, e) => this._popupWindow = null;
+			this._popupWindow.Show();
+		}
 	}
 }

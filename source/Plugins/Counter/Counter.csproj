@@ -152,6 +152,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="CounterWindow.xaml.cs">
+      <DependentUpon>CounterWindow.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -203,6 +206,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CounterWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="$(SolutionDir)\Analyzers\KanColleViewer.PluginAnalyzer\bin\$(Configuration)\KanColleViewer.Composition.dll" />
@@ -216,16 +223,16 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
-<PropertyGroup>
-  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2>nul
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-</PropertyGroup>
-<PropertyGroup>
-  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2>nul
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2>nul
+mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-</PropertyGroup>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets..
   <Target Name="BeforeBuild">
