@@ -12,9 +12,11 @@
 			 d:DesignWidth="700">
 	<UserControl.Resources>
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 		<!-- Expeditions.xaml ベースの GroupBox スタイル -->
-		<Style TargetType="{x:Type GroupBox}">
+		<Style x:Key="BaseGroupBoxStyle"
+			   TargetType="{x:Type GroupBox}">
 			<Setter Property="OverridesDefaultStyle"
 					Value="True" />
 			<Setter Property="BorderThickness"
@@ -65,6 +67,23 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
+
+		<!-- 暗黙の GroupBox スタイル（全 GroupBox に自動適用） -->
+		<Style TargetType="{x:Type GroupBox}"
+			   BasedOn="{StaticResource BaseGroupBoxStyle}" />
+
+		<!-- 無効時に半透明化するスタイル -->
+		<Style x:Key="DisableableGroupBoxStyle"
+			   TargetType="{x:Type GroupBox}"
+			   BasedOn="{StaticResource BaseGroupBoxStyle}">
+			<Style.Triggers>
+				<Trigger Property="IsEnabled"
+						 Value="False">
+					<Setter Property="Opacity"
+							Value="0.35" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
 	</UserControl.Resources>
 
 	<ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -91,8 +110,22 @@
 							  Margin="0,5,0,0"
 							  Padding="8">
 						<StackPanel>
+							<CheckBox IsChecked="{Binding IsCounterEnabled, Mode=TwoWay}"
+									  Foreground="{DynamicResource ForegroundBrushKey}"
+									  Margin="0,2">
+								<TextBlock Text="カウンターを使用する"
+										   Style="{DynamicResource DefaultTextStyleKey}" />
+							</CheckBox>
+							<CheckBox IsChecked="{Binding IsSortieHistoryEnabled, Mode=TwoWay}"
+									  Foreground="{DynamicResource ForegroundBrushKey}"
+									  Margin="0,2">
+								<TextBlock Text="戦闘履歴、出撃数をカウントする"
+										   Style="{DynamicResource DefaultTextStyleKey}" />
+							</CheckBox>
 							<CheckBox IsChecked="{Binding SortieHistory.BossOnly, Mode=TwoWay}"
-									  Foreground="{DynamicResource ForegroundBrushKey}">
+									  IsEnabled="{Binding IsSortieHistoryEnabled}"
+									  Foreground="{DynamicResource ForegroundBrushKey}"
+									  Margin="16,2,0,2">
 								<TextBlock Text="ボスマスのみをカウントする"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
@@ -101,7 +134,9 @@
 
 					<!-- 上段: カウンター -->
 					<GroupBox Header="カウンター"
-							  Padding="8">
+							  Padding="8"
+							  IsEnabled="{Binding IsCounterEnabled}"
+							  Style="{StaticResource DisableableGroupBoxStyle}">
 						<ItemsControl ItemsSource="{Binding Counters}"
 									  Grid.IsSharedSizeScope="True">
 							<ItemsControl.ItemTemplate>
@@ -138,7 +173,9 @@
 				<!-- ========== 第2列: 直近10件の戦闘結果 ========== -->
 				<GroupBox Header="戦闘履歴"
 						  Margin="5,0,5,5"
-						  Padding="8">
+						  Padding="8"
+						  IsEnabled="{Binding IsSortieHistoryEnabled}"
+						  Style="{StaticResource DisableableGroupBoxStyle}">
 					<ItemsControl ItemsSource="{Binding SortieHistory.History}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate DataType="{x:Type counter:SortieRecord}">
@@ -159,7 +196,9 @@
 				<!-- ========== 第3列: 海域ごとの出撃数 ========== -->
 				<GroupBox Header="海域ごとの出撃数"
 						  Margin="5,0,5,5"
-						  Padding="8">
+						  Padding="8"
+						  IsEnabled="{Binding IsSortieHistoryEnabled}"
+						  Style="{StaticResource DisableableGroupBoxStyle}">
 					<DockPanel>
 						<!-- リセットボタンを下端に固定 -->
 						<StackPanel DockPanel.Dock="Bottom"

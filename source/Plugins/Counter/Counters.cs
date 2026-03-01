@@ -52,6 +52,28 @@ namespace Counter
 
 		#endregion
 
+		#region IsEnabled 変更通知プロパティ
+
+		private bool _IsEnabled = true;
+
+		/// <summary>
+		/// カウントの有効/無効を切り替えます。false の場合、カウントアップをスキップします。
+		/// </summary>
+		public bool IsEnabled
+		{
+			get { return this._IsEnabled; }
+			set
+			{
+				if (this._IsEnabled != value)
+				{
+					this._IsEnabled = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		public void Reset()
 		{
 			this.Count = 0;
@@ -67,6 +89,7 @@ namespace Counter
 		{
 			KanColleClient.Current.SupplyCompleted += (sender, e) =>
 			{
+				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] SupplyCompleted イベント発火!");
 				this.Count++;
 			};
@@ -84,6 +107,7 @@ namespace Counter
 		{
 			KanColleClient.Current.ItemDestroyed += (sender, e) =>
 			{
+				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] ItemDestroyed イベント発火!");
 				this.Count++;
 			};
@@ -101,6 +125,7 @@ namespace Counter
 		{
 			KanColleClient.Current.MissionSucceeded += (sender, e) =>
 			{
+				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] MissionSucceeded イベント発火!");
 				this.Count++;
 			};
@@ -119,6 +144,7 @@ namespace Counter
 			// SortieInfo.IsActive が true になったタイミング（= api_req_map/start）でカウント
 			KanColleClient.Current.SortieInfo.PropertyChanged += (sender, e) =>
 			{
+				if (!this.IsEnabled) return;
 				if (e.PropertyName == nameof(SortieInfo.IsActive)
 					&& KanColleClient.Current.SortieInfo.IsActive)
 				{
@@ -360,6 +386,28 @@ namespace Counter
 		// 海域-セルごとの集計データ（キー検索用）
 		private readonly Dictionary<string, SortieAreaCount> _areaCountMap;
 
+		#region IsEnabled 変更通知プロパティ
+
+		private bool _IsEnabled = true;
+
+		/// <summary>
+		/// 戦闘履歴・出撃数カウントの有効/無効を切り替えます。false の場合、記録をスキップします。
+		/// </summary>
+		public bool IsEnabled
+		{
+			get { return this._IsEnabled; }
+			set
+			{
+				if (this._IsEnabled != value)
+				{
+					this._IsEnabled = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region BossOnly 変更通知プロパティ
 
 		private bool _BossOnly;
@@ -376,15 +424,9 @@ namespace Counter
 				{
 					this._BossOnly = value;
 					this.RaisePropertyChanged();
-					this.RaisePropertyChanged(nameof(this.BossOnlyText));
 				}
 			}
 		}
-
-		/// <summary>
-		/// ボタン表示用テキスト
-		/// </summary>
-		public string BossOnlyText => this.BossOnly ? "ボスのみ:有効中" : "ボスのみ:無効中";
 
 		#endregion
 
@@ -449,15 +491,6 @@ namespace Counter
 			this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
 		}
 
-		/// <summary>
-		/// BossOnly トグルを切り替えるメソッドです（XAML の CallMethodButton から呼び出されます）。
-		/// </summary>
-		public void ToggleBossOnly()
-		{
-			this.BossOnly = !this.BossOnly;
-			System.Diagnostics.Debug.WriteLine($"[SortieHistory] BossOnly = {this.BossOnly}");
-		}
-
 		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			var sortieInfo = (SortieInfo)sender;
@@ -479,6 +512,9 @@ namespace Counter
 					break;
 
 				case nameof(SortieInfo.WinRank):
+					// 無効の場合はスキップ
+					if (!this.IsEnabled) break;
+
 					// 戦闘結果が来たタイミングで即座に履歴を追加
 					if (!string.IsNullOrEmpty(sortieInfo.WinRank)
 						&& this._currentMapAreaId > 0
