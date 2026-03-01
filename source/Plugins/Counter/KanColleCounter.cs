@@ -14,9 +14,9 @@ namespace Counter
 	[Export(typeof(IRequestNotify))]
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
-	[ExportMetadata("Description", "シンプルな回数カウント機能を提供します。")]
-	[ExportMetadata("Version", "1.1.1")]
-	[ExportMetadata("Author", "@Grabacr07")]
+	[ExportMetadata("Description", "シンプルな回数カウント機能、出撃履歴を提供します。")]
+	[ExportMetadata("Version", "2.0.0")]
+	[ExportMetadata("Author", "@Grabacr07/@Donaco")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
 		private CounterViewModel viewModel;
@@ -29,14 +29,18 @@ namespace Counter
 
 		public void Initialize()
 		{
+			var proxy = KanColleClient.Current.Proxy;
+
 			this.viewModel = new CounterViewModel
 			{
 				Counters = new ObservableCollection<CounterBase>
 				{
-					new SupplyCounter(KanColleClient.Current.Proxy),
-					new ItemDestroyCounter(KanColleClient.Current.Proxy),
-					new MissionCounter(KanColleClient.Current.Proxy),
-				}
+					new SupplyCounter(proxy),
+					new ItemDestroyCounter(proxy),
+					new MissionCounter(proxy),
+				},
+				// 出撃履歴（直近10件を表示）
+				SortieHistory = new SortieHistoryCounter(proxy, 10),
 			};
 		}
 
