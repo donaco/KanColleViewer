@@ -63,47 +63,100 @@
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
 
-			<!-- 出撃履歴セクション -->
+			<!-- 出撃履歴 ヘッダー + クリアボタン -->
 			<Border DockPanel.Dock="Top"
-					Margin="4,12,4,0"
+					Margin="8,12,4,0"
 					Padding="0,0,0,8"
 					BorderThickness="0,0,0,.99"
 					BorderBrush="{DynamicResource BorderBrushKey}">
-				<DockPanel>
-					<Grid DockPanel.Dock="Top">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*" />
-							<ColumnDefinition Width="Auto" />
-						</Grid.ColumnDefinitions>
-						<TextBlock Text="直近の出撃履歴"
-								   Style="{DynamicResource DefaultTextStyleKey}"
-								   FontWeight="Bold" />
-						<metro2:CallMethodButton Grid.Column="1"
-												 Content="クリア"
-												 MethodName="Reset"
-												 DataContext="{Binding SortieHistory}" />
-					</Grid>
-				</DockPanel>
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="162" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<TextBlock Text="出撃履歴"
+							   Style="{DynamicResource DefaultTextStyleKey}"
+							   FontWeight="Bold" />
+					<metro2:CallMethodButton Grid.Column="1"
+											 Content="クリア"
+											 MethodName="Reset"
+											 DataContext="{Binding SortieHistory}" />
+				</Grid>
 			</Border>
 
-			<ItemsControl DockPanel.Dock="Top"
-						  ItemsSource="{Binding SortieHistory.History}"
-						  Margin="4,4,4,0">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate DataType="{x:Type counter:SortieRecord}">
-						<Border Margin="2"
-								Padding="4,2">
-							<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
-								<Run Text="{Binding DisplayText, Mode=OneWay}"
-									 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-								<Run Text="  " />
-								<Run Text="{Binding Timestamp, StringFormat=HH:mm:ss, Mode=OneWay}"
-									 Foreground="{DynamicResource ForegroundBrushKey}" />
-							</TextBlock>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+			<!-- 出撃履歴（左）+ 海域ごとの出撃数（右）を横並び -->
+			<Grid DockPanel.Dock="Top"
+				  Margin="0,4,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="200" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<!-- 左: 直近の出撃履歴 -->
+				<DockPanel Grid.Column="0">
+					<TextBlock DockPanel.Dock="Top"
+							   Text="直近10件の戦闘結果"
+							   Style="{DynamicResource DefaultTextStyleKey}"
+							   Margin="4,0,0,4"
+							   Opacity="0.6" />
+					<ItemsControl ItemsSource="{Binding SortieHistory.History}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate DataType="{x:Type counter:SortieRecord}">
+								<Border Margin="2,1"
+										Padding="4,1">
+									<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
+										<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
+											 Foreground="{DynamicResource ForegroundBrushKey}" />
+										<Run Text="{Binding DisplayText, Mode=OneWay}"
+											 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+									</TextBlock>
+								</Border>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</DockPanel>
+
+				<!-- 右: 海域ごとの出撃数 -->
+				<DockPanel Grid.Column="1"
+						   Margin="12,0,0,0"
+						   MinWidth="100">
+					<TextBlock DockPanel.Dock="Top"
+							   Text="海域ごとの出撃数"
+							   Style="{DynamicResource DefaultTextStyleKey}"
+							   Margin="0,0,0,4"
+							   Opacity="0.6" />
+					<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
+								  Grid.IsSharedSizeScope="True">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
+								<Border Margin="2,1"
+										Padding="4,1">
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="Auto"
+															  SharedSizeGroup="AreaKey" />
+											<ColumnDefinition Width="4" />
+											<ColumnDefinition Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<TextBlock Grid.Column="0"
+												   Style="{DynamicResource DefaultTextStyleKey}">
+											<Run Text="{Binding AreaCellKey, Mode=OneWay}"
+												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+										</TextBlock>
+										<TextBlock Grid.Column="2"
+												   Style="{DynamicResource DefaultTextStyleKey}">
+											<Run Text=":"
+												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											<Run Text="{Binding Count, Mode=OneWay}"
+												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+										</TextBlock>
+									</Grid>
+								</Border>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</DockPanel>
+			</Grid>
 		</DockPanel>
 	</ScrollViewer>
 </UserControl>

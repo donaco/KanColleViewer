@@ -135,6 +135,11 @@ namespace Counter
 		/// </summary>
 		public DateTime Timestamp { get; }
 
+		/// <summary>
+		/// 海域-セルのキー文字列（例: "7-4-C"）。集計に使用します。
+		/// </summary>
+		public string AreaCellKey { get; }
+
 		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank)
 		{
 			this.MapAreaId = mapAreaId;
@@ -147,16 +152,65 @@ namespace Counter
 				this.CellName = MapCellNameProvider.GetCellName(mapAreaId, mapInfoNo, cellNo.Value);
 			}
 
-			var text = $"{mapAreaId}-{mapInfoNo}";
-			if (!string.IsNullOrEmpty(this.CellName))
-			{
-				text += $"-{this.CellName}";
-			}
+			// 海域-セルのキー（例: "7-4-C"、セル無しなら "7-4"）
+			this.AreaCellKey = !string.IsNullOrEmpty(this.CellName)
+				? $"{mapAreaId}-{mapInfoNo}-{this.CellName}"
+				: $"{mapAreaId}-{mapInfoNo}";
+
+			// 表示テキスト（例: "7-4-C [S]"）
+			var text = this.AreaCellKey;
 			if (!string.IsNullOrEmpty(winRank))
 			{
 				text += $" [{winRank}]";
 			}
 			this.DisplayText = text;
+		}
+	}
+
+	/// <summary>
+	/// 海域-セルごとの出撃数を表すモデルです。
+	/// </summary>
+	public class SortieAreaCount : NotificationObject
+	{
+		/// <summary>
+		/// 海域-セルのキー（例: "7-4-C"）
+		/// </summary>
+		public string AreaCellKey { get; }
+
+		#region Count 変更通知プロパティ
+
+		private int _Count;
+
+		/// <summary>
+		/// 出撃回数
+		/// </summary>
+		public int Count
+		{
+			get { return this._Count; }
+			set
+			{
+				if (this._Count != value)
+				{
+					this._Count = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		public SortieAreaCount(string areaCellKey)
+		{
+			this.AreaCellKey = areaCellKey;
+			this.Count = 0;
+		}
+
+		/// <summary>
+		/// カウントを 1 増加します。
+		/// </summary>
+		public void Increment()
+		{
+			this.Count++;
 		}
 	}
 
@@ -167,11 +221,15 @@ namespace Counter
 	public class SortieHistoryCounter : NotificationObject
 	{
 		private readonly int _maxHistory;
+		private readonly SortieInfo _sortieInfo;
 
 		// 出撃中の海域・セル情報を一時保持
 		private int _currentMapAreaId;
 		private int _currentMapInfoNo;
 		private int? _currentCellNo;
+
+		// 海域-セルごとの集計データ（キー検索用）
+		private readonly Dictionary<string, SortieAreaCount> _areaCountMap;
 
 		#region History 変更通知プロパティ
 
@@ -195,6 +253,28 @@ namespace Counter
 
 		#endregion
 
+		#region AreaCounts 変更通知プロパティ
+
+		private ObservableCollection<SortieAreaCount> _AreaCounts;
+
+		/// <summary>
+		/// 海域-セルごとの出撃数一覧（出撃数の多い順）
+		/// </summary>
+		public ObservableCollection<SortieAreaCount> AreaCounts
+		{
+			get { return this._AreaCounts; }
+			set
+			{
+				if (this._AreaCounts != value)
+				{
+					this._AreaCounts = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
@@ -204,10 +284,12 @@ namespace Counter
 		{
 			this._maxHistory = maxHistory;
 			this.History = new ObservableCollection<SortieRecord>();
+			this.AreaCounts = new ObservableCollection<SortieAreaCount>();
+			this._areaCountMap = new Dictionary<string, SortieAreaCount>();
 
-			// SortieInfo の PropertyChanged を監視
-			var sortieInfo = KanColleClient.Current.SortieInfo;
-			sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
+			// SortieInfo への参照を保持し、PropertyChanged を監視
+			this._sortieInfo = KanColleClient.Current.SortieInfo;
+			this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
 		}
 
 		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -236,10 +318,18 @@ namespace Counter
 						&& this._currentMapAreaId > 0
 						&& this._currentMapInfoNo > 0)
 					{
+						// SortieInfo から直接 CellNo を読み取り、ローカルキャッシュとマージ
+						var cellNo = this._currentCellNo;
+						var liveCellNo = this._sortieInfo.CellNo;
+						if (liveCellNo.HasValue && liveCellNo.Value > 0)
+						{
+							cellNo = liveCellNo;
+						}
+
 						this.AddRecord(
 							this._currentMapAreaId,
 							this._currentMapInfoNo,
-							this._currentCellNo,
+							cellNo,
 							sortieInfo.WinRank
 						);
 					}
@@ -258,7 +348,8 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// 履歴を1件追加します。UI スレッドで安全に実行します。
+		/// 履歴を1件追加し、海域ごとの出撃数を更新します。
+		/// UI スレッドで安全に実行します。
 		/// </summary>
 		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank)
 		{
@@ -271,12 +362,15 @@ namespace Counter
 			{
 				app.Dispatcher.BeginInvoke((Action)(() =>
 				{
+					// 履歴に追加
 					this.History.Insert(0, record);
-
 					while (this.History.Count > this._maxHistory)
 					{
 						this.History.RemoveAt(this.History.Count - 1);
 					}
+
+					// 海域ごとの出撃数を更新
+					this.UpdateAreaCount(record.AreaCellKey);
 				}));
 			}
 			else
@@ -286,22 +380,63 @@ namespace Counter
 				{
 					this.History.RemoveAt(this.History.Count - 1);
 				}
+				this.UpdateAreaCount(record.AreaCellKey);
 			}
 		}
 
 		/// <summary>
-		/// 履歴をクリアします。
+		/// 海域-セルごとの出擊数を更新します。
+		/// 既存のキーがあればカウントを増加し、なければ新しいエントリを追加します。
+		/// 追加後は出撃数の多い順にソートします。
+		/// </summary>
+		private void UpdateAreaCount(string areaCellKey)
+		{
+			if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
+			{
+				// 既存エントリのカウントを増加
+				existing.Increment();
+			}
+			else
+			{
+				// 新しいエントリを作成
+				var newEntry = new SortieAreaCount(areaCellKey);
+				newEntry.Increment();
+				this._areaCountMap[areaCellKey] = newEntry;
+				this.AreaCounts.Add(newEntry);
+			}
+
+			// 出撃数の多い順にソート（ObservableCollection を入れ替え）
+			var sorted = this.AreaCounts.OrderByDescending(x => x.Count).ToList();
+			for (int i = 0; i < sorted.Count; i++)
+			{
+				var currentIndex = this.AreaCounts.IndexOf(sorted[i]);
+				if (currentIndex != i)
+				{
+					this.AreaCounts.Move(currentIndex, i);
+				}
+			}
+		}
+
+		/// <summary>
+		/// 履歴と集計データをすべてクリアします。
 		/// </summary>
 		public void Reset()
 		{
 			var app = System.Windows.Application.Current;
 			if (app != null)
 			{
-				app.Dispatcher.BeginInvoke((Action)(() => this.History.Clear()));
+				app.Dispatcher.BeginInvoke((Action)(() =>
+				{
+					this.History.Clear();
+					this.AreaCounts.Clear();
+					this._areaCountMap.Clear();
+				}));
 			}
 			else
 			{
 				this.History.Clear();
+				this.AreaCounts.Clear();
+				this._areaCountMap.Clear();
 			}
 		}
 	}
