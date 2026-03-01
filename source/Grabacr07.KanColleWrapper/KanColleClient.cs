@@ -557,6 +557,7 @@ namespace Grabacr07.KanColleWrapper
 		{
 			// battle 系 API をまとめて判定
 			if (!(url.Contains("/kcsapi/api_req_sortie/battle")
+				|| url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
 				|| url.Contains("/kcsapi/api_req_battle_midnight")
 				|| url.Contains("/kcsapi/api_req_combined_battle/")))
 				return false;
