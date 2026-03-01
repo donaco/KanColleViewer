@@ -565,24 +565,29 @@ namespace Grabacr07.KanColleWrapper
 			// battleresult は別ハンドラで処理するため除外
 			if (url.Contains("battleresult")) return false;
 
-			// 設定に応じてキャッシュされた cellNo を使用して表示開始
-			var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
-
-			// showOnArrival が false の場合のみ battle 時に cellNo を表示開始
-			if (!showOnArrival)
+			RunOnUi(() =>
 			{
-				RunOnUi(() =>
+				try
 				{
-					try
+					if (this.cachedCellNo > 0)
 					{
-						if (this.cachedCellNo > 0)
+						var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+
+						if (!showOnArrival)
 						{
+							// 従来動作: battle 時に cellNo を表示開始
+							this.SortieInfo.EnterBattle(this.cachedCellNo);
+						}
+						else if (!this.SortieInfo.CellNo.HasValue || this.SortieInfo.CellNo.Value != this.cachedCellNo)
+						{
+							// セル到達時表示モードだが、CellNo が未設定または古い場合は
+							// フォールバックとして更新する（出撃中に設定を切り替えたケースに対応）
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 					}
-					catch { }
-				});
-			}
+				}
+				catch { }
+			});
 
 			return true;
 		}
