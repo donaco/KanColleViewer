@@ -58,20 +58,9 @@ namespace Counter
 		}
 	}
 
-	public class ItemDestroyCounter : CounterBase
-	{
-		public ItemDestroyCounter(KanColleProxy proxy)
-		{
-			KanColleClient.Current.ItemDestroyed += (sender, e) =>
-			{
-				System.Diagnostics.Debug.WriteLine("[Counter] ItemDestroyed イベント発火!");
-				this.Count++;
-			};
-
-			this.Text = "装備を破棄した回数";
-		}
-	}
-
+	/// <summary>
+	/// 補給をカウント
+	/// </summary>
 	public class SupplyCounter : CounterBase
 	{
 		public SupplyCounter(KanColleProxy proxy)
@@ -86,6 +75,26 @@ namespace Counter
 		}
 	}
 
+	/// <summary>
+	/// 装備の破棄をカウント
+	/// </summary>
+	public class ItemDestroyCounter : CounterBase
+	{
+		public ItemDestroyCounter(KanColleProxy proxy)
+		{
+			KanColleClient.Current.ItemDestroyed += (sender, e) =>
+			{
+				System.Diagnostics.Debug.WriteLine("[Counter] ItemDestroyed イベント発火!");
+				this.Count++;
+			};
+
+			this.Text = "装備を破棄した回数";
+		}
+	}
+
+	/// <summary>
+	/// 遠征の成功をカウント
+	/// </summary>
 	public class MissionCounter : CounterBase
 	{
 		public MissionCounter(KanColleProxy proxy)
@@ -100,6 +109,9 @@ namespace Counter
 		}
 	}
 
+	/// <summary>
+	/// 出撃をカウント
+	/// </summary>
 	public class SortieCounter : CounterBase
 	{
 		public SortieCounter(KanColleProxy proxy)

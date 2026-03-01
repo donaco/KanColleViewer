@@ -8,113 +8,142 @@
 			 xmlns:counter="clr-namespace:Counter"
 			 mc:Ignorable="d"
 			 d:DataContext="{d:DesignInstance counter:CounterViewModel}"
-			 d:DesignHeight="300"
-			 d:DesignWidth="300">
+			 d:DesignHeight="400"
+			 d:DesignWidth="700">
 	<UserControl.Resources>
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+
+		<!-- Expeditions.xaml ベースの GroupBox スタイル -->
+		<Style TargetType="{x:Type GroupBox}">
+			<Setter Property="OverridesDefaultStyle"
+					Value="True" />
+			<Setter Property="BorderThickness"
+					Value=".99" />
+			<Setter Property="BorderBrush"
+					Value="{DynamicResource BorderBrushKey}" />
+			<Setter Property="Background"
+					Value="{DynamicResource BorderBrushKey}" />
+			<Setter Property="TextOptions.TextFormattingMode"
+					Value="Display" />
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type GroupBox}">
+						<Border BorderThickness="{TemplateBinding BorderThickness}"
+								BorderBrush="{TemplateBinding BorderBrush}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+
+								<Border Background="{TemplateBinding Background}">
+									<ContentPresenter Content="{TemplateBinding Header}"
+													  ContentTemplate="{TemplateBinding HeaderTemplate}"
+													  ContentStringFormat="{TemplateBinding HeaderStringFormat}" />
+								</Border>
+
+								<ContentPresenter Grid.Row="1"
+												  Content="{TemplateBinding Content}"
+												  ContentTemplate="{TemplateBinding ContentTemplate}"
+												  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+												  Margin="{TemplateBinding Padding}" />
+							</Grid>
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+
+			<Setter Property="HeaderTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<Border Margin="9,5">
+							<TextBlock Text="{Binding}"
+									   FontSize="{DynamicResource EmphaticFontSizeKey}"
+									   Foreground="{DynamicResource ForegroundBrushKey}" />
+						</Border>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</UserControl.Resources>
-	<ScrollViewer HorizontalScrollBarVisibility="Disabled"
-				  VerticalScrollBarVisibility="Auto"
+
+	<ScrollViewer VerticalScrollBarVisibility="Auto"
+				  HorizontalScrollBarVisibility="Disabled"
 				  PanningMode="Both">
-		<DockPanel Margin="8,0,8,8">
+		<DockPanel Margin="5,0,5,5">
+			<!-- フッター注意書き -->
 			<TextBlock DockPanel.Dock="Bottom"
 					   Text="※アプリケーションが起動している間に発生した回数のみをカウントしています。"
 					   Style="{DynamicResource DefaultTextStyleKey}"
-					   Margin="4"
-					   Padding="0,8,0,0" />
+					   Margin="10,8,10,0" />
 
-			<!-- 回数カウンターセクション -->
-			<ItemsControl DockPanel.Dock="Top"
-						  ItemsSource="{Binding Counters}"
-						  Grid.IsSharedSizeScope="True">
-				<ItemsControl.Template>
-					<ControlTemplate TargetType="{x:Type ItemsControl}">
-						<ScrollViewer HorizontalScrollBarVisibility="Disabled"
-									  VerticalScrollBarVisibility="Auto">
-							<StackPanel IsItemsHost="True"
-										Margin="4" />
-						</ScrollViewer>
-					</ControlTemplate>
-				</ItemsControl.Template>
+			<!-- 3列レイアウト -->
+			<UniformGrid DockPanel.Dock="Top"
+						 Columns="3"
+						 Margin="0,0,0,0">
 
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border Margin="4"
-								Padding="0,0,0,8"
-								BorderThickness="0,0,0,.99"
-								BorderBrush="{DynamicResource BorderBrushKey}">
-							<Grid>
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="Auto"
-													  SharedSizeGroup="Text" />
-									<ColumnDefinition Width="32" />
-									<ColumnDefinition Width="Auto" />
-								</Grid.ColumnDefinitions>
+				<!-- ========== 第1列: 上下2段 ========== -->
+				<DockPanel Margin="5,0,5,5">
 
-								<TextBlock>
-								<Run Text="{Binding Text, Mode=OneWay}" />
-								<Run Text=":" />
-								<Run Text="{Binding Count}"
-									 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-								</TextBlock>
-								<metro2:CallMethodButton Grid.Column="2"
-														 Content="リセット"
-														 MethodName="Reset" />
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+					<!-- 下段: 表示設定 -->
+					<GroupBox DockPanel.Dock="Bottom"
+							  Header="表示設定"
+							  Margin="0,5,0,0"
+							  Padding="8">
+						<StackPanel>
+							<CheckBox IsChecked="{Binding SortieHistory.BossOnly, Mode=TwoWay}"
+									  Foreground="{DynamicResource ForegroundBrushKey}">
+								<TextBlock Text="ボスマスのみをカウントする"
+										   Style="{DynamicResource DefaultTextStyleKey}" />
+							</CheckBox>
+						</StackPanel>
+					</GroupBox>
 
-			<!-- 出撃履歴 ヘッダー + クリアボタン + BOSSのみボタン -->
-			<Border DockPanel.Dock="Top"
-					Margin="8,12,4,0"
-					Padding="0,0,0,8"
-					BorderThickness="0,0,0,.99"
-					BorderBrush="{DynamicResource BorderBrushKey}">
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="75" />
-						<ColumnDefinition Width="100" />
-						<ColumnDefinition Width="0" />
-						<ColumnDefinition Width="Auto" />
-					</Grid.ColumnDefinitions>
-					<TextBlock Text="出撃履歴"
-							   Style="{DynamicResource DefaultTextStyleKey}"
-							   FontWeight="Bold" />
-					<metro2:CallMethodButton Grid.Column="1"
-											 MethodName="ToggleBossOnly"
-											 DataContext="{Binding SortieHistory}">
-						<TextBlock Text="{Binding BossOnlyText}"
-								   Style="{DynamicResource DefaultTextStyleKey}" />
-					</metro2:CallMethodButton>
-					<metro2:CallMethodButton Grid.Column="3"
-											 Content="クリア"
-											 MethodName="Reset"
-											 DataContext="{Binding SortieHistory}" />
-				</Grid>
-			</Border>
+					<!-- 上段: カウンター -->
+					<GroupBox Header="カウンター"
+							  Padding="8">
+						<ItemsControl ItemsSource="{Binding Counters}"
+									  Grid.IsSharedSizeScope="True">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Border Margin="2,2,2,6"
+											Padding="0,0,0,6"
+											BorderThickness="0,0,0,.99"
+											BorderBrush="{DynamicResource BorderBrushKey}">
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto"
+																  SharedSizeGroup="CounterText" />
+												<ColumnDefinition Width="*" />
+												<ColumnDefinition Width="Auto" />
+											</Grid.ColumnDefinitions>
 
-			<!-- 出撃履歴（左）+ 海域ごとの出撃数（右）を横並び -->
-			<Grid DockPanel.Dock="Top"
-				  Margin="0,4,0,0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="225" />
-					<ColumnDefinition Width="Auto" />
-				</Grid.ColumnDefinitions>
+											<TextBlock>
+												<Run Text="{Binding Text, Mode=OneWay}" />
+												<Run Text=":" />
+												<Run Text="{Binding Count}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											<metro2:CallMethodButton Grid.Column="2"
+																	 Content="リセット"
+																	 MethodName="Reset" />
+										</Grid>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</GroupBox>
+				</DockPanel>
 
-				<!-- 左: 直近の出撃履歴 -->
-				<DockPanel Grid.Column="0">
-					<TextBlock DockPanel.Dock="Top"
-							   Text="直近10件の戦闘結果"
-							   Style="{DynamicResource DefaultTextStyleKey}"
-							   Margin="4,0,0,4"
-							   Opacity="0.6" />
+				<!-- ========== 第2列: 直近10件の戦闘結果 ========== -->
+				<GroupBox Header="戦闘履歴"
+						  Margin="5,0,5,5"
+						  Padding="8">
 					<ItemsControl ItemsSource="{Binding SortieHistory.History}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate DataType="{x:Type counter:SortieRecord}">
 								<Border Margin="2,1"
-										Padding="4,1">
+										Padding="2,1">
 									<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
 										<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
 											 Foreground="{DynamicResource ForegroundBrushKey}" />
@@ -125,55 +154,60 @@
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
-				</DockPanel>
+				</GroupBox>
 
-				<!-- 右: 海域ごとの出撃数 + 戦闘結果集計 -->
-				<DockPanel Grid.Column="1"
-						   Margin="12,0,0,0"
-						   MinWidth="100">
-					<TextBlock DockPanel.Dock="Top"
-							   Text="海域ごとの出撃数"
-							   Style="{DynamicResource DefaultTextStyleKey}"
-							   Margin="0,0,0,4"
-							   Opacity="0.6" />
-					<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
-								<Border Margin="2,1"
-										Padding="4,1">
-									<StackPanel Orientation="Horizontal">
-										<!-- 海域名 : 出撃数 -->
-										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-												   MinWidth="160">
-											<Run Text="{Binding AreaCellKey, Mode=OneWay}"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											<Run Text=":"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											<Run Text="{Binding Count, Mode=OneWay}"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-										</TextBlock>
-										<!-- S勝利（0なら非表示） -->
-										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-												   Text="{Binding SText, Mode=OneWay}"
-												   Margin="8,0,0,0"
-												   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
-										<!-- A勝利（0なら非表示） -->
-										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-												   Text="{Binding AText, Mode=OneWay}"
-												   Margin="8,0,0,0"
-												   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
-										<!-- B勝利（0なら非表示） -->
-										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-												   Text="{Binding BText, Mode=OneWay}"
-												   Margin="8,0,0,0"
-												   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
-									</StackPanel>
-								</Border>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</DockPanel>
-			</Grid>
+				<!-- ========== 第3列: 海域ごとの出撃数 ========== -->
+				<GroupBox Header="海域ごとの出撃数"
+						  Margin="5,0,5,5"
+						  Padding="8">
+					<DockPanel>
+						<!-- リセットボタンを下端に固定 -->
+						<StackPanel DockPanel.Dock="Bottom"
+									Orientation="Horizontal"
+									HorizontalAlignment="Right"
+									Margin="0,8,0,0">
+							<metro2:CallMethodButton Content="リセット"
+													 MethodName="Reset"
+													 DataContext="{Binding SortieHistory}" />
+						</StackPanel>
+
+						<!-- 出撃数リスト -->
+						<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
+									<Border Margin="2,1"
+											Padding="2,1">
+										<StackPanel Orientation="Horizontal">
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   MinWidth="175">
+												<Run Text="{Binding AreaCellKey, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												<Run Text=":"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												<Run Text="{Binding Count, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Text="{Binding SText, Mode=OneWay}"
+													   Margin="8,0,0,0"
+													   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Text="{Binding AText, Mode=OneWay}"
+													   Margin="8,0,0,0"
+													   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Text="{Binding BText, Mode=OneWay}"
+													   Margin="8,0,0,0"
+													   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
+										</StackPanel>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</DockPanel>
+				</GroupBox>
+			</UniformGrid>
 		</DockPanel>
 	</ScrollViewer>
 </UserControl>
+
