@@ -38,6 +38,7 @@ namespace Counter
 					new SupplyCounter(proxy),
 					new ItemDestroyCounter(proxy),
 					new MissionCounter(proxy),
+					new SortieCounter(proxy),
 				},
 				// 出撃履歴（直近10件を表示）
 				SortieHistory = new SortieHistoryCounter(proxy, 10),

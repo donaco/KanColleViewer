@@ -10,6 +10,9 @@
 			 d:DataContext="{d:DesignInstance counter:CounterViewModel}"
 			 d:DesignHeight="300"
 			 d:DesignWidth="300">
+	<UserControl.Resources>
+		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+	</UserControl.Resources>
 	<ScrollViewer HorizontalScrollBarVisibility="Disabled"
 				  VerticalScrollBarVisibility="Auto"
 				  PanningMode="Both">
@@ -88,7 +91,7 @@
 			<Grid DockPanel.Dock="Top"
 				  Margin="0,4,0,0">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="200" />
+					<ColumnDefinition Width="225" />
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 
@@ -116,7 +119,7 @@
 					</ItemsControl>
 				</DockPanel>
 
-				<!-- 右: 海域ごとの出撃数 -->
+				<!-- 右: 海域ごとの出撃数 + 戦闘結果集計 -->
 				<DockPanel Grid.Column="1"
 						   Margin="12,0,0,0"
 						   MinWidth="100">
@@ -125,32 +128,38 @@
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   Margin="0,0,0,4"
 							   Opacity="0.6" />
-					<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
-								  Grid.IsSharedSizeScope="True">
+					<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
 								<Border Margin="2,1"
 										Padding="4,1">
-									<Grid>
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="Auto"
-															  SharedSizeGroup="AreaKey" />
-											<ColumnDefinition Width="4" />
-											<ColumnDefinition Width="Auto" />
-										</Grid.ColumnDefinitions>
-										<TextBlock Grid.Column="0"
-												   Style="{DynamicResource DefaultTextStyleKey}">
+									<StackPanel Orientation="Horizontal">
+										<!-- 海域名 : 出撃数 -->
+										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+												   MinWidth="160">
 											<Run Text="{Binding AreaCellKey, Mode=OneWay}"
 												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-										</TextBlock>
-										<TextBlock Grid.Column="2"
-												   Style="{DynamicResource DefaultTextStyleKey}">
 											<Run Text=":"
 												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											<Run Text="{Binding Count, Mode=OneWay}"
 												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 										</TextBlock>
-									</Grid>
+										<!-- S勝利（0なら非表示） -->
+										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+												   Text="{Binding SText, Mode=OneWay}"
+												   Margin="8,0,0,0"
+												   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
+										<!-- A勝利（0なら非表示） -->
+										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+												   Text="{Binding AText, Mode=OneWay}"
+												   Margin="8,0,0,0"
+												   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
+										<!-- B勝利（0なら非表示） -->
+										<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+												   Text="{Binding BText, Mode=OneWay}"
+												   Margin="8,0,0,0"
+												   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
+									</StackPanel>
 								</Border>
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>

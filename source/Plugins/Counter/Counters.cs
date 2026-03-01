@@ -100,6 +100,25 @@ namespace Counter
 		}
 	}
 
+	public class SortieCounter : CounterBase
+	{
+		public SortieCounter(KanColleProxy proxy)
+		{
+			// SortieInfo.IsActive が true になったタイミング（= api_req_map/start）でカウント
+			KanColleClient.Current.SortieInfo.PropertyChanged += (sender, e) =>
+			{
+				if (e.PropertyName == nameof(SortieInfo.IsActive)
+					&& KanColleClient.Current.SortieInfo.IsActive)
+				{
+					System.Diagnostics.Debug.WriteLine("[Counter] 出撃開始検知!");
+					this.Count++;
+				}
+			};
+
+			this.Text = "海域に出撃した回数";
+		}
+	}
+
 	/// <summary>
 	/// 出撃履歴の1件分を表すモデルです。
 	/// </summary>
@@ -168,7 +187,7 @@ namespace Counter
 	}
 
 	/// <summary>
-	/// 海域-セルごとの出撃数を表すモデルです。
+	/// 海域-セルごとの出撃数と戦闘結果の集計を表すモデルです。
 	/// </summary>
 	public class SortieAreaCount : NotificationObject
 	{
@@ -199,6 +218,87 @@ namespace Counter
 
 		#endregion
 
+		#region SCount 変更通知プロパティ
+
+		private int _SCount;
+
+		/// <summary>
+		/// S勝利の回数
+		/// </summary>
+		public int SCount
+		{
+			get { return this._SCount; }
+			set
+			{
+				if (this._SCount != value)
+				{
+					this._SCount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region ACount 変更通知プロパティ
+
+		private int _ACount;
+
+		/// <summary>
+		/// A勝利の回数
+		/// </summary>
+		public int ACount
+		{
+			get { return this._ACount; }
+			set
+			{
+				if (this._ACount != value)
+				{
+					this._ACount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region BCount 変更通知プロパティ
+
+		private int _BCount;
+
+		/// <summary>
+		/// B勝利の回数
+		/// </summary>
+		public int BCount
+		{
+			get { return this._BCount; }
+			set
+			{
+				if (this._BCount != value)
+				{
+					this._BCount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// S勝利の表示テキスト（0の場合は空文字）
+		/// </summary>
+		public string SText => this.SCount > 0 ? $"S:{this.SCount}" : "";
+
+		/// <summary>
+		/// A勝利の表示テキスト（0の場合は空文字）
+		/// </summary>
+		public string AText => this.ACount > 0 ? $"A:{this.ACount}" : "";
+
+		/// <summary>
+		/// B勝利の表示テキスト（0の場合は空文字）
+		/// </summary>
+		public string BText => this.BCount > 0 ? $"B:{this.BCount}" : "";
+
 		public SortieAreaCount(string areaCellKey)
 		{
 			this.AreaCellKey = areaCellKey;
@@ -206,11 +306,28 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// カウントを 1 増加します。
+		/// カウントを 1 増加し、ランク別の集計も更新します。
 		/// </summary>
-		public void Increment()
+		/// <param name="winRank">戦闘結果ランク（"S", "A", "B" など）</param>
+		public void Increment(string winRank)
 		{
 			this.Count++;
+
+			switch (winRank)
+			{
+				case "S":
+					this.SCount++;
+					this.RaisePropertyChanged(nameof(this.SText));
+					break;
+				case "A":
+					this.ACount++;
+					this.RaisePropertyChanged(nameof(this.AText));
+					break;
+				case "B":
+					this.BCount++;
+					this.RaisePropertyChanged(nameof(this.BText));
+					break;
+			}
 		}
 	}
 
@@ -370,7 +487,7 @@ namespace Counter
 					}
 
 					// 海域ごとの出撃数を更新
-					this.UpdateAreaCount(record.AreaCellKey);
+					this.UpdateAreaCount(record.AreaCellKey, winRank);
 				}));
 			}
 			else
@@ -380,32 +497,28 @@ namespace Counter
 				{
 					this.History.RemoveAt(this.History.Count - 1);
 				}
-				this.UpdateAreaCount(record.AreaCellKey);
+				this.UpdateAreaCount(record.AreaCellKey, winRank);
 			}
 		}
 
 		/// <summary>
-		/// 海域-セルごとの出擊数を更新します。
-		/// 既存のキーがあればカウントを増加し、なければ新しいエントリを追加します。
-		/// 追加後は出撃数の多い順にソートします。
+		/// 海域-セルごとの出撃数とランク別集計を更新します。
 		/// </summary>
-		private void UpdateAreaCount(string areaCellKey)
+		private void UpdateAreaCount(string areaCellKey, string winRank)
 		{
 			if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
 			{
-				// 既存エントリのカウントを増加
-				existing.Increment();
+				existing.Increment(winRank);
 			}
 			else
 			{
-				// 新しいエントリを作成
 				var newEntry = new SortieAreaCount(areaCellKey);
-				newEntry.Increment();
+				newEntry.Increment(winRank);
 				this._areaCountMap[areaCellKey] = newEntry;
 				this.AreaCounts.Add(newEntry);
 			}
 
-			// 出撃数の多い順にソート（ObservableCollection を入れ替え）
+			// 出撃数の多い順にソート
 			var sorted = this.AreaCounts.OrderByDescending(x => x.Count).ToList();
 			for (int i = 0; i < sorted.Count; i++)
 			{
