@@ -324,6 +324,7 @@
       <DependentUpon>Tools.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Controls\MetroComboBox.cs" />
+    <Compile Include="Views\Converters\HtmlBreakToNewLineConverter.cs" />
     <Compile Include="Views\Converters\RangeToBooleanConverter.cs" />
     <Compile Include="Views\Converters\StringToSlotItemIconTypeConverter.cs" />
     <Compile Include="Views\Converters\StringToVisibilityConverter.cs" />
