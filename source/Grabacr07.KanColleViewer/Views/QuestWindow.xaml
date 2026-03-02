@@ -1,0 +1,226 @@
+<metro:MetroWindow x:Class="Grabacr07.KanColleViewer.Views.QuestWindow"
+				   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+				   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				   xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				   xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
+				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
+				   xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views.Contents"
+				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
+				   mc:Ignorable="d"
+				   d:DataContext="{d:DesignInstance viewModels:QuestWindowViewModel}"
+				   Title="{Binding Title}"
+				   Width="1200"
+				   Height="500"
+				   FontSize="12"
+				   Background="{DynamicResource ThemeBrushKey}"
+				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+				   FontFamily="{DynamicResource DefaultFontFamilyKey}"
+				   SnapsToDevicePixels="True"
+				   Topmost="{Binding Settings.TopMost.Value}"
+				   TextOptions.TextFormattingMode="Display">
+
+	<i:Interaction.Triggers>
+		<i:EventTrigger EventName="ContentRendered">
+			<livet:LivetCallMethodAction MethodTarget="{Binding}"
+										 MethodName="Initialize" />
+		</i:EventTrigger>
+
+		<i:EventTrigger EventName="Closed">
+			<livet:DataContextDisposeAction />
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<!-- #region CaptionBar (CounterWindow.xaml と共通パターン) -->
+		<Border metro:MetroWindow.IsCaptionBar="True"
+				Panel.ZIndex="100">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<kcvc:AppIcon Width="36"
+							  Height="36"
+							  Background="Transparent"
+							  AnchorVisibility="Collapsed"
+							  BandVisibility="Collapsed" />
+
+				<TextBlock Grid.Column="1"
+						   Text="任務一覧"
+						   Style="{DynamicResource CaptionTextStyleKey}"
+						   Margin="2,0,8,0" />
+
+				<StackPanel Grid.Column="2"
+							Orientation="Horizontal"
+							VerticalAlignment="Top"
+							WindowChrome.IsHitTestVisibleInChrome="True">
+					<metro:CaptionButton IsChecked="{Binding Settings.TopMost.Value, Mode=TwoWay}"
+										 ToolTip="常に最前面に表示"
+										 Style="{DynamicResource PinButtonStyleKey}" />
+					<metro:SystemButtons HorizontalAlignment="Right"
+										 VerticalAlignment="Top" />
+				</StackPanel>
+			</Grid>
+		</Border>
+		<!-- #endregion -->
+
+		<!-- コンテンツ: 3列レイアウト -->
+		<Grid Grid.Row="1"
+			  Margin="4">
+
+			<!-- 任務未取得時のメッセージ -->
+			<TextBlock Text="任務一覧は取得されていません"
+					   Style="{DynamicResource EmphaticTextStyleKey}"
+					   FontSize="16"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   Visibility="{Binding IsUntaken, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+			<!-- 任務取得済みの3列表示 -->
+			<Grid Visibility="{Binding IsUntaken, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter=Collapsed:Visible}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+
+				<!-- 第1列: 遂行中の任務 -->
+				<Grid Grid.Column="0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+
+					<TextBlock Text="現在遂行中の任務"
+							   Style="{DynamicResource HeaderTextStyleKey}"
+							   Margin="10,6,10,10" />
+
+					<ScrollViewer Grid.Row="1"
+								  VerticalScrollBarVisibility="Auto"
+								  PanningMode="Both">
+						<ItemsControl ItemsSource="{Binding Current}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<kcvc:Quest IsUntaken="{Binding IsUntaken}"
+												Title="{Binding Title}"
+												Detail="{Binding Detail}"
+												Category="{Binding Category}"
+												Progress="{Binding Progress}"
+												State="{Binding State}"
+												IsDetailView="True"
+												Margin="10,0,10,10" />
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
+
+					<TextBlock Grid.Row="1"
+							   Text="遂行中の任務はありません"
+							   Style="{DynamicResource DetailTextStyleKey}"
+							   HorizontalAlignment="Center"
+							   Margin="10"
+							   Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+				</Grid>
+
+				<!-- 区切り線 -->
+				<Rectangle Grid.Column="1"
+						   Width="0.99"
+						   Margin="0,6"
+						   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+
+				<!-- 第2列: デイリー任務 -->
+				<Grid Grid.Column="2">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+
+					<Grid.Resources>
+						<views:QuestViewSource x:Key="DailyQuestSourceKey"
+											   Source="{Binding Quests}"
+											   Type="Daily" />
+					</Grid.Resources>
+
+					<TextBlock Text="デイリー任務"
+							   Style="{DynamicResource HeaderTextStyleKey}"
+							   Margin="10,6,10,10" />
+
+					<ScrollViewer Grid.Row="1"
+								  VerticalScrollBarVisibility="Auto"
+								  PanningMode="Both">
+						<ItemsControl ItemsSource="{Binding Source={StaticResource DailyQuestSourceKey}}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<kcvc:Quest IsUntaken="{Binding IsUntaken}"
+												Title="{Binding Title}"
+												Detail="{Binding Detail}"
+												Category="{Binding Category}"
+												Progress="{Binding Progress}"
+												State="{Binding State}"
+												IsDetailView="True"
+												Margin="10,0,10,10" />
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
+				</Grid>
+
+				<!-- 区切り線 -->
+				<Rectangle Grid.Column="3"
+						   Width="0.99"
+						   Margin="0,6"
+						   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+
+				<!-- 第3列: ウィークリー任務 -->
+				<Grid Grid.Column="4">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+
+					<Grid.Resources>
+						<views:QuestViewSource x:Key="WeeklyQuestSourceKey"
+											   Source="{Binding Quests}"
+											   Type="Weekly" />
+					</Grid.Resources>
+
+					<TextBlock Text="ウィークリー任務"
+							   Style="{DynamicResource HeaderTextStyleKey}"
+							   Margin="10,6,10,10" />
+
+					<ScrollViewer Grid.Row="1"
+								  VerticalScrollBarVisibility="Auto"
+								  PanningMode="Both">
+						<ItemsControl ItemsSource="{Binding Source={StaticResource WeeklyQuestSourceKey}}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<kcvc:Quest IsUntaken="{Binding IsUntaken}"
+												Title="{Binding Title}"
+												Detail="{Binding Detail}"
+												Category="{Binding Category}"
+												Progress="{Binding Progress}"
+												State="{Binding State}"
+												IsDetailView="True"
+												Margin="10,0,10,10" />
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
+				</Grid>
+			</Grid>
+		</Grid>
+	</Grid>
+</metro:MetroWindow>
+

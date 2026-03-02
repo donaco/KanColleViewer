@@ -176,6 +176,7 @@
     <EmbeddedResource Include="Controls.Globalization\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls.Globalization\Resources.en.resx">
       <DependentUpon>Resources.resx</DependentUpon>

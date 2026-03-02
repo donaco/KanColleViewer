@@ -236,6 +236,7 @@
     <Compile Include="Models\Migration\_KanColleClientSettings.cs" />
     <Compile Include="ViewModels\AirBaseWindowViewModel.cs" />
     <Compile Include="ViewModels\Catalogs\SlotItemTypeViewModel.cs" />
+    <Compile Include="ViewModels\QuestWindowViewModel.cs" />
     <Compile Include="ViewModels\Composition\LoadFailedPluginViewModel.cs" />
     <Compile Include="ViewModels\Contents\AirBases\AirBasesViewModel.cs" />
     <Compile Include="ViewModels\Contents\AirBases\AirBaseViewModel.cs" />
@@ -416,6 +417,9 @@
     </Compile>
     <Compile Include="Views\StatusBar.xaml.cs">
       <DependentUpon>StatusBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\QuestWindow.xaml.cs">
+      <DependentUpon>QuestWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Win32\INTERNET_CACHE_ENTRY_INFOA.cs" />
     <Compile Include="Win32\WinHttp.cs" />
@@ -620,6 +624,10 @@
     <Compile Include="Views\Information.xaml.cs">
       <DependentUpon>Information.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\QuestWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Grabacr07.KanColleViewer.Properties;
+using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
 using Livet.EventListeners;
 
@@ -10,6 +12,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
 	public class QuestsViewModel : TabItemViewModel
 	{
+		// 任務一覧ウィンドウのインスタンスを保持
+		private static Window questWindowInstance;
+
 		public override string Name
 		{
 			get { return Resources.Quests; }
@@ -110,5 +115,42 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 				{ nameof(quests.IsEmpty), (sender, args) => this.IsEmpty = quests.IsEmpty }
 			});
 		}
+
+		#region 任務一覧ウィンドウを安全に表示
+		/// <summary>
+		/// null チェックと例外処理を追加して、任務一覧ウィンドウを安全に表示。
+		/// 既に開いている場合はアクティブにする。
+		/// </summary>
+		public void ShowQuestWindow()
+		{
+			try
+			{
+				// 既存のウィンドウがあり、閉じられていない場合はアクティブにする
+				if (questWindowInstance != null && questWindowInstance.IsLoaded)
+				{
+					questWindowInstance.Activate();
+					if (questWindowInstance.WindowState == WindowState.Minimized)
+					{
+						questWindowInstance.WindowState = WindowState.Normal;
+					}
+					return;
+				}
+
+				// 新しいウィンドウを作成
+				var vm = new QuestWindowViewModel();
+				var window = new QuestWindow { DataContext = vm };
+
+				// ウィンドウが閉じられたらインスタンスをクリア
+				window.Closed += (s, e) => questWindowInstance = null;
+
+				questWindowInstance = window;
+				window.Show();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error in ShowQuestWindow: {ex}");
+			}
+		}
+		#endregion
 	}
 }

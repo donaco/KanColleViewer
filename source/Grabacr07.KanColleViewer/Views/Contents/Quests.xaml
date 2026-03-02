@@ -9,6 +9,7 @@
 			 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
 			 xmlns:kcvv="http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters"
+			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=MetroTrilithon.Desktop"
 			 xmlns:properties="clr-namespace:Grabacr07.KanColleViewer.Properties"
 			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views.Contents"
 			 xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
@@ -27,6 +28,7 @@
 					<ColumnDefinition Width="5*" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="4*" />
+					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
 					<RowDefinition />
@@ -176,15 +178,24 @@
 					</TabItem>
 				</TabControl>
 
+				<!-- 任務一覧ポップアップボタン (Fleets.xaml の艦隊詳細ボタンと同じパターン) -->
+				<metro2:CallMethodButton Grid.Row="0"
+										 Grid.Column="3"
+										 Content="任務一覧"
+										 Margin="0,0,10,3"
+										 Padding="12,16"
+										 VerticalAlignment="Top"
+										 MethodName="ShowQuestWindow" />
+
 				<TextBlock Grid.Row="1"
 						   Grid.Column="0"
-						   Grid.ColumnSpan="3"
+						   Grid.ColumnSpan="4"
 						   Text="{Binding Resources.Quests_Notice, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="10" />
 			</Grid>
 
-			<TextBlock Grid.ColumnSpan="3"
+			<TextBlock Grid.ColumnSpan="4"
 					   Text="{Binding Resources.Quests_Untaken, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource EmphaticTextStyleKey}"
 					   FontSize="16"

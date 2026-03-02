@@ -32,6 +32,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 	// 装備一覧 用のウィンドウ設定
 	public class SlotItemCatalogWindowSettings : WindowSettings { }
 
+	// 任務一覧 用のウィンドウ設定
+	public class QuestWindowSettings : WindowSettings { }
+
 	// 艦隊詳細 用のウィンドウ設定
 	public class FleetWindowSettings : WindowSettings { }
 
