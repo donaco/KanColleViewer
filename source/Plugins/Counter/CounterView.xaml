@@ -12,6 +12,7 @@
 			 d:DesignWidth="700">
 	<UserControl.Resources>
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+		<counter:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 		<!-- Expeditions.xaml ベースの GroupBox スタイル -->
@@ -227,11 +228,12 @@
 						  IsEnabled="{Binding IsSortieHistoryEnabled}"
 						  Style="{StaticResource DisableableGroupBoxStyle}">
 					<DockPanel>
-						<!-- リセットボタンを下端に固定 -->
+						<!-- リセットボタンを下端に固定（SortieHistory が null なら非表示） -->
 						<StackPanel DockPanel.Dock="Bottom"
 									Orientation="Horizontal"
 									HorizontalAlignment="Right"
-									Margin="0,8,0,0">
+									Margin="0,8,0,0"
+									Visibility="{Binding SortieHistory, Converter={StaticResource NullToCollapsedConverter}}">
 							<metro2:CallMethodButton Content="リセット"
 													 MethodName="Reset"
 													 DataContext="{Binding SortieHistory}" />

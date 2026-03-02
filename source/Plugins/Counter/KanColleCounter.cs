@@ -29,20 +29,51 @@ namespace Counter
 
 		public void Initialize()
 		{
-			var proxy = KanColleClient.Current.Proxy;
-
-			this.viewModel = new CounterViewModel
+			try
 			{
-				Counters = new ObservableCollection<CounterBase>
+				var proxy = KanColleClient.Current?.Proxy;
+				if (proxy == null)
 				{
-					new SupplyCounter(proxy),
-					new ItemDestroyCounter(proxy),
-					new MissionCounter(proxy),
-					new SortieCounter(proxy),
-				},
-				// 出撃履歴（直近10件を表示）
-				SortieHistory = new SortieHistoryCounter(proxy, 10),
-			};
+					System.Diagnostics.Debug.WriteLine("[Counter] KanColleProxy が取得できませんでした。プラグインは無効状態で起動します。");
+					this.viewModel = new CounterViewModel
+					{
+						Counters = new ObservableCollection<CounterBase>(),
+						SortieHistory = null,
+					};
+					return;
+				}
+
+				this.viewModel = new CounterViewModel
+				{
+					Counters = new ObservableCollection<CounterBase>
+					{
+						new SupplyCounter(proxy),
+						new ItemDestroyCounter(proxy),
+						new MissionCounter(proxy),
+						new SortieCounter(proxy),
+					},
+					// 出撃履歴（直近10件を表示）
+					SortieHistory = new SortieHistoryCounter(proxy, 10),
+				};
+
+				// アプリケーション終了時にポップアップウィンドウを閉じる
+				if (System.Windows.Application.Current != null)
+				{
+					System.Windows.Application.Current.Exit += (s, e) =>
+					{
+						this.viewModel?.ClosePopupWindow();
+					};
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[Counter] 初期化エラー: {ex.Message}");
+				this.viewModel = new CounterViewModel
+				{
+					Counters = new ObservableCollection<CounterBase>(),
+					SortieHistory = null,
+				};
+			}
 		}
 
 		public void RequestNotify(string type, string header, string body)

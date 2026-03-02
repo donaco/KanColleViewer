@@ -487,8 +487,16 @@ namespace Counter
 			this._areaCountMap = new Dictionary<string, SortieAreaCount>();
 
 			// SortieInfo への参照を保持し、PropertyChanged を監視
-			this._sortieInfo = KanColleClient.Current.SortieInfo;
-			this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
+			var sortieInfo = KanColleClient.Current?.SortieInfo;
+			if (sortieInfo != null)
+			{
+				this._sortieInfo = sortieInfo;
+				this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine("[SortieHistory] SortieInfo が null のため、履歴記録は無効です。");
+			}
 		}
 
 		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)

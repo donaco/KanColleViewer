@@ -140,24 +140,53 @@ namespace Counter
 		/// <summary>
 		/// ポップアップウィンドウを開きます。
 		/// 既に開いている場合はアクティブにします。
-		/// XAML の CallMethodButton から呼び出されます。
 		/// </summary>
 		public void OpenPopupWindow()
 		{
-			if (this._popupWindow != null && this._popupWindow.IsLoaded)
+			try
 			{
-				// 既に開いている → アクティブにする
-				this._popupWindow.Activate();
-				return;
+				if (this._popupWindow != null && this._popupWindow.IsLoaded)
+				{
+					this._popupWindow.Activate();
+					return;
+				}
+
+				this._popupWindow = new CounterWindow
+				{
+					DataContext = this,
+				};
+
+				this._popupWindow.Closed += (s, e) => this._popupWindow = null;
+				this._popupWindow.Show();
 			}
-
-			this._popupWindow = new CounterWindow
+			catch (Exception ex)
 			{
-				DataContext = this,
-			};
+				System.Diagnostics.Debug.WriteLine($"[Counter] ポップアップウィンドウの表示に失敗: {ex.Message}");
+				this._popupWindow = null;
+			}
+		}
 
-			this._popupWindow.Closed += (s, e) => this._popupWindow = null;
-			this._popupWindow.Show();
+		/// <summary>
+		/// ポップアップウィンドウを安全に閉じます。
+		/// アプリケーション終了時に呼び出されます。
+		/// </summary>
+		public void ClosePopupWindow()
+		{
+			try
+			{
+				if (this._popupWindow != null && this._popupWindow.IsLoaded)
+				{
+					this._popupWindow.Close();
+				}
+			}
+			catch
+			{
+				// 終了時の例外は無視
+			}
+			finally
+			{
+				this._popupWindow = null;
+			}
 		}
 	}
 }
