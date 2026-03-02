@@ -9,10 +9,11 @@
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views.Contents"
 				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
+				   xmlns:contentsVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:QuestWindowViewModel}"
 				   Title="{Binding Title}"
-				   Width="1200"
+				   Width="930"
 				   Height="500"
 				   FontSize="12"
 				   Background="{DynamicResource ThemeBrushKey}"
@@ -74,7 +75,7 @@
 		</Border>
 		<!-- #endregion -->
 
-		<!-- コンテンツ: 3列レイアウト -->
+		<!-- コンテンツ: 2列レイアウト (遂行中 | デイリー/ウィークリー切り替え) -->
 		<Grid Grid.Row="1"
 			  Margin="4">
 
@@ -86,11 +87,9 @@
 					   VerticalAlignment="Center"
 					   Visibility="{Binding IsUntaken, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-			<!-- 任務取得済みの3列表示 -->
+			<!-- 任務取得済みの2列表示 -->
 			<Grid Visibility="{Binding IsUntaken, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter=Collapsed:Visible}">
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
@@ -140,85 +139,107 @@
 						   Margin="0,6"
 						   Style="{DynamicResource SeparatorRectangleStyleKey}" />
 
-				<!-- 第2列: デイリー任務 -->
-				<Grid Grid.Column="2">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition Height="*" />
-					</Grid.RowDefinitions>
+				<!-- 第2列: デイリー / ウィークリー切り替え (Quests.xaml の TabControl と同じパターン) -->
+				<TabControl Grid.Column="2">
+					<TabControl.Template>
+						<ControlTemplate TargetType="{x:Type TabControl}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="*" />
+								</Grid.RowDefinitions>
+								<WrapPanel IsItemsHost="True" />
+								<ContentPresenter x:Name="PART_SelectedContentHost"
+												  Grid.Row="1"
+												  ContentSource="SelectedContent" />
+							</Grid>
+						</ControlTemplate>
+					</TabControl.Template>
+					<TabControl.Resources>
+						<Style TargetType="{x:Type TabItem}">
+							<Setter Property="OverridesDefaultStyle"
+									Value="True" />
+							<Setter Property="Foreground"
+									Value="{DynamicResource InactiveForegroundBrushKey}" />
+							<Setter Property="Template">
+								<Setter.Value>
+									<ControlTemplate TargetType="{x:Type TabItem}">
+										<Border x:Name="Border"
+												Background="Transparent">
+											<ContentPresenter x:Name="ContentSite"
+															  ContentSource="Header" />
+										</Border>
+										<ControlTemplate.Triggers>
+											<Trigger Property="IsSelected"
+													 Value="True">
+												<Setter Property="Foreground"
+														Value="{DynamicResource ForegroundBrushKey}" />
+											</Trigger>
+											<Trigger SourceName="Border"
+													 Property="IsMouseOver"
+													 Value="True">
+												<Setter Property="Foreground"
+														Value="{DynamicResource AccentHighlightBrushKey}" />
+											</Trigger>
+										</ControlTemplate.Triggers>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
 
-					<Grid.Resources>
+						<Style TargetType="{x:Type ItemsControl}">
+							<Setter Property="Margin"
+									Value="10,0,10,5" />
+							<Setter Property="ItemTemplate">
+								<Setter.Value>
+									<DataTemplate DataType="{x:Type contentsVm:QuestViewModel}">
+										<kcvc:Quest IsUntaken="{Binding IsUntaken}"
+													Title="{Binding Title}"
+													Detail="{Binding Detail}"
+													Category="{Binding Category}"
+													Progress="{Binding Progress}"
+													State="{Binding State}"
+													IsDetailView="True"
+													Margin="0,0,0,10" />
+									</DataTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
+
 						<views:QuestViewSource x:Key="DailyQuestSourceKey"
 											   Source="{Binding Quests}"
 											   Type="Daily" />
-					</Grid.Resources>
-
-					<TextBlock Text="デイリー任務"
-							   Style="{DynamicResource HeaderTextStyleKey}"
-							   Margin="10,6,10,10" />
-
-					<ScrollViewer Grid.Row="1"
-								  VerticalScrollBarVisibility="Auto"
-								  PanningMode="Both">
-						<ItemsControl ItemsSource="{Binding Source={StaticResource DailyQuestSourceKey}}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<kcvc:Quest IsUntaken="{Binding IsUntaken}"
-												Title="{Binding Title}"
-												Detail="{Binding Detail}"
-												Category="{Binding Category}"
-												Progress="{Binding Progress}"
-												State="{Binding State}"
-												IsDetailView="True"
-												Margin="10,0,10,10" />
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-					</ScrollViewer>
-				</Grid>
-
-				<!-- 区切り線 -->
-				<Rectangle Grid.Column="3"
-						   Width="0.99"
-						   Margin="0,6"
-						   Style="{DynamicResource SeparatorRectangleStyleKey}" />
-
-				<!-- 第3列: ウィークリー任務 -->
-				<Grid Grid.Column="4">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition Height="*" />
-					</Grid.RowDefinitions>
-
-					<Grid.Resources>
 						<views:QuestViewSource x:Key="WeeklyQuestSourceKey"
 											   Source="{Binding Quests}"
 											   Type="Weekly" />
-					</Grid.Resources>
+					</TabControl.Resources>
 
-					<TextBlock Text="ウィークリー任務"
-							   Style="{DynamicResource HeaderTextStyleKey}"
-							   Margin="10,6,10,10" />
+					<TabItem>
+						<TabItem.Header>
+							<TextBlock Text="デイリー"
+									   Style="{DynamicResource HeaderTextStyleKey}"
+									   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Foreground}"
+									   Margin="10,6,10,10" />
+						</TabItem.Header>
+						<ScrollViewer VerticalScrollBarVisibility="Auto"
+									  PanningMode="Both">
+							<ItemsControl ItemsSource="{Binding Source={StaticResource DailyQuestSourceKey}}" />
+						</ScrollViewer>
+					</TabItem>
 
-					<ScrollViewer Grid.Row="1"
-								  VerticalScrollBarVisibility="Auto"
-								  PanningMode="Both">
-						<ItemsControl ItemsSource="{Binding Source={StaticResource WeeklyQuestSourceKey}}">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<kcvc:Quest IsUntaken="{Binding IsUntaken}"
-												Title="{Binding Title}"
-												Detail="{Binding Detail}"
-												Category="{Binding Category}"
-												Progress="{Binding Progress}"
-												State="{Binding State}"
-												IsDetailView="True"
-												Margin="10,0,10,10" />
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-					</ScrollViewer>
-				</Grid>
+					<TabItem>
+						<TabItem.Header>
+							<TextBlock Text="ウィークリー"
+									   Style="{DynamicResource HeaderTextStyleKey}"
+									   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Foreground}"
+									   Margin="10,6,10,10" />
+						</TabItem.Header>
+						<ScrollViewer VerticalScrollBarVisibility="Auto"
+									  PanningMode="Both">
+							<ItemsControl ItemsSource="{Binding Source={StaticResource WeeklyQuestSourceKey}}" />
+						</ScrollViewer>
+					</TabItem>
+				</TabControl>
 			</Grid>
 		</Grid>
 	</Grid>
