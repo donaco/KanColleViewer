@@ -601,6 +601,15 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   マンスリー任務 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Quests_Monthly {
+            get {
+                return ResourceManager.GetString("Quests_Monthly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ※進捗状況 (50 %, 80 %) はゲーム内の表示と同じです。敵艦隊の撃破数や遠征の成功回数のカウント等は行っていません。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Quests_Notice {

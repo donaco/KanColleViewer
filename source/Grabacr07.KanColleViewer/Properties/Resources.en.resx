@@ -282,6 +282,9 @@
   <data name="Quests_Weekly" xml:space="preserve">
     <value>Weekly Quests</value>
   </data>
+  <data name="Quests_Monthly" xml:space="preserve">
+    <value>Monthly Quests</value>
+  </data>
   <data name="Repairyard" xml:space="preserve">
     <value>Repair</value>
   </data>

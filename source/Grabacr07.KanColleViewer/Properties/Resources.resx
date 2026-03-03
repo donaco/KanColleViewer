@@ -279,6 +279,9 @@
   <data name="Quests_Weekly" xml:space="preserve">
     <value>ウィークリー任務</value>
   </data>
+  <data name="Quests_Monthly" xml:space="preserve">
+  <value>マンスリー任務</value>
+</data>
   <data name="Repairyard" xml:space="preserve">
     <value>入渠ドック</value>
   </data>
