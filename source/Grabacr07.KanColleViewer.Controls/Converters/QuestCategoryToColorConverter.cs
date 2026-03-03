@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -22,6 +22,8 @@ namespace Grabacr07.KanColleViewer.Converters
 						return Color.FromRgb(42, 125, 70);
 					case QuestCategory.Sortie:
 					case QuestCategory.Sortie2:
+					case QuestCategory.Sortie3:
+					case QuestCategory.Sortie4:
 						return Color.FromRgb(181, 59, 54);
 					case QuestCategory.Expeditions:
 						return Color.FromRgb(59, 160, 157);
@@ -30,6 +32,7 @@ namespace Grabacr07.KanColleViewer.Converters
 					case QuestCategory.Supply:
 						return Color.FromRgb(178, 147, 47);
 					case QuestCategory.Building:
+					case QuestCategory.Building2:
 						return Color.FromRgb(100, 68, 59);
 					case QuestCategory.Remodelling:
 						return Color.FromRgb(169, 135, 186);

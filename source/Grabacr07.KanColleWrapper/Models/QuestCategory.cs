@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +8,7 @@ namespace Grabacr07.KanColleWrapper.Models
 {
 	/// <summary>
 	/// 任務のカテゴリを示す識別子を定義します。
+	/// api_category の値を QuestCategory 型に変換する際に使用します。
 	/// </summary>
 	public enum QuestCategory
 	{
@@ -55,8 +56,23 @@ namespace Grabacr07.KanColleWrapper.Models
 		Sortie2 = 8,
 
 		/// <summary>
-		/// その他。
+		/// イヤリー限定？の出撃任務。
 		/// </summary>
-		Other = 9,
+		Sortie3 = 9,
+
+		/// <summary>
+		/// 期間限定の出撃任務。
+		/// </summary>
+		Sortie4 = 10,
+
+		/// <summary>
+		/// イヤリー、単発、期間限定などの出撃任務以外の任務。
+		/// </summary>
+		Building2 = 11,
+
+		/// <summary>
+		/// その他
+		/// </summary>
+		Other = 12,
 	}
 }

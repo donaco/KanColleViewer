@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Controls"
 					xmlns:globalization="clr-namespace:Grabacr07.KanColleViewer.Controls.Globalization">
@@ -121,6 +121,12 @@
 									Value="#FF64443B" />
 						</Trigger>
 						<Trigger Property="Category"
+								 Value="Building2">
+							<Setter TargetName="Icon"
+									Property="Fill"
+									Value="#FF64443B" />
+						</Trigger>
+						<Trigger Property="Category"
 								 Value="Remodelling">
 							<Setter TargetName="Icon"
 									Property="Fill"
@@ -128,6 +134,18 @@
 						</Trigger>
 						<Trigger Property="Category"
 								 Value="Sortie2">
+							<Setter TargetName="Icon"
+									Property="Fill"
+									Value="#FFB53B36" />
+						</Trigger>
+						<Trigger Property="Category"
+								 Value="Sortie3">
+							<Setter TargetName="Icon"
+									Property="Fill"
+									Value="#FFB53B36" />
+						</Trigger>
+						<Trigger Property="Category"
+								 Value="Sortie4">
 							<Setter TargetName="Icon"
 									Property="Fill"
 									Value="#FFB53B36" />
