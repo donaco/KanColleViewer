@@ -78,6 +78,7 @@
 		</ListBox>
 
 		<!-- 行0-1, 列1: 基地詳細ボタン（rowspan="2"相当） -->
+		<!-- 行0-1, 列1: 基地詳細ボタン（rowspan="2"相当） -->
 		<metro2:CallMethodButton Grid.Row="0"
 								 Grid.RowSpan="2"
 								 Grid.Column="1"
@@ -86,7 +87,18 @@
 								 Padding="12,16,12,16"
 								 VerticalAlignment="Center"
 								 MethodName="ShowAirBaseWindow"
-								 MethodTarget="{Binding}" />
+								 MethodTarget="{Binding}">
+			<metro2:CallMethodButton.Style>
+				<Style TargetType="metro2:CallMethodButton">
+					<Setter Property="Visibility" Value="Visible" />
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsEmpty}" Value="True">
+							<Setter Property="Visibility" Value="Collapsed" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</metro2:CallMethodButton.Style>
+		</metro2:CallMethodButton>
 
 		<!-- 行1: 整備レベル -->
 		<StackPanel Grid.Row="1"
