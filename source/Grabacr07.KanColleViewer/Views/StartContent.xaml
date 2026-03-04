@@ -278,8 +278,8 @@
 							<LineBreak />
 							<LineBreak />
 							<Run Text="Project home:" />
-							<metro2:HyperlinkEx Uri="https://dona-co.art/?page_id=3534">
-								<Run Text="https://dona-co.art/KanColleViewer" />
+							<metro2:HyperlinkEx Uri="https://github.com/donaco/KanColleViewer">
+								<Run Text="https://github.com/donaco/KanColleViewer" />
 							</metro2:HyperlinkEx>
 							<LineBreak />
 							<Run Text="Source code:" />
