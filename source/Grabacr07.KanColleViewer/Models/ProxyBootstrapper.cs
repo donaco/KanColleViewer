@@ -66,7 +66,7 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 				this.Result = ProxyBootstrapResult.UnexpectedException;
 				this.Exception = ex;
-				Application.TelemetryClient.TrackException(ex);
+				System.Diagnostics.Debug.WriteLine(ex);
 			}
 		}
 

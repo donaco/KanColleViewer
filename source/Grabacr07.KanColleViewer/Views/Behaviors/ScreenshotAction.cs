@@ -32,7 +32,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 				catch (Exception ex)
 				{
 					StatusService.Current.Notify(Resources.Screenshot_Failed + ex.Message);
-					Application.TelemetryClient.TrackException(ex);
+					System.Diagnostics.Debug.WriteLine(ex);
 				}
 			}
 		}

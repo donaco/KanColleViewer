@@ -60,7 +60,7 @@ namespace Grabacr07.KanColleViewer.Models
 				}
 				catch (Exception ex)
 				{
-					Application.TelemetryClient.TrackException(ex);
+					System.Diagnostics.Debug.WriteLine(ex);
 				}
 			}
 		}

@@ -180,7 +180,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			catch (Exception ex)
 			{
 				StatusService.Current.Notify(string.Format(Properties.Resources.ZoomAction_ZoomFailed, ex.Message));
-				Application.TelemetryClient.TrackException(ex);
+				System.Diagnostics.Debug.WriteLine(ex);
 			}
 		}
 
@@ -263,7 +263,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			catch (Exception ex)
 			{
 				StatusService.Current.Notify("failed to apply css: " + ex.Message);
-				Application.TelemetryClient.TrackException(ex);
+				System.Diagnostics.Debug.WriteLine(ex);
 			}
 		}
 
