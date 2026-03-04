@@ -3,8 +3,7 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-			 xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 			 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
 			 xmlns:kcvv="http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters"
@@ -101,7 +100,7 @@
 									   Style="{DynamicResource DefaultTextStyleKey}"
 									   Foreground="{DynamicResource ActiveForegroundBrushKey}">
 								<i:Interaction.Behaviors>
-									<ei:DataStateBehavior Binding="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+									<i:DataStateBehavior Binding="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
 														  Value="True"
 														  TrueState="Blinking"
 														  FalseState="Normal" />
@@ -109,27 +108,27 @@
 								<i:Interaction.Triggers>
 									<i:EventTrigger EventName="Loaded">
 										<i:Interaction.Behaviors>
-											<ei:ConditionBehavior>
-												<ei:ConditionalExpression>
-													<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+											<i:ConditionBehavior>
+												<i:ConditionalExpression>
+													<i:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
 																			RightOperand="True"
 																			Operator="Equal" />
-												</ei:ConditionalExpression>
-											</ei:ConditionBehavior>
+												</i:ConditionalExpression>
+											</i:ConditionBehavior>
 										</i:Interaction.Behaviors>
-										<ei:GoToStateAction StateName="Blinking" />
+										<i:GoToStateAction StateName="Blinking" />
 									</i:EventTrigger>
 									<i:EventTrigger EventName="Loaded">
 										<i:Interaction.Behaviors>
-											<ei:ConditionBehavior>
-												<ei:ConditionalExpression>
-													<ei:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
+											<i:ConditionBehavior>
+												<i:ConditionalExpression>
+													<i:ComparisonCondition LeftOperand="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
 																			RightOperand="True"
 																			Operator="NotEqual" />
-												</ei:ConditionalExpression>
-											</ei:ConditionBehavior>
+												</i:ConditionalExpression>
+											</i:ConditionBehavior>
 										</i:Interaction.Behaviors>
-										<ei:GoToStateAction StateName="Normal" />
+										<i:GoToStateAction StateName="Normal" />
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
 							</TextBlock>

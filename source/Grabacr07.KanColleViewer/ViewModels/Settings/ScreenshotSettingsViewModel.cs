@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -53,9 +53,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			};
 			this.Messenger.Raise(message);
 
-			if (Directory.Exists(message.Response))
+			var selectedPath = message.Response?.FirstOrDefault();
+			if (Directory.Exists(selectedPath))
 			{
-				ScreenshotSettings.Destination.Value = message.Response;
+				ScreenshotSettings.Destination.Value = selectedPath;
 			}
 		}
 

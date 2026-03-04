@@ -10,8 +10,6 @@ using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Desktop;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DataContracts;
 
 namespace Grabacr07.KanColleViewer
 {
@@ -21,18 +19,7 @@ namespace Grabacr07.KanColleViewer
 		{
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => ReportException("AppDomain", sender, args.ExceptionObject as Exception);
 			AppDomain.CurrentDomain.AssemblyResolve += CefBridge.ResolveCefSharpAssembly;
-
-			TelemetryClient = new TelemetryClient();
-			TelemetryClient.Context.Session.Id = Guid.NewGuid().ToString();
-			TelemetryClient.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
-			TelemetryClient.Context.Component.Version = ProductInfo.VersionString;
-#if DEBUG
-			TelemetryClient.Context.User.Id = Environment.UserName;
-#endif
-			SetInstrumentationKey();
 		}
-
-		public static TelemetryClient TelemetryClient { get; }
 
 		public static Application Instance => Current as Application;
 
@@ -86,9 +73,6 @@ Exception: {exception?.GetType().FullName}
 				// ReSharper disable once AssignNullToNotNullAttribute
 				Directory.CreateDirectory(Path.GetDirectoryName(path));
 				File.AppendAllText(path, message);
-
-				TelemetryClient.TrackException(exception);
-				TelemetryClient.TrackTrace(message, SeverityLevel.Critical);
 			}
 			catch (Exception ex)
 			{

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Grabacr07.KanColleViewer.Plugins</RootNamespace>
     <AssemblyName>WindowsNotifier</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -75,7 +75,7 @@
   <ItemGroup>
     <Reference Include="DesktopToast">
       <HintPath>..\..\..\assemblies\DesktopToast.dll</HintPath>
-            <Private>True</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -126,15 +126,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2>nul
+    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-</PropertyGroup>
-<PropertyGroup>
-  <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2>nul
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2>nul
+mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-</PropertyGroup>
+  </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

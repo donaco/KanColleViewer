@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
 
 namespace Grabacr07.KanColleViewer.Views.Behaviors

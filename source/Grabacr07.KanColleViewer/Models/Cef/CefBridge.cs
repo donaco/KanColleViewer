@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		{
 			lock (cefInitLock)
 			{
-				if (initialized || CefSharp.Cef.IsInitialized) return;
+				if (initialized || CefSharp.Cef.IsInitialized == true) return;
 
 				CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 
@@ -99,7 +99,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame canvas)
 		{
 			var browser = webBrowser.GetBrowser();
-			var gameFrame = browser.GetFrame("game_frame");
+			var gameFrame = browser.GetFrameByName("game_frame");
 			if (gameFrame == null)
 			{
 				canvas = null;
@@ -107,7 +107,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			}
 
 			canvas = browser.GetFrameIdentifiers()
-				.Select(x => browser.GetFrame(x))
+				.Select(x => browser.GetFrameByIdentifier(x))
 				.Where(x => x.Parent?.Identifier == gameFrame.Identifier)
 				.FirstOrDefault(x => x.Url.Contains("/kcs2/index.php"));
 

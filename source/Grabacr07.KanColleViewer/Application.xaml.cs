@@ -170,7 +170,7 @@ namespace Grabacr07.KanColleViewer
 
 				// CefSharp のシャットダウン完了を待機（最大5秒）
 				var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-				while (Cef.IsInitialized && stopwatch.ElapsedMilliseconds < 5000)
+				while (Cef.IsInitialized == true && stopwatch.ElapsedMilliseconds < 5000)
 				{
 					Thread.Sleep(100);
 				}

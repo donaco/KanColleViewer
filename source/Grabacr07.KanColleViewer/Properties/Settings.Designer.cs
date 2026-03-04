@@ -52,21 +52,21 @@ namespace Grabacr07.KanColleViewer.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("body {\r\n    margin:0;\r\n    overflow:hidden\r\n}\r\n\r\n#game_frame {\r\n    position:fixe" +
-            "d;\r\n    left:50%;\r\n    top:-16px;\r\n    margin-left:-600px;\r\n    z-index:1\r\n}\r\n\r\n" +
-            ".area-pickupgame,\r\n.area-menu\r\n{\r\n    display:none!important;\r\n}")]
-        public string OverrideStyleSheet {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SallyAreaSource {
             get {
-                return ((string)(this["OverrideStyleSheet"]));
+                return ((string)(this["SallyAreaSource"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SallyAreaSource {
+        [global::System.Configuration.DefaultSettingValueAttribute("body {\r\n    margin:0;\r\n    overflow:hidden\r\n}\r\n\r\n#game_frame {\r\n    position:fixe" +
+            "d;\r\n    left:50%;\r\n    top:0px;\r\n    margin-left:-600px;\r\n    z-index:1\r\n}\r\n\r\n.a" +
+            "rea-pickupgame,\r\n.area-menu\r\n{\r\n    display:none!important;\r\n}")]
+        public string OverrideStyleSheet {
             get {
-                return ((string)(this["SallyAreaSource"]));
+                return ((string)(this["OverrideStyleSheet"]));
             }
         }
     }

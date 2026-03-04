@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Grabacr07.KanColleWrapper</RootNamespace>
     <AssemblyName>KanColleWrapper</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -85,14 +85,35 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Livet, Version=1.3.0.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.1.3.1.0\lib\net45\Livet.dll</HintPath>
+    <Reference Include="Livet, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.4.0.2\lib\net452\Livet.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=2.0.9.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.10\lib\net45\log4net.dll</HintPath>
+    <Reference Include="Livet.Behaviors, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Behaviors.4.0.2\lib\net452\Livet.Behaviors.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.1.3.1.0\lib\net45\Microsoft.Expression.Interactions.dll</HintPath>
+    <Reference Include="Livet.Collections, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Collections.4.0.2\lib\net452\Livet.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Livet.Converters, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Converters.4.0.2\lib\net452\Livet.Converters.dll</HintPath>
+    </Reference>
+    <Reference Include="Livet.Core, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Core.4.0.2\lib\net452\Livet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Livet.EventListeners, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.EventListeners.4.0.2\lib\net452\Livet.EventListeners.dll</HintPath>
+    </Reference>
+    <Reference Include="Livet.Messaging, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Messaging.4.0.2\lib\net452\Livet.Messaging.dll</HintPath>
+    </Reference>
+    <Reference Include="Livet.Mvvm, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\LivetCask.Mvvm.4.0.2\lib\net452\Livet.Mvvm.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=3.3.0.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.3.3.0\lib\net462\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.142\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="Nekoxy, Version=1.5.3.21, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nekoxy.1.5.3.21\lib\net45\Nekoxy.dll</HintPath>
@@ -102,31 +123,27 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="StatefulModel">
+    <Reference Include="StatefulModel, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StatefulModel.0.6.0\lib\portable-net45+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10\StatefulModel.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Reactive.Core">
+    <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Interfaces">
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Linq">
+    <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.PlatformServices">
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.1.3.1.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -139,13 +156,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Annotations\DarkAttribute.cs" />
+    <Compile Include="Annotations\ElementalAttribute.cs" />
+    <Compile Include="Annotations\LightAttribute.cs" />
     <Compile Include="ApiDataDeserializer.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
-    <Compile Include="Annotations\DarkAttribute.cs" />
-    <Compile Include="Annotations\ElementalAttribute.cs" />
-    <Compile Include="Annotations\LightAttribute.cs" />
     <Compile Include="Calculator.cs" />
     <Compile Include="Counter.cs" />
     <Compile Include="DisposableNotifier.cs" />
