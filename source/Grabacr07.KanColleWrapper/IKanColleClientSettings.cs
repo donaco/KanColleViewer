@@ -39,5 +39,6 @@ namespace Grabacr07.KanColleWrapper
 		/// 航空戦マスのみ制空権の情報を表示するかどうかを取得します。
 		/// </summary>
 		bool ShowAirSuperiority { get; }
+		bool ShowSortieInfo { get; }
 	}
 }

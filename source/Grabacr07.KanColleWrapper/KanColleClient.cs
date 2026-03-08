@@ -280,6 +280,9 @@ namespace Grabacr07.KanColleWrapper
 		// start/next で取得した cellNo をキャッシュ（battle で使用）
 		private int cachedCellNo = 0;
 
+		// 直近に受信した battle 系 API の種別を保持 ("battle" / "ld_airbattle" / null)
+		private string lastBattleApiType = null;
+
 		/// <summary>
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
@@ -567,6 +570,20 @@ namespace Grabacr07.KanColleWrapper
 			bool isLdAirbattle = url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
 				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle");
 
+			// battle/ld_airbattle/midnight/combined_battle など
+			if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle") || url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle"))
+			{
+				this.lastBattleApiType = "ld_airbattle";
+			}
+			else if (url.Contains("/kcsapi/api_req_sortie/battle") || url.Contains("/kcsapi/api_req_combined_battle/battle"))
+			{
+				this.lastBattleApiType = "battle";
+			}
+			else
+			{
+				this.lastBattleApiType = null;
+			}
+
 			// 航空戦の制空状態を JSON から先に読み取る（UI スレッド外で解析）
 			// 設定が ON かつ航空戦マス（ld_airbattle）のときだけ取得する
 			AirSuperiority airResult = AirSuperiority.None;
@@ -661,6 +678,55 @@ namespace Grabacr07.KanColleWrapper
 			{
 			}
 
+			// 設定値取得
+			var showSortieInfo = this.Settings?.ShowSortieInfo ?? false;
+			var showAirSuperiority = this.Settings?.ShowAirSuperiority ?? false;
+			var showCellOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+
+			// 制空権情報を表示するか判定
+			bool showAirResult = false;
+			if (showCellOnArrival)
+			{
+				// ネタバレONなら常に表示
+				showAirResult = true;
+			}
+			else if (showAirSuperiority)
+			{
+				// 航空戦マスのみ制空権の情報を表示する
+				// battleでは非表示、ld_airbattleでbattleresult時のみ表示
+				showAirResult = (this.lastBattleApiType == "ld_airbattle");
+			}
+			else if (showSortieInfo)
+			{
+				// 出撃中のマップ位置、戦闘結果を表示する
+				showAirResult = true;
+			}
+
+			// battleresult取得時に制空情報をSortieInfoにセット（ただし UI スレッドで実行するためここでは値を取得するだけ）
+			AirSuperiority airResult = AirSuperiority.None;
+			if (showAirResult)
+			{
+				try
+				{
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					var stage1 = data?.SelectToken("api_kouku.api_stage1");
+					if (stage1 != null)
+					{
+						var dispSeiku = stage1["api_disp_seiku"];
+						if (dispSeiku != null)
+						{
+							int val = dispSeiku.Value<int>();
+							if (val >= 0 && val <= 4)
+							{
+								airResult = (AirSuperiority)val;
+							}
+						}
+					}
+				}
+				catch { }
+			}
+
 			// 戦闘結果の WinRank を SortieInfo に反映（RunOnUi の外で先に取得）
 			string winRank = null;
 			try
@@ -741,6 +807,13 @@ namespace Grabacr07.KanColleWrapper
 					{
 					}
 
+					// UI スレッド上で制空状態を反映（安全）
+					try
+					{
+						this.SortieInfo.SetAirResult(airResult);
+					}
+					catch { }
+
 					// WinRank を SortieInfo に反映
 					if (!string.IsNullOrEmpty(winRank))
 					{
@@ -750,6 +823,13 @@ namespace Grabacr07.KanColleWrapper
 						}
 						catch { }
 					}
+
+					// 使用済みの lastBattleApiType はリセットして次回判定へ影響しないようにする
+					try
+					{
+						this.lastBattleApiType = null;
+					}
+					catch { }
 				}
 				catch
 				{

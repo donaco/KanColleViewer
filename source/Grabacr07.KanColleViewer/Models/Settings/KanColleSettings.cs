@@ -161,6 +161,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		bool IKanColleClientSettings.ShowAirSuperiority => ShowAirSuperiority.Value;
 
+		// 追加: インターフェイスのインスタンス プロパティを明示的に実装
+		bool IKanColleClientSettings.ShowSortieInfo => ShowSortieInfo.Value;
+
 		#endregion
 
 
