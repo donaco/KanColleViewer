@@ -137,6 +137,29 @@ namespace Counter
 
 		#endregion
 
+		#region IsPopupMode 変更通知プロパティ
+
+		private bool _IsPopupMode;
+
+		/// <summary>
+		/// ポップアップウィンドウ内で表示中かどうかを示します。
+		/// true の場合、「別ウィンドウで表示」ボタンを非表示にします。
+		/// </summary>
+		public bool IsPopupMode
+		{
+			get { return this._IsPopupMode; }
+			set
+			{
+				if (this._IsPopupMode != value)
+				{
+					this._IsPopupMode = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// ポップアップウィンドウを開きます。
 		/// 既に開いている場合はアクティブにします。
@@ -151,24 +174,32 @@ namespace Counter
 					return;
 				}
 
+				// ポップアップ用に ViewModel を複製せず共有するため、フラグで制御
+				this.IsPopupMode = true;
+
 				this._popupWindow = new CounterWindow
 				{
 					DataContext = this,
 				};
 
-				this._popupWindow.Closed += (s, e) => this._popupWindow = null;
+				this._popupWindow.Closed += (s, e) =>
+				{
+					this.IsPopupMode = false;
+					this._popupWindow = null;
+				};
+
 				this._popupWindow.Show();
 			}
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.WriteLine($"[Counter] ポップアップウィンドウの表示に失敗: {ex.Message}");
+				this.IsPopupMode = false;
 				this._popupWindow = null;
 			}
 		}
 
 		/// <summary>
 		/// ポップアップウィンドウを安全に閉じます。
-		/// アプリケーション終了時に呼び出されます。
 		/// </summary>
 		public void ClosePopupWindow()
 		{
@@ -181,10 +212,10 @@ namespace Counter
 			}
 			catch
 			{
-				// 終了時の例外は無視
 			}
 			finally
 			{
+				this.IsPopupMode = false;
 				this._popupWindow = null;
 			}
 		}

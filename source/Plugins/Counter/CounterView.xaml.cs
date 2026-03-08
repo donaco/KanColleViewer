@@ -62,4 +62,24 @@ namespace Counter
 			throw new NotSupportedException();
 		}
 	}
+
+	/// <summary>
+	/// bool が false なら Visible、true なら Collapsed を返すコンバーターです。
+	/// </summary>
+	public class InverseBoolToVisibilityConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value is bool b && b)
+			{
+				return Visibility.Collapsed;
+			}
+			return Visibility.Visible;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotSupportedException();
+		}
+	}
 }

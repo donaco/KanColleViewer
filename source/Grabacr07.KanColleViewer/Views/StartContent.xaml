@@ -211,7 +211,7 @@
 								   TextWrapping="Wrap">
 							<Run Text="{Binding Source={x:Static models:ProductInfo.Copyright}, Mode=OneWay}" />
 							<LineBreak />
-							<Run Text="                                   2025 donaco" />
+							<Run Text="                       2025 - 2026 Donaco" />
 						</TextBlock>
 
 						<TextBlock FontFamily="Segoe UI"

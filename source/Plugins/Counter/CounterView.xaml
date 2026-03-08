@@ -13,6 +13,7 @@
 	<UserControl.Resources>
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
 		<counter:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
+		<counter:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 		<!-- Expeditions.xaml ベースの GroupBox スタイル -->
@@ -131,32 +132,19 @@
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 
-							<!-- 区切り線 -->
+							<!-- 区切り線（ポップアップ内では非表示） -->
 							<Border Height=".99"
 									Background="{DynamicResource BorderBrushKey}"
-									Margin="0,6" />
+									Margin="0,6"
+									Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
 
-							<!-- ポップアップボタン（CounterWindow 内では非表示） -->
+							<!-- ポップアップボタン（ポップアップ内では非表示） -->
 							<metro2:CallMethodButton Content="別ウィンドウで表示"
 													 MethodName="OpenPopupWindow"
 													 HorizontalAlignment="Stretch"
 													 Margin="0,0,0,0"
-													 Padding="10">
-								<metro2:CallMethodButton.Style>
-									<Style TargetType="{x:Type metro2:CallMethodButton}"
-										   BasedOn="{StaticResource {x:Type metro2:CallMethodButton}}">
-										<Style.Triggers>
-											<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type counter:CounterWindow}}, FallbackValue={x:Null}}"
-														 Value="{x:Null}">
-												<Setter Property="Visibility"
-														Value="Visible" />
-											</DataTrigger>
-										</Style.Triggers>
-										<Setter Property="Visibility"
-												Value="Collapsed" />
-									</Style>
-								</metro2:CallMethodButton.Style>
-							</metro2:CallMethodButton>
+													 Padding="10"
+													 Visibility="{Binding IsPopupMode, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
 						</StackPanel>
 					</GroupBox>
 
