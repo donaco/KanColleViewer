@@ -15,7 +15,7 @@ namespace Counter
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
 	[ExportMetadata("Description", "シンプルな回数カウント機能、出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.0.0")]
+	[ExportMetadata("Version", "2.0.1")]
 	[ExportMetadata("Author", "@Grabacr07/@Donaco")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
