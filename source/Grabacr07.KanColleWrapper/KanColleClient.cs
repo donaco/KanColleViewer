@@ -563,6 +563,46 @@ namespace Grabacr07.KanColleWrapper
 			// battleresult は別ハンドラで処理するため除外
 			if (url.Contains("battleresult")) return false;
 
+			// 航空戦マス（ld_airbattle）かどうかを判定
+			bool isLdAirbattle = url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
+				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle");
+
+			// 航空戦の制空状態を JSON から先に読み取る（UI スレッド外で解析）
+			// 設定が ON かつ航空戦マス（ld_airbattle）のときだけ取得する
+			AirSuperiority airResult = AirSuperiority.None;
+			bool showAir = this.Settings?.ShowAirSuperiority ?? false;
+
+			if (showAir && isLdAirbattle)
+			{
+				try
+				{
+					if (!string.IsNullOrEmpty(normalized))
+					{
+						var root = JToken.Parse(normalized);
+						var data = root["api_data"] ?? root;
+						if (data != null)
+						{
+							// api_kouku.api_stage1.api_disp_seiku を探す
+							var stage1 = data.SelectToken("api_kouku.api_stage1");
+							if (stage1 != null)
+							{
+								var dispSeiku = stage1["api_disp_seiku"];
+								if (dispSeiku != null)
+								{
+									int val = dispSeiku.Value<int>();
+									if (val >= 0 && val <= 4)
+									{
+										airResult = (AirSuperiority)val;
+									}
+								}
+							}
+							// api_kouku が null または api_stage1 が null → AirSuperiority.None（航空戦なし）
+						}
+					}
+				}
+				catch { }
+			}
+
 			RunOnUi(() =>
 			{
 				try
@@ -583,6 +623,9 @@ namespace Grabacr07.KanColleWrapper
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 					}
+
+					// 航空戦の制空状態を反映（ld_airbattle かつ設定ON のときのみ値が入る）
+					this.SortieInfo.SetAirResult(airResult);
 				}
 				catch { }
 			});

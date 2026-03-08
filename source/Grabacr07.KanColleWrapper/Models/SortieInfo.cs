@@ -3,6 +3,31 @@ using System;
 namespace Grabacr07.KanColleWrapper.Models
 {
 	/// <summary>
+	/// 航空戦の制空状態を表します。
+	/// api_kouku.api_stage1.api_disp_seiku の値に対応します。
+	/// </summary>
+	public enum AirSuperiority
+	{
+		/// <summary>航空戦なし（api_kouku または api_stage1 が null）</summary>
+		None = -1,
+
+		/// <summary>航空均衡</summary>
+		AirParity = 0,
+
+		/// <summary>制空確保</summary>
+		AirSupremacy = 1,
+
+		/// <summary>航空優勢</summary>
+		AirSuperior = 2,
+
+		/// <summary>航空劣勢</summary>
+		AirInferior = 3,
+
+		/// <summary>制空喪失</summary>
+		AirIncapability = 4,
+	}
+
+	/// <summary>
 	/// 出撃中のマップ位置情報を保持します。
 	/// </summary>
 	public class SortieInfo : Notifier
@@ -99,6 +124,29 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
+		#region AirResult 変更通知プロパティ
+
+		private AirSuperiority _AirResult = AirSuperiority.None;
+
+		/// <summary>
+		/// 航空戦の制空状態を取得します。
+		/// </summary>
+		public AirSuperiority AirResult
+		{
+			get { return this._AirResult; }
+			set
+			{
+				if (this._AirResult != value)
+				{
+					this._AirResult = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
 		#region IsActive 変更通知プロパティ
 
 		private bool _IsActive;
@@ -124,7 +172,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 表示用テキストを取得します。
-		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S]"（battleresult時）
+		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）
 		/// </summary>
 		public string DisplayText
 		{
@@ -148,7 +196,29 @@ namespace Grabacr07.KanColleWrapper.Models
 					baseText += $" [{this.WinRank}]";
 				}
 
+				// 航空戦結果がある場合のみ追加（None 以外）
+				if (this.AirResult != AirSuperiority.None)
+				{
+					baseText += $"[{GetAirSuperiorityText(this.AirResult)}]";
+				}
+
 				return baseText;
+			}
+		}
+
+		/// <summary>
+		/// <see cref="AirSuperiority"/> を日本語の短縮表記に変換します。
+		/// </summary>
+		private static string GetAirSuperiorityText(AirSuperiority value)
+		{
+			switch (value)
+			{
+				case AirSuperiority.AirParity: return "均衡";
+				case AirSuperiority.AirSupremacy: return "確保";
+				case AirSuperiority.AirSuperior: return "優勢";
+				case AirSuperiority.AirInferior: return "劣勢";
+				case AirSuperiority.AirIncapability: return "喪失";
+				default: return string.Empty;
 			}
 		}
 
@@ -163,18 +233,29 @@ namespace Grabacr07.KanColleWrapper.Models
 			// CellNo は設定しない（start時は表示しない）
 			this.CellNo = null;
 			this.WinRank = null;
+			this.AirResult = AirSuperiority.None;
 			this.IsActive = true;
 		}
 
 		/// <summary>
 		/// 戦闘開始時に呼び出します (api_req_sortie/battle など)
-		/// cellNo を表示開始し、WinRank をクリアします
+		/// cellNo を表示開始し、WinRank と AirResult をクリアします
 		/// </summary>
 		public void EnterBattle(int cellNo)
 		{
 			// battle時にセル番号を設定（表示開始）
 			this.CellNo = cellNo;
 			this.WinRank = null;
+			this.AirResult = AirSuperiority.None;
+		}
+
+		/// <summary>
+		/// 航空戦の制空状態を設定します。
+		/// battle API のレスポンスから api_kouku.api_stage1.api_disp_seiku を読み取って呼び出します。
+		/// </summary>
+		public void SetAirResult(AirSuperiority airResult)
+		{
+			this.AirResult = airResult;
 		}
 
 		/// <summary>
@@ -192,6 +273,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		{
 			this.CellNo = cellNo;
 			this.WinRank = null;
+			this.AirResult = AirSuperiority.None;
 		}
 
 		/// <summary>
@@ -203,6 +285,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.MapInfoNo = 0;
 			this.CellNo = null;
 			this.WinRank = null;
+			this.AirResult = AirSuperiority.None;
 			this.IsActive = false;
 		}
 	}

@@ -117,6 +117,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> ShowCellOnArrival { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 
+		/// <summary>
+		/// 航空戦マスのみ制空権の情報を表示するかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> ShowAirSuperiority { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+
 		#region instance members
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -152,6 +158,8 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		bool IKanColleClientSettings.CheckFlagshipIsRepairShip => CheckFlagshipIsNotRepairShip.Value;
 
 		bool IKanColleClientSettings.ShowCellOnArrival => ShowCellOnArrival.Value;
+
+		bool IKanColleClientSettings.ShowAirSuperiority => ShowAirSuperiority.Value;
 
 		#endregion
 

@@ -34,5 +34,10 @@ namespace Grabacr07.KanColleWrapper
 		/// マップ位置の表示を、戦闘開始時ではなくセル到達時（start/next）に更新するかどうかを取得します。
 		/// </summary>
 		bool ShowCellOnArrival { get; }
+
+		/// <summary>
+		/// 航空戦マスのみ制空権の情報を表示するかどうかを取得します。
+		/// </summary>
+		bool ShowAirSuperiority { get; }
 	}
 }
