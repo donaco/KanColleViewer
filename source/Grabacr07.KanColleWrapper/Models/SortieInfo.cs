@@ -3,8 +3,7 @@ using System;
 namespace Grabacr07.KanColleWrapper.Models
 {
 	/// <summary>
-	/// 航空戦の制空状態を表します。
-	/// api_kouku.api_stage1.api_disp_seiku の値に対応します。
+	/// 航空戦の制空状態 api_kouku.api_stage1.api_disp_seiku
 	/// </summary>
 	public enum AirSuperiority
 	{
@@ -181,19 +180,19 @@ namespace Grabacr07.KanColleWrapper.Models
 				if (!this.IsActive) return string.Empty;
 
 				// ベーステキスト: 海域-マップ番号
-				var baseText = $"{this.MapAreaId}-{this.MapInfoNo}";
+				var baseText = $"{this.MapAreaId}-{this.MapInfoNo} ";
 
 				// セル番号がある場合のみ追加
 				if (this.CellNo.HasValue)
 				{
 					var cellName = MapCellNameProvider.GetCellName(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
-					baseText += $"-{cellName}";
+					baseText += $"-{cellName} ";
 				}
 
 				// ランクがある場合のみ追加
 				if (!string.IsNullOrEmpty(this.WinRank))
 				{
-					baseText += $" [{this.WinRank}]";
+					baseText += $"[{this.WinRank}]";
 				}
 
 				// 航空戦結果がある場合のみ追加（None 以外）

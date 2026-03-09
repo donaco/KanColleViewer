@@ -112,11 +112,11 @@
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<CheckBox Content="出撃中のマップ位置、戦闘結果を表示する（例: 1-5-D [S]）"
+			<CheckBox Content="出撃中のマップ位置、戦闘結果を表示する（例: 1-5-D [S][確保]）"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 
 			<Border Height="8" />
-			<CheckBox Content="航空戦マスのみ制空権の情報を表示する（例: 1-5-G [S][確保]）"
+			<CheckBox Content="航空戦マスのみ制空権の情報を表示する"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowAirSuperiority}, Path=Value}"
 					  IsEnabled="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 			

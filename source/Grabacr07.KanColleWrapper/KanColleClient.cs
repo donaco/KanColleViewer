@@ -570,7 +570,7 @@ namespace Grabacr07.KanColleWrapper
 			bool isLdAirbattle = url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
 				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle");
 
-			// battle/ld_airbattle/midnight/combined_battle など
+			// battle/ld_airbattle/midnight/combined_battle など を記録
 			if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle") || url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle"))
 			{
 				this.lastBattleApiType = "ld_airbattle";
@@ -584,12 +584,14 @@ namespace Grabacr07.KanColleWrapper
 				this.lastBattleApiType = null;
 			}
 
-			// 航空戦の制空状態を JSON から先に読み取る（UI スレッド外で解析）
-			// 設定が ON かつ航空戦マス（ld_airbattle）のときだけ取得する
-			AirSuperiority airResult = AirSuperiority.None;
-			bool showAir = this.Settings?.ShowAirSuperiority ?? false;
+			// 設定: true = 「航空戦マスのみ表示 (制限)」、false = 制限しない（全ての battle で表示可）
+			bool restrictToAir = this.Settings?.ShowAirSuperiority ?? false;
 
-			if (showAir && isLdAirbattle)
+			// 航空戦の制空状態を JSON から先に読み取る
+			// 設定が false（制限しない）なら全ての battle で解析、true なら航空戦マスのみ解析
+			AirSuperiority airResult = AirSuperiority.None;
+			bool shouldParseAir = !restrictToAir || isLdAirbattle;
+			if (shouldParseAir)
 			{
 				try
 				{
@@ -599,7 +601,6 @@ namespace Grabacr07.KanColleWrapper
 						var data = root["api_data"] ?? root;
 						if (data != null)
 						{
-							// api_kouku.api_stage1.api_disp_seiku を探す
 							var stage1 = data.SelectToken("api_kouku.api_stage1");
 							if (stage1 != null)
 							{
@@ -613,7 +614,6 @@ namespace Grabacr07.KanColleWrapper
 									}
 								}
 							}
-							// api_kouku が null または api_stage1 が null → AirSuperiority.None（航空戦なし）
 						}
 					}
 				}
@@ -630,18 +630,15 @@ namespace Grabacr07.KanColleWrapper
 
 						if (!showOnArrival)
 						{
-							// 従来動作: battle 時に cellNo を表示開始
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 						else if (!this.SortieInfo.CellNo.HasValue || this.SortieInfo.CellNo.Value != this.cachedCellNo)
 						{
-							// セル到達時表示モードだが、CellNo が未設定または古い場合は
-							// フォールバックとして更新する（出撃中に設定を切り替えたケースに対応）
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 					}
 
-					// 航空戦の制空状態を反映（ld_airbattle かつ設定ON のときのみ値が入る）
+					// 解析した値を UI スレッドで反映
 					this.SortieInfo.SetAirResult(airResult);
 				}
 				catch { }
@@ -657,11 +654,9 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
 
-			// ローカル変数として型付きで宣言
 			Models.Raw.kcsapi_battleresult brLocal = null;
 			Models.Raw.kcsapi_combined_battle_battleresult cbrLocal = null;
 
-			// 解析は試すが、主目的は UI の強制再描画
 			try
 			{
 				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_battleresult>(normalized, out brLocal))
@@ -670,40 +665,43 @@ namespace Grabacr07.KanColleWrapper
 				else if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_combined_battle_battleresult>(normalized, out cbrLocal))
 				{
 				}
-				else
-				{
-				}
 			}
-			catch
-			{
-			}
+			catch { }
 
-			// 設定値取得
+			// 設定値
 			var showSortieInfo = this.Settings?.ShowSortieInfo ?? false;
-			var showAirSuperiority = this.Settings?.ShowAirSuperiority ?? false;
+			var restrictToAir = this.Settings?.ShowAirSuperiority ?? false;
 			var showCellOnArrival = this.Settings?.ShowCellOnArrival ?? false;
 
 			// 制空権情報を表示するか判定
 			bool showAirResult = false;
 			if (showCellOnArrival)
 			{
-				// ネタバレONなら常に表示
+				// ネタバレ ON は常に表示
 				showAirResult = true;
 			}
-			else if (showAirSuperiority)
+			else if (!showSortieInfo)
 			{
-				// 航空戦マスのみ制空権の情報を表示する
-				// battleでは非表示、ld_airbattleでbattleresult時のみ表示
-				showAirResult = (this.lastBattleApiType == "ld_airbattle");
+				// 出撃情報自体が無効なら表示しない
+				showAirResult = false;
 			}
-			else if (showSortieInfo)
+			else
 			{
-				// 出撃中のマップ位置、戦闘結果を表示する
-				showAirResult = true;
+				// ShowSortieInfo が有効な場合、ShowAirSuperiority が true なら「航空戦マスのみ」、
+				// false なら「制限なし（すべての battle で表示）」とする
+				if (restrictToAir)
+				{
+					showAirResult = (this.lastBattleApiType == "ld_airbattle");
+				}
+				else
+				{
+					showAirResult = true;
+				}
 			}
 
-			// battleresult取得時に制空情報をSortieInfoにセット（ただし UI スレッドで実行するためここでは値を取得するだけ）
+			// battleresult で制空情報を取得（必要な場合のみ）
 			AirSuperiority airResult = AirSuperiority.None;
+			bool parsedAir = false; // JSON に制空情報が含まれているか
 			if (showAirResult)
 			{
 				try
@@ -716,32 +714,26 @@ namespace Grabacr07.KanColleWrapper
 						var dispSeiku = stage1["api_disp_seiku"];
 						if (dispSeiku != null)
 						{
-							int val = dispSeiku.Value<int>();
-							if (val >= 0 && val <= 4)
+							int val;
+							if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
 							{
 								airResult = (AirSuperiority)val;
+								parsedAir = true;
 							}
 						}
 					}
 				}
-				catch { }
+				catch { parsedAir = false; }
 			}
 
-			// 戦闘結果の WinRank を SortieInfo に反映（RunOnUi の外で先に取得）
+			// WinRank 取得（既存ロジック）
 			string winRank = null;
 			try
 			{
-				if (brLocal != null)
-				{
-					winRank = brLocal.api_win_rank;
-				}
-				else if (cbrLocal != null)
-				{
-					winRank = cbrLocal.api_win_rank;
-				}
+				if (brLocal != null) winRank = brLocal.api_win_rank;
+				else if (cbrLocal != null) winRank = cbrLocal.api_win_rank;
 				else
 				{
-					// フォールバック: JSON から直接取得
 					try
 					{
 						var root = JToken.Parse(normalized);
@@ -758,82 +750,44 @@ namespace Grabacr07.KanColleWrapper
 				try
 				{
 					var org = this.Homeport?.Organization;
-					if (org == null)
-					{
-						return;
-					}
+					if (org == null) return;
 
-					// 出撃フラグに依らず全フリートを強制更新（CEF 経路では出撃検知が漏れるためのフォールバック）
 					foreach (var fleet in org.Fleets.Values)
 					{
-						try
-						{
-							fleet.State.Update();
-							fleet.State.Calculate();
-							fleet.RaiseShipsUpdated();
-						}
-						catch
-						{
-						}
+						try { fleet.State.Update(); fleet.State.Calculate(); fleet.RaiseShipsUpdated(); } catch { }
 					}
 
-					// 組織レベルでも明示通知
-					try
-					{
-						this.Homeport?.Organization?.NotifyUpdated();
-					}
-					catch
-					{
-					}
+					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 
-					// UI スレッドキューの低優先度で再通知を行う
 					try
 					{
 						if (Application.Current != null && Application.Current.Dispatcher != null)
 						{
 							Application.Current.Dispatcher.InvokeAsync(() =>
 							{
-								try
-								{
-									this.Homeport?.Organization?.NotifyUpdated();
-								}
-								catch
-								{
-								}
+								try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 							}, System.Windows.Threading.DispatcherPriority.Background);
 						}
 					}
-					catch
-					{
-					}
-
-					// UI スレッド上で制空状態を反映（安全）
-					try
-					{
-						this.SortieInfo.SetAirResult(airResult);
-					}
 					catch { }
 
-					// WinRank を SortieInfo に反映
+					// parsedAir が true のときだけ制空結果を反映する。
+					// JSON に含まれていない場合は既存の SortieInfo.AirResult を保持する（上書きしない）。
+					if (parsedAir)
+					{
+						try { this.SortieInfo.SetAirResult(airResult); } catch { }
+					}
+
+					// WinRank を反映
 					if (!string.IsNullOrEmpty(winRank))
 					{
-						try
-						{
-							this.SortieInfo.SetBattleResult(winRank);
-						}
-						catch { }
+						try { this.SortieInfo.SetBattleResult(winRank); } catch { }
 					}
 
-					// 使用済みの lastBattleApiType はリセットして次回判定へ影響しないようにする
-					try
-					{
-						this.lastBattleApiType = null;
-					}
-					catch { }
+					// 使用済みフラグはクリア（次回判定へ影響しないよう）
+					this.lastBattleApiType = null;
 				}
-				catch
-				{
-				}
+				catch { }
 			});
 
 			return true;
