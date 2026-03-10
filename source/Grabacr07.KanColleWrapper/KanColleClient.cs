@@ -630,6 +630,17 @@ namespace Grabacr07.KanColleWrapper
 					var data = root["api_data"] ?? root;
 					if (data != null)
 					{
+
+						var kouku = data?.SelectToken("api_kouku");
+						var planeFrom = kouku?["api_plane_from"];
+						if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
+						{
+							// 制空戦が発生していない場合
+							airResult = AirSuperiority.None;
+							parsedBattleAir = false;
+							return true; // 制空戦がないため、これ以上の処理をスキップ
+						}
+
 						var stage1 = data.SelectToken("api_kouku.api_stage1");
 						if (stage1 != null)
 						{
@@ -760,6 +771,17 @@ namespace Grabacr07.KanColleWrapper
 				{
 					var root = JToken.Parse(normalized);
 					var data = root["api_data"] ?? root;
+
+					var kouku = data?.SelectToken("api_kouku");
+					var planeFrom = kouku?["api_plane_from"];
+					if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
+					{
+						// 制空戦が発生していない場合
+						airResult = AirSuperiority.None;
+						parsedAir = false;
+						return true; // 制空戦がないため、これ以上の処理をスキップ
+					}
+
 					var stage1 = data?.SelectToken("api_kouku.api_stage1");
 					if (stage1 != null)
 					{
