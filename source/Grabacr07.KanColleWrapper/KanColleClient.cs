@@ -635,23 +635,24 @@ namespace Grabacr07.KanColleWrapper
 						var planeFrom = kouku?["api_plane_from"];
 						if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
 						{
-							// 制空戦が発生していない場合
+							// 制空戦が発生していない場合 → 制空情報のみスキップ（メソッドは続行）
 							airResult = AirSuperiority.None;
 							parsedBattleAir = false;
-							return true; // 制空戦がないため、これ以上の処理をスキップ
 						}
-
-						var stage1 = data.SelectToken("api_kouku.api_stage1");
-						if (stage1 != null)
+						else
 						{
-							var dispSeiku = stage1["api_disp_seiku"];
-							if (dispSeiku != null)
+							var stage1 = data.SelectToken("api_kouku.api_stage1");
+							if (stage1 != null)
 							{
-								int val;
-								if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+								var dispSeiku = stage1["api_disp_seiku"];
+								if (dispSeiku != null)
 								{
-									airResult = (AirSuperiority)val;
-									parsedBattleAir = true;
+									int val;
+									if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+									{
+										airResult = (AirSuperiority)val;
+										parsedBattleAir = true;
+									}
 								}
 							}
 						}
@@ -776,23 +777,24 @@ namespace Grabacr07.KanColleWrapper
 					var planeFrom = kouku?["api_plane_from"];
 					if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
 					{
-						// 制空戦が発生していない場合
+						// 制空戦が発生していない場合 → 制空情報のみスキップ（WinRank 処理は続行）
 						airResult = AirSuperiority.None;
 						parsedAir = false;
-						return true; // 制空戦がないため、これ以上の処理をスキップ
 					}
-
-					var stage1 = data?.SelectToken("api_kouku.api_stage1");
-					if (stage1 != null)
+					else
 					{
-						var dispSeiku = stage1["api_disp_seiku"];
-						if (dispSeiku != null)
+						var stage1 = data?.SelectToken("api_kouku.api_stage1");
+						if (stage1 != null)
 						{
-							int val;
-							if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+							var dispSeiku = stage1["api_disp_seiku"];
+							if (dispSeiku != null)
 							{
-								airResult = (AirSuperiority)val;
-								parsedAir = true;
+								int val;
+								if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+								{
+									airResult = (AirSuperiority)val;
+									parsedAir = true;
+								}
 							}
 						}
 					}
