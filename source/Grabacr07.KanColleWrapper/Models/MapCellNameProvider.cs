@@ -69,7 +69,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		{
 			var cellName = GetCellName(mapAreaId, mapInfoNo, cellNo);
 			return cellName != null
-				&& cellName.IndexOf("(BOSS)", StringComparison.OrdinalIgnoreCase) >= 0;
+				&& cellName.IndexOf("[BOSS]", StringComparison.OrdinalIgnoreCase) >= 0;
 		}
 
 		/// <summary>
