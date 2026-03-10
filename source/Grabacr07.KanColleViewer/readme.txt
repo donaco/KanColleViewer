@@ -147,6 +147,7 @@ Application Insights
 
 
 ■更新履歴
+2026/0*/0* - version 4.7.0 
 2026/03/04 - version 4.6.5
 2026/02/16 - version 4.6.4
 2026/01/09 - version 4.6.3

@@ -271,6 +271,7 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
+		#region 各種フィード
 		// 直近に処理した api_req_hensei/change の deckId を一時保持する（requestBody が来ない時用）
 		private int lastChangeDeckId = -1;
 
@@ -282,6 +283,12 @@ namespace Grabacr07.KanColleWrapper
 
 		// 直近に受信した battle 系 API の種別を保持 ("battle" / "ld_airbattle" / null)
 		private string lastBattleApiType = null;
+
+		// battle で解析したが表示を保留した制空情報を一時保持する
+		private AirSuperiority pendingAirResult = AirSuperiority.None;
+		private bool hasPendingAirResult = false;
+
+		#endregion
 
 		/// <summary>
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
@@ -481,6 +488,8 @@ namespace Grabacr07.KanColleWrapper
 										{
 											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
 										}
+										this.hasPendingAirResult = false;
+										this.pendingAirResult = AirSuperiority.None;
 									}
 									catch { }
 								});
@@ -540,7 +549,16 @@ namespace Grabacr07.KanColleWrapper
 										this.SortieInfo.Next(cellNo);
 									}
 									catch { }
+									// ※クリアは UI スレッドで行っておく
+									this.hasPendingAirResult = false;
+									this.pendingAirResult = AirSuperiority.None;
 								});
+							}
+							else
+							{
+								// showOnArrival == false の場合でも、次セル到達で前の battle に紐づく pending は破棄する
+								this.hasPendingAirResult = false;
+								this.pendingAirResult = AirSuperiority.None;
 							}
 						}
 					}
@@ -584,40 +602,51 @@ namespace Grabacr07.KanColleWrapper
 				this.lastBattleApiType = null;
 			}
 
-			// 設定: true = 「航空戦マスのみ表示 (制限)」、false = 制限しない（全ての battle で表示可）
-			bool restrictToAir = this.Settings?.ShowAirSuperiority ?? false;
+			// 設定参照
+			var restrictToAir = this.Settings?.ShowAirSuperiority ?? false;   // true = 航空戦マスのみ表示
+			var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;    // true = ネタバレ（battle 時に表示）
 
-			// 航空戦の制空状態を JSON から先に読み取る
-			// 設定が false（制限しない）なら全ての battle で解析、true なら航空戦マスのみ解析
+			// 航空戦の制空状態を JSON から先に読み取る条件
+			// ネタバレがオフの場合は battle では解析しない（battleresult で反映するため）
 			AirSuperiority airResult = AirSuperiority.None;
-			bool shouldParseAir = !restrictToAir || isLdAirbattle;
-			if (shouldParseAir)
+			bool parsedBattleAir = false;
+			bool shouldParseAir = false;
+			if (showOnArrival)
+			{
+				// ネタバレON のときは従来どおり、設定に応じて全 battle または ld_airbattle のみ解析
+				shouldParseAir = !restrictToAir || isLdAirbattle;
+			}
+			else
+			{
+				// ネタバレOFF のときは battle では解析しない（battleresult で表示）
+				shouldParseAir = false;
+			}
+
+			if (!string.IsNullOrEmpty(normalized) && (shouldParseAir || !shouldParseAir /* still try to parse to cache if possible */))
 			{
 				try
 				{
-					if (!string.IsNullOrEmpty(normalized))
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					if (data != null)
 					{
-						var root = JToken.Parse(normalized);
-						var data = root["api_data"] ?? root;
-						if (data != null)
+						var stage1 = data.SelectToken("api_kouku.api_stage1");
+						if (stage1 != null)
 						{
-							var stage1 = data.SelectToken("api_kouku.api_stage1");
-							if (stage1 != null)
+							var dispSeiku = stage1["api_disp_seiku"];
+							if (dispSeiku != null)
 							{
-								var dispSeiku = stage1["api_disp_seiku"];
-								if (dispSeiku != null)
+								int val;
+								if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
 								{
-									int val = dispSeiku.Value<int>();
-									if (val >= 0 && val <= 4)
-									{
-										airResult = (AirSuperiority)val;
-									}
+									airResult = (AirSuperiority)val;
+									parsedBattleAir = true;
 								}
 							}
 						}
 					}
 				}
-				catch { }
+				catch { parsedBattleAir = false; }
 			}
 
 			RunOnUi(() =>
@@ -626,20 +655,34 @@ namespace Grabacr07.KanColleWrapper
 				{
 					if (this.cachedCellNo > 0)
 					{
-						var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
+						var showOnArrivalLocal = this.Settings?.ShowCellOnArrival ?? false;
 
-						if (!showOnArrival)
+						if (!showOnArrivalLocal)
 						{
+							// 従来動作: battle 時に cellNo を表示開始
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 						else if (!this.SortieInfo.CellNo.HasValue || this.SortieInfo.CellNo.Value != this.cachedCellNo)
 						{
+							// セル到達時表示モードだが、CellNo が未設定または古い場合はフォールバック更新
 							this.SortieInfo.EnterBattle(this.cachedCellNo);
 						}
 					}
 
-					// 解析した値を UI スレッドで反映
-					this.SortieInfo.SetAirResult(airResult);
+					// battle 時に反映するのは shouldParseAir が true の場合のみ
+					if (shouldParseAir && parsedBattleAir)
+					{
+						this.SortieInfo.SetAirResult(airResult);
+						// 表示したので pending はクリア
+						this.hasPendingAirResult = false;
+						this.pendingAirResult = AirSuperiority.None;
+					}
+					else if (!shouldParseAir && parsedBattleAir)
+					{
+						// 解析はできたが表示を保留 → battleresult 時に使えるようキャッシュしておく
+						this.pendingAirResult = airResult;
+						this.hasPendingAirResult = true;
+					}
 				}
 				catch { }
 			});
@@ -677,8 +720,17 @@ namespace Grabacr07.KanColleWrapper
 			bool showAirResult = false;
 			if (showCellOnArrival)
 			{
-				// ネタバレ ON は常に表示
-				showAirResult = true;
+				// ネタバレ ON の場合、
+				// - ShowAirSuperiority が true のときは「航空戦マスのみ」を意味するので、直前が ld_airbattle のときのみ表示
+				// - ShowAirSuperiority が false のときは制限なしで表示
+				if (restrictToAir)
+				{
+					showAirResult = (this.lastBattleApiType == "ld_airbattle");
+				}
+				else
+				{
+					showAirResult = true;
+				}
 			}
 			else if (!showSortieInfo)
 			{
@@ -771,11 +823,20 @@ namespace Grabacr07.KanColleWrapper
 					}
 					catch { }
 
-					// parsedAir が true のときだけ制空結果を反映する。
-					// JSON に含まれていない場合は既存の SortieInfo.AirResult を保持する（上書きしない）。
+					// parsedAir が true のときだけ制空結果を反映。
+					// JSON に含まれていない場合は、もし battle 側で解析して保留している値があればそれを反映する。
 					if (parsedAir)
 					{
 						try { this.SortieInfo.SetAirResult(airResult); } catch { }
+						// 反映したので pending をクリア
+						this.hasPendingAirResult = false;
+						this.pendingAirResult = AirSuperiority.None;
+					}
+					else if (this.hasPendingAirResult && showAirResult)
+					{
+						try { this.SortieInfo.SetAirResult(this.pendingAirResult); } catch { }
+						this.hasPendingAirResult = false;
+						this.pendingAirResult = AirSuperiority.None;
 					}
 
 					// WinRank を反映
@@ -984,6 +1045,9 @@ namespace Grabacr07.KanColleWrapper
 						try
 						{
 							this.SortieInfo.Reset();
+							// 母港に戻ったら pending は破棄
+							this.hasPendingAirResult = false;
+							this.pendingAirResult = AirSuperiority.None;
 						}
 						catch { }
 					});

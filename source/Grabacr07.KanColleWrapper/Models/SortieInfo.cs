@@ -180,7 +180,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				if (!this.IsActive) return string.Empty;
 
 				// ベーステキスト: 海域-マップ番号
-				var baseText = $"{this.MapAreaId}-{this.MapInfoNo} ";
+				var baseText = $"{this.MapAreaId}-{this.MapInfoNo}";
 
 				// セル番号がある場合のみ追加
 				if (this.CellNo.HasValue)
