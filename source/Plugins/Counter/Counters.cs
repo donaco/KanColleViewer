@@ -636,6 +636,46 @@ namespace Counter
 		}
 
 		/// <summary>
+		/// 戦闘履歴のみをクリアします。
+		/// </summary>
+		public void ResetHistory()
+		{
+			var app = System.Windows.Application.Current;
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke((Action)(() =>
+				{
+					this.History.Clear();
+				}));
+			}
+			else
+			{
+				this.History.Clear();
+			}
+		}
+
+		/// <summary>
+		/// 海域ごとの出撃数のみをクリアします。
+		/// </summary>
+		public void ResetAreaCounts()
+		{
+			var app = System.Windows.Application.Current;
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke((Action)(() =>
+				{
+					this.AreaCounts.Clear();
+					this._areaCountMap.Clear();
+				}));
+			}
+			else
+			{
+				this.AreaCounts.Clear();
+				this._areaCountMap.Clear();
+			}
+		}
+
+		/// <summary>
 		/// 履歴と集計データをすべてクリアします。
 		/// </summary>
 		public void Reset()

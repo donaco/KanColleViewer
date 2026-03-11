@@ -9,7 +9,7 @@
 			 mc:Ignorable="d"
 			 d:DataContext="{d:DesignInstance counter:CounterViewModel}"
 			 d:DesignHeight="400"
-			 d:DesignWidth="700">
+			 d:DesignWidth="720">
 	<UserControl.Resources>
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
 		<counter:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
@@ -192,21 +192,35 @@
 						  Padding="8"
 						  IsEnabled="{Binding IsSortieHistoryEnabled}"
 						  Style="{StaticResource DisableableGroupBoxStyle}">
-					<ItemsControl ItemsSource="{Binding SortieHistory.History}">
-						<ItemsControl.ItemTemplate>
-							<DataTemplate DataType="{x:Type counter:SortieRecord}">
-								<Border Margin="2,1"
-										Padding="2,1">
-									<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
-										<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
-											 Foreground="{DynamicResource ForegroundBrushKey}" />
-										<Run Text="{Binding DisplayText, Mode=OneWay}"
-											 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-									</TextBlock>
-								</Border>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
+					<DockPanel>
+						<!-- リセットボタンを下端に固定 -->
+						<StackPanel DockPanel.Dock="Bottom"
+									Orientation="Horizontal"
+									HorizontalAlignment="Right"
+									Margin="0,8,0,0"
+									Visibility="{Binding SortieHistory, Converter={StaticResource NullToCollapsedConverter}}">
+							<metro2:CallMethodButton Content="リセット"
+													 MethodName="ResetHistory"
+													 DataContext="{Binding SortieHistory}" />
+						</StackPanel>
+
+						<!-- 出撃履歴リスト -->
+						<ItemsControl ItemsSource="{Binding SortieHistory.History}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate DataType="{x:Type counter:SortieRecord}">
+									<Border Margin="2,1"
+											Padding="2,1">
+										<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
+											<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
+												 Foreground="{DynamicResource ForegroundBrushKey}" />
+											<Run Text="{Binding DisplayText, Mode=OneWay}"
+												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+										</TextBlock>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</DockPanel>
 				</GroupBox>
 
 				<!-- ========== 第3列: 海域ごとの出撃数 ========== -->
@@ -216,14 +230,14 @@
 						  IsEnabled="{Binding IsSortieHistoryEnabled}"
 						  Style="{StaticResource DisableableGroupBoxStyle}">
 					<DockPanel>
-						<!-- リセットボタンを下端に固定（SortieHistory が null なら非表示） -->
+						<!-- リセットボタンを下端に固定 -->
 						<StackPanel DockPanel.Dock="Bottom"
 									Orientation="Horizontal"
 									HorizontalAlignment="Right"
 									Margin="0,8,0,0"
 									Visibility="{Binding SortieHistory, Converter={StaticResource NullToCollapsedConverter}}">
 							<metro2:CallMethodButton Content="リセット"
-													 MethodName="Reset"
+													 MethodName="ResetAreaCounts"
 													 DataContext="{Binding SortieHistory}" />
 						</StackPanel>
 
