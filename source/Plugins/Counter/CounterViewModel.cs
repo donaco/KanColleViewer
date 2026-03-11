@@ -1,10 +1,12 @@
+using Livet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using Livet;
+using System.Windows.Data;
 
 namespace Counter
 {
@@ -231,6 +233,24 @@ namespace Counter
 			{
 				this.IsPopupMode = false;
 				this._popupWindow = null;
+			}
+		}
+
+		/// <summary>
+		/// null または 空文字列 なら Collapsed、そうでなければ Visible を返すコンバーターです。
+		/// </summary>
+		public class NullToCollapsedConverter : IValueConverter
+		{
+			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				var s = value as string;
+				if (string.IsNullOrEmpty(s)) return Visibility.Collapsed;
+				return Visibility.Visible;
+			}
+
+			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				throw new NotSupportedException();
 			}
 		}
 	}

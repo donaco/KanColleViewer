@@ -178,7 +178,7 @@ namespace Counter
 		public int MapInfoNo { get; }
 
 		/// <summary>
-		/// セル名（例: "O"）。セルに到達しなかった場合は null
+		/// セル名（例: "O" または "O [BOSS]"）。セルに到達しなかった場合は null
 		/// </summary>
 		public string CellName { get; }
 
@@ -196,6 +196,39 @@ namespace Counter
 		/// 海域-セルのキー文字列（例: "7-4-C"）。集計に使用します。
 		/// </summary>
 		public string AreaCellKey { get; }
+
+		/// <summary>
+		/// "(BOSS)" 部分を取り除いた海域表示（例: "7-4-K"）。
+		/// </summary>
+		public string CleanAreaCellKey
+		{
+			get
+			{
+				// CellName が null の場合は "mapArea-mapInfo" を返す
+				if (string.IsNullOrEmpty(this.CellName)) return $"{this.MapAreaId}-{this.MapInfoNo}";
+
+				// "(BOSS)" を取り除く
+				var cleanCell = this.CellName.Replace("[BOSS]", "").Trim();
+
+				return !string.IsNullOrEmpty(cleanCell)
+					? $"{this.MapAreaId}-{this.MapInfoNo}-{cleanCell}"
+					: $"{this.MapAreaId}-{this.MapInfoNo}";
+			}
+		}
+
+		/// <summary>
+		/// ボス表示テキスト（ボスセルなら "[BOSS]"、そうでなければ空文字）。
+		/// </summary>
+		public string BossText
+		{
+			get
+			{
+				return !string.IsNullOrEmpty(this.CellName) &&
+					   this.CellName.IndexOf("[BOSS]", StringComparison.OrdinalIgnoreCase) >= 0
+					? "[BOSS]"
+					: string.Empty;
+			}
+		}
 
 		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank)
 		{
@@ -536,7 +569,7 @@ namespace Counter
 							cellNo = liveCellNo;
 						}
 
-						// BossOnly フィルター: MapCellNames.json のセル名に "(BOSS)" が含まれるかで判定
+						// BossOnly フィルター: MapCellNames.json のセル名に "[BOSS]" が含まれるかで判定
 						if (this.BossOnly)
 						{
 							if (!cellNo.HasValue

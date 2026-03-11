@@ -115,20 +115,20 @@
 							<CheckBox IsChecked="{Binding IsCounterEnabled, Mode=TwoWay}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="0,2">
-								<TextBlock Text="カウンターを使用する"
+								<TextBlock Text="カウンターを表示する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding IsSortieHistoryEnabled, Mode=TwoWay}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="0,2">
-								<TextBlock Text="戦闘履歴、出撃数をカウントする"
+								<TextBlock Text="戦闘履歴、出撃数を表示する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding SortieHistory.BossOnly, Mode=TwoWay}"
 									  IsEnabled="{Binding IsSortieHistoryEnabled}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="16,2,0,2">
-								<TextBlock Text="ボスマスのみをカウントする"
+								<TextBlock Text="ボスマスのみを表示する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 
@@ -220,13 +220,41 @@
 							<ItemsControl.ItemTemplate>
 								<DataTemplate DataType="{x:Type counter:SortieRecord}">
 									<Border Margin="2,1"
-											Padding="2,1">
-										<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
-											<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
-												 Foreground="{DynamicResource ForegroundBrushKey}" />
-											<Run Text="{Binding DisplayText, Mode=OneWay}"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-										</TextBlock>
+												Padding="2,1">
+										<StackPanel Orientation="Horizontal"
+														VerticalAlignment="Center">
+											<!-- 時刻 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,3,0,0"
+													   MinWidth="40">
+													<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
+														 Foreground="{DynamicResource ForegroundBrushKey}" />
+											</TextBlock>
+
+											<!-- 海域（例: 5-5-K）: "(BOSS)" を除去した表示 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="0,0,0,0"
+													       MinWidth="48">
+													<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+
+											<!-- 戦闘結果（例: [S]）。WinRank が空なら非表示 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="8,0,0,0"
+														   Visibility="{Binding WinRank, Converter={StaticResource NullToCollapsedConverter}}">
+													<Run Text="[" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+													<Run Text="{Binding WinRank, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+													<Run Text="]" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+
+											<!-- BOSS 表示（例: [BOSS]）。空なら非表示 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="4,0,0,0"
+														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
+													<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+										</StackPanel>
 									</Border>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
@@ -260,25 +288,29 @@
 											Padding="2,1">
 										<StackPanel Orientation="Horizontal">
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="175">
+													   MinWidth="102">
 												<Run Text="{Binding AreaCellKey, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   MinWidth="45">
 												<Run Text=":"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												<Run Text="{Binding Count, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
+											<!-- 戦闘結果 S,A,B -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding SText, Mode=OneWay}"
-													   Margin="8,0,0,0"
+													   Margin="0,2,0,0"
 													   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AText, Mode=OneWay}"
-													   Margin="8,0,0,0"
+													   Margin="0,2,0,0"
 													   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding BText, Mode=OneWay}"
-													   Margin="8,0,0,0"
+													   Margin="0,2,0,0"
 													   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
 										</StackPanel>
 									</Border>
