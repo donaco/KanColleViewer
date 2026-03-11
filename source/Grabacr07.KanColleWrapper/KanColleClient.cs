@@ -589,11 +589,13 @@ namespace Grabacr07.KanColleWrapper
 				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle");
 
 			// battle/ld_airbattle/midnight/combined_battle など を記録
-			if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle") || url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle"))
+			if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
+				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle"))
 			{
 				this.lastBattleApiType = "ld_airbattle";
 			}
-			else if (url.Contains("/kcsapi/api_req_sortie/battle") || url.Contains("/kcsapi/api_req_combined_battle/battle"))
+			else if (url.Contains("/kcsapi/api_req_sortie/battle")
+				|| url.Contains("/kcsapi/api_req_combined_battle/battle"))
 			{
 				this.lastBattleApiType = "battle";
 			}
@@ -707,7 +709,10 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		private bool TryHandleBattleResult(string url, string normalized)
 		{
-			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult") || url.Contains("/kcsapi/api_req_combined_battle/battleresult"))) return false;
+			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult")
+				|| url.Contains("/kcsapi/api_req_combined_battle/battleresult")
+				|| url.Contains("/kcsapi/api_req_battle_midnight/battleresult")))
+				return false;
 
 			Models.Raw.kcsapi_battleresult brLocal = null;
 			Models.Raw.kcsapi_combined_battle_battleresult cbrLocal = null;
