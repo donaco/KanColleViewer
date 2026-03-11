@@ -161,6 +161,20 @@ namespace Counter
 		#endregion
 
 		/// <summary>
+		/// すべてのカウンターをリセットします。
+		/// </summary>
+		public void ResetAllCounters()
+		{
+			if (this.Counters != null)
+			{
+				foreach (var counter in this.Counters)
+				{
+					counter.Reset();
+				}
+			}
+		}
+
+		/// <summary>
 		/// ポップアップウィンドウを開きます。
 		/// 既に開いている場合はアクティブにします。
 		/// </summary>

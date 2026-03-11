@@ -153,36 +153,47 @@
 							  Padding="8"
 							  IsEnabled="{Binding IsCounterEnabled}"
 							  Style="{StaticResource DisableableGroupBoxStyle}">
-						<ItemsControl ItemsSource="{Binding Counters}"
-									  Grid.IsSharedSizeScope="True">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<Border Margin="2,2,2,6"
-											Padding="0,0,0,6"
-											BorderThickness="0,0,0,.99"
-											BorderBrush="{DynamicResource BorderBrushKey}">
-										<Grid>
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="Auto"
-																  SharedSizeGroup="CounterText" />
-												<ColumnDefinition Width="*" />
-												<ColumnDefinition Width="Auto" />
-											</Grid.ColumnDefinitions>
+						<StackPanel>
+							<ItemsControl ItemsSource="{Binding Counters}"
+										  Grid.IsSharedSizeScope="True">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate>
+										<Border Margin="2,2,2,6"
+												Padding="0,0,0,6"
+												BorderThickness="0,0,0,.99"
+												BorderBrush="{DynamicResource BorderBrushKey}">
+											<Grid>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="Auto"
+																	  SharedSizeGroup="CounterText" />
+													<ColumnDefinition Width="*" />
+													<ColumnDefinition Width="Auto" />
+												</Grid.ColumnDefinitions>
 
-											<TextBlock>
-												<Run Text="{Binding Text, Mode=OneWay}" />
-												<Run Text=":" />
-												<Run Text="{Binding Count}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<metro2:CallMethodButton Grid.Column="2"
-																	 Content="リセット"
-																	 MethodName="Reset" />
-										</Grid>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
+												<TextBlock>
+													<Run Text="{Binding Text, Mode=OneWay}" />
+													<Run Text=":" />
+													<Run Text="{Binding Count}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<metro2:CallMethodButton Grid.Column="2"
+																		 Content="リセット"
+																		 MethodName="Reset" />
+											</Grid>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+
+							<!-- カウンター直下に配置（右寄せ、横並び） -->
+							<StackPanel Orientation="Horizontal"
+										HorizontalAlignment="Right"
+										Margin="2,2,2,0">
+								<metro2:CallMethodButton Content="全リセット"
+													 MethodName="ResetAllCounters"
+													 Padding="2,3,2,3" />
+							</StackPanel>
+						</StackPanel>
 					</GroupBox>
 				</DockPanel>
 
