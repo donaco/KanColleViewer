@@ -188,6 +188,11 @@ namespace Counter
 		public string WinRank { get; }
 
 		/// <summary>
+		/// 航空戦の制空状態（例: AirSuperiority.AirSupremacy）
+		/// </summary>
+		public AirSuperiority AirResult { get; }
+
+		/// <summary>
 		/// 記録日時
 		/// </summary>
 		public DateTime Timestamp { get; }
@@ -230,11 +235,31 @@ namespace Counter
 			}
 		}
 
-		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank)
+		/// <summary>
+		/// 制空状態の表示テキスト（例: "[確保]"）。AirResult が None なら空文字。
+		/// </summary>
+		public string AirSuperiorityText
+		{
+			get
+			{
+				switch (this.AirResult)
+				{
+					case AirSuperiority.AirParity: return "[均衡]";
+					case AirSuperiority.AirSupremacy: return "[確保]";
+					case AirSuperiority.AirSuperior: return "[優勢]";
+					case AirSuperiority.AirInferior: return "[劣勢]";
+					case AirSuperiority.AirIncapability: return "[喪失]";
+					default: return string.Empty;
+				}
+			}
+		}
+
+		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult = AirSuperiority.None)
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
 			this.WinRank = winRank;
+			this.AirResult = airResult;
 			this.Timestamp = DateTime.Now;
 
 			if (cellNo.HasValue && cellNo.Value > 0)
@@ -581,11 +606,13 @@ namespace Counter
 							}
 						}
 
+						// AirResult を取得して AddRecord に渡す
 						this.AddRecord(
 							this._currentMapAreaId,
 							this._currentMapInfoNo,
 							cellNo,
-							sortieInfo.WinRank
+							sortieInfo.WinRank,
+							sortieInfo.AirResult
 						);
 					}
 					break;
@@ -593,7 +620,6 @@ namespace Counter
 				case nameof(SortieInfo.IsActive):
 					if (sortieInfo.IsActive)
 					{
-						// 出撃開始: 海域情報を取得し、セル情報をリセット
 						this._currentMapAreaId = sortieInfo.MapAreaId;
 						this._currentMapInfoNo = sortieInfo.MapInfoNo;
 						this._currentCellNo = null;
@@ -604,11 +630,10 @@ namespace Counter
 
 		/// <summary>
 		/// 履歴を1件追加し、海域ごとの出撃数を更新します。
-		/// UI スレッドで安全に実行します。
 		/// </summary>
-		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank)
+		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult)
 		{
-			var record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank);
+			var record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult);
 
 			System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}");
 

@@ -162,6 +162,28 @@ namespace Counter
 
 		#endregion
 
+		#region ShowAirSuperiority 変更通知プロパティ
+
+		private bool _ShowAirSuperiority = true;
+
+		/// <summary>
+		/// 戦闘履歴に制空状態を表示するかどうかを切り替えます。
+		/// </summary>
+		public bool ShowAirSuperiority
+		{
+			get { return this._ShowAirSuperiority; }
+			set
+			{
+				if (this._ShowAirSuperiority != value)
+				{
+					this._ShowAirSuperiority = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// すべてのカウンターをリセットします。
 		/// </summary>
@@ -246,6 +268,26 @@ namespace Counter
 				var s = value as string;
 				if (string.IsNullOrEmpty(s)) return Visibility.Collapsed;
 				return Visibility.Visible;
+			}
+
+			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		/// <summary>
+		/// bool が true なら Visible、false なら Collapsed を返すコンバーターです。
+		/// </summary>
+		public class BoolToVisibilityConverter : IValueConverter
+		{
+			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				if (value is bool b && b)
+				{
+					return Visibility.Visible;
+				}
+				return Visibility.Collapsed;
 			}
 
 			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

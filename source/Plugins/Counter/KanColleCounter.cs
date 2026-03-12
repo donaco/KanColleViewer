@@ -53,7 +53,7 @@ namespace Counter
 						new SortieCounter(proxy),
 					},
 					// 出撃履歴（直近10件を表示）
-					SortieHistory = new SortieHistoryCounter(proxy, 10),
+					SortieHistory = new SortieHistoryCounter(proxy, 12),
 				};
 
 				// アプリケーション終了時にポップアップウィンドウを閉じる

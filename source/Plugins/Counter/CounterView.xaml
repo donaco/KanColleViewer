@@ -14,6 +14,7 @@
 		<counter:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
 		<counter:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
 		<counter:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+		<counter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 		<!-- Expeditions.xaml ベースの GroupBox スタイル -->
@@ -131,6 +132,13 @@
 								<TextBlock Text="ボスマスのみを表示する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
+							<CheckBox IsChecked="{Binding ShowAirSuperiority, Mode=TwoWay}"
+								  IsEnabled="{Binding IsSortieHistoryEnabled}"
+								  Foreground="{DynamicResource ForegroundBrushKey}"
+								  Margin="0,2">
+								<TextBlock Text="制空状態を表示する"
+									   Style="{DynamicResource DefaultTextStyleKey}" />
+							</CheckBox>
 
 							<!-- 区切り線（ポップアップ内では非表示） -->
 							<Border Height=".99"
@@ -246,6 +254,22 @@
 													<Run Text="[" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 													<Run Text="{Binding WinRank, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 													<Run Text="]" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+
+											<!-- 制空状態（例: [確保]）。ShowAirSuperiority が false または AirSuperiorityText が空なら非表示 -->
+											<TextBlock Margin="6,0,0,0"
+										   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
+												<TextBlock.Style>
+													<Style TargetType="{x:Type TextBlock}">
+														<Setter Property="Foreground" Value="{DynamicResource ForegroundBrushKey}" />
+														<Style.Triggers>
+															<DataTrigger Binding="{Binding AirSuperiorityText}" Value="">
+																<Setter Property="Visibility" Value="Collapsed" />
+															</DataTrigger>
+														</Style.Triggers>
+													</Style>
+												</TextBlock.Style>
+									<Run Text="{Binding AirSuperiorityText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
 											<!-- BOSS 表示（例: [BOSS]）。空なら非表示 -->
