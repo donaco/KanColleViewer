@@ -336,6 +336,15 @@
 													   Text="{Binding BText, Mode=OneWay}"
 													   Margin="0,2,0,0"
 													   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
+											<!-- 制空結果 確保,優勢 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Text="{Binding AirSupremacyText, Mode=OneWay}"
+													   Margin="6,2,0,0"
+													   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Text="{Binding AirSuperiorText, Mode=OneWay}"
+													   Margin="0,2,0,0"
+													   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
 										</StackPanel>
 									</Border>
 								</DataTemplate>

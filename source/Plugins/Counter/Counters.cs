@@ -380,6 +380,50 @@ namespace Counter
 
 		#endregion
 
+		#region AirSupremacyCount 変更通知プロパティ
+
+		private int _AirSupremacyCount;
+
+		/// <summary>
+		/// 制空確保の回数
+		/// </summary>
+		public int AirSupremacyCount
+		{
+			get { return this._AirSupremacyCount; }
+			set
+			{
+				if (this._AirSupremacyCount != value)
+				{
+					this._AirSupremacyCount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region AirSuperiorCount 変更通知プロパティ
+
+		private int _AirSuperiorCount;
+
+		/// <summary>
+		/// 航空優勢の回数
+		/// </summary>
+		public int AirSuperiorCount
+		{
+			get { return this._AirSuperiorCount; }
+			set
+			{
+				if (this._AirSuperiorCount != value)
+				{
+					this._AirSuperiorCount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// S勝利の表示テキスト（0の場合は空文字）
 		/// </summary>
@@ -395,6 +439,16 @@ namespace Counter
 		/// </summary>
 		public string BText => this.BCount > 0 ? $"B:{this.BCount}" : "";
 
+		/// <summary>
+		/// 制空確保の表示テキスト（0の場合は空文字）
+		/// </summary>
+		public string AirSupremacyText => this.AirSupremacyCount > 0 ? $"確:{this.AirSupremacyCount}" : "";
+
+		/// <summary>
+		/// 航空優勢の表示テキスト（0の場合は空文字）
+		/// </summary>
+		public string AirSuperiorText => this.AirSuperiorCount > 0 ? $"優:{this.AirSuperiorCount}" : "";
+
 		public SortieAreaCount(string areaCellKey)
 		{
 			this.AreaCellKey = areaCellKey;
@@ -402,10 +456,11 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// カウントを 1 増加し、ランク別の集計も更新します。
+		/// カウントを 1 増加し、ランク別・制空別の集計も更新します。
 		/// </summary>
 		/// <param name="winRank">戦闘結果ランク（"S", "A", "B" など）</param>
-		public void Increment(string winRank)
+		/// <param name="airResult">航空戦の制空状態</param>
+		public void Increment(string winRank, AirSuperiority airResult = AirSuperiority.None)
 		{
 			this.Count++;
 
@@ -422,6 +477,18 @@ namespace Counter
 				case "B":
 					this.BCount++;
 					this.RaisePropertyChanged(nameof(this.BText));
+					break;
+			}
+
+			switch (airResult)
+			{
+				case AirSuperiority.AirSupremacy:
+					this.AirSupremacyCount++;
+					this.RaisePropertyChanged(nameof(this.AirSupremacyText));
+					break;
+				case AirSuperiority.AirSuperior:
+					this.AirSuperiorCount++;
+					this.RaisePropertyChanged(nameof(this.AirSuperiorText));
 					break;
 			}
 		}
@@ -642,15 +709,13 @@ namespace Counter
 			{
 				app.Dispatcher.BeginInvoke((Action)(() =>
 				{
-					// 履歴に追加
 					this.History.Insert(0, record);
 					while (this.History.Count > this._maxHistory)
 					{
 						this.History.RemoveAt(this.History.Count - 1);
 					}
 
-					// 海域ごとの出撃数を更新
-					this.UpdateAreaCount(record.AreaCellKey, winRank);
+					this.UpdateAreaCount(record.AreaCellKey, winRank, airResult);
 				}));
 			}
 			else
@@ -660,23 +725,23 @@ namespace Counter
 				{
 					this.History.RemoveAt(this.History.Count - 1);
 				}
-				this.UpdateAreaCount(record.AreaCellKey, winRank);
+				this.UpdateAreaCount(record.AreaCellKey, winRank, airResult);
 			}
 		}
 
 		/// <summary>
-		/// 海域-セルごとの出撃数とランク別集計を更新します。
+		/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
 		/// </summary>
-		private void UpdateAreaCount(string areaCellKey, string winRank)
+		private void UpdateAreaCount(string areaCellKey, string winRank, AirSuperiority airResult)
 		{
 			if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
 			{
-				existing.Increment(winRank);
+				existing.Increment(winRank, airResult);
 			}
 			else
 			{
 				var newEntry = new SortieAreaCount(areaCellKey);
-				newEntry.Increment(winRank);
+				newEntry.Increment(winRank, airResult);
 				this._areaCountMap[areaCellKey] = newEntry;
 				this.AreaCounts.Add(newEntry);
 			}
