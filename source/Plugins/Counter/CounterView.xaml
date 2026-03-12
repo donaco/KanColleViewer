@@ -205,7 +205,7 @@
 					</GroupBox>
 				</DockPanel>
 
-				<!-- ========== 第2列: 直近10件の戦闘結果 ========== -->
+				<!-- ========== 第2列: 直近12件の戦闘結果 ========== -->
 				<GroupBox Header="戦闘履歴"
 						  Margin="5,0,5,5"
 						  Padding="8"
@@ -239,10 +239,10 @@
 														 Foreground="{DynamicResource ForegroundBrushKey}" />
 											</TextBlock>
 
-											<!-- 海域（例: 5-5-K）: "(BOSS)" を除去した表示 -->
+											<!-- 海域（例: 5-5-K）: "[ボス]" を除去した表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 														   Margin="0,0,0,0"
-													       MinWidth="48">
+													       MinWidth="56">
 													<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
 														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
@@ -272,7 +272,7 @@
 									<Run Text="{Binding AirSuperiorityText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- BOSS 表示（例: [BOSS]）。空なら非表示 -->
+											<!-- BOSS 表示（例: [ボス]）。空なら非表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 														   Margin="4,0,0,0"
 														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
@@ -317,7 +317,7 @@
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="45">
+													   MinWidth="42">
 												<Run Text=":"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												<Run Text="{Binding Count, Mode=OneWay}"

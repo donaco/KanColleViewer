@@ -178,7 +178,7 @@ namespace Counter
 		public int MapInfoNo { get; }
 
 		/// <summary>
-		/// セル名（例: "O" または "O [BOSS]"）。セルに到達しなかった場合は null
+		/// セル名（例: "O" または "O [ボス]"）。セルに到達しなかった場合は null
 		/// </summary>
 		public string CellName { get; }
 
@@ -213,7 +213,7 @@ namespace Counter
 				if (string.IsNullOrEmpty(this.CellName)) return $"{this.MapAreaId}-{this.MapInfoNo}";
 
 				// "(BOSS)" を取り除く
-				var cleanCell = this.CellName.Replace("[BOSS]", "").Trim();
+				var cleanCell = this.CellName.Replace("[ボス]", "").Trim();
 
 				return !string.IsNullOrEmpty(cleanCell)
 					? $"{this.MapAreaId}-{this.MapInfoNo}-{cleanCell}"
@@ -222,15 +222,15 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// ボス表示テキスト（ボスセルなら "[BOSS]"、そうでなければ空文字）。
+		/// ボス表示テキスト（ボスセルなら "[ボス]"、そうでなければ空文字）。
 		/// </summary>
 		public string BossText
 		{
 			get
 			{
 				return !string.IsNullOrEmpty(this.CellName) &&
-					   this.CellName.IndexOf("[BOSS]", StringComparison.OrdinalIgnoreCase) >= 0
-					? "[BOSS]"
+					   this.CellName.IndexOf("[ボス]", StringComparison.OrdinalIgnoreCase) >= 0
+					? "[ボス]"
 					: string.Empty;
 			}
 		}
@@ -594,7 +594,7 @@ namespace Counter
 							cellNo = liveCellNo;
 						}
 
-						// BossOnly フィルター: MapCellNames.json のセル名に "[BOSS]" が含まれるかで判定
+						// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれるかで判定
 						if (this.BossOnly)
 						{
 							if (!cellNo.HasValue
