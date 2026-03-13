@@ -186,6 +186,12 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleLoadEnd(object sender, FrameLoadEndEventArgs e)
 		{
+			// null チェック：e 自体が null またはそのプロパティが null の場合の防御
+			if (e == null)
+			{
+				return;
+			}
+
 			try
 			{
 				// UI スレッドに処理を委譲して、WPF オブジェクトへのアクセス例外を防ぐ
@@ -194,15 +200,17 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 					try
 					{
 						// WebBrowser が準備できていれば RequestHandler を割り当てる
-						if (this.WebBrowser != null)
+						// null チェックを厳密に（BeginInvoke 時点と実行時点の両方をチェック）
+						var browser = this.WebBrowser;
+						if (browser != null)
 						{
 							// AttachRequestHandler は CustomRequestHandler を割り当てます
 							// 既に CustomRequestHandler が設定されていなければアタッチ
 							try
 							{
-								if (!(this.WebBrowser.RequestHandler is CustomRequestHandler))
+								if (!(browser.RequestHandler is CustomRequestHandler))
 								{
-									CefBridge.AttachRequestHandler(this.WebBrowser, captured =>
+									CefBridge.AttachRequestHandler(browser, captured =>
 									{
 										try
 										{
@@ -229,12 +237,12 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			{
 			}
 
-			if (e.Frame.IsMain)
+			if (e.Frame != null && e.Frame.IsMain)
 			{
 				this.Dispatcher.Invoke(() => this.ApplySize());
 			}
 
-			if (e.Url.Contains("/kcs2/index.php"))
+			if (!string.IsNullOrEmpty(e.Url) && e.Url.Contains("/kcs2/index.php"))
 			{
 				this.Dispatcher.Invoke(() => this.ApplyStyleSheet());
 			}
