@@ -148,6 +148,6 @@ $RECYCLE.BIN/
 
 # Visual Studio local files
 .vs
-
+.github/
 # Application Insights Key
 *.InstrumentationKey.cs
