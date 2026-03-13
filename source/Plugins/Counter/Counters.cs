@@ -178,9 +178,14 @@ namespace Counter
 		public int MapInfoNo { get; }
 
 		/// <summary>
-		/// セル名（例: "O" または "O [ボス]"）。セルに到達しなかった場合は null
+		/// セル名（例: "O"）。セルに到達しなかった場合は null
 		/// </summary>
 		public string CellName { get; }
+
+		/// <summary>
+		/// セル番号（生の値）。セルに到達しなかった場合は null
+		/// </summary>
+		public int? CellNo { get; }
 
 		/// <summary>
 		/// 戦闘結果ランク（例: "S"）。
@@ -203,21 +208,15 @@ namespace Counter
 		public string AreaCellKey { get; }
 
 		/// <summary>
-		/// "(BOSS)" 部分を取り除いた海域表示（例: "7-4-K"）。
+		/// 海域表示キー（例: "7-4-K"）。CellName にはボス情報が含まれないため、そのまま使用。
 		/// </summary>
 		public string CleanAreaCellKey
 		{
 			get
 			{
-				// CellName が null の場合は "mapArea-mapInfo" を返す
 				if (string.IsNullOrEmpty(this.CellName)) return $"{this.MapAreaId}-{this.MapInfoNo}";
 
-				// "(BOSS)" を取り除く
-				var cleanCell = this.CellName.Replace("[ボス]", "").Trim();
-
-				return !string.IsNullOrEmpty(cleanCell)
-					? $"{this.MapAreaId}-{this.MapInfoNo}-{cleanCell}"
-					: $"{this.MapAreaId}-{this.MapInfoNo}";
+				return $"{this.MapAreaId}-{this.MapInfoNo}-{this.CellName}";
 			}
 		}
 
@@ -228,10 +227,12 @@ namespace Counter
 		{
 			get
 			{
-				return !string.IsNullOrEmpty(this.CellName) &&
-					   this.CellName.IndexOf("[ボス]", StringComparison.OrdinalIgnoreCase) >= 0
-					? "[ボス]"
-					: string.Empty;
+				if (this.CellNo.HasValue
+					&& MapCellNameProvider.IsBossCell(this.MapAreaId, this.MapInfoNo, this.CellNo.Value))
+				{
+					return "[ボス]";
+				}
+				return string.Empty;
 			}
 		}
 
@@ -258,6 +259,7 @@ namespace Counter
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
+			this.CellNo = cellNo;
 			this.WinRank = winRank;
 			this.AirResult = airResult;
 			this.Timestamp = DateTime.Now;
@@ -291,6 +293,21 @@ namespace Counter
 		/// 海域-セルのキー（例: "7-4-C"）
 		/// </summary>
 		public string AreaCellKey { get; }
+
+		/// <summary>
+		/// 海域ID（例: 7）。ボス判定に使用
+		/// </summary>
+		public int? MapAreaId { get; }
+
+		/// <summary>
+		/// マップ番号（例: 4）。ボス判定に使用
+		/// </summary>
+		public int? MapInfoNo { get; }
+
+		/// <summary>
+		/// セル番号（例: 3）。ボス判定に使用
+		/// </summary>
+		public int? CellNo { get; }
 
 		#region Count 変更通知プロパティ
 
@@ -449,9 +466,28 @@ namespace Counter
 		/// </summary>
 		public string AirSuperiorText => this.AirSuperiorCount > 0 ? $"優:{this.AirSuperiorCount}" : "";
 
-		public SortieAreaCount(string areaCellKey)
+		/// <summary>
+		/// ボス表示テキスト（ボスセルなら "[ボス]"、そうでなければ空文字）
+		/// </summary>
+		public string BossText
+		{
+			get
+			{
+				if (this.MapAreaId.HasValue && this.MapInfoNo.HasValue && this.CellNo.HasValue
+					&& MapCellNameProvider.IsBossCell(this.MapAreaId.Value, this.MapInfoNo.Value, this.CellNo.Value))
+				{
+					return "[ボス]";
+				}
+				return string.Empty;
+			}
+		}
+
+		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null)
 		{
 			this.AreaCellKey = areaCellKey;
+			this.MapAreaId = mapAreaId;
+			this.MapInfoNo = mapInfoNo;
+			this.CellNo = cellNo;
 			this.Count = 0;
 		}
 
@@ -715,7 +751,7 @@ namespace Counter
 						this.History.RemoveAt(this.History.Count - 1);
 					}
 
-					this.UpdateAreaCount(record.AreaCellKey, winRank, airResult);
+					this.UpdateAreaCount(record, winRank, airResult);
 				}));
 			}
 			else
@@ -725,22 +761,29 @@ namespace Counter
 				{
 					this.History.RemoveAt(this.History.Count - 1);
 				}
-				this.UpdateAreaCount(record.AreaCellKey, winRank, airResult);
+				this.UpdateAreaCount(record, winRank, airResult);
 			}
 		}
 
 		/// <summary>
 		/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
 		/// </summary>
-		private void UpdateAreaCount(string areaCellKey, string winRank, AirSuperiority airResult)
+		private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult)
 		{
+			var areaCellKey = record.AreaCellKey;
+
 			if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
 			{
 				existing.Increment(winRank, airResult);
 			}
 			else
 			{
-				var newEntry = new SortieAreaCount(areaCellKey);
+				// ボス情報を含めて新規作成
+				var newEntry = new SortieAreaCount(
+					areaCellKey,
+					record.MapAreaId,
+					record.MapInfoNo,
+					record.CellNo);
 				newEntry.Increment(winRank, airResult);
 				this._areaCountMap[areaCellKey] = newEntry;
 				this.AreaCounts.Add(newEntry);

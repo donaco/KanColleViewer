@@ -272,7 +272,7 @@
 									<Run Text="{Binding AirSuperiorityText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- BOSS 表示（例: [ボス]）。空なら非表示 -->
+											<!-- ボス表示（例: [ボス]）。空なら非表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 														   Margin="4,0,0,0"
 														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
@@ -312,9 +312,16 @@
 											Padding="2,1">
 										<StackPanel Orientation="Horizontal">
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="102">
+													   MinWidth="56">
 												<Run Text="{Binding AreaCellKey, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											<!-- ボス表示（例: [ボス]）。空なら非表示 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="4,0,0,0"
+													   MinWidth="42"
+													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   MinWidth="42">

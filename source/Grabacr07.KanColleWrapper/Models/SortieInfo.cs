@@ -171,7 +171,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 表示用テキストを取得します。
-		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）
+		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）, "1-5-G [ボス][S][確保]"（ボス戦時）
 		/// </summary>
 		public string DisplayText
 		{
@@ -187,6 +187,12 @@ namespace Grabacr07.KanColleWrapper.Models
 				{
 					var cellName = MapCellNameProvider.GetCellName(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
 					baseText += $"-{cellName} ";
+
+					// ボス判定を追加
+					if (MapCellNameProvider.IsBossCell(this.MapAreaId, this.MapInfoNo, this.CellNo.Value))
+					{
+						baseText += "[ボス]";
+					}
 				}
 
 				// ランクがある場合のみ追加
