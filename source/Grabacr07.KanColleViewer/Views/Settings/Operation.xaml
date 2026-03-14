@@ -116,7 +116,7 @@
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 
 			<Border Height="8" />
-			<CheckBox Content="航空戦マスのみ制空権の情報を表示する"
+			<CheckBox Content="航空戦マス・防空戦のみ制空権の情報を表示する"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowAirSuperiority}, Path=Value}"
 					  IsEnabled="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 			

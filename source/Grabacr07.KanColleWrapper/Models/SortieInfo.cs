@@ -282,6 +282,17 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 
 		/// <summary>
+		/// 防空戦の制空状態を設定します。(api_destruction_battle)
+		/// 例: "5-5 [優勢]"
+		/// </summary>
+		public void SetDestructionAirResult(AirSuperiority airResult)
+		{
+			this.CellNo = null;
+			this.WinRank = null;
+			this.AirResult = airResult;
+		}
+
+		/// <summary>
 		/// 母港帰還時に呼び出します (api_port/port)
 		/// </summary>
 		public void Reset()

@@ -223,7 +223,7 @@
 													 DataContext="{Binding SortieHistory}" />
 						</StackPanel>
 
-						<!-- 出撃履歴リスト -->
+						<!-- 戦闘履歴リスト -->
 						<ItemsControl ItemsSource="{Binding SortieHistory.History}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate DataType="{x:Type counter:SortieRecord}">
@@ -239,15 +239,15 @@
 														 Foreground="{DynamicResource ForegroundBrushKey}" />
 											</TextBlock>
 
-											<!-- 海域（例: 5-5-K）: "[ボス]" を除去した表示 -->
+											<!-- 海域（例: 5-5-K）-->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 														   Margin="0,0,0,0"
-													       MinWidth="56">
+													       MinWidth="64">
 													<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
 														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- 戦闘結果（例: [S]）。WinRank が空なら非表示 -->
+											<!-- 戦闘結果（例: [S]）WinRank 空なら非表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 														   Margin="8,0,0,0"
 														   Visibility="{Binding WinRank, Converter={StaticResource NullToCollapsedConverter}}">
@@ -256,8 +256,8 @@
 													<Run Text="]" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- 制空状態（例: [確保]）。ShowAirSuperiority が false または AirSuperiorityText が空なら非表示 -->
-											<TextBlock Margin="6,0,0,0"
+											<!-- 制空状態（例: [確保]）ShowAirSuperiority が false または AirSuperiorityText が空なら非表示 -->
+											<TextBlock Margin="0,0,0,0"
 										   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
 												<TextBlock.Style>
 													<Style TargetType="{x:Type TextBlock}">
@@ -272,9 +272,9 @@
 									<Run Text="{Binding AirSuperiorityText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- ボス表示（例: [ボス]）。空なら非表示 -->
+											<!-- ボス表示（例: [ボス]）空なら非表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Margin="4,0,0,0"
+														   Margin="0,0,0,0"
 														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
 													<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
@@ -312,7 +312,7 @@
 											Padding="2,1">
 										<StackPanel Orientation="Horizontal">
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="56">
+													   MinWidth="64">
 												<Run Text="{Binding AreaCellKey, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
@@ -346,11 +346,11 @@
 											<!-- 制空結果 確保,優勢 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AirSupremacyText, Mode=OneWay}"
-													   Margin="6,2,0,0"
+													   Margin="4,2,0,0"
 													   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AirSuperiorText, Mode=OneWay}"
-													   Margin="0,2,0,0"
+													   Margin="4,2,0,0"
 													   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
 										</StackPanel>
 									</Border>

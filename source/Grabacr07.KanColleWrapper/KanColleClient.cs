@@ -561,6 +561,38 @@ namespace Grabacr07.KanColleWrapper
 								this.pendingAirResult = AirSuperiority.None;
 							}
 						}
+
+						// 防空戦 (api_destruction_battle) の制空結果を解析
+						try
+						{
+							var destructionBattle = data["api_destruction_battle"];
+							if (destructionBattle != null)
+							{
+								var stage1 = destructionBattle.SelectToken("api_air_base_attack.api_stage1");
+								if (stage1 != null)
+								{
+									var dispSeiku = stage1["api_disp_seiku"];
+									if (dispSeiku != null)
+									{
+										int val;
+										if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+										{
+											var airResult = (AirSuperiority)val;
+											RunOnUi(() =>
+											{
+												try
+												{
+													// 防空戦は CellNo なしで制空結果のみ表示（例: "5-5 [優勢]"）
+													this.SortieInfo.SetDestructionAirResult(airResult);
+												}
+												catch { }
+											});
+										}
+									}
+								}
+							}
+						}
+						catch { /* 防空戦の解析失敗は無視 */ }
 					}
 				}
 			}
