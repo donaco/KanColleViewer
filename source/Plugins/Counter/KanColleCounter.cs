@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleWrapper;
+using static Counter.SortieAreaCount;
 
 namespace Counter
 {
@@ -14,8 +15,8 @@ namespace Counter
 	[Export(typeof(IRequestNotify))]
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
-	[ExportMetadata("Description", "シンプルな回数カウント機能、出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.0.1")]
+	[ExportMetadata("Description", "回数カウント機能や出撃履歴を提供します。")]
+	[ExportMetadata("Version", "2.1.0")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{

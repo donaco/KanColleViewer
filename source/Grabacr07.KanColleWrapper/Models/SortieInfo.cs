@@ -169,6 +169,29 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
+		#region IsDestruction 変更通知プロパティ
+
+		private bool _IsDestruction;
+
+		/// <summary>
+		/// 防空戦が発生したかどうかを示す値を取得します。
+		/// </summary>
+		public bool IsDestruction
+		{
+			get { return this._IsDestruction; }
+			set
+			{
+				if (this._IsDestruction != value)
+				{
+					this._IsDestruction = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// 表示用テキストを取得します。
 		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）, "1-5-G [ボス][S][確保]"（ボス戦時）
@@ -235,10 +258,10 @@ namespace Grabacr07.KanColleWrapper.Models
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
-			// CellNo は設定しない（start時は表示しない）
 			this.CellNo = null;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.IsDestruction = false;
 			this.IsActive = true;
 		}
 
@@ -248,10 +271,10 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public void EnterBattle(int cellNo)
 		{
-			// battle時にセル番号を設定（表示開始）
 			this.CellNo = cellNo;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.IsDestruction = false;
 		}
 
 		/// <summary>
@@ -279,6 +302,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = cellNo;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.IsDestruction = false;
 		}
 
 		/// <summary>
@@ -290,6 +314,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = null;
 			this.WinRank = null;
 			this.AirResult = airResult;
+			this.IsDestruction = true;
 		}
 
 		/// <summary>
@@ -302,6 +327,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = null;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.IsDestruction = false;
 			this.IsActive = false;
 		}
 	}

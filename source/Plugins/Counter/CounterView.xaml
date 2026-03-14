@@ -256,6 +256,14 @@
 													<Run Text="]" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
+
+											<!-- 防空戦表示（例: [防空]）空なら非表示 -->
+											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding DestructionText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											
 											<!-- 制空状態（例: [確保]）ShowAirSuperiority が false または AirSuperiorityText が空なら非表示 -->
 											<TextBlock Margin="0,0,0,0"
 										   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -274,9 +282,9 @@
 
 											<!-- ボス表示（例: [ボス]）空なら非表示 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Margin="0,0,0,0"
-														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
-													<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+													   Margin="0,0,0,0"
+													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 										</StackPanel>
 									</Border>
@@ -324,7 +332,7 @@
 												<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="42">
+													   MinWidth="38">
 												<Run Text=":"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												<Run Text="{Binding Count, Mode=OneWay}"
@@ -333,24 +341,24 @@
 											<!-- 戦闘結果 S,A,B -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding SText, Mode=OneWay}"
-													   Margin="0,2,0,0"
+													   Margin="4,2,4,0"
 													   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AText, Mode=OneWay}"
-													   Margin="0,2,0,0"
+													   Margin="4,2,4,0"
 													   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding BText, Mode=OneWay}"
-													   Margin="0,2,0,0"
+													   Margin="4,2,4,0"
 													   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<!-- 制空結果 確保,優勢 -->
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AirSupremacyText, Mode=OneWay}"
-													   Margin="4,2,0,0"
+													   Margin="0,2,4,0"
 													   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
 											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 													   Text="{Binding AirSuperiorText, Mode=OneWay}"
-													   Margin="4,2,0,0"
+													   Margin="0,2,4,0"
 													   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
 										</StackPanel>
 									</Border>
