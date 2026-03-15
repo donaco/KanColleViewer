@@ -18,47 +18,10 @@
 				<ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Accents/Purple.xaml" />
 
 				<ResourceDictionary Source="pack://application:,,,/MetroTrilithon.Desktop;component/Styles/Controls.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Controls.ListView.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
 			<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
-			<!-- ListViewItem のマウスオーバー時のハイライトを無効化 -->
-			<Style x:Key="ListViewItemNoHighlight"
-				   TargetType="ListViewItem">
-				<Setter Property="Template">
-					<Setter.Value>
-						<ControlTemplate TargetType="ListViewItem">
-							<Border Name="Bd"
-									Background="Transparent"
-									BorderBrush="Transparent"
-									BorderThickness="0"
-									Padding="0">
-								<GridViewRowPresenter VerticalAlignment="Center" />
-							</Border>
-							<ControlTemplate.Triggers>
-								<Trigger Property="IsMouseOver"
-										 Value="True">
-									<Setter TargetName="Bd"
-											Property="Background"
-											Value="Transparent" />
-									<Setter TargetName="Bd"
-											Property="BorderBrush"
-											Value="Transparent" />
-								</Trigger>
-								<Trigger Property="IsSelected"
-										 Value="True">
-									<Setter TargetName="Bd"
-											Property="Background"
-											Value="Transparent" />
-									<Setter TargetName="Bd"
-											Property="BorderBrush"
-											Value="Transparent" />
-								</Trigger>
-							</ControlTemplate.Triggers>
-						</ControlTemplate>
-					</Setter.Value>
-				</Setter>
-			</Style>
 		</ResourceDictionary>
 	</UserControl.Resources>
 
@@ -76,13 +39,18 @@
 				   Style="{DynamicResource HeaderTextStyleKey}"
 				   Margin="0,0,0,8" />
 
-		<!-- 読み込みボタン -->
-		<metro2:CallMethodButton Grid.Row="1"
-								 Content="マスター データを読み込む"
-								 MethodName="Load"
-								 HorizontalAlignment="Left"
-								 Padding="12,4"
-								 Margin="0,0,0,8" />
+		<!-- ボタン行 -->
+		<StackPanel Grid.Row="1"
+					Orientation="Horizontal"
+					Margin="0,0,0,8">
+			<metro2:CallMethodButton Content="マスター データを読み込む"
+									 MethodName="Load"
+									 Padding="12,4"
+									 Margin="0,0,8,0" />
+			<metro2:CallMethodButton Content="別ウィンドウで表示"
+									 MethodName="ShowPopupWindow"
+									 Padding="12,4" />
+		</StackPanel>
 
 		<!-- カテゴリ選択 -->
 		<StackPanel Grid.Row="2"
@@ -100,7 +68,7 @@
 		<!-- データ一覧 -->
 		<ListView Grid.Row="3"
 				  ItemsSource="{Binding Items}"
-				  ItemContainerStyle="{StaticResource ListViewItemNoHighlight}"
+				  ItemContainerStyle="{StaticResource GridViewItemContainerStyleKey}"
 				  Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
 				  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 				  VirtualizingPanel.IsVirtualizing="True"

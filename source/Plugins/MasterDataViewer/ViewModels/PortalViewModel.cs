@@ -90,8 +90,34 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 		#endregion
 
-		#region カテゴリ
+		#region IsTopMost 変更通知プロパティ
+
+		private bool _IsTopMost;
+
+		/// <summary>
+		/// ポップアップウィンドウを常に最前面に表示するかどうかを示す値を取得または設定します。
+		/// </summary>
+		public bool IsTopMost
+		{
+			get { return this._IsTopMost; }
+			set
+			{
+				if (this._IsTopMost != value)
+				{
+					this._IsTopMost = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		private const int DeepSeaThreshold = 1500;
+
+		/// <summary>
+		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
+		/// </summary>
+		private Views.MasterDataWindow _popupWindow;
 
 		public PortalViewModel()
 		{
@@ -113,7 +139,6 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			};
 			this.SelectedCategory = this.Categories[0];
 		}
-		#endregion
 
 		/// <summary>
 		/// マスターデータを読み込みます。CallMethodButton から呼ばれます。
@@ -123,7 +148,38 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			this.UpdateItems();
 		}
 
-		#region 読み仮名を表示
+		/// <summary>
+		/// 別ウィンドウでマスターデータを表示します。
+		/// </summary>
+		public void ShowPopupWindow()
+		{
+			try
+			{
+				if (this._popupWindow != null && this._popupWindow.IsLoaded)
+				{
+					this._popupWindow.Activate();
+					return;
+				}
+
+				this._popupWindow = new Views.MasterDataWindow
+				{
+					DataContext = this,
+				};
+
+				this._popupWindow.Closed += (s, e) =>
+				{
+					this._popupWindow = null;
+				};
+
+				this._popupWindow.Show();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[MasterDataViewer] ポップアップウィンドウの表示に失敗: {ex.Message}");
+				this._popupWindow = null;
+			}
+		}
+
 		private string FormatShipName(ShipInfo ship)
 		{
 			// 読み仮名が空、またはハイフンのみの場合は非表示
@@ -133,9 +189,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			}
 			return $"{ship.Name} ({ship.Kana})";
 		}
-		#endregion
 
-		#region brタグ消去
 		private string RemoveHtmlBreaks(string text)
 		{
 			if (string.IsNullOrEmpty(text))
@@ -144,7 +198,6 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			}
 			return Regex.Replace(text, @"<\s*br\s*/?\s*>", "", RegexOptions.IgnoreCase);
 		}
-		#endregion
 
 		private void UpdateItems()
 		{

@@ -135,6 +135,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ViewModels\PortalViewModel.cs" />
+    <Compile Include="Views\MasterDataWindow.xaml.cs">
+      <DependentUpon>MasterDataWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Portal.xaml.cs">
       <DependentUpon>Portal.xaml</DependentUpon>
     </Compile>
@@ -188,6 +191,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\MasterDataWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Portal.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
