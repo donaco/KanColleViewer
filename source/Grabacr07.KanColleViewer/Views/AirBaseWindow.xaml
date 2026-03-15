@@ -17,7 +17,7 @@
 				   FontSize="12"
 				   Background="{DynamicResource ThemeBrushKey}"
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-				   WindowStartupLocation="CenterOwner"
+				   IsRestoringWindowPlacement="True"
 				   Topmost="{Binding Settings.TopMost.Value}"
 				   d:DataContext="{d:DesignInstance viewModels:AirBaseWindowViewModel}">
 
