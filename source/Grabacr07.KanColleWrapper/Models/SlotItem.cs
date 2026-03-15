@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,14 +25,16 @@ namespace Grabacr07.KanColleWrapper.Models
 		internal SlotItem(kcsapi_slotitem rawData)
 			: base(rawData)
 		{
-			this.Info = KanColleClient.Current.Master.SlotItems[this.RawData.api_slotitem_id] ?? SlotItemInfo.Dummy;
+			var master = KanColleClient.Current.Master;
+			this.Info = master?.SlotItems[this.RawData.api_slotitem_id] ?? SlotItemInfo.Dummy;
 		}
 
 
 		public void Remodel(int level, int masterId)
 		{
 			this.RawData.api_level = level;
-			this.Info = KanColleClient.Current.Master.SlotItems[masterId] ?? SlotItemInfo.Dummy;
+			var master = KanColleClient.Current.Master;
+			this.Info = master?.SlotItems[masterId] ?? SlotItemInfo.Dummy;
 
 			this.RaisePropertyChanged(nameof(this.Info));
 			this.RaisePropertyChanged(nameof(this.Level));
