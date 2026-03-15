@@ -30,7 +30,9 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 艦種を取得します。
 		/// </summary>
-		public ShipType ShipType => this.shipType ?? (this.shipType = KanColleClient.Current.Master.ShipTypes[this.RawData.api_stype]) ?? ShipType.Dummy;
+		public ShipType ShipType => this.shipType
+			?? (this.shipType = KanColleClient.Current.Master?.ShipTypes[this.RawData.api_stype])
+			?? ShipType.Dummy;
 
 		/// <summary>
 		/// 各装備スロットの最大搭載機数を取得します。

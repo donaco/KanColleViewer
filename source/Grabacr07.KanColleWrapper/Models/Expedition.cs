@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -114,7 +114,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			else
 			{
 				this.Id = (int)rawData[1];
-				this.Mission = KanColleClient.Current.Master.Missions[this.Id];
+				this.Mission = KanColleClient.Current.Master?.Missions[this.Id];
 				this.ReturnTime = Definitions.UnixEpoch.AddMilliseconds(rawData[2]);
 				this.UpdateCore();
 			}
