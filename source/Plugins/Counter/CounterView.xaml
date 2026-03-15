@@ -116,20 +116,20 @@
 							<CheckBox IsChecked="{Binding IsCounterEnabled, Mode=TwoWay}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="0,2">
-								<TextBlock Text="カウンターを表示する"
+								<TextBlock Text="カウンターを記録する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding IsSortieHistoryEnabled, Mode=TwoWay}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="0,2">
-								<TextBlock Text="戦闘履歴、出撃数を表示する"
+								<TextBlock Text="戦闘履歴、出撃数を記録する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding SortieHistory.BossOnly, Mode=TwoWay}"
 									  IsEnabled="{Binding IsSortieHistoryEnabled}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="16,2,0,2">
-								<TextBlock Text="ボスマスのみを表示する"
+								<TextBlock Text="ボスマスのみを記録する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding ShowAirSuperiority, Mode=TwoWay}"
@@ -224,49 +224,71 @@
 						</StackPanel>
 
 						<!-- 戦闘履歴リスト -->
-						<ItemsControl ItemsSource="{Binding SortieHistory.History}">
+						<ItemsControl ItemsSource="{Binding SortieHistory.History}"
+									  Grid.IsSharedSizeScope="True">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate DataType="{x:Type counter:SortieRecord}">
 									<Border Margin="2,1"
-												Padding="2,1">
-										<StackPanel Orientation="Horizontal"
-														VerticalAlignment="Center">
+											Padding="2,1">
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="39"   SharedSizeGroup="ColTime" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="ColArea" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="ColRank" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="ColAir" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="ColBoss" />
+											</Grid.ColumnDefinitions>
+
 											<!-- 時刻 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,3,0,0"
-													   MinWidth="40">
-													<Run Text="{Binding Timestamp, StringFormat=HH:mm　, Mode=OneWay}"
-														 Foreground="{DynamicResource ForegroundBrushKey}" />
+											<TextBlock Grid.Column="0"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,6,0">
+												<Run Text="{Binding Timestamp, StringFormat=HH:mm, Mode=OneWay}"
+													 Foreground="{DynamicResource ForegroundBrushKey}" />
 											</TextBlock>
 
 											<!-- 海域（例: 5-5-K）-->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Margin="0,0,0,0"
-													       MinWidth="64">
-													<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
-														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											<TextBlock Grid.Column="1"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,4,0">
+												<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 
-											<!-- 戦闘結果（例: [S]）WinRank 空なら非表示 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Margin="8,0,0,0"
-														   Visibility="{Binding WinRank, Converter={StaticResource NullToCollapsedConverter}}">
-													<Run Text="[" Style="{DynamicResource EmphaticTextElementStyleKey}" />
-													<Run Text="{Binding WinRank, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
-													<Run Text="]" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											<!-- ボス表示（例: [ボス]）-->
+											<TextBlock Grid.Column="2"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding BossText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
-
-
-											<!-- 防空戦表示（例: [防空]）空なら非表示 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+											<!-- 防空戦は WinRank が無いので同じ列に重ねて表示 -->
+											<TextBlock Grid.Column="2"
+													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding DestructionText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+												<Run Text="{Binding DestructionText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>											
 											
-											<!-- 制空状態（例: [確保]）ShowAirSuperiority が false または AirSuperiorityText が空なら非表示 -->
-											<TextBlock Margin="0,0,0,0"
-										   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
+											<!-- 戦闘結果（例: [S]）-->
+											<TextBlock Grid.Column="3"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0">
+												<TextBlock.Visibility>
+													<MultiBinding Converter="{StaticResource NullToCollapsedConverter}">
+														<Binding Path="WinRank" />
+													</MultiBinding>
+												</TextBlock.Visibility>
+												<Run Text="{Binding WinRank, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+
+											<!-- 制空状態（例: [確保]）-->
+											<TextBlock Grid.Column="4"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
 												<TextBlock.Style>
 													<Style TargetType="{x:Type TextBlock}">
 														<Setter Property="Foreground" Value="{DynamicResource ForegroundBrushKey}" />
@@ -277,16 +299,10 @@
 														</Style.Triggers>
 													</Style>
 												</TextBlock.Style>
-									<Run Text="{Binding AirSuperiorityText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												<Run Text="{Binding AirSuperiorityText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
-
-											<!-- ボス表示（例: [ボス]）空なら非表示 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,0,0,0"
-													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-										</StackPanel>
+										</Grid>
 									</Border>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
@@ -313,54 +329,86 @@
 						</StackPanel>
 
 						<!-- 出撃数リスト -->
-						<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}">
+						<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
+									  Grid.IsSharedSizeScope="True">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
 									<Border Margin="2,1"
 											Padding="2,1">
-										<StackPanel Orientation="Horizontal">
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="64">
+										<Grid>
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="Auto" SharedSizeGroup="AcArea" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="AcBoss" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="AcCount" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="AcRank" />
+												<ColumnDefinition Width="Auto" SharedSizeGroup="AcAir" />
+											</Grid.ColumnDefinitions>
+
+											<!-- 海域（例: 6-5-E）-->
+											<TextBlock Grid.Column="0"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,4,0">
 												<Run Text="{Binding AreaCellKey, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
-											<!-- ボス表示（例: [ボス]）。空なら非表示 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="4,0,0,0"
-													   MinWidth="42"
+
+											<!-- ボス表示（例: [ボス]）-->
+											<TextBlock Grid.Column="1"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
 													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding BossText, Mode=OneWay}" Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												<Run Text="{Binding BossText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   MinWidth="38">
+											<!-- 防空戦表示（例: [防空]）ボスと同じ列に重ねる -->
+											<TextBlock Grid.Column="1"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding DestructionText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+
+											<!-- 出撃数（例: :3）-->
+											<TextBlock Grid.Column="2"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,4,0">
 												<Run Text=":"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												<Run Text="{Binding Count, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
-											<!-- 戦闘結果 S,A,B -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Text="{Binding SText, Mode=OneWay}"
-													   Margin="4,2,4,0"
-													   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Text="{Binding AText, Mode=OneWay}"
-													   Margin="4,2,4,0"
-													   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Text="{Binding BText, Mode=OneWay}"
-													   Margin="4,2,4,0"
-													   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
-											<!-- 制空結果 確保,優勢 -->
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Text="{Binding AirSupremacyText, Mode=OneWay}"
-													   Margin="0,2,4,0"
-													   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
-											<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-													   Text="{Binding AirSuperiorText, Mode=OneWay}"
-													   Margin="0,2,4,0"
-													   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
-										</StackPanel>
+
+											<!-- 戦闘結果 S,A,B（横並び）-->
+											<StackPanel Grid.Column="3"
+														Orientation="Horizontal">
+												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Text="{Binding SText, Mode=OneWay}"
+														   Margin="0,2,4,0"
+														   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
+												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Text="{Binding AText, Mode=OneWay}"
+														   Margin="0,2,4,0"
+														   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
+												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Text="{Binding BText, Mode=OneWay}"
+														   Margin="0,2,4,0"
+														   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
+											</StackPanel>
+
+											<!-- 制空結果 確保,優勢（横並び）-->
+											<StackPanel Grid.Column="4"
+														Orientation="Horizontal">
+												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Text="{Binding AirSupremacyText, Mode=OneWay}"
+														   Margin="0,2,4,0"
+														   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
+												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+														   Text="{Binding AirSuperiorText, Mode=OneWay}"
+														   Margin="0,2,4,0"
+														   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
+											</StackPanel>
+										</Grid>
 									</Border>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>

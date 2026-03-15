@@ -193,6 +193,11 @@ namespace Counter
 		public string WinRank { get; }
 
 		/// <summary>
+		/// 括弧付きの戦闘結果表示（例: "[S]"）。WinRank が空なら空文字。
+		/// </summary>
+		public string WinRankBracketed => string.IsNullOrEmpty(this.WinRank) ? string.Empty : $"[{this.WinRank}]";
+
+		/// <summary>
 		/// 航空戦の制空状態（例: AirSuperiority.AirSupremacy）
 		/// </summary>
 		public AirSuperiority AirResult { get; }
@@ -242,11 +247,11 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// 防空戦表示テキスト（防空戦なら "[防空]"、そうでなければ空文字）。
+		/// 防空戦　出撃数テキスト（防空戦なら "[防空]"、そうでなければ空文字）。
 		/// </summary>
 		public string DestructionText
 		{
-			get { return this.IsDestruction ? "[防]" : string.Empty; }
+			get { return this.IsDestruction ? "[防空]" : string.Empty; }
 		}
 
 		/// <summary>
@@ -283,23 +288,16 @@ namespace Counter
 				this.CellName = MapCellNameProvider.GetCellName(mapAreaId, mapInfoNo, cellNo.Value);
 			}
 
-			// 防空戦の場合はセルなしで海域のみ（例: "6-5"）
-			if (isDestruction)
-			{
-				this.AreaCellKey = $"{mapAreaId}-{mapInfoNo}";
-			}
-			else
-			{
-				this.AreaCellKey = !string.IsNullOrEmpty(this.CellName)
-					? $"{mapAreaId}-{mapInfoNo}-{this.CellName}"
-					: $"{mapAreaId}-{mapInfoNo}";
-			}
+			// 海域-セルのキー（例: "7-4-C"、セル無しなら "7-4"）
+			this.AreaCellKey = !string.IsNullOrEmpty(this.CellName)
+				? $"{mapAreaId}-{mapInfoNo}-{this.CellName}"
+				: $"{mapAreaId}-{mapInfoNo}";
 
 			// 表示テキスト（例: "7-4-C [S]"）
 			var text = this.AreaCellKey;
-			if (!string.IsNullOrEmpty(winRank))
+			if (!string.IsNullOrEmpty(this.WinRankBracketed))
 			{
-				text += $" [{winRank}]";
+				text += $" {this.WinRankBracketed}";
 			}
 			this.DisplayText = text;
 		}
@@ -526,9 +524,9 @@ namespace Counter
 		#endregion
 
 		/// <summary>
-		/// 防空戦表示テキスト（例: "[防空]:1"）。0の場合は空文字。
+		/// 防空戦表示テキスト（防空戦なら "[防空]"、そうでなければ空文字）。
 		/// </summary>
-		public string DestructionText => this.DestructionCount > 0 ? $"[防空]:{this.DestructionCount}" : "";
+		public string DestructionText => this.DestructionCount > 0 ? "[防空]" : string.Empty;
 
 		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null)
 		{
