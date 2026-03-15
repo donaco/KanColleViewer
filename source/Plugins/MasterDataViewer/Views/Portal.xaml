@@ -6,8 +6,8 @@
 			 xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
 			 xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.Plugins.ViewModels"
 			 mc:Ignorable="d"
-			 d:DesignHeight="300"
-			 d:DesignWidth="300"
+			 d:DesignHeight="500"
+			 d:DesignWidth="400"
 			 d:DataContext="{d:DesignInstance viewModels:PortalViewModel}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -21,13 +21,103 @@
 			</ResourceDictionary.MergedDictionaries>
 
 			<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+			<!-- ListViewItem のマウスオーバー時のハイライトを無効化 -->
+			<Style x:Key="ListViewItemNoHighlight"
+				   TargetType="ListViewItem">
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="ListViewItem">
+							<Border Name="Bd"
+									Background="Transparent"
+									BorderBrush="Transparent"
+									BorderThickness="0"
+									Padding="0">
+								<GridViewRowPresenter VerticalAlignment="Center" />
+							</Border>
+							<ControlTemplate.Triggers>
+								<Trigger Property="IsMouseOver"
+										 Value="True">
+									<Setter TargetName="Bd"
+											Property="Background"
+											Value="Transparent" />
+									<Setter TargetName="Bd"
+											Property="BorderBrush"
+											Value="Transparent" />
+								</Trigger>
+								<Trigger Property="IsSelected"
+										 Value="True">
+									<Setter TargetName="Bd"
+											Property="Background"
+											Value="Transparent" />
+									<Setter TargetName="Bd"
+											Property="BorderBrush"
+											Value="Transparent" />
+								</Trigger>
+							</ControlTemplate.Triggers>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
 		</ResourceDictionary>
 	</UserControl.Resources>
 
-	<StackPanel Margin="8,0,8,8">
-		<TextBlock Text="艦これのマスター データを閲覧します。"
-				   Style="{DynamicResource HeaderTextStyleKey}" />
+	<Grid Margin="8,0,8,8">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
 
-		<metro2:CallMethodButton />
-	</StackPanel>
+		<!-- ヘッダー -->
+		<TextBlock Grid.Row="0"
+				   Text="艦これのマスター データを閲覧します。"
+				   Style="{DynamicResource HeaderTextStyleKey}"
+				   Margin="0,0,0,8" />
+
+		<!-- 読み込みボタン -->
+		<metro2:CallMethodButton Grid.Row="1"
+								 Content="マスター データを読み込む"
+								 MethodName="Load"
+								 HorizontalAlignment="Left"
+								 Padding="12,4"
+								 Margin="0,0,0,8" />
+
+		<!-- カテゴリ選択 -->
+		<StackPanel Grid.Row="2"
+					Orientation="Horizontal"
+					Margin="0,0,0,8"
+					Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+			<TextBlock Text="カテゴリ:"
+					   VerticalAlignment="Center"
+					   Margin="0,0,8,0" />
+			<ComboBox ItemsSource="{Binding Categories}"
+					  SelectedItem="{Binding SelectedCategory}"
+					  MinWidth="140" />
+		</StackPanel>
+
+		<!-- データ一覧 -->
+		<ListView Grid.Row="3"
+				  ItemsSource="{Binding Items}"
+				  ItemContainerStyle="{StaticResource ListViewItemNoHighlight}"
+				  Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+				  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+				  VirtualizingPanel.IsVirtualizing="True"
+				  VirtualizingPanel.VirtualizationMode="Recycling">
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Header="ID"
+									Width="50"
+									DisplayMemberBinding="{Binding Id}" />
+					<GridViewColumn Header="名前"
+									Width="250"
+									DisplayMemberBinding="{Binding Name}" />
+					<GridViewColumn Header="詳細"
+									Width="450"
+									DisplayMemberBinding="{Binding Detail}" />
+				</GridView>
+			</ListView.View>
+		</ListView>
+	</Grid>
 </UserControl>

@@ -169,9 +169,11 @@
     <Compile Include="Dockyard.cs" />
     <Compile Include="EnumerableEx.cs" />
     <Compile Include="Models\AirBaseInfo.cs" />
+    <Compile Include="Models\BGMInfo.cs" />
     <Compile Include="Models\CombinedFleet.cs" />
     <Compile Include="Models\FleetSpeed.cs" />
     <Compile Include="Models\FleetState.cs" />
+    <Compile Include="Models\FurnitureInfo.cs" />
     <Compile Include="Models\MapArea.cs" />
     <Compile Include="Models\MapCell.cs" />
     <Compile Include="Models\MapCellNameProvider.cs" />
@@ -183,10 +185,14 @@
     <Compile Include="Models\ConditionRejuvenatedEventArgs.cs" />
     <Compile Include="Models\CreatedSlotItem.cs" />
     <Compile Include="Models\FleetCondition.cs" />
+    <Compile Include="Models\PayItemInfo.cs" />
     <Compile Include="Models\Raw\kcsapi_air_base.cs" />
     <Compile Include="Models\Raw\kcsapi_mapinfo.cs" />
     <Compile Include="Models\Raw\kcsapi_air_base_expanded_info.cs" />
+    <Compile Include="Models\Raw\kcsapi_mst_bgm.cs" />
+    <Compile Include="Models\Raw\kcsapi_mst_furniture.cs" />
     <Compile Include="Models\Raw\kcsapi_mst_mapcell.cs" />
+    <Compile Include="Models\Raw\kcsapi_mst_payitem.cs" />
     <Compile Include="Models\Raw\kcsapi_require_info.cs" />
     <Compile Include="Models\Raw\kcsapi_ship_deck.cs" />
     <Compile Include="Models\Raw\kcsapi_mst_maparea.cs" />

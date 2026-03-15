@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -34,6 +34,11 @@ namespace Grabacr07.KanColleWrapper
 		public MasterTable<UseItemInfo> UseItems { get; }
 
 		/// <summary>
+		/// すべての課金アイテムの定義を取得します。
+		/// </summary>
+		public MasterTable<PayItemInfo> PayItems { get; }
+
+		/// <summary>
 		/// 艦種を取得します。
 		/// </summary>
 		public MasterTable<ShipType> ShipTypes { get; }
@@ -54,6 +59,16 @@ namespace Grabacr07.KanColleWrapper
 		public MasterTable<MapInfo> MapInfos { get; }
 
 		/// <summary>
+		/// すべての家具の定義を取得します。
+		/// </summary>
+		public MasterTable<FurnitureInfo> Furnitures { get; }
+
+		/// <summary>
+		/// すべての BGM の定義を取得します。
+		/// </summary>
+		public MasterTable<BGMInfo> BGMs { get; }
+
+		/// <summary>
 		/// すべてのセルの定義を取得します。
 		/// </summary>
 		[Obsolete("マスター データから削除されました。")]
@@ -67,9 +82,12 @@ namespace Grabacr07.KanColleWrapper
 			this.SlotItemEquipTypes = new MasterTable<SlotItemEquipType>(start2.api_mst_slotitem_equiptype.Select(x => new SlotItemEquipType(x)));
 			this.SlotItems = new MasterTable<SlotItemInfo>(start2.api_mst_slotitem.Select(x => new SlotItemInfo(x, this.SlotItemEquipTypes)));
 			this.UseItems = new MasterTable<UseItemInfo>(start2.api_mst_useitem.Select(x => new UseItemInfo(x)));
+			this.PayItems = new MasterTable<PayItemInfo>(start2.api_mst_payitem.Select(x => new PayItemInfo(x)));
 			this.Missions = new MasterTable<Mission>(start2.api_mst_mission.Select(x => new Mission(x)));
 			this.MapInfos = new MasterTable<MapInfo>(start2.api_mst_mapinfo.Select(x => new MapInfo(x)));
 			this.MapAreas = new MasterTable<MapArea>(start2.api_mst_maparea.Select(x => new MapArea(x, this.MapInfos)));
+			this.Furnitures = new MasterTable<FurnitureInfo>(start2.api_mst_furniture?.Select(x => new FurnitureInfo(x)) ?? Enumerable.Empty<FurnitureInfo>());
+			this.BGMs = new MasterTable<BGMInfo>(start2.api_mst_bgm?.Select(x => new BGMInfo(x)) ?? Enumerable.Empty<BGMInfo>());
 		}
 	}
 }
