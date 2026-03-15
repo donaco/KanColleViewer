@@ -208,6 +208,11 @@ namespace Counter
 		public bool IsDestruction { get; }
 
 		/// <summary>
+		/// 陸上基地航空隊による航空支援が行われたかどうか
+		/// </summary>
+		public bool IsLdAirbattle { get; }
+
+		/// <summary>
 		/// 記録日時
 		/// </summary>
 		public DateTime Timestamp { get; }
@@ -255,6 +260,14 @@ namespace Counter
 		}
 
 		/// <summary>
+		/// 航空マス表示テキスト（航空戦マスなら "[航空]"、そうでなければ空文字）。
+		/// </summary>
+		public string LdAirbattleText
+		{
+			get { return this.IsLdAirbattle ? "[航空]" : string.Empty; }
+		}
+
+		/// <summary>
 		/// 制空状態の表示テキスト（例: "[確保]"）。AirResult が None なら空文字。
 		/// </summary>
 		public string AirSuperiorityText
@@ -273,7 +286,7 @@ namespace Counter
 			}
 		}
 
-		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false)
+		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
@@ -281,6 +294,7 @@ namespace Counter
 			this.WinRank = winRank;
 			this.AirResult = airResult;
 			this.IsDestruction = isDestruction;
+			this.IsLdAirbattle = isLdAirbattle;
 			this.Timestamp = DateTime.Now;
 
 			if (cellNo.HasValue && cellNo.Value > 0)
@@ -288,7 +302,6 @@ namespace Counter
 				this.CellName = MapCellNameProvider.GetCellName(mapAreaId, mapInfoNo, cellNo.Value);
 			}
 
-			// 海域-セルのキー（例: "7-4-C"、セル無しなら "7-4"）
 			this.AreaCellKey = !string.IsNullOrEmpty(this.CellName)
 				? $"{mapAreaId}-{mapInfoNo}-{this.CellName}"
 				: $"{mapAreaId}-{mapInfoNo}";
@@ -537,13 +550,40 @@ namespace Counter
 			this.Count = 0;
 		}
 
+		#region LdAirbattleCount 変更通知プロパティ
+
+		private int _LdAirbattleCount;
+
+		/// <summary>
+		/// 航空戦マスの回数
+		/// </summary>
+		public int LdAirbattleCount
+		{
+			get { return this._LdAirbattleCount; }
+			set
+			{
+				if (this._LdAirbattleCount != value)
+				{
+					this._LdAirbattleCount = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// 航空マス表示テキスト（航空戦マスなら "[航空]"、そうでなければ空文字）。
+		/// </summary>
+		public string LdAirbattleText => this.LdAirbattleCount > 0 ? "[航空]" : string.Empty;
+
 		/// <summary>
 		/// カウントを 1 増加し、ランク別・制空別の集計も更新します。
 		/// </summary>
 		/// <param name="winRank">戦闘結果ランク（"S", "A", "B" など）</param>
 		/// <param name="airResult">航空戦の制空状態</param>
 		/// <param name="isDestruction">防空戦かどうか</param>
-		public void Increment(string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false)
+		public void Increment(string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			this.Count++;
 
@@ -579,6 +619,12 @@ namespace Counter
 			{
 				this.DestructionCount++;
 				this.RaisePropertyChanged(nameof(this.DestructionText));
+			}
+
+			if (isLdAirbattle)
+			{
+				this.LdAirbattleCount++;
+				this.RaisePropertyChanged(nameof(this.LdAirbattleText));
 			}
 		}
 
@@ -733,6 +779,7 @@ namespace Counter
 						break;
 
 					case nameof(SortieInfo.WinRank):
+
 						// 無効の場合はスキップ
 						if (!this.IsEnabled) break;
 
@@ -741,6 +788,7 @@ namespace Counter
 							&& this._currentMapAreaId > 0
 							&& this._currentMapInfoNo > 0)
 						{
+
 							// SortieInfo から直接 CellNo を読み取り、ローカルキャッシュとマージ
 							var cellNo = this._currentCellNo;
 							var liveCellNo = this._sortieInfo.CellNo;
@@ -755,8 +803,6 @@ namespace Counter
 								if (!cellNo.HasValue
 									|| !MapCellNameProvider.IsBossCell(this._currentMapAreaId, this._currentMapInfoNo, cellNo.Value))
 								{
-									System.Diagnostics.Debug.WriteLine(
-										$"[SortieHistory] BossOnly フィルター: {this._currentMapAreaId}-{this._currentMapInfoNo} cellNo={cellNo} → ボスセルではないためスキップ");
 									break;
 								}
 							}
@@ -767,7 +813,8 @@ namespace Counter
 								this._currentMapInfoNo,
 								cellNo,
 								sortieInfo.WinRank,
-								sortieInfo.AirResult
+								sortieInfo.AirResult,
+								isLdAirbattle: sortieInfo.IsLdAirbattle
 							);
 						}
 						break;
@@ -806,23 +853,22 @@ namespace Counter
 			/// <summary>
 			/// 履歴を1件追加し、海域ごとの出撃数を更新します。
 			/// </summary>
-			private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false)
+			private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
 			{
 				try
 				{
 					SortieRecord record = null;
 					try
 					{
-						record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction);
+						record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle);
 					}
-					catch (Exception ex)
+					catch (System.Exception ex)
 					{
 						System.Diagnostics.Debug.WriteLine($"[SortieHistory] SortieRecord 作成時に例外: {ex}");
-						// レコード作成に失敗したら履歴には追加しない
 						return;
 					}
 
-					System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}");
+					System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}{(isLdAirbattle ? " [航空]" : "")}");
 
 					var app = System.Windows.Application.Current;
 					Action addAndUpdate = () =>
@@ -837,14 +883,14 @@ namespace Counter
 
 							try
 							{
-								this.UpdateAreaCount(record, winRank, airResult, isDestruction);
+								this.UpdateAreaCount(record, winRank, airResult, isDestruction, isLdAirbattle);
 							}
-							catch (Exception ex)
+							catch (System.Exception ex)
 							{
 								System.Diagnostics.Debug.WriteLine($"[SortieHistory] UpdateAreaCount で例外: {ex}");
 							}
 						}
-						catch (Exception ex)
+						catch (System.Exception ex)
 						{
 							System.Diagnostics.Debug.WriteLine($"[SortieHistory] UI 反映時に例外: {ex}");
 						}
@@ -856,20 +902,18 @@ namespace Counter
 						{
 							app.Dispatcher.BeginInvoke((Action)(() => addAndUpdate()));
 						}
-						catch (Exception ex)
+						catch (System.Exception ex)
 						{
 							System.Diagnostics.Debug.WriteLine($"[SortieHistory] Dispatcher 呼び出しで例外: {ex}");
-							// フォールバックでスレッド直実行（まれに Dispatcher が使えない環境があるため）
-							try { addAndUpdate(); } catch (Exception ex2) { System.Diagnostics.Debug.WriteLine($"[SortieHistory] フォールバック実行で例外: {ex2}"); }
+							try { addAndUpdate(); } catch { }
 						}
 					}
 					else
 					{
-						// UI が存在しない環境（テスト等）
 						addAndUpdate();
 					}
 				}
-				catch (Exception ex)
+				catch (System.Exception ex)
 				{
 					System.Diagnostics.Debug.WriteLine($"[SortieHistory] AddRecord 全体で例外: {ex}");
 				}
@@ -878,13 +922,13 @@ namespace Counter
 			/// <summary>
 			/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
 			/// </summary>
-			private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult, bool isDestruction = false)
+			private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
 			{
 				var areaCellKey = record.AreaCellKey;
 
 				if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
 				{
-					existing.Increment(winRank, airResult, isDestruction);
+					existing.Increment(winRank, airResult, isDestruction, isLdAirbattle);
 				}
 				else
 				{
@@ -893,12 +937,11 @@ namespace Counter
 						record.MapAreaId,
 						record.MapInfoNo,
 						record.CellNo);
-					newEntry.Increment(winRank, airResult, isDestruction);
+					newEntry.Increment(winRank, airResult, isDestruction, isLdAirbattle);
 					this._areaCountMap[areaCellKey] = newEntry;
 					this.AreaCounts.Add(newEntry);
 				}
 
-				// 出撃数の多い順にソート
 				var sorted = this.AreaCounts.OrderByDescending(x => x.Count).ToList();
 				for (int i = 0; i < sorted.Count; i++)
 				{

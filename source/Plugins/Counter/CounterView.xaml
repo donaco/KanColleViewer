@@ -271,6 +271,14 @@
 												<Run Text="{Binding DestructionText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
+											<!-- 航空マス表示（例: [航空]）空なら非表示 -->
+											<TextBlock Grid.Column="2"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding LdAirbattleText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
 
 											<!-- 戦闘結果（例: [S]）-->
 											<TextBlock Grid.Column="3"
@@ -364,11 +372,19 @@
 												<Run Text="{Binding DestructionText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
+											<!-- 航空マス表示（例: [航空]）空なら非表示 -->
+											<TextBlock Grid.Column="1"
+												   Style="{DynamicResource DefaultTextStyleKey}"
+												   Margin="0,0,0,0"
+												   Visibility="{Binding LdAirbattleText, Converter={StaticResource NullToCollapsedConverter}}">
+											<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
+												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
 
 											<!-- 出撃数（例: :3）-->
 											<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,0,4,0">
+													   Margin="4,0,4,0">
 												<Run Text=":"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												<Run Text="{Binding Count, Mode=OneWay}"

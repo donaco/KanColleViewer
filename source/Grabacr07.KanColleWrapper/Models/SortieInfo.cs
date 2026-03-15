@@ -192,6 +192,29 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
+		#region IsLdAirbattle 変更通知プロパティ
+
+		private bool _IsLdAirbattle;
+
+		/// <summary>
+		/// 航空戦マス（ld_airbattle）かどうかを示す値を取得します。
+		/// </summary>
+		public bool IsLdAirbattle
+		{
+			get { return this._IsLdAirbattle; }
+			set
+			{
+				if (this._IsLdAirbattle != value)
+				{
+					this._IsLdAirbattle = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
+
+		#endregion
+
 		/// <summary>
 		/// 表示用テキストを取得します。
 		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）, "1-5-G [ボス][S][確保]"（ボス戦時）
@@ -262,6 +285,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
 			this.IsDestruction = false;
+			this.IsLdAirbattle = false;
 			this.IsActive = true;
 		}
 
@@ -275,6 +299,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
 			this.IsDestruction = false;
+			this.IsLdAirbattle = false;
 		}
 
 		/// <summary>
@@ -303,6 +328,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
 			this.IsDestruction = false;
+			this.IsLdAirbattle = false;
 		}
 
 		/// <summary>
@@ -315,6 +341,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.WinRank = null;
 			this.AirResult = airResult;
 			this.IsDestruction = true;
+			this.IsLdAirbattle = false;
 		}
 
 		/// <summary>
@@ -328,6 +355,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
 			this.IsDestruction = false;
+			this.IsLdAirbattle = false;
 			this.IsActive = false;
 		}
 	}

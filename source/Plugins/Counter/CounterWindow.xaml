@@ -10,7 +10,7 @@
 				   d:DataContext="{d:DesignInstance counter:CounterViewModel}"
 				   Title="カウンター"
 				   Width="800"
-				   Height="450"
+				   Height="430"
 				   FontSize="12"
 				   Background="{DynamicResource ThemeBrushKey}"
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"

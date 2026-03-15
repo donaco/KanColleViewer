@@ -715,6 +715,9 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 
+					// 航空戦マスフラグを設定
+					this.SortieInfo.IsLdAirbattle = isLdAirbattle;
+
 					// battle 時に反映するのは shouldParseAir が true の場合のみ
 					if (shouldParseAir && parsedBattleAir)
 					{
