@@ -45,7 +45,7 @@
 					Margin="0,0,0,8">
 			<metro2:CallMethodButton Content="マスター データを読み込む"
 									 MethodName="Load"
-									 Padding="12,4"
+									 Padding="12,8"
 									 Margin="0,0,8,0" />
 			<metro2:CallMethodButton Content="別ウィンドウで表示"
 									 MethodName="ShowPopupWindow"
