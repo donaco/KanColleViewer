@@ -217,7 +217,6 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 表示用テキストを取得します。
-		/// 例: "1-5"（start時）, "1-5-G"（battle時）, "1-5-G [S][確保]"（battleresult時）, "1-5-G [ボス][S][確保]"（ボス戦時）
 		/// </summary>
 		public string DisplayText
 		{
@@ -239,6 +238,18 @@ namespace Grabacr07.KanColleWrapper.Models
 					{
 						baseText += "[ボス]";
 					}
+				}
+
+				// 防空戦の表示
+				if (this.IsDestruction)
+				{
+					baseText += "[防空]";
+				}
+
+				// 航空戦マス表示
+				if (this.IsLdAirbattle)
+				{
+					baseText += "[航空]";
 				}
 
 				// ランクがある場合のみ追加
