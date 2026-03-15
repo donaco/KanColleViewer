@@ -270,18 +270,14 @@
 													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
 												<Run Text="{Binding DestructionText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>											
-											
+											</TextBlock>
+
 											<!-- 戦闘結果（例: [S]）-->
 											<TextBlock Grid.Column="3"
 													   Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,0,0,0">
-												<TextBlock.Visibility>
-													<MultiBinding Converter="{StaticResource NullToCollapsedConverter}">
-														<Binding Path="WinRank" />
-													</MultiBinding>
-												</TextBlock.Visibility>
-												<Run Text="{Binding WinRank, Mode=OneWay}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding WinRank, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding WinRank, Mode=OneWay, StringFormat=[{0}]}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 

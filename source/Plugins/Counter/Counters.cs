@@ -808,32 +808,70 @@ namespace Counter
 			/// </summary>
 			private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false)
 			{
-				var record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction);
-
-				System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}");
-
-				var app = System.Windows.Application.Current;
-				if (app != null)
+				try
 				{
-					app.Dispatcher.BeginInvoke((Action)(() =>
+					SortieRecord record = null;
+					try
 					{
-						this.History.Insert(0, record);
-						while (this.History.Count > this._maxHistory)
-						{
-							this.History.RemoveAt(this.History.Count - 1);
-						}
-
-						this.UpdateAreaCount(record, winRank, airResult, isDestruction);
-					}));
-				}
-				else
-				{
-					this.History.Insert(0, record);
-					while (this.History.Count > this._maxHistory)
-					{
-						this.History.RemoveAt(this.History.Count - 1);
+						record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction);
 					}
-					this.UpdateAreaCount(record, winRank, airResult, isDestruction);
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[SortieHistory] SortieRecord 作成時に例外: {ex}");
+						// レコード作成に失敗したら履歴には追加しない
+						return;
+					}
+
+					System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}");
+
+					var app = System.Windows.Application.Current;
+					Action addAndUpdate = () =>
+					{
+						try
+						{
+							this.History.Insert(0, record);
+							while (this.History.Count > this._maxHistory)
+							{
+								this.History.RemoveAt(this.History.Count - 1);
+							}
+
+							try
+							{
+								this.UpdateAreaCount(record, winRank, airResult, isDestruction);
+							}
+							catch (Exception ex)
+							{
+								System.Diagnostics.Debug.WriteLine($"[SortieHistory] UpdateAreaCount で例外: {ex}");
+							}
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"[SortieHistory] UI 反映時に例外: {ex}");
+						}
+					};
+
+					if (app != null)
+					{
+						try
+						{
+							app.Dispatcher.BeginInvoke((Action)(() => addAndUpdate()));
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"[SortieHistory] Dispatcher 呼び出しで例外: {ex}");
+							// フォールバックでスレッド直実行（まれに Dispatcher が使えない環境があるため）
+							try { addAndUpdate(); } catch (Exception ex2) { System.Diagnostics.Debug.WriteLine($"[SortieHistory] フォールバック実行で例外: {ex2}"); }
+						}
+					}
+					else
+					{
+						// UI が存在しない環境（テスト等）
+						addAndUpdate();
+					}
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"[SortieHistory] AddRecord 全体で例外: {ex}");
 				}
 			}
 

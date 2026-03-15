@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +45,7 @@ namespace Grabacr07.KanColleWrapper.Models
 	    internal ModernizableStatus(int[] status, int upgraded)
             : this()
         {
-            if (status.Length == 2)
+            if (status != null && status.Length == 2)
             {
                 this.Default = status[0];
                 this.Max = status[1];
