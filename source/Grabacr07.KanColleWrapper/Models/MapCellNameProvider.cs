@@ -31,6 +31,12 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// マップID（海域-マップ番号）をキーとした、セル番号→CellInfo のマッピング
 		/// </summary>
 		private static Dictionary<string, Dictionary<int, CellInfo>> _cellInfoByMap;
+
+		/// <summary>
+		/// 海域ID → 表示用ラベル（例: 62 → "E1"）
+		/// </summary>
+		private static Dictionary<int, string> _areaLabels;
+
 		private static string _jsonFilePath;
 		private static DateTime _lastLoadTime = DateTime.MinValue;
 
@@ -43,6 +49,44 @@ namespace Grabacr07.KanColleWrapper.Models
 			_jsonFilePath = Path.Combine(executableDir, "MapCellNames.json");
 
 			_cellInfoByMap = LoadCellNames();
+		}
+
+		/// <summary>
+		/// 海域-マップ-セル の表示用テキストを生成します。
+		/// ラベルが定義されている場合: (62, 1, "C") → "E1-C"
+		/// ラベルが未定義の場合:       (7, 4, "C")  → "7-4-C"
+		/// </summary>
+		public static string FormatDisplayKey(int mapAreaId, int mapInfoNo, string cellName = null)
+		{
+			TryReloadIfModified();
+
+			// areaLabels に定義がある場合は特殊フォーマット（例: "E1-C"）
+			if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+			{
+				var prefix = $"{label}{mapInfoNo}";
+				return string.IsNullOrEmpty(cellName)
+					? prefix
+					: $"{prefix}-{cellName}";
+			}
+
+			// 通常海域（例: "7-4-C"）
+			return string.IsNullOrEmpty(cellName)
+				? $"{mapAreaId}-{mapInfoNo}"
+				: $"{mapAreaId}-{mapInfoNo}-{cellName}";
+		}
+
+		/// <summary>
+		/// 海域IDを表示用ラベルに変換します。
+		/// areaLabels に定義があればそのラベル＋mapInfoNo、なければ "mapAreaId-mapInfoNo" を返します。
+		/// </summary>
+		public static string GetAreaLabel(int mapAreaId, int mapInfoNo)
+		{
+			TryReloadIfModified();
+			if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+			{
+				return $"{label}{mapInfoNo}";
+			}
+			return $"{mapAreaId}-{mapInfoNo}";
 		}
 
 		/// <summary>
@@ -119,13 +163,14 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 
 		/// <summary>
-		/// JSON ファイルからセル名を読み込みます。
+		/// JSON ファイルからセル名と海域ラベルを読み込みます。
 		/// 文字列値 → CellInfo(name, boss: false)
 		/// オブジェクト値 → CellInfo(name, boss) として読み込みます。
 		/// </summary>
 		private static Dictionary<string, Dictionary<int, CellInfo>> LoadCellNames()
 		{
 			var result = new Dictionary<string, Dictionary<int, CellInfo>>();
+			_areaLabels = new Dictionary<int, string>();
 			_lastLoadTime = DateTime.Now;
 
 			try
@@ -138,8 +183,22 @@ namespace Grabacr07.KanColleWrapper.Models
 
 				var json = File.ReadAllText(_jsonFilePath);
 				var root = JObject.Parse(json);
-				var maps = root["maps"] as JObject;
 
+				// areaLabels の読み込み（例: "62" → "E1"）
+				var labels = root["areaLabels"] as JObject;
+				if (labels != null)
+				{
+					foreach (var p in labels.Properties())
+					{
+						if (int.TryParse(p.Name, out var id))
+						{
+							_areaLabels[id] = p.Value?.Value<string>() ?? p.Name;
+						}
+					}
+				}
+
+				// maps の読み込み
+				var maps = root["maps"] as JObject;
 				if (maps != null)
 				{
 					foreach (var mapProp in maps.Properties())
@@ -180,7 +239,6 @@ namespace Grabacr07.KanColleWrapper.Models
 						}
 					}
 				}
-
 			}
 			catch
 			{

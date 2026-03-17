@@ -218,20 +218,19 @@ namespace Counter
 		public DateTime Timestamp { get; }
 
 		/// <summary>
-		/// 海域-セルのキー文字列（例: "7-4-C"）。集計に使用します。
+		/// 海域-セルの内部キー文字列（例: "7-4-C"）。集計に使用します。
+		/// ※内部キーは数値ベースで、ラベル変換は行いません。
 		/// </summary>
 		public string AreaCellKey { get; }
 
 		/// <summary>
-		/// 海域表示キー（例: "7-4-K"）。CellName にはボス情報が含まれないため、そのまま使用。
+		/// 海域表示キー（例: "7-4-K" や "E1-1-3"）。ラベル変換済みの表示用です。
 		/// </summary>
 		public string CleanAreaCellKey
 		{
 			get
 			{
-				if (string.IsNullOrEmpty(this.CellName)) return $"{this.MapAreaId}-{this.MapInfoNo}";
-
-				return $"{this.MapAreaId}-{this.MapInfoNo}-{this.CellName}";
+				return MapCellNameProvider.FormatDisplayKey(this.MapAreaId, this.MapInfoNo, this.CellName);
 			}
 		}
 
@@ -302,12 +301,13 @@ namespace Counter
 				this.CellName = MapCellNameProvider.GetCellName(mapAreaId, mapInfoNo, cellNo.Value);
 			}
 
+			// 内部キー（集計用）は数値ベースのまま
 			this.AreaCellKey = !string.IsNullOrEmpty(this.CellName)
 				? $"{mapAreaId}-{mapInfoNo}-{this.CellName}"
 				: $"{mapAreaId}-{mapInfoNo}";
 
-			// 表示テキスト（例: "7-4-C [S]"）
-			var text = this.AreaCellKey;
+			// 表示テキストはラベル変換済み
+			var text = this.CleanAreaCellKey;
 			if (!string.IsNullOrEmpty(this.WinRankBracketed))
 			{
 				text += $" {this.WinRankBracketed}";
@@ -322,17 +322,17 @@ namespace Counter
 	public class SortieAreaCount : NotificationObject
 	{
 		/// <summary>
-		/// 海域-セルのキー（例: "7-4-C"）
+		/// 海域-セルの内部キー（例: "7-4-C"）。集計・辞書検索用です。
 		/// </summary>
 		public string AreaCellKey { get; }
 
 		/// <summary>
-		/// 海域ID（例: 7）。ボス判定に使用
+		/// 海域ID（例: 7）。ボス判定・ラベル変換に使用
 		/// </summary>
 		public int? MapAreaId { get; }
 
 		/// <summary>
-		/// マップ番号（例: 4）。ボス判定に使用
+		/// マップ番号（例: 4）。ボス判定・ラベル変換に使用
 		/// </summary>
 		public int? MapInfoNo { get; }
 
@@ -340,6 +340,26 @@ namespace Counter
 		/// セル番号（例: 3）。ボス判定に使用
 		/// </summary>
 		public int? CellNo { get; }
+
+		/// <summary>
+		/// セル名（例: "C"）。ラベル変換表示に使用
+		/// </summary>
+		public string CellName { get; }
+
+		/// <summary>
+		/// ラベル変換済みの表示用キー（例: "E1-1-3" や "7-4-C"）
+		/// </summary>
+		public string DisplayAreaCellKey
+		{
+			get
+			{
+				if (this.MapAreaId.HasValue && this.MapInfoNo.HasValue)
+				{
+					return MapCellNameProvider.FormatDisplayKey(this.MapAreaId.Value, this.MapInfoNo.Value, this.CellName);
+				}
+				return this.AreaCellKey;
+			}
+		}
 
 		#region Count 変更通知プロパティ
 
@@ -541,12 +561,13 @@ namespace Counter
 		/// </summary>
 		public string DestructionText => this.DestructionCount > 0 ? "[防空]" : string.Empty;
 
-		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null)
+		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null, string cellName = null)
 		{
 			this.AreaCellKey = areaCellKey;
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
 			this.CellNo = cellNo;
+			this.CellName = cellName;
 			this.Count = 0;
 		}
 
@@ -797,7 +818,7 @@ namespace Counter
 								cellNo = liveCellNo;
 							}
 
-							// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれるかで判定
+							// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれないかで判定
 							if (this.BossOnly)
 							{
 								if (!cellNo.HasValue
@@ -936,7 +957,8 @@ namespace Counter
 						areaCellKey,
 						record.MapAreaId,
 						record.MapInfoNo,
-						record.CellNo);
+						record.CellNo,
+						record.CellName);
 					newEntry.Increment(winRank, airResult, isDestruction, isLdAirbattle);
 					this._areaCountMap[areaCellKey] = newEntry;
 					this.AreaCounts.Add(newEntry);

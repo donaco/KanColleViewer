@@ -475,7 +475,7 @@ namespace Grabacr07.KanColleWrapper.Models
 					return "中部海域";
 				case 7:
 					return "南西海域";
-				case 61:
+				case 62:
 					return "期間限定海域";
 				default:
 					return $"海域 {areaId}";
