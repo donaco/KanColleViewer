@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleWrapper;
-using static Counter.SortieAreaCount;
 
 namespace Counter
 {
@@ -21,6 +20,7 @@ namespace Counter
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
 		private CounterViewModel viewModel;
+		private bool _dataSaved;
 
 		string ITool.Name => "Counter";
 
@@ -53,18 +53,29 @@ namespace Counter
 						new MissionCounter(proxy),
 						new SortieCounter(proxy),
 					},
-					// 出撃履歴（直近10件を表示）
+					// --- 直近12件を表示(表示数を指定) ---
 					SortieHistory = new SortieHistoryCounter(proxy, 12),
 				};
 
-				// アプリケーション終了時にポップアップウィンドウを閉じる
+				// --- 保存データを復元 ---
+				this.RestoreSavedData();
+
+				// --- 終了時の保存を2段構えで登録 ---
+				// 1. Application.Exit（通常の終了）
 				if (System.Windows.Application.Current != null)
 				{
 					System.Windows.Application.Current.Exit += (s, e) =>
 					{
+						this.SaveDataOnce();
 						this.viewModel?.ClosePopupWindow();
 					};
 				}
+
+				// 2. ProcessExit（Environment.Exit による強制終了にも対応）
+				AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+				{
+					this.SaveDataOnce();
+				};
 			}
 			catch (Exception ex)
 			{
@@ -74,6 +85,60 @@ namespace Counter
 					Counters = new ObservableCollection<CounterBase>(),
 					SortieHistory = null,
 				};
+			}
+		}
+
+		/// <summary>
+		/// 保存データを読み込み、各カウンターに復元します。
+		/// </summary>
+		private void RestoreSavedData()
+		{
+			var data = CounterDataStore.Load();
+			if (data == null) return;
+
+			// 各カウンターの値を復元（Text をキーに照合）
+			if (data.Counters != null && this.viewModel.Counters != null)
+			{
+				foreach (var counter in this.viewModel.Counters)
+				{
+					if (!string.IsNullOrEmpty(counter.Text) && data.Counters.TryGetValue(counter.Text, out var count))
+					{
+						counter.Count = count;
+						System.Diagnostics.Debug.WriteLine($"[Counter] 復元: {counter.Text} = {count}");
+					}
+				}
+			}
+
+			// 海域ごとの出撃数を復元
+			if (data.AreaCounts != null && this.viewModel.SortieHistory != null)
+			{
+				this.viewModel.SortieHistory.RestoreAreaCounts(data.AreaCounts);
+			}
+
+			// 戦闘履歴を復元
+			if (data.History != null && this.viewModel.SortieHistory != null)
+			{
+				this.viewModel.SortieHistory.RestoreHistory(data.History);
+			}
+		}
+
+		/// <summary>
+		/// 現在のカウンターデータを保存します（二重保存防止付き）。
+		/// Application.Exit と ProcessExit の両方から呼ばれる可能性があるため、
+		/// 一度だけ実行されるようにガードしています。
+		/// </summary>
+		private void SaveDataOnce()
+		{
+			if (this._dataSaved) return;
+			this._dataSaved = true;
+
+			try
+			{
+				CounterDataStore.Save(this.viewModel?.Counters, this.viewModel?.SortieHistory);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[Counter] 保存エラー: {ex.Message}");
 			}
 		}
 

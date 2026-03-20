@@ -215,7 +215,7 @@ namespace Counter
 		/// <summary>
 		/// 記録日時
 		/// </summary>
-		public DateTime Timestamp { get; }
+		public DateTime Timestamp { get; set; }
 
 		/// <summary>
 		/// 海域-セルの内部キー文字列（例: "7-4-C"）。集計に使用します。
@@ -571,6 +571,39 @@ namespace Counter
 			this.Count = 0;
 		}
 
+		/// <summary>
+		/// 保存データから SortieAreaCount を復元します。
+		/// </summary>
+		public static SortieAreaCount FromSaveData(CounterDataStore.AreaCountData data)
+		{
+			var entry = new SortieAreaCount(
+				data.AreaCellKey,
+				data.MapAreaId,
+				data.MapInfoNo,
+				data.CellNo,
+				data.CellName);
+
+			entry.Count = data.Count;
+			entry.SCount = data.SCount;
+			entry.ACount = data.ACount;
+			entry.BCount = data.BCount;
+			entry.AirSupremacyCount = data.AirSupremacyCount;
+			entry.AirSuperiorCount = data.AirSuperiorCount;
+			entry.DestructionCount = data.DestructionCount;
+			entry.LdAirbattleCount = data.LdAirbattleCount;
+
+			// 表示テキストの変更通知を発行
+			entry.RaisePropertyChanged(nameof(entry.SText));
+			entry.RaisePropertyChanged(nameof(entry.AText));
+			entry.RaisePropertyChanged(nameof(entry.BText));
+			entry.RaisePropertyChanged(nameof(entry.AirSupremacyText));
+			entry.RaisePropertyChanged(nameof(entry.AirSuperiorText));
+			entry.RaisePropertyChanged(nameof(entry.DestructionText));
+			entry.RaisePropertyChanged(nameof(entry.LdAirbattleText));
+
+			return entry;
+		}
+
 		#region LdAirbattleCount 変更通知プロパティ
 
 		private int _LdAirbattleCount;
@@ -648,394 +681,472 @@ namespace Counter
 				this.RaisePropertyChanged(nameof(this.LdAirbattleText));
 			}
 		}
+	}
+
+	/// <summary>
+	/// 直近の出撃履歴を保持・表示するカウンターです。
+	/// BossOnly が true の場合、ボスセルでの戦闘結果のみを記録します。
+	/// </summary>
+	public class SortieHistoryCounter : NotificationObject
+	{
+		private readonly int _maxHistory;
+		private readonly SortieInfo _sortieInfo;
+
+		// 出撃中の海域・セル情報を一時保持
+		private int _currentMapAreaId;
+		private int _currentMapInfoNo;
+		private int? _currentCellNo;
+
+		// 海域-セルごとの集計データ（キー検索用）
+		private readonly Dictionary<string, SortieAreaCount> _areaCountMap;
+
+		#region IsEnabled 変更通知プロパティ
+
+		private bool _IsEnabled = true;
 
 		/// <summary>
-		/// 直近の出撃履歴を保持・表示するカウンターです。
-		/// BossOnly が true の場合、ボスセルでの戦闘結果のみを記録します。
+		/// 戦闘履歴・出撃数カウントの有効/無効を切り替えます。false の場合、記録をスキップします。
 		/// </summary>
-		public class SortieHistoryCounter : NotificationObject
+		public bool IsEnabled
 		{
-			private readonly int _maxHistory;
-			private readonly SortieInfo _sortieInfo;
-
-			// 出撃中の海域・セル情報を一時保持
-			private int _currentMapAreaId;
-			private int _currentMapInfoNo;
-			private int? _currentCellNo;
-
-			// 海域-セルごとの集計データ（キー検索用）
-			private readonly Dictionary<string, SortieAreaCount> _areaCountMap;
-
-			#region IsEnabled 変更通知プロパティ
-
-			private bool _IsEnabled = true;
-
-			/// <summary>
-			/// 戦闘履歴・出撃数カウントの有効/無効を切り替えます。false の場合、記録をスキップします。
-			/// </summary>
-			public bool IsEnabled
+			get { return this._IsEnabled; }
+			set
 			{
-				get { return this._IsEnabled; }
-				set
+				if (this._IsEnabled != value)
 				{
-					if (this._IsEnabled != value)
+					this._IsEnabled = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region BossOnly 変更通知プロパティ
+
+		private bool _BossOnly;
+
+		/// <summary>
+		/// true の場合、ボスセルでの戦闘結果のみをカウント・履歴に追加します。
+		/// </summary>
+		public bool BossOnly
+		{
+			get { return this._BossOnly; }
+			set
+			{
+				if (this._BossOnly != value)
+				{
+					this._BossOnly = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region History 変更通知プロパティ
+
+		private ObservableCollection<SortieRecord> _History;
+
+		/// <summary>
+		/// 直近の出撃履歴（新しいものが先頭）
+		/// </summary>
+		public ObservableCollection<SortieRecord> History
+		{
+			get { return this._History; }
+			set
+			{
+				if (this._History != value)
+				{
+					this._History = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region AreaCounts 変更通知プロパティ
+
+		private ObservableCollection<SortieAreaCount> _AreaCounts;
+
+		/// <summary>
+		/// 海域-セルごとの出撃数一覧（出撃数の多い順）
+		/// </summary>
+		public ObservableCollection<SortieAreaCount> AreaCounts
+		{
+			get { return this._AreaCounts; }
+			set
+			{
+				if (this._AreaCounts != value)
+				{
+					this._AreaCounts = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		/// コンストラクタ
+		/// </summary>
+		/// <param name="proxy">KanColleProxy のインスタンス</param>
+		/// <param name="maxHistory">保持する履歴の最大件数</param>
+		public SortieHistoryCounter(KanColleProxy proxy, int maxHistory = 20)
+		{
+			this._maxHistory = maxHistory;
+			this.History = new ObservableCollection<SortieRecord>();
+			this.AreaCounts = new ObservableCollection<SortieAreaCount>();
+			this._areaCountMap = new Dictionary<string, SortieAreaCount>();
+
+			// SortieInfo への参照を保持し、PropertyChanged を監視
+			var sortieInfo = KanColleClient.Current?.SortieInfo;
+			if (sortieInfo != null)
+			{
+				this._sortieInfo = sortieInfo;
+				this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine("[SortieHistory] SortieInfo が null のため、履歴記録は無効です。");
+			}
+		}
+
+		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var sortieInfo = (SortieInfo)sender;
+
+			switch (e.PropertyName)
+			{
+				case nameof(SortieInfo.MapAreaId):
+				case nameof(SortieInfo.MapInfoNo):
+					// 海域情報を常に最新に保つ
+					this._currentMapAreaId = sortieInfo.MapAreaId;
+					this._currentMapInfoNo = sortieInfo.MapInfoNo;
+					break;
+
+				case nameof(SortieInfo.CellNo):
+					if (sortieInfo.CellNo.HasValue)
 					{
-						this._IsEnabled = value;
-						this.RaisePropertyChanged();
+						this._currentCellNo = sortieInfo.CellNo;
 					}
-				}
-			}
+					break;
 
-			#endregion
+				case nameof(SortieInfo.WinRank):
 
-			#region BossOnly 変更通知プロパティ
+					// 無効の場合はスキップ
+					if (!this.IsEnabled) break;
 
-			private bool _BossOnly;
-
-			/// <summary>
-			/// true の場合、ボスセルでの戦闘結果のみをカウント・履歴に追加します。
-			/// </summary>
-			public bool BossOnly
-			{
-				get { return this._BossOnly; }
-				set
-				{
-					if (this._BossOnly != value)
+					// 戦闘結果が来たタイミングで即座に履歴を追加
+					if (!string.IsNullOrEmpty(sortieInfo.WinRank)
+						&& this._currentMapAreaId > 0
+						&& this._currentMapInfoNo > 0)
 					{
-						this._BossOnly = value;
-						this.RaisePropertyChanged();
+
+						// SortieInfo から直接 CellNo を読み取り、ローカルキャッシュとマージ
+						var cellNo = this._currentCellNo;
+						var liveCellNo = this._sortieInfo.CellNo;
+						if (liveCellNo.HasValue && liveCellNo.Value > 0)
+						{
+							cellNo = liveCellNo;
+						}
+
+						// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれないかで判定
+						if (this.BossOnly)
+						{
+							if (!cellNo.HasValue
+								|| !MapCellNameProvider.IsBossCell(this._currentMapAreaId, this._currentMapInfoNo, cellNo.Value))
+							{
+								break;
+							}
+						}
+
+						// AirResult を取得して AddRecord に渡す
+						this.AddRecord(
+							this._currentMapAreaId,
+							this._currentMapInfoNo,
+							cellNo,
+							sortieInfo.WinRank,
+							sortieInfo.AirResult,
+							isLdAirbattle: sortieInfo.IsLdAirbattle
+						);
 					}
-				}
-			}
+					break;
 
-			#endregion
+				case nameof(SortieInfo.IsDestruction):
+					// 防空戦の制空結果を記録
+					if (!this.IsEnabled) break;
 
-			#region History 変更通知プロパティ
-
-			private ObservableCollection<SortieRecord> _History;
-
-			/// <summary>
-			/// 直近の出撃履歴（新しいものが先頭）
-			/// </summary>
-			public ObservableCollection<SortieRecord> History
-			{
-				get { return this._History; }
-				set
-				{
-					if (this._History != value)
+					if (sortieInfo.IsDestruction
+						&& sortieInfo.AirResult != AirSuperiority.None
+						&& this._currentMapAreaId > 0
+						&& this._currentMapInfoNo > 0)
 					{
-						this._History = value;
-						this.RaisePropertyChanged();
+						this.AddRecord(
+							this._currentMapAreaId,
+							this._currentMapInfoNo,
+							null,       // 防空戦は CellNo なし
+							null,       // 防空戦は WinRank なし
+							sortieInfo.AirResult,
+							isDestruction: true
+						);
 					}
-				}
-			}
+					break;
 
-			#endregion
-
-			#region AreaCounts 変更通知プロパティ
-
-			private ObservableCollection<SortieAreaCount> _AreaCounts;
-
-			/// <summary>
-			/// 海域-セルごとの出撃数一覧（出撃数の多い順）
-			/// </summary>
-			public ObservableCollection<SortieAreaCount> AreaCounts
-			{
-				get { return this._AreaCounts; }
-				set
-				{
-					if (this._AreaCounts != value)
+				case nameof(SortieInfo.IsActive):
+					if (sortieInfo.IsActive)
 					{
-						this._AreaCounts = value;
-						this.RaisePropertyChanged();
-					}
-				}
-			}
-
-			#endregion
-
-			/// <summary>
-			/// コンストラクタ
-			/// </summary>
-			/// <param name="proxy">KanColleProxy のインスタンス</param>
-			/// <param name="maxHistory">保持する履歴の最大件数</param>
-			public SortieHistoryCounter(KanColleProxy proxy, int maxHistory = 20)
-			{
-				this._maxHistory = maxHistory;
-				this.History = new ObservableCollection<SortieRecord>();
-				this.AreaCounts = new ObservableCollection<SortieAreaCount>();
-				this._areaCountMap = new Dictionary<string, SortieAreaCount>();
-
-				// SortieInfo への参照を保持し、PropertyChanged を監視
-				var sortieInfo = KanColleClient.Current?.SortieInfo;
-				if (sortieInfo != null)
-				{
-					this._sortieInfo = sortieInfo;
-					this._sortieInfo.PropertyChanged += this.SortieInfo_PropertyChanged;
-				}
-				else
-				{
-					System.Diagnostics.Debug.WriteLine("[SortieHistory] SortieInfo が null のため、履歴記録は無効です。");
-				}
-			}
-
-			private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
-			{
-				var sortieInfo = (SortieInfo)sender;
-
-				switch (e.PropertyName)
-				{
-					case nameof(SortieInfo.MapAreaId):
-					case nameof(SortieInfo.MapInfoNo):
-						// 海域情報を常に最新に保つ
 						this._currentMapAreaId = sortieInfo.MapAreaId;
 						this._currentMapInfoNo = sortieInfo.MapInfoNo;
-						break;
-
-					case nameof(SortieInfo.CellNo):
-						if (sortieInfo.CellNo.HasValue)
-						{
-							this._currentCellNo = sortieInfo.CellNo;
-						}
-						break;
-
-					case nameof(SortieInfo.WinRank):
-
-						// 無効の場合はスキップ
-						if (!this.IsEnabled) break;
-
-						// 戦闘結果が来たタイミングで即座に履歴を追加
-						if (!string.IsNullOrEmpty(sortieInfo.WinRank)
-							&& this._currentMapAreaId > 0
-							&& this._currentMapInfoNo > 0)
-						{
-
-							// SortieInfo から直接 CellNo を読み取り、ローカルキャッシュとマージ
-							var cellNo = this._currentCellNo;
-							var liveCellNo = this._sortieInfo.CellNo;
-							if (liveCellNo.HasValue && liveCellNo.Value > 0)
-							{
-								cellNo = liveCellNo;
-							}
-
-							// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれないかで判定
-							if (this.BossOnly)
-							{
-								if (!cellNo.HasValue
-									|| !MapCellNameProvider.IsBossCell(this._currentMapAreaId, this._currentMapInfoNo, cellNo.Value))
-								{
-									break;
-								}
-							}
-
-							// AirResult を取得して AddRecord に渡す
-							this.AddRecord(
-								this._currentMapAreaId,
-								this._currentMapInfoNo,
-								cellNo,
-								sortieInfo.WinRank,
-								sortieInfo.AirResult,
-								isLdAirbattle: sortieInfo.IsLdAirbattle
-							);
-						}
-						break;
-
-					case nameof(SortieInfo.IsDestruction):
-						// 防空戦の制空結果を記録
-						if (!this.IsEnabled) break;
-
-						if (sortieInfo.IsDestruction
-							&& sortieInfo.AirResult != AirSuperiority.None
-							&& this._currentMapAreaId > 0
-							&& this._currentMapInfoNo > 0)
-						{
-							this.AddRecord(
-								this._currentMapAreaId,
-								this._currentMapInfoNo,
-								null,       // 防空戦は CellNo なし
-								null,       // 防空戦は WinRank なし
-								sortieInfo.AirResult,
-								isDestruction: true
-							);
-						}
-						break;
-
-					case nameof(SortieInfo.IsActive):
-						if (sortieInfo.IsActive)
-						{
-							this._currentMapAreaId = sortieInfo.MapAreaId;
-							this._currentMapInfoNo = sortieInfo.MapInfoNo;
-							this._currentCellNo = null;
-						}
-						break;
-				}
+						this._currentCellNo = null;
+					}
+					break;
 			}
+		}
 
-			/// <summary>
-			/// 履歴を1件追加し、海域ごとの出撃数を更新します。
-			/// </summary>
-			private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		/// <summary>
+		/// 履歴を1件追加し、海域ごとの出撃数を更新します。
+		/// </summary>
+		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		{
+			try
 			{
+				SortieRecord record = null;
 				try
 				{
-					SortieRecord record = null;
-					try
-					{
-						record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle);
-					}
-					catch (System.Exception ex)
-					{
-						System.Diagnostics.Debug.WriteLine($"[SortieHistory] SortieRecord 作成時に例外: {ex}");
-						return;
-					}
-
-					System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}{(isLdAirbattle ? " [航空]" : "")}");
-
-					var app = System.Windows.Application.Current;
-					Action addAndUpdate = () =>
-					{
-						try
-						{
-							this.History.Insert(0, record);
-							while (this.History.Count > this._maxHistory)
-							{
-								this.History.RemoveAt(this.History.Count - 1);
-							}
-
-							try
-							{
-								this.UpdateAreaCount(record, winRank, airResult, isDestruction, isLdAirbattle);
-							}
-							catch (System.Exception ex)
-							{
-								System.Diagnostics.Debug.WriteLine($"[SortieHistory] UpdateAreaCount で例外: {ex}");
-							}
-						}
-						catch (System.Exception ex)
-						{
-							System.Diagnostics.Debug.WriteLine($"[SortieHistory] UI 反映時に例外: {ex}");
-						}
-					};
-
-					if (app != null)
-					{
-						try
-						{
-							app.Dispatcher.BeginInvoke((Action)(() => addAndUpdate()));
-						}
-						catch (System.Exception ex)
-						{
-							System.Diagnostics.Debug.WriteLine($"[SortieHistory] Dispatcher 呼び出しで例外: {ex}");
-							try { addAndUpdate(); } catch { }
-						}
-					}
-					else
-					{
-						addAndUpdate();
-					}
+					record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle);
 				}
 				catch (System.Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine($"[SortieHistory] AddRecord 全体で例外: {ex}");
-				}
-			}
-
-			/// <summary>
-			/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
-			/// </summary>
-			private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
-			{
-				var areaCellKey = record.AreaCellKey;
-
-				if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
-				{
-					existing.Increment(winRank, airResult, isDestruction, isLdAirbattle);
-				}
-				else
-				{
-					var newEntry = new SortieAreaCount(
-						areaCellKey,
-						record.MapAreaId,
-						record.MapInfoNo,
-						record.CellNo,
-						record.CellName);
-					newEntry.Increment(winRank, airResult, isDestruction, isLdAirbattle);
-					this._areaCountMap[areaCellKey] = newEntry;
-					this.AreaCounts.Add(newEntry);
+					System.Diagnostics.Debug.WriteLine($"[SortieHistory] SortieRecord 作成時に例外: {ex}");
+					return;
 				}
 
-				var sorted = this.AreaCounts.OrderByDescending(x => x.Count).ToList();
-				for (int i = 0; i < sorted.Count; i++)
+				System.Diagnostics.Debug.WriteLine($"[SortieHistory] 履歴追加: {record.DisplayText}{(isDestruction ? " [防空]" : "")}{(isLdAirbattle ? " [航空]" : "")}");
+
+				var app = System.Windows.Application.Current;
+				Action addAndUpdate = () =>
 				{
-					var currentIndex = this.AreaCounts.IndexOf(sorted[i]);
-					if (currentIndex != i)
+					try
 					{
-						this.AreaCounts.Move(currentIndex, i);
+						this.History.Insert(0, record);
+						while (this.History.Count > this._maxHistory)
+						{
+							this.History.RemoveAt(this.History.Count - 1);
+						}
+
+						try
+						{
+							this.UpdateAreaCount(record, winRank, airResult, isDestruction, isLdAirbattle);
+						}
+						catch (System.Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"[SortieHistory] UpdateAreaCount で例外: {ex}");
+						}
+					}
+					catch (System.Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[SortieHistory] UI 反映時に例外: {ex}");
+					}
+				};
+
+				if (app != null)
+				{
+					try
+					{
+						app.Dispatcher.BeginInvoke((Action)(() => addAndUpdate()));
+					}
+					catch (System.Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine($"[SortieHistory] Dispatcher 呼び出しで例外: {ex}");
+						try { addAndUpdate(); } catch { }
 					}
 				}
+				else
+				{
+					addAndUpdate();
+				}
+			}
+			catch (System.Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[SortieHistory] AddRecord 全体で例外: {ex}");
+			}
+		}
+
+		/// <summary>
+		/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
+		/// </summary>
+		private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		{
+			var areaCellKey = record.AreaCellKey;
+
+			if (this._areaCountMap.TryGetValue(areaCellKey, out var existing))
+			{
+				existing.Increment(winRank, airResult, isDestruction, isLdAirbattle);
+			}
+			else
+			{
+				var newEntry = new SortieAreaCount(
+					areaCellKey,
+					record.MapAreaId,
+					record.MapInfoNo,
+					record.CellNo,
+					record.CellName);
+				newEntry.Increment(winRank, airResult, isDestruction, isLdAirbattle);
+				this._areaCountMap[areaCellKey] = newEntry;
+				this.AreaCounts.Add(newEntry);
 			}
 
-			/// <summary>
-			/// 戦闘履歴のみをクリアします。
-			/// </summary>
-			public void ResetHistory()
+			var sorted = this.AreaCounts.OrderByDescending(x => x.Count).ToList();
+			for (int i = 0; i < sorted.Count; i++)
 			{
-				var app = System.Windows.Application.Current;
-				if (app != null)
+				var currentIndex = this.AreaCounts.IndexOf(sorted[i]);
+				if (currentIndex != i)
 				{
-					app.Dispatcher.BeginInvoke((Action)(() =>
-					{
-						this.History.Clear();
-					}));
+					this.AreaCounts.Move(currentIndex, i);
 				}
-				else
+			}
+		}
+
+		/// <summary>
+		/// 戦闘履歴のみをクリアします。
+		/// </summary>
+		public void ResetHistory()
+		{
+			var app = System.Windows.Application.Current;
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke((Action)(() =>
 				{
 					this.History.Clear();
-				}
+				}));
 			}
-
-			/// <summary>
-			/// 海域ごとの出撃数のみをクリアします。
-			/// </summary>
-			public void ResetAreaCounts()
+			else
 			{
-				var app = System.Windows.Application.Current;
-				if (app != null)
-				{
-					app.Dispatcher.BeginInvoke((Action)(() =>
-					{
-						this.AreaCounts.Clear();
-						this._areaCountMap.Clear();
-					}));
-				}
-				else
+				this.History.Clear();
+			}
+		}
+
+		/// <summary>
+		/// 海域ごとの出撃数のみをクリアします。
+		/// </summary>
+		public void ResetAreaCounts()
+		{
+			var app = System.Windows.Application.Current;
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke((Action)(() =>
 				{
 					this.AreaCounts.Clear();
 					this._areaCountMap.Clear();
-				}
+				}));
 			}
-
-			/// <summary>
-			/// 履歴と集計データをすべてクリアします。
-			/// </summary>
-			public void Reset()
+			else
 			{
-				var app = System.Windows.Application.Current;
-				if (app != null)
-				{
-					app.Dispatcher.BeginInvoke((Action)(() =>
-					{
-						this.History.Clear();
-						this.AreaCounts.Clear();
-						this._areaCountMap.Clear();
-					}));
-				}
-				else
+				this.AreaCounts.Clear();
+				this._areaCountMap.Clear();
+			}
+		}
+
+		/// <summary>
+		/// 履歴と集計データをすべてクリアします。
+		/// </summary>
+		public void Reset()
+		{
+			var app = System.Windows.Application.Current;
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke((Action)(() =>
 				{
 					this.History.Clear();
 					this.AreaCounts.Clear();
 					this._areaCountMap.Clear();
+				}));
+			}
+			else
+			{
+				this.History.Clear();
+				this.AreaCounts.Clear();
+				this._areaCountMap.Clear();
+			}
+		}
+
+		/// <summary>
+		/// 保存データから海域ごとの出撃数を復元します。
+		/// </summary>
+		public void RestoreAreaCounts(List<CounterDataStore.AreaCountData> areaCountDataList)
+		{
+			if (areaCountDataList == null) return;
+
+			var app = System.Windows.Application.Current;
+			Action restoreAction = () =>
+			{
+				this.AreaCounts.Clear();
+				this._areaCountMap.Clear();
+
+				foreach (var data in areaCountDataList)
+				{
+					var entry = SortieAreaCount.FromSaveData(data);
+					this._areaCountMap[entry.AreaCellKey] = entry;
+					this.AreaCounts.Add(entry);
 				}
+
+				System.Diagnostics.Debug.WriteLine($"[SortieHistory] 出撃数データ復元完了: {this.AreaCounts.Count} 件");
+			};
+
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke(restoreAction);
+			}
+			else
+			{
+				restoreAction();
+			}
+		}
+
+		/// <summary>
+		/// 保存データから戦闘履歴を復元します。
+		/// </summary>
+		public void RestoreHistory(List<CounterDataStore.HistoryData> historyDataList)
+		{
+			if (historyDataList == null) return;
+
+			var app = System.Windows.Application.Current;
+			Action restoreAction = () =>
+			{
+				this.History.Clear();
+
+				foreach (var data in historyDataList)
+				{
+					var record = new SortieRecord(
+						data.MapAreaId,
+						data.MapInfoNo,
+						data.CellNo,
+						data.WinRank,
+						(AirSuperiority)data.AirResult,
+						data.IsDestruction,
+						data.IsLdAirbattle);
+
+					// リフレクションの代わりに、Timestamp プロパティに直接セット
+					if (DateTime.TryParse(data.Timestamp, out var ts))
+					{
+						record.Timestamp = ts;
+					}
+
+					this.History.Add(record);
+				}
+
+				System.Diagnostics.Debug.WriteLine($"[SortieHistory] 戦闘履歴復元完了: {this.History.Count} 件");
+			};
+
+			if (app != null)
+			{
+				app.Dispatcher.BeginInvoke(restoreAction);
+			}
+			else
+			{
+				restoreAction();
 			}
 		}
 	}
