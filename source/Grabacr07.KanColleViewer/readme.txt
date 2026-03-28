@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-                                             version 4.6.5  2026/03/04
+                                             version 4.7.0  2026/04/01
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -32,7 +32,7 @@ Windows 11 Pro でのみ動作確認を行っており、64bit OS のみサポ�
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。
 
 
-Windows 8 またはそれ以前で使用する場合、.NET Framework 4.6 のインストールが必要です。
+Windows 8 またはそれ以前で使用する場合、.NET Framework 4.8 のインストールが必要です。
 Windows 10 の場合は標準でインストールされています。
 
 現在、艦これ本体のセキュア化に伴い暫定対応しています。
@@ -46,7 +46,7 @@ Windows 10 の場合は標準でインストールされています。
 
 ■使用方法
 同梱の KanColleViewer.exe を起動してください。
-各画面の解説等は http://grabacr.net/kancolleviewer を参照してください。
+各画面の解説等は https://dona-co.art/?page_id=3534 を参照してください。
 
 
 
@@ -147,7 +147,7 @@ Application Insights
 
 
 ■更新履歴
-2026/0*/0* - version 4.7.0 
+2026/04/01 - version 4.7.0 
 2026/03/04 - version 4.6.5
 2026/02/16 - version 4.6.4
 2026/01/09 - version 4.6.3
@@ -201,8 +201,8 @@ Application Insights
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Product name: 提督業も忙しい！    
- Product URL:  http://grabacr.net/kancolleviewer
- Source code:  https://github.com/Grabacr07/KanColleViewer
+ Product URL:  https://dona-co.art/?page_id=3534
+ Source code:  https://github.com/donaco/KanColleViewer
  License:      MIT License
  Author:       @Grabacr07 / donaco
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

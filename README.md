@@ -39,9 +39,9 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 Windows 10/11 Pro でのみ動作確認を行っており、64bit OS のみサポートしています。  
 Windows 7 では、遠征や建造の終了時のトースト通知が動作しません (代わりに、タスクトレイからのバルーン通知になります)。 Windows 8 以降での使用を推奨します。
   
-* [.NET Framework 4.6](http://www.microsoft.com/ja-jp/download/details.aspx?id=30653)
+* [.NET Framework 4.8](https://dotnet.microsoft.com/ja-jp/download/dotnet-framework/thank-you/net48-web-installer)
 
-Windows 8 またはそれ以前で使用する場合、.NET Framework 4.6 のインストールが必要です。
+Windows 8 またはそれ以前で使用する場合、.NET Framework 4.8 のインストールが必要です。
 Windows 10 の場合は標準でインストールされています。
   
 現在、艦これ本体のセキュア化に伴い暫定対応しています。  
