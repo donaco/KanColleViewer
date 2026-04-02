@@ -1,11 +1,13 @@
+using Grabacr07.KanColleViewer.Models;
+using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents.AirBases;
+using Grabacr07.KanColleViewer.ViewModels.Messages;
+using Livet.Commands;
 using MetroTrilithon.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using Grabacr07.KanColleViewer.Models.Settings;
-using Livet.Commands;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
@@ -104,6 +106,23 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				}
 				// SelectedAirBase の変更は監視しない（連動させない）
 			};
+		}
+
+		/// <summary>
+		/// ウィンドウ全体のスクリーンショットを撮影します。
+		/// 保存先は通常のスクリーンショットと同じフォルダーです。
+		/// </summary>
+		public void TakeScreenshot()
+		{
+			var format = ScreenshotSettings.Format.Value;
+			var path = Helper.CreateScreenshotFilePath(format);
+
+			var message = new ScreenshotMessage("Window.Screenshot")
+			{
+				Path = path,
+				Format = format,
+			};
+			this.Messenger.Raise(message);
 		}
 	}
 }

@@ -1,5 +1,7 @@
+using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
+using Grabacr07.KanColleViewer.ViewModels.Messages;
 using Grabacr07.KanColleWrapper;
 using Livet.Messaging;
 using MetroTrilithon.Mvvm;
@@ -90,6 +92,24 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			{
 				System.Diagnostics.Debug.WriteLine($"Error in FleetWindowViewModel constructor: {ex}");
 			}
+		}
+
+
+		/// <summary>
+		/// ウィンドウ全体のスクリーンショットを撮影します。
+		/// 保存先は通常のスクリーンショットと同じフォルダーです。
+		/// </summary>
+		public void TakeScreenshot()
+		{
+			var format = ScreenshotSettings.Format.Value;
+			var path = Helper.CreateScreenshotFilePath(format);
+
+			var message = new ScreenshotMessage("Window.Screenshot")
+			{
+				Path = path,
+				Format = format,
+			};
+			this.Messenger.Raise(message);
 		}
 
 
