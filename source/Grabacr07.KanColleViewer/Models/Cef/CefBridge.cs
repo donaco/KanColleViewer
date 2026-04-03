@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using System.Threading;
 using CefSharp;
 using CefSharp.Wpf;
 
@@ -51,16 +51,23 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			{
 				try
 				{
-					// ネイティブ DLL の検索パスを明示的に設定
+					// CefSharp はカレントディレクトリからもネイティブ DLL を探すため、
+					// デバッグ実行時の作業ディレクトリ不一致に対応する
+					Environment.CurrentDirectory = assemblyDirectory;
+
 					SetDllDirectory(cefDirectory);
 
-					if (initialized || CefSharp.Cef.IsInitialized == true) return;
+					if (initialized || (CefSharp.Cef.IsInitialized ?? false)) return;
+
+					// デバッガアタッチ時のタイミング問題対応
+					if (System.Diagnostics.Debugger.IsAttached)
+					{
+						Thread.Sleep(100);
+					}
 
 					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 
-					// 結合する前にパスを決定して存在確認する
 					var browserSubprocessPath = Path.Combine(cefDirectory, "CefSharp.BrowserSubprocess.exe");
-					// フォールバック: ルート出力ディレクトリにも存在するか試す
 					var fallbackPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
 
 					if (!File.Exists(browserSubprocessPath) && File.Exists(fallbackPath))
@@ -82,11 +89,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					};
 
 					cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
-
-					// 例: リモートデバッグポートを追加（開発用）
 					cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
 
-					// ログファイルの場所をわかりやすくしておく
 					try
 					{
 						var cefLogDir = Path.Combine(CefBridge.CachePath);
@@ -108,6 +112,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 					CefSharp.Cef.Initialize(cefSettings);
 
+					// デバッガ環境でも初期化完了を確認
+					int waitCount = 0;
+					while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < 50)
+					{
+						Thread.Sleep(100);
+						waitCount++;
+					}
+
 					initialized = true;
 				}
 				catch
@@ -118,6 +130,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			}
 		}
 
+		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured)
+		{
+			webBrowser.RequestHandler = new CustomRequestHandler(onCaptured);
+		}
+
 		public static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs args)
 		{
 			if (args.Name.StartsWith("CefSharp"))
@@ -126,12 +143,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				var archSpecificPath = Path.Combine(cefDirectory, assemblyName);
 
 				if (File.Exists(archSpecificPath))
-					return Assembly.LoadFile(archSpecificPath);
+					return Assembly.LoadFrom(archSpecificPath);
 
 				// フォールバック: 出力ルート直下を試す
 				var rootPath = Path.Combine(assemblyDirectory, assemblyName);
 				if (File.Exists(rootPath))
-					return Assembly.LoadFile(rootPath);
+					return Assembly.LoadFrom(rootPath);
 
 				return null;
 			}
@@ -149,19 +166,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				return false;
 			}
 
-			canvas = browser.GetFrameIdentifiers()
-				.Select(x => browser.GetFrameByIdentifier(x))
-				.Where(x => x.Parent?.Identifier == gameFrame.Identifier)
-				.FirstOrDefault(x => x.Url.Contains("/kcs2/index.php"));
-
-			return canvas != null;
-		}
-
-		// 追加: ChromiumWebBrowser に RequestHandler を割り当てるユーティリティ
-		public static void AttachRequestHandler(ChromiumWebBrowser browser, Action<CapturedHttp> onCaptured)
-		{
-			if (browser == null) throw new ArgumentNullException(nameof(browser));
-			browser.RequestHandler = new CustomRequestHandler(onCaptured);
+			canvas = gameFrame;
+			return true;
 		}
 	}
 }

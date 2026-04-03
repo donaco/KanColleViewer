@@ -23,8 +23,6 @@ namespace Grabacr07.KanColleViewer
 
 		public static Application Instance => Current as Application;
 
-		static partial void SetInstrumentationKey();
-
 		/// <summary>
 		/// <see cref="ProxyBootstrapper"/> を使用し、<see cref="KanColleProxy"/> を起動することを試みます。
 		/// 必要に応じて、ユーザーに操作を求めるダイアログを表示します。
@@ -60,16 +58,16 @@ namespace Grabacr07.KanColleViewer
 					$"ErrorReport-{now:yyyyMMdd-HHmmss}-{now.Millisecond:000}.log");
 
 				var message = $@"*** Error Report ({caller}) ***
-{ProductInfo.Product} ver.{ProductInfo.VersionString}
-{now}
+					{ProductInfo.Product} ver.{ProductInfo.VersionString}
+					{now}
 
-{new SystemEnvironment()}
+					{new SystemEnvironment()}
 
-Sender:    {(sender is Type t ? t : sender?.GetType())?.FullName}
-Exception: {exception?.GetType().FullName}
+					Sender:    {(sender is Type t ? t : sender?.GetType())?.FullName}
+					Exception: {exception?.GetType().FullName}
 
-{exception}
-";
+					{exception}
+					";
 				// ReSharper disable once AssignNullToNotNullAttribute
 				Directory.CreateDirectory(Path.GetDirectoryName(path));
 				File.AppendAllText(path, message);

@@ -130,14 +130,6 @@ CefSharp.Wpf
     ・ライセンス : The 3-Clause BSD License
     ・ライセンス全文 : Licenses/CefSharp.txt
 
-Application Insights
-(https://azure.microsoft.com/ja-jp/services/application-insights/)
-    The MIT License (MIT)
-    Copyright (c) Microsoft Corporation
-    ・用途 : クラッシュ ログ収集
-    ・ライセンス : The MIT License (MIT)
-    ・ライセンス全文 : Licenses/Application Insights.txt
-
 
 
 ■免責事項

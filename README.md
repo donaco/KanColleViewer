@@ -132,11 +132,4 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The 3-Clause BSD License
 * **ライセンス全文 :** [licenses/CefSharp.txt](licenses/CefSharp.txt)
 
-### [Application Insights](https://azure.microsoft.com/ja-jp/services/application-insights/)
-> The MIT License (MIT)
-> 
-> Copyright (c) Microsoft Corporation
-* **用途 :** クラッシュ ログ収集
-* **ライセンス :** The MIT License (MIT)
-* **ライセンス全文 :** [licenses/Application_Insights.txt](licenses/Application_Insights.txt)
 
