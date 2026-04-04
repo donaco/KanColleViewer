@@ -1,4 +1,3 @@
-using System.Windows;
 using MetroRadiance.UI.Controls;
 
 namespace Grabacr07.KanColleViewer.Plugins.Views
