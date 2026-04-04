@@ -67,7 +67,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 
+					// 結合する前にパスを決定して存在確認する
 					var browserSubprocessPath = Path.Combine(cefDirectory, "CefSharp.BrowserSubprocess.exe");
+
+					// フォールバック: ルート出力ディレクトリにも存在するか試す
 					var fallbackPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
 
 					if (!File.Exists(browserSubprocessPath) && File.Exists(fallbackPath))
@@ -89,8 +92,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					};
 
 					cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
+
+					// 例: リモートデバッグポートを追加（開発用）
 					cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
 
+					// ログファイルの場所をわかりやすくしておく
 					try
 					{
 						var cefLogDir = Path.Combine(CefBridge.CachePath);
