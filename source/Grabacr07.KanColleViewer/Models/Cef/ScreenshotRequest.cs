@@ -23,8 +23,22 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		{
 			try
 			{
+				// エラーレスポンスの確認
+				if (dataUrl.StartsWith("error:"))
+				{
+					throw new Exception($"スクリーンショット取得エラー: {dataUrl.Substring(6)}");
+				}
+
+				if (string.IsNullOrEmpty(dataUrl))
+				{
+					throw new Exception("無効な形式: dataUrl が空です");
+				}
+
 				var array = dataUrl.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-				if (array.Length != 2) throw new Exception($"無効な形式: {dataUrl}");
+				if (array.Length != 2)
+				{
+					throw new Exception($"無効な形式: カンマで区切られた2つの要素が必要です (実際: {array.Length}個)");
+				}
 
 				var base64 = array[1];
 				var bytes = Convert.FromBase64String(base64);

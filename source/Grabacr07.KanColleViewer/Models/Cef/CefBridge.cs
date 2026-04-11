@@ -162,18 +162,58 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return null;
 		}
 
+		/// <summary>
+		/// 艦これのゲーム画面が含まれる IFrame を取得します。
+		/// IBrowser.GetFrameNames() を使用してフレーム名一覧を取得し、
+		/// kcs2/index.php を含む URL のフレームを探します。
+		/// </summary>
 		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame canvas)
 		{
-			var browser = webBrowser.GetBrowser();
-			var gameFrame = browser.GetFrameByName("game_frame");
-			if (gameFrame == null)
+			try
 			{
+				var browser = webBrowser.GetBrowser();
+				if (browser == null)
+				{
+					canvas = null;
+					return false;
+				}
+
+				// フレーム名一覧からゲームフレームを探す
+				var frameNames = browser.GetFrameNames();
+				foreach (var name in frameNames)
+				{
+					var frame = browser.GetFrameByName(name);
+					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
+					{
+						System.Diagnostics.Debug.WriteLine($"[CefBridge] Found game frame: {name}, URL: {frame.Url}");
+						canvas = frame;
+						return true;
+					}
+				}
+
+				// フレーム名で見つからない場合、フレーム識別子で探す
+				var frameIds = browser.GetFrameIdentifiers();
+				foreach (var frameId in frameIds)
+				{
+					var frame = browser.GetFrameByIdentifier(frameId);
+					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
+					{
+						System.Diagnostics.Debug.WriteLine($"[CefBridge] Found game frame by ID: {frameId}, URL: {frame.Url}");
+						canvas = frame;
+						return true;
+					}
+				}
+
+				System.Diagnostics.Debug.WriteLine($"[CefBridge] Game frame not found. Frame names: [{string.Join(", ", frameNames)}]");
 				canvas = null;
 				return false;
 			}
-
-			canvas = gameFrame;
-			return true;
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[CefBridge] TryGetKanColleCanvas error: {ex.Message}");
+				canvas = null;
+				return false;
+			}
 		}
 	}
 }
