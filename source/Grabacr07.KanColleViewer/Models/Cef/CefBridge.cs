@@ -185,7 +185,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					var frame = browser.GetFrameByName(name);
 					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
 					{
-						System.Diagnostics.Debug.WriteLine($"[CefBridge] Found game frame: {name}, URL: {frame.Url}");
 						canvas = frame;
 						return true;
 					}
@@ -198,19 +197,16 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					var frame = browser.GetFrameByIdentifier(frameId);
 					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
 					{
-						System.Diagnostics.Debug.WriteLine($"[CefBridge] Found game frame by ID: {frameId}, URL: {frame.Url}");
 						canvas = frame;
 						return true;
 					}
 				}
 
-				System.Diagnostics.Debug.WriteLine($"[CefBridge] Game frame not found. Frame names: [{string.Join(", ", frameNames)}]");
 				canvas = null;
 				return false;
 			}
-			catch (Exception ex)
+			catch
 			{
-				System.Diagnostics.Debug.WriteLine($"[CefBridge] TryGetKanColleCanvas error: {ex.Message}");
 				canvas = null;
 				return false;
 			}
