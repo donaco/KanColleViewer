@@ -53,7 +53,7 @@ Windows 10 の場合は標準でインストールされています。
 ■開発環境・言語
 C# + WPF で開発しています。
 GitHub Copilot を使用しています。
-開発環境は Windows 11 Pro + Visual Studio 2022 + Adobe Creative Cloud です。
+開発環境は Windows 11 Pro + Visual Studio 2026 + Adobe Creative Cloud です。
 
 
 ■使用ライブラリ
@@ -139,6 +139,7 @@ CefSharp.Wpf
 
 
 ■更新履歴
+2026/05/0x - version 4.7.1
 2026/04/01 - version 4.7.0 
 2026/03/04 - version 4.6.5
 2026/02/16 - version 4.6.4

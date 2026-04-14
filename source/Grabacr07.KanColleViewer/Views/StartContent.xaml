@@ -255,9 +255,6 @@
 							<LineBreak />
 							<Run Text="艦これ本体は内蔵された Web ブラウザー (Chromium) 上で動作します。艦これのサーバーに対して一切の負荷をかけないように設計・開発しており、通信内容の変更やサーバーに対する情報の送信、マクロ・チートの類は一切行っていません。" />
 						</Paragraph>
-						<Paragraph Language="ja-jp">
-							<Run Text="現在、艦これ本体のセキュア化に伴い、暫定対応しています。未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。" />
-						</Paragraph>
 						<Paragraph>
 							<InlineUIContainer>
 								<CheckBox IsChecked="{Binding ClearCacheOnNextStartup}"
@@ -274,6 +271,28 @@
 						</Paragraph>
 						<Paragraph Language="ja-jp">
 							<Run Text="ツールは不定期に更新されています。適宜、更新の確認をお願いします。" />
+							<LineBreak />
+							<InlineUIContainer>
+								<StackPanel Orientation="Horizontal"
+											Margin="0,8,0,0">
+									<Button Content="アップデートチェック"
+											Command="{Binding CheckForUpdateCommand}"
+											Padding="8,4" />
+									<!-- 通常ステータス (最新版です / 確認中... / 確認に失敗しました) -->
+									<TextBlock Text="{Binding UpdateStatusText}"
+											   VerticalAlignment="Center"
+											   Margin="8,0,0,0"
+											   Visibility="{Binding IsUpdateAvailable, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter='Collapsed:Visible'}" />
+									<!-- 更新あり (クリックでリリースページへ) -->
+									<TextBlock VerticalAlignment="Center"
+											   Margin="8,0,0,0"
+											   Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+										<metro2:HyperlinkEx Uri="{Binding UpdateUri}">
+											<Run Text="{Binding UpdateStatusText, Mode=OneWay}" />
+										</metro2:HyperlinkEx>
+									</TextBlock>
+								</StackPanel>
+							</InlineUIContainer>
 							<LineBreak />
 							<LineBreak />
 							<Run Text="Project home:" />
