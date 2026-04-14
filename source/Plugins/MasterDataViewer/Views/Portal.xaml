@@ -37,7 +37,7 @@
 		<TextBlock Grid.Row="0"
 				   Text="艦これのマスター データを閲覧します。"
 				   Style="{DynamicResource HeaderTextStyleKey}"
-				   Margin="0,0,0,8" />
+				   Margin="2,0,0,8" />
 
 		<!-- ボタン行 -->
 		<StackPanel Grid.Row="1"
@@ -46,10 +46,21 @@
 			<metro2:CallMethodButton Content="マスター データを読み込む"
 									 MethodName="Load"
 									 Padding="12,8"
-									 Margin="0,0,8,0" />
+									 Margin="0,0,6,0" />
+			<metro2:CallMethodButton Content="CSV で保存"
+									 MethodName="ExportCsv"
+									 Padding="12,4"
+									 Margin="0,0,6,0"
+									 Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+			<metro2:CallMethodButton Content="XML で保存"
+									 MethodName="ExportXml"
+									 Padding="12,4"
+									 Margin="0,0,6,0"
+									 Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
 			<metro2:CallMethodButton Content="別ウィンドウで表示"
 									 MethodName="ShowPopupWindow"
-									 Padding="12,4" />
+									 Padding="12,4"
+									 Margin="0,0,6,0" />
 		</StackPanel>
 
 		<!-- カテゴリ選択 -->

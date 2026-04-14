@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Livet;
+using Microsoft.Win32;
 
 namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 {
@@ -175,6 +179,96 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				System.Diagnostics.Debug.WriteLine($"[MasterDataViewer] ポップアップウィンドウの表示に失敗: {ex.Message}");
 				this._popupWindow = null;
 			}
+		}
+
+		/// <summary>
+		/// 現在表示中のマスターデータを CSV でエクスポートします。
+		/// </summary>
+		public void ExportCsv()
+		{
+			if (this.Items == null || this.Items.Count == 0) return;
+
+			var dialog = new SaveFileDialog
+			{
+				Title = "CSV エクスポート",
+				Filter = "CSV ファイル (*.csv)|*.csv",
+				FileName = $"MasterData_{this.SelectedCategory}_{DateTime.Now:yyyyMMdd_HHmmss}.csv",
+			};
+
+			if (dialog.ShowDialog() != true) return;
+
+			try
+			{
+				using (var writer = new StreamWriter(dialog.FileName, false, Encoding.UTF8))
+				{
+					// BOM 付き UTF-8 で出力（Excel 対応）
+					writer.WriteLine("Id,Name,Detail");
+
+					foreach (var item in this.Items)
+					{
+						writer.WriteLine($"{item.Id},{EscapeCsvField(item.Name)},{EscapeCsvField(item.Detail)}");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[MasterDataViewer] CSV エクスポートに失敗: {ex.Message}");
+			}
+		}
+
+		/// <summary>
+		/// 現在表示中のマスターデータを XML でエクスポートします。
+		/// </summary>
+		public void ExportXml()
+		{
+			if (this.Items == null || this.Items.Count == 0) return;
+
+			var dialog = new SaveFileDialog
+			{
+				Title = "XML エクスポート",
+				Filter = "XML ファイル (*.xml)|*.xml",
+				FileName = $"MasterData_{this.SelectedCategory}_{DateTime.Now:yyyyMMdd_HHmmss}.xml",
+			};
+
+			if (dialog.ShowDialog() != true) return;
+
+			try
+			{
+				var document = new XDocument(
+					new XDeclaration("1.0", "utf-8", "yes"),
+					new XElement("MasterData",
+						new XAttribute("Category", this.SelectedCategory ?? ""),
+						new XAttribute("ExportedAt", DateTime.Now.ToString("o")),
+						this.Items.Select(item =>
+							new XElement("Item",
+								new XElement("Id", item.Id),
+								new XElement("Name", item.Name ?? ""),
+								new XElement("Detail", item.Detail ?? "")
+							)
+						)
+					)
+				);
+
+				document.Save(dialog.FileName);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"[MasterDataViewer] XML エクスポートに失敗: {ex.Message}");
+			}
+		}
+
+		/// <summary>
+		/// CSV フィールドをエスケープします。カンマ・改行・ダブルクォートを含む場合はダブルクォートで囲みます。
+		/// </summary>
+		private static string EscapeCsvField(string field)
+		{
+			if (string.IsNullOrEmpty(field)) return "";
+
+			if (field.IndexOfAny(new[] { ',', '"', '\n', '\r' }) >= 0)
+			{
+				return "\"" + field.Replace("\"", "\"\"") + "\"";
+			}
+			return field;
 		}
 
 		private string FormatShipName(ShipInfo ship)

@@ -4,6 +4,7 @@
 				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				   xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.Plugins.ViewModels"
 				   mc:Ignorable="d"
@@ -72,7 +73,7 @@
 		</Border>
 		<!-- #endregion -->
 
-		<!-- #region カテゴリ選択 -->
+		<!-- #region カテゴリ選択 + エクスポート -->
 		<StackPanel Grid.Row="1"
 					Orientation="Horizontal"
 					Margin="8,8,8,8"
@@ -83,6 +84,13 @@
 			<ComboBox ItemsSource="{Binding Categories}"
 					  SelectedItem="{Binding SelectedCategory}"
 					  MinWidth="180" />
+			<metro2:CallMethodButton Content="CSV で保存"
+									 MethodName="ExportCsv"
+									 Padding="12,4"
+									 Margin="8,0,6,0" />
+			<metro2:CallMethodButton Content="XML で保存"
+									 MethodName="ExportXml"
+									 Padding="12,4" />
 		</StackPanel>
 		<!-- #endregion -->
 
