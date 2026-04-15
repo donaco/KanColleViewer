@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Composition;
@@ -10,6 +11,7 @@ using Grabacr07.KanColleViewer.ViewModels.Composition;
 using Grabacr07.KanColleWrapper.Models;
 using MetroTrilithon.Mvvm;
 using Livet;
+using Livet.Commands;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
@@ -44,6 +46,72 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		public List<PluginViewModel> LoadedPlugins { get; }
 
 		public List<LoadFailedPluginViewModel> FailedPlugins { get; }
+
+		#region UpdateStatusText 変更通知プロパティ
+
+		private string _UpdateStatusText;
+
+		public string UpdateStatusText
+		{
+			get { return this._UpdateStatusText; }
+			set
+			{
+				if (this._UpdateStatusText != value)
+				{
+					this._UpdateStatusText = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region IsUpdateAvailable 変更通知プロパティ
+
+		private bool _IsUpdateAvailable;
+
+		public bool IsUpdateAvailable
+		{
+			get { return this._IsUpdateAvailable; }
+			set
+			{
+				if (this._IsUpdateAvailable != value)
+				{
+					this._IsUpdateAvailable = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region UpdateUri 変更通知プロパティ
+
+		private Uri _UpdateUri;
+
+		public Uri UpdateUri
+		{
+			get { return this._UpdateUri; }
+			set
+			{
+				if (this._UpdateUri != value)
+				{
+					this._UpdateUri = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region CheckForUpdateCommand コマンド
+
+		private ViewModelCommand _CheckForUpdateCommand;
+
+		public ViewModelCommand CheckForUpdateCommand
+			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new ViewModelCommand(this.CheckForUpdate));
+
+		#endregion
 
 		#region ViewRangeSettingsCollection 変更通知プロパティ
 
@@ -131,6 +199,38 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.WindowSettings.Initialize();
 			this.NetworkSettings.Initialize();
 			this.UserStyleSheetSettings.Initialize();
+		}
+
+
+		private async void CheckForUpdate()
+		{
+			this.IsUpdateAvailable = false;
+			this.UpdateStatusText = "確認中...";
+
+			try
+			{
+				var result = await UpdateChecker.CheckAsync();
+
+				if (result.IsUpdateAvailable)
+				{
+					this.IsUpdateAvailable = true;
+					this.UpdateStatusText = $"アップデートがあります ({result.LatestVersion})";
+
+					if (Uri.TryCreate(result.ReleaseUrl, UriKind.Absolute, out var uri))
+					{
+						this.UpdateUri = uri;
+					}
+				}
+				else
+				{
+					this.UpdateStatusText = "最新版です";
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex);
+				this.UpdateStatusText = "確認に失敗しました";
+			}
 		}
 	}
 }
