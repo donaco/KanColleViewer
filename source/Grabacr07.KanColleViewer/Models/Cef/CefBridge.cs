@@ -51,6 +51,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			{
 				try
 				{
+					EnsureVCRuntimeAvailable();  // ← 追加
+
+					Environment.CurrentDirectory = assemblyDirectory;
 					// CefSharp はカレントディレクトリからもネイティブ DLL を探すため、
 					// デバッグ実行時の作業ディレクトリ不一致に対応する
 					Environment.CurrentDirectory = assemblyDirectory;
@@ -135,6 +138,37 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				}
 			}
 		}
+
+		/// <summary>
+		/// CefSharp が必要とする Visual C++ ランタイム (vcruntime140.dll) の存在を確認します。
+		/// </summary>
+		private static void EnsureVCRuntimeAvailable()
+		{
+			// CefSharp.Core.Runtime.dll は vcruntime140.dll に依存する
+			// 不足時は FileNotFoundException になるが、メッセージが不親切なため事前チェックする
+			var runtimeNames = new[] { "vcruntime140.dll", "msvcp140.dll" };
+
+			foreach (var name in runtimeNames)
+			{
+				var handle = LoadLibrary(name);
+				if (handle == IntPtr.Zero)
+				{
+					throw new DllNotFoundException(
+						$"Microsoft Visual C++ 再頒布可能パッケージが見つかりません ({name})。\n\n" +
+						"以下の URL からインストールしてください:\n" +
+						"https://aka.ms/vs/17/release/vc_redist.x64.exe\n\n" +
+						"インストール後、アプリケーションを再起動してください。");
+				}
+				FreeLibrary(handle);
+			}
+		}
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		private static extern IntPtr LoadLibrary(string lpFileName);
+
+		[DllImport("kernel32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool FreeLibrary(IntPtr hModule);
 
 		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured)
 		{

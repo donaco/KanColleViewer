@@ -71,6 +71,13 @@ namespace Grabacr07.KanColleViewer
 			{
 				this.DispatcherUnhandledException += (sender, args) =>
 				{
+					if (args.Exception is DllNotFoundException dllEx)
+					{
+						MessageBox.Show(dllEx.Message, ProductInfo.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+						args.Handled = true;
+						this.Shutdown();
+						return;
+					}
 					ReportException("Dispatcher", sender, args.Exception);
 					args.Handled = true;  // 例外を処理済みとしてアプリ続行
 				};
