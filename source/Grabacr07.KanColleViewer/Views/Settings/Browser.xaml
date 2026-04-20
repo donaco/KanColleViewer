@@ -10,6 +10,7 @@
 			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
+			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 mc:Ignorable="d"
 			 d:DesignWidth="700"
@@ -100,6 +101,24 @@
 					   Text="CefSharp.Wpf の埋め込みブラウザで DevTools をポップアップ表示させます。"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
         </DockPanel>
+
+        <Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+
+        <!-- GPU アクセラレーション設定 -->
+        <DockPanel Margin="0,5,0,5">
+            <CheckBox DockPanel.Dock="Left"
+                      IsChecked="{Binding Source={x:Static settings:GeneralSettings.IsGpuDisabled}, Path=Value, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+            <StackPanel Margin="8,0,0,0">
+                <TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+                           Foreground="{DynamicResource ActiveForegroundBrushKey}"
+                           Text="GPU アクセラレーションを無効にする" />
+                <TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+                           FontSize="11"
+                           Text="画面表示に問題がある場合に有効にしてください。変更後はアプリの再起動が必要です。" />
+            </StackPanel>
+        </DockPanel>
+
         <Rectangle Style="{DynamicResource SeparatorStyleKey}" />
     </StackPanel>
 </UserControl>

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using CefSharp;
 using CefSharp.Wpf;
+using Grabacr07.KanColleViewer.Models.Settings;
 
 namespace Grabacr07.KanColleViewer.Models.Cef
 {
@@ -53,7 +54,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				{
 					EnsureVCRuntimeAvailable();  // ← 追加
 
-					Environment.CurrentDirectory = assemblyDirectory;
 					// CefSharp はカレントディレクトリからもネイティブ DLL を探すため、
 					// デバッグ実行時の作業ディレクトリ不一致に対応する
 					Environment.CurrentDirectory = assemblyDirectory;
@@ -95,6 +95,13 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					};
 
 					cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
+
+					// GPU アクセラレーション設定（設定値に基づいて切り替え）
+					if (GeneralSettings.IsGpuDisabled)
+					{
+						cefSettings.CefCommandLineArgs["disable-gpu"] = "1";
+						cefSettings.CefCommandLineArgs["disable-gpu-compositing"] = "1";
+					}
 
 					// 例: リモートデバッグポートを追加（開発用）
 					cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
