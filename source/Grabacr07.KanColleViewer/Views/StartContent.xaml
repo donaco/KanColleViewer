@@ -258,7 +258,7 @@
 						<Paragraph>
 							<InlineUIContainer>
 								<CheckBox IsChecked="{Binding ClearCacheOnNextStartup}"
-										  Content="次回起動時にキャッシュを削除する" />
+										  Content="次回起動時にブラウザのキャッシュを削除する" />
 							</InlineUIContainer>
 							<LineBreak />
 							<InlineUIContainer>

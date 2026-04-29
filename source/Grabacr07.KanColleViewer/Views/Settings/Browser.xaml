@@ -98,7 +98,7 @@
 			</Canvas>
             <TextBlock Margin="8,0,10,0"
 					   Style="{DynamicResource DefaultTextStyleKey}"
-					   Text="CefSharp.Wpf の埋め込みブラウザで DevTools をポップアップ表示させます。"
+					   Text="埋め込みブラウザで DevTools をポップアップ表示させます。"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
         </DockPanel>
 

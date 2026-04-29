@@ -319,7 +319,7 @@
 
 		<StackPanel Orientation="Horizontal"
 						HorizontalAlignment="Right">
-			<TextBlock Text="※CefSharp.Wpf の埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
+			<TextBlock Text="※埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="16,8" />
 			<Border Width="5" />
