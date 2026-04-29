@@ -39,6 +39,13 @@ namespace Counter
 			public List<AreaCountData> AreaCounts { get; set; } = new List<AreaCountData>();
 			public List<HistoryData> History { get; set; } = new List<HistoryData>();
 			public DateTime SavedAt { get; set; }
+
+			// 追加: 表示設定（旧JSON互換のため nullable）
+			public bool? IsCounterEnabled { get; set; }
+			public bool? IsSortieHistoryEnabled { get; set; }
+			public bool? ShowAirSuperiority { get; set; }
+			public bool? BossOnly { get; set; }
+			public bool? IsTopMost { get; set; }
 		}
 
 		/// <summary>
@@ -79,13 +86,26 @@ namespace Counter
 		/// <summary>
 		/// カウンターデータを JSON ファイルに保存します。
 		/// </summary>
-		public static void Save(IEnumerable<CounterBase> counters, SortieHistoryCounter sortieHistory)
+		public static void Save(
+			IEnumerable<CounterBase> counters,
+			SortieHistoryCounter sortieHistory,
+			bool isCounterEnabled,
+			bool isSortieHistoryEnabled,
+			bool showAirSuperiority,
+			bool isTopMost)
 		{
 			try
 			{
 				var data = new CounterSaveData
 				{
 					SavedAt = DateTime.Now,
+
+					// 追加: 表示設定保存
+					IsCounterEnabled = isCounterEnabled,
+					IsSortieHistoryEnabled = isSortieHistoryEnabled,
+					ShowAirSuperiority = showAirSuperiority,
+					BossOnly = sortieHistory?.BossOnly,
+					IsTopMost = isTopMost,
 				};
 
 				// 各カウンターの値を保存

@@ -15,7 +15,7 @@ namespace Counter
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
 	[ExportMetadata("Description", "回数カウント機能や出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.1.0")]
+	[ExportMetadata("Version", "2.1.1")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
@@ -120,6 +120,28 @@ namespace Counter
 			{
 				this.viewModel.SortieHistory.RestoreHistory(data.History);
 			}
+
+			// 設定項目の復元
+			if (data.IsCounterEnabled.HasValue)
+			{
+				this.viewModel.IsCounterEnabled = data.IsCounterEnabled.Value;
+			}
+			if (data.IsSortieHistoryEnabled.HasValue)
+			{
+				this.viewModel.IsSortieHistoryEnabled = data.IsSortieHistoryEnabled.Value;
+			}
+			if (data.ShowAirSuperiority.HasValue)
+			{
+				this.viewModel.ShowAirSuperiority = data.ShowAirSuperiority.Value;
+			}
+			if (data.IsTopMost.HasValue)
+			{
+				this.viewModel.IsTopMost = data.IsTopMost.Value;
+			}
+			if (data.BossOnly.HasValue && this.viewModel.SortieHistory != null)
+			{
+				this.viewModel.SortieHistory.BossOnly = data.BossOnly.Value;
+			}
 		}
 
 		/// <summary>
@@ -134,7 +156,13 @@ namespace Counter
 
 			try
 			{
-				CounterDataStore.Save(this.viewModel?.Counters, this.viewModel?.SortieHistory);
+				CounterDataStore.Save(
+					this.viewModel?.Counters,
+					this.viewModel?.SortieHistory,
+					this.viewModel?.IsCounterEnabled ?? true,
+					this.viewModel?.IsSortieHistoryEnabled ?? true,
+					this.viewModel?.ShowAirSuperiority ?? true,
+					this.viewModel?.IsTopMost ?? true);
 			}
 			catch (Exception ex)
 			{
