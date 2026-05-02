@@ -1219,11 +1219,6 @@ namespace Grabacr07.KanColleWrapper
 									int slotIncrease = itemId - 900;
 									deltaCapacity += slotIncrease;
 								}
-								else if (type == 13)
-								{
-									// その他は count を使用（従来のフォールバック）
-									deltaCapacity += Math.Max(0, count);
-								}
 							}
 							catch { /* swallow */ }
 						}
