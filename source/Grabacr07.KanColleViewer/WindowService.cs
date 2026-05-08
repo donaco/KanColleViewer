@@ -11,6 +11,7 @@ using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleViewer.ViewModels.Messages;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
+using Grabacr07.KanColleWrapper.Models;
 using Livet;
 using Livet.Messaging;
 using MetroRadiance.UI;
@@ -18,6 +19,7 @@ using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using CefSharp.Wpf;
 using CefSharp;
+using StatefulModel;
 
 namespace Grabacr07.KanColleViewer
 {
@@ -49,6 +51,12 @@ namespace Grabacr07.KanColleViewer
 		private InformationWindowViewModel informationWindow;
 		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
 
+		// 各艦隊の Situation 変化購読を管理する
+		private MultipleDisposable fleetStateListeners = new MultipleDisposable();
+
+		// 大破時のアクセントカラー (Red)
+		private static readonly Accent HeavilyDamagedAccent = Accent.FromColor(Colors.Red);
+
 		public WindowServiceMode Mode
 		{
 			get { return this.currentMode; }
@@ -64,19 +72,15 @@ namespace Grabacr07.KanColleViewer
 							this.MainWindow.Content = startContent;
 							this.MainWindow.StatusBar = startContent;
 							StatusService.Current.Set(Resources.StatusBar_NotStarted);
-							ThemeService.Current.ChangeAccent(Accent.Purple);
 							break;
 						case WindowServiceMode.Started:
 							this.MainWindow.Content = this.Information;
 							this.MainWindow.StatusBar = this.Information.SelectedItem;
 							StatusService.Current.Set(Resources.StatusBar_Ready);
-							ThemeService.Current.ChangeAccent(Accent.Blue);
-							break;
-						case WindowServiceMode.InSortie:
-							ThemeService.Current.ChangeAccent(Accent.Orange);
 							break;
 					}
 
+					this.UpdateAccent();
 					this.RaisePropertyChanged();
 				}
 			}
@@ -123,6 +127,75 @@ namespace Grabacr07.KanColleViewer
 
 			KanColleClient.Current.Subscribe(nameof(KanColleClient.IsStarted), this.UpdateMode).AddTo(this);
 			KanColleClient.Current.Subscribe(nameof(KanColleClient.IsInSortie), this.UpdateMode).AddTo(this);
+
+			// Homeport はログイン後に生成されるため、Homeport プロパティの変化を監視してから購読する
+			KanColleClient.Current
+				.Subscribe(nameof(KanColleClient.Homeport), this.OnHomeportChanged)
+				.AddTo(this);
+		}
+
+		/// <summary>
+		/// Homeport が生成されたとき（ログイン後）に艦隊リストの監視を開始します。
+		/// </summary>
+		private void OnHomeportChanged()
+		{
+			var homeport = KanColleClient.Current.Homeport;
+			if (homeport == null) return;
+
+			// 艦隊リストの変化を監視し、各艦隊の大破状態変化を購読し直す
+			homeport.Organization
+				.Subscribe(nameof(Organization.Fleets), this.RefreshFleetStateListeners)
+				.AddTo(this);
+
+			// 購読開始直後に一度実行して初期状態を反映する
+			this.RefreshFleetStateListeners();
+		}
+
+		/// <summary>
+		/// 艦隊リストが更新されたとき、各艦隊の Situation 変化購読を張り直します。
+		/// </summary>
+		private void RefreshFleetStateListeners()
+		{
+			this.fleetStateListeners?.Dispose();
+			this.fleetStateListeners = new MultipleDisposable();
+
+			foreach (var fleet in KanColleClient.Current.Homeport.Organization.Fleets.Values)
+			{
+				fleet.State
+					.Subscribe(nameof(FleetState.Situation), this.UpdateAccent)
+					.AddTo(this.fleetStateListeners);
+			}
+		}
+
+		/// <summary>
+		/// 現在のモードと大破状態に応じてアクセントカラーを更新します。
+		/// </summary>
+		private void UpdateAccent()
+		{
+			switch (this.currentMode)
+			{
+				case WindowServiceMode.NotStarted:
+					ThemeService.Current.ChangeAccent(Accent.Purple);
+					break;
+
+				case WindowServiceMode.Started:
+					ThemeService.Current.ChangeAccent(Accent.Blue);
+					break;
+
+				case WindowServiceMode.InSortie:
+					// 出撃中の艦隊に大破艦がいる場合は赤、それ以外はオレンジ
+					var hasHeavilyDamaged = KanColleClient.Current.Homeport.Organization.Fleets.Values
+						.Any(f => f.IsInSortie && f.State.Situation.HasFlag(FleetSituation.HeavilyDamaged));
+					ThemeService.Current.ChangeAccent(hasHeavilyDamaged ? HeavilyDamagedAccent : Accent.Orange);
+					break;
+			}
+		}
+
+		private void UpdateMode()
+		{
+			this.Mode = KanColleClient.Current.IsStarted
+				? KanColleClient.Current.IsInSortie ? WindowServiceMode.InSortie : WindowServiceMode.Started
+				: WindowServiceMode.NotStarted;
 		}
 
 		public void ClearZoomFactor()
@@ -220,19 +293,13 @@ namespace Grabacr07.KanColleViewer
 		}
 
 
-		private void UpdateMode()
-		{
-			this.Mode = KanColleClient.Current.IsStarted
-				? KanColleClient.Current.IsInSortie ? WindowServiceMode.InSortie : WindowServiceMode.Started
-				: WindowServiceMode.NotStarted;
-		}
-
 		#region disposable members
 
 		ICollection<IDisposable> IDisposableHolder.CompositeDisposable => this.compositeDisposable;
 
 		public void Dispose()
 		{
+			this.fleetStateListeners?.Dispose();
 			this.compositeDisposable.Dispose();
 		}
 
