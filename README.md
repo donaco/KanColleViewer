@@ -15,6 +15,7 @@
 ### このプロジェクトについて
 Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.github.io/)) 上で艦これを表示し、通信内容をキャプチャしています。
 **当然ですが、通信内容の変更や、DMM/艦これのサーバーに対する情報の送信等 (マクロ・チート行為) は一切行っていません。**
+本リポジトリは [Grabacr07/KanColleViewer](https://github.com/Grabacr07/KanColleViewer) の近代改修版です。
   
 ### 主な機能
 * 高速修復材や高速建造材 (ゲーム内で確認しにくいやつ) のリアルタイム表示
