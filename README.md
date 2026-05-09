@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/github/license/Grabacr07/KanColleViewer.svg?style=flat-square)](https://github.com/Grabacr07/KanColleViewer/blob/develop/LICENSE.txt)
   
 提督業も忙しい！ (KanColleViewer) は、DMM.com が配信しているブラウザゲーム「艦隊これくしょん ～艦これ～」をより遊びやすくするためのツールです。
+本リポジトリは [Grabacr07/KanColleViewer](https://github.com/Grabacr07/KanColleViewer) の近代改修版です。
 
 詳しくは、[特設ページ](https://dona-co.art/?page_id=3534) [(WebArchive)](https://web.archive.org/web/20250122055413/http://grabacr.net/kancolleviewer) をご覧ください。  
 ダウンロードは、[Github - 最新リリース](https://github.com/donaco/KanColleViewer/releases/latest) からどうぞ。
@@ -15,7 +16,6 @@
 ### このプロジェクトについて
 Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.github.io/)) 上で艦これを表示し、通信内容をキャプチャしています。
 **当然ですが、通信内容の変更や、DMM/艦これのサーバーに対する情報の送信等 (マクロ・チート行為) は一切行っていません。**
-本リポジトリは [Grabacr07/KanColleViewer](https://github.com/Grabacr07/KanColleViewer) の近代改修版です。
   
 ### 主な機能
 * 高速修復材や高速建造材 (ゲーム内で確認しにくいやつ) のリアルタイム表示
