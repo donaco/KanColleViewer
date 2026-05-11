@@ -33,12 +33,23 @@ namespace Grabacr07.KanColleViewer.Models
 		/// デザイナーのコンテキストで実行されているかどうかを取得します。
 		/// </summary>
 		public static bool IsInDesignMode => DesignerProperties.GetIsInDesignMode(new DependencyObject());
-		
+
+		/// <summary>
+		/// スクリーンショットの保存先として、保存先フォルダの配下にあるファイルパスを生成します。
+		/// </summary>
+
 		public static string CreateScreenshotFilePath(SupportedImageFormat format)
 		{
-			var filePath = Path.Combine(
-				ScreenshotSettings.Destination,
-				$"KanColle-{DateTimeOffset.Now.LocalDateTime:yyMMdd-HHmmssff}");
+			var destination = Path.GetFullPath(ScreenshotSettings.Destination);
+			var filePath = Path.GetFullPath(Path.Combine(
+				destination,
+				$"KanColle-{DateTimeOffset.Now.LocalDateTime:yyMMdd-HHmmssff}"));
+
+			// 生成したパスが保存先フォルダの配下にあることを確認
+			if (!filePath.StartsWith(destination + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException("スクリーンショットの保存先が不正です。");
+			}
 
 			return Path.ChangeExtension(filePath, format.ToExtension());
 		}
