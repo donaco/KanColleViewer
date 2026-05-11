@@ -65,6 +65,14 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> IsGpuDisabled { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
 
+		/// <summary>
+		/// 開発者向けオプション（リモートデバッグ等）を有効にするかどうかを示す設定値を取得します。
+		/// true の場合、CefSharp のリモートデバッグポートを開放します。
+		/// 設定変更後はアプリケーションの再起動が必要です。
+		/// </summary>
+		public static SerializableProperty<bool> IsRemoteDebuggingEnabled { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
+
 		private static string GetKey([CallerMemberName] string propertyName = "")
 		{
 			return nameof(GeneralSettings) + "." + propertyName;

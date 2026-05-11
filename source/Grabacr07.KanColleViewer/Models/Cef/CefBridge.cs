@@ -103,8 +103,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						cefSettings.CefCommandLineArgs["disable-gpu-compositing"] = "1";
 					}
 
-					// 例: リモートデバッグポートを追加（開発用）
-					cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
+					// 開発者向けオプション: リモートデバッグポートの開放
+					// 設定が有効な場合のみポートを開放する（デフォルト: 無効）
+					if (GeneralSettings.IsRemoteDebuggingEnabled)
+					{
+						cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
+					}
 
 					// ログファイルの場所をわかりやすくしておく
 					try

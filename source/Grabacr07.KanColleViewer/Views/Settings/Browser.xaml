@@ -68,41 +68,59 @@
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
         </DockPanel>
 
-        <Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-        <DockPanel>
-            <metro2:CallMethodButton DockPanel.Dock="Right"
+		<!-- 開発者向けオプション設定 -->
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+		<DockPanel IsEnabled="{Binding Source={x:Static settings:GeneralSettings.IsRemoteDebuggingEnabled}, Path=Value, Mode=OneWay}">
+			<metro2:CallMethodButton DockPanel.Dock="Right"
 									 MethodTarget="{Binding Source={x:Static root:WindowService.Current}}"
 									 MethodName="ShowDevTools"
 									 Padding="20,4"
 									 HorizontalAlignment="Left">
-                <StackPanel>
-                    <TextBlock Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type metro2:CallMethodButton}}, Path=Foreground}"
+				<StackPanel>
+					<TextBlock Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type metro2:CallMethodButton}}, Path=Foreground}"
 							   FontSize="13"
 							   HorizontalAlignment="Center">
-                        <TextBlock.Text>
-                            開発用ツールを表示する
-                        </TextBlock.Text>
-                    </TextBlock>
+						<TextBlock.Text>
+							開発用ツールを表示する
+						</TextBlock.Text>
+					</TextBlock>
 					<TextBlock Text="(開発向け ・ポップアップで開きます)"
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   FontSize="11"
 							   HorizontalAlignment="Center" />
-                </StackPanel>
-            </metro2:CallMethodButton>
-            <Canvas Width="35" Height="35">
-                <Ellipse Width="33" Height="33" Stroke="{DynamicResource ForegroundBrushKey}" StrokeThickness="7" Canvas.Left="1" Canvas.Top="1"/>
-                <Ellipse Width="11" Height="11" Fill="{DynamicResource ForegroundBrushKey}" Canvas.Left="12" Canvas.Top="12"/>
+				</StackPanel>
+			</metro2:CallMethodButton>
+			<Canvas Width="35" Height="35">
+				<Ellipse Width="33" Height="33" Stroke="{DynamicResource ForegroundBrushKey}" StrokeThickness="7" Canvas.Left="1" Canvas.Top="1"/>
+				<Ellipse Width="11" Height="11" Fill="{DynamicResource ForegroundBrushKey}" Canvas.Left="12" Canvas.Top="12"/>
 				<Line X1="15" Y1="15" X2="31" Y2="15" Stroke="#2f2f32" StrokeThickness="3.98" Canvas.Left="2" Canvas.Top="-4.95"/>
 				<Line X1="15" Y1="15" X2="7" Y2="28.86" Stroke="#2f2f32" StrokeThickness="3.98" Canvas.Left="9.1" Canvas.Top="6"/>
 				<Line X1="15" Y1="15" X2="7" Y2="1.14" Stroke="#2f2f32" StrokeThickness="3.98" Canvas.Left="-3.8" Canvas.Top="6.55"/>
 			</Canvas>
-            <TextBlock Margin="8,0,10,0"
+			<TextBlock Margin="8,0,10,0"
 					   Style="{DynamicResource DefaultTextStyleKey}"
 					   Text="埋め込みブラウザで DevTools をポップアップ表示させます。"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-        </DockPanel>
+		</DockPanel>
 
-        <Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+
+		<!-- 開発者向けオプション 有効/無効チェックボックス -->
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+		<DockPanel Margin="0,5,0,5">
+			<CheckBox DockPanel.Dock="Left"
+					  IsChecked="{Binding Source={x:Static settings:GeneralSettings.IsRemoteDebuggingEnabled}, Path=Value, Mode=TwoWay}"
+					  VerticalAlignment="Center" />
+			<StackPanel Margin="8,0,0,0">
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+						   Text="開発者向けオプションを有効にする" />
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   FontSize="11"
+						   Text="開発者向け機能を有効にします。無効に戻した後はアプリの再起動が必要です。" />
+			</StackPanel>
+		</DockPanel>
+
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
         <!-- GPU アクセラレーション設定 -->
 		<DockPanel Margin="0,5,0,5">

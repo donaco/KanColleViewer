@@ -312,22 +312,24 @@
 				</Grid>
 			</StackPanel>
 		</StackPanel>
+		<!-- 開発者向けオプション -->
+		<StackPanel IsEnabled="{Binding Source={x:Static ms:GeneralSettings.IsRemoteDebuggingEnabled}, Path=Value, Mode=OneWay}">
+			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+			<TextBlock Text="開発者ツールの表示設定"
+					   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
-		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-		<TextBlock Text="開発者ツールの表示設定"
-				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
-
-		<StackPanel Orientation="Horizontal"
+			<StackPanel Orientation="Horizontal"
 						HorizontalAlignment="Right">
-			<TextBlock Text="※埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
+				<TextBlock Text="※埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="16,8" />
-			<Border Width="5" />
-			<metro2:CallMethodButton MethodTarget="{Binding Source={x:Static root:WindowService.Current}}"
+				<Border Width="5" />
+				<metro2:CallMethodButton MethodTarget="{Binding Source={x:Static root:WindowService.Current}}"
 										 MethodName="ShowDevTools"
 										 Content="表示"
 										 MinWidth="110"
 										 Padding="16,6" />
+			</StackPanel>
 		</StackPanel>
 	</StackPanel>
 </UserControl>
