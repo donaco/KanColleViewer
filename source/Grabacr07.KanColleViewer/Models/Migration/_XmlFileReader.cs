@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Grabacr07.KanColleViewer.Models.Migration
@@ -91,14 +92,21 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 			var type = typeof(T);
 			var attr = Attribute.GetCustomAttribute(type, typeof(XmlRootAttribute));
 			// シリアライズ用オブジェクト生成
-			var serializer = attr == null 
+			var serializer = attr == null
 				? new XmlSerializer(type)
 				: new XmlSerializer(type, (XmlRootAttribute)attr);
 
-			// 与えられたストリームから XML 逆シリアル化
-			var result = (T)serializer.Deserialize(stream);
+			// DTD 処理を禁止した XmlReader を経由して逆シリアル化（XXE 対策）
+			var xmlReaderSettings = new XmlReaderSettings
+			{
+				DtdProcessing = DtdProcessing.Prohibit, // DTD を完全禁止
+				XmlResolver = null,                      // 外部リソース参照を無効化
+			};
 
-			return result;
+			using (var xmlReader = XmlReader.Create(stream, xmlReaderSettings))
+			{
+				return (T)serializer.Deserialize(xmlReader);
+			}
 		}
 	}
 }
