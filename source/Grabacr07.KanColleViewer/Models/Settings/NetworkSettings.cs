@@ -142,8 +142,22 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 			public bool IsUseHttpProxyForAllProtocols { get; set; }
 
-			private static Regex pattern = new Regex("(?<scheme>http|https|ftp|socks)=(?<host>[^:]*)(:(?<port>\\d+))?",
-				RegexOptions.Singleline | RegexOptions.Compiled);
+			private const int MaxIEProxyStringLength = 2048;
+			private const int MaxHostLength = 253;
+
+			private static readonly Regex pattern = new Regex(
+				"(?<scheme>http|https|ftp|socks)=(?<host>[^:;\\s]*)(:(?<port>\\d+))?",
+				RegexOptions.Singleline | RegexOptions.Compiled,
+				TimeSpan.FromSeconds(1));
+
+			private static bool IsValidHost(string host)
+			{
+				if (string.IsNullOrWhiteSpace(host)) return false;
+				if (host.Length > MaxHostLength) return false;
+				if (host.Any(char.IsControl)) return false;
+				if (host.Contains(" ")) return false;
+				return true;
+			}
 
 			internal static IEStyleProxySettingsBuilder Parse(string ieStyleSettings)
 			{
@@ -152,51 +166,77 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				if (string.IsNullOrWhiteSpace(ieStyleSettings))
 					return value;
 
+				// 異常に長い入力は破棄
+				if (ieStyleSettings.Length > MaxIEProxyStringLength)
+					return value;
+
+				ieStyleSettings = ieStyleSettings.Trim();
+
 				if (!ieStyleSettings.Contains("="))
 				{
-					// すべてのプロトコルに～
-					var setting = ieStyleSettings.Split(':');
-					value = new IEStyleProxySettingsBuilder()
+					// すべてのプロトコルに同一設定 (host[:port])
+					var setting = ieStyleSettings.Split(new[] { ':' }, 2);
+					if (setting.Length > 0 && IsValidHost(setting[0]))
 					{
-						IsUseHttpProxyForAllProtocols = true,
-						HttpHost = setting[0],
-					};
-					if (1 < setting.Length && ushort.TryParse(setting[1], out var httpPort))
-						value.HttpPort = httpPort;
+						value = new IEStyleProxySettingsBuilder
+						{
+							IsUseHttpProxyForAllProtocols = true,
+							HttpHost = setting[0],
+						};
+
+						if (setting.Length == 2 && ushort.TryParse(setting[1], out var httpPort) && httpPort != 0)
+							value.HttpPort = httpPort;
+					}
 					return value;
 				}
 
 				var settings = ieStyleSettings.Split(';');
 				foreach (var setting in settings)
 				{
-					var groups = pattern.Match(setting).Groups;
-					if (groups.Count < 1) continue;
-					switch (groups["scheme"].Value)
+					if (string.IsNullOrWhiteSpace(setting)) continue;
+
+					try
 					{
-						case "http":
-							value.HttpHost = groups["host"].Value;
-							if (ushort.TryParse(groups["port"].Value, out var httpPort))
-								value.HttpPort = httpPort;
-							break;
-						case "https":
-							value.HttpsHost = groups["host"].Value;
-							if (ushort.TryParse(groups["port"].Value, out var httpsPort))
-								value.HttpsPort = httpsPort;
-							break;
-						case "ftp":
-							value.FtpHost = groups["host"].Value;
-							if (ushort.TryParse(groups["port"].Value, out var ftpPort))
-								value.FtpPort = ftpPort;
-							break;
-						case "socks":
-							value.SocksHost = groups["host"].Value;
-							if (ushort.TryParse(groups["port"].Value, out var socksPort))
-								value.SocksPort = socksPort;
-							break;
-						default:
-							break;
+						var groups = pattern.Match(setting).Groups;
+						if (groups.Count < 1) continue;
+
+						var host = groups["host"].Value;
+						if (!IsValidHost(host)) continue;
+
+						switch (groups["scheme"].Value)
+						{
+							case "http":
+								value.HttpHost = host;
+								if (ushort.TryParse(groups["port"].Value, out var httpPort) && httpPort != 0)
+									value.HttpPort = httpPort;
+								break;
+
+							case "https":
+								value.HttpsHost = host;
+								if (ushort.TryParse(groups["port"].Value, out var httpsPort) && httpsPort != 0)
+									value.HttpsPort = httpsPort;
+								break;
+
+							case "ftp":
+								value.FtpHost = host;
+								if (ushort.TryParse(groups["port"].Value, out var ftpPort) && ftpPort != 0)
+									value.FtpPort = ftpPort;
+								break;
+
+							case "socks":
+								value.SocksHost = host;
+								if (ushort.TryParse(groups["port"].Value, out var socksPort) && socksPort != 0)
+									value.SocksPort = socksPort;
+								break;
+						}
+					}
+					catch (RegexMatchTimeoutException)
+					{
+						// タイムアウト時は安全側で当該要素を無視
+						continue;
 					}
 				}
+
 				return value;
 			}
 
