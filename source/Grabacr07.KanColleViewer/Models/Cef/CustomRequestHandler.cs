@@ -28,34 +28,39 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				var url = request?.Url;
 				if (!string.IsNullOrEmpty(url) && url.IndexOf("maintenance.png", StringComparison.OrdinalIgnoreCase) >= 0)
 				{
-					// ChromiumWebBrowser インスタンスにキャストできれば UI スレッドでナビゲート
-					try
+					// スキームを http / https に限定（file://, javascript: 等を排除）
+					if (Uri.TryCreate(url, UriKind.Absolute, out var parsedUri)
+						&& (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
 					{
-						var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
-						if (cb != null)
+						// ChromiumWebBrowser インスタンスにキャストできれば UI スレッドでナビゲート
+						try
 						{
-							cb.Dispatcher.BeginInvoke(new Action(() =>
+							var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
+							if (cb != null)
 							{
-								try
+								cb.Dispatcher.BeginInvoke(new Action(() =>
 								{
-									// 繰り返しナビゲートを避けるため簡易フラグを Tag に記録
-									const string flag = "maintenance_shown";
-									if (cb.Tag as string != flag)
+									try
 									{
-										cb.Tag = flag;
-										cb.Load(url);
+										// 繰り返しナビゲートを避けるため簡易フラグを Tag に記録
+										const string flag = "maintenance_shown";
+										if (cb.Tag as string != flag)
+										{
+											cb.Tag = flag;
+											cb.Load(url);
+										}
 									}
-								}
-								catch
-								{
-									// swallow
-								}
-							}));
+									catch
+									{
+										// swallow
+									}
+								}));
+							}
 						}
-					}
-					catch
-					{
-						// swallow
+						catch
+						{
+							// swallow
+						}
 					}
 				}
 			}
@@ -142,7 +147,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 							if (string.IsNullOrEmpty(normalized))
 							{
 								normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
-								// responseBodyText が有効なら decompressionSucceeded は true としない（既に展開済みの可能性あり）
 							}
 						}
 						catch
