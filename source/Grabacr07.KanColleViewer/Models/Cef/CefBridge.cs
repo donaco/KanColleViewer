@@ -184,20 +184,59 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		public static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs args)
 		{
-			if (args.Name.StartsWith("CefSharp"))
-			{
-				var assemblyName = args.Name.Split(new[] { ',' }, 2).FirstOrDefault() + ".dll";
-				var archSpecificPath = Path.Combine(cefDirectory, assemblyName);
-
-				if (File.Exists(archSpecificPath))
-					return Assembly.LoadFrom(archSpecificPath);
-
-				// フォールバック: 出力ルート直下を試す
-				var rootPath = Path.Combine(assemblyDirectory, assemblyName);
-				if (File.Exists(rootPath))
-					return Assembly.LoadFrom(rootPath);
-
+			if (!args.Name.StartsWith("CefSharp"))
 				return null;
+
+			// アセンブリ名を取得（"CefSharp.Wpf, Version=..." → "CefSharp.Wpf"）
+			var shortName = args.Name.Split(new[] { ',' }, 2).FirstOrDefault();
+
+			// ① パス区切り文字・ファイル名として不正な文字を含む名前は拒否
+			if (string.IsNullOrEmpty(shortName)
+				|| shortName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+				|| shortName.Contains('/') || shortName.Contains('\\'))
+			{
+				return null;
+			}
+
+			var assemblyFileName = shortName + ".dll";
+
+			// ② 候補パスを列挙（cefDirectory 優先、assemblyDirectory にフォールバック）
+			var candidates = new[]
+			{
+				Path.Combine(cefDirectory, assemblyFileName),
+				Path.Combine(assemblyDirectory, assemblyFileName),
+			};
+
+			// 許可ディレクトリ（正規化済み）
+			var allowedDirs = new[]
+			{
+				Path.GetFullPath(cefDirectory),
+				Path.GetFullPath(assemblyDirectory),
+			};
+
+			foreach (var candidate in candidates)
+			{
+				// ③ Path.GetFullPath で正規化（"../" 等を解決）
+				string fullPath;
+				try
+				{
+					fullPath = Path.GetFullPath(candidate);
+				}
+				catch
+				{
+					// 不正なパス文字列は無視
+					continue;
+				}
+
+				// ④ 正規化後のパスが許可ディレクトリ配下にあるか検証
+				var isAllowed = allowedDirs.Any(dir =>
+					fullPath.StartsWith(dir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+					|| string.Equals(fullPath, dir, StringComparison.OrdinalIgnoreCase));
+
+				if (!isAllowed) continue;
+				if (!File.Exists(fullPath)) continue;
+
+				return Assembly.LoadFrom(fullPath);
 			}
 
 			return null;
