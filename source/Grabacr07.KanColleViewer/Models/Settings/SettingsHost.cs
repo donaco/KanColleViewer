@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -69,6 +69,41 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			Migration._Settings.Load();
 #pragma warning restore 612
 
+			// 読み込んだ設定値の妥当性を検証し、不正値はデフォルトにリセットする
+			SanitizeSettings();
+		}
+
+		/// <summary>
+		/// 読み込んだ設定値を検証し、範囲外の値をデフォルト値にリセットします。
+		/// </summary>
+		private static void SanitizeSettings()
+		{
+			// ポート番号の有効範囲 (1～65535)
+			// ushort 型は 0～65535 のため、0 のみ不正値として扱う
+
+			// ローカル待ち受けポート
+			if (NetworkSettings.LocalProxy.Port.Value == 0)
+				NetworkSettings.LocalProxy.Port.Value = NetworkSettings.LocalProxy.Port.Default;
+
+			// 上流プロキシ: HTTP ポート
+			if (NetworkSettings.Proxy.Port.Value == 0)
+				NetworkSettings.Proxy.Port.Value = NetworkSettings.Proxy.Port.Default;
+
+			// 上流プロキシ: HTTPS ポート
+			if (NetworkSettings.Proxy.HttpsPort.Value == 0)
+				NetworkSettings.Proxy.HttpsPort.Value = NetworkSettings.Proxy.HttpsPort.Default;
+
+			// 上流プロキシ: FTP ポート
+			if (NetworkSettings.Proxy.FtpPort.Value == 0)
+				NetworkSettings.Proxy.FtpPort.Value = NetworkSettings.Proxy.FtpPort.Default;
+
+			// 上流プロキシ: SOCKS ポート
+			if (NetworkSettings.Proxy.SocksPort.Value == 0)
+				NetworkSettings.Proxy.SocksPort.Value = NetworkSettings.Proxy.SocksPort.Default;
+
+			// プロキシ種別: 未定義の enum 値はデフォルト (SystemProxy) にリセット
+			if (!Enum.IsDefined(typeof(KanColleWrapper.ProxyType), NetworkSettings.Proxy.Type.Value))
+				NetworkSettings.Proxy.Type.Value = NetworkSettings.Proxy.Type.Default;
 		}
 
 		public static void Save()
