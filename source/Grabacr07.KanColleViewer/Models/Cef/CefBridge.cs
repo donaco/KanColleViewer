@@ -110,29 +110,25 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
 					}
 
-					// ログファイルの場所をわかりやすくしておく
-					try
-					{
-						var cefLogDir = Path.Combine(CefBridge.CachePath);
-						Directory.CreateDirectory(cefLogDir);
-						cefSettings.LogFile = Path.Combine(cefLogDir, "cef.log");
-					}
-					catch { }
-
 					// proxy-server は空でなければ設定する（Network.xaml の設定を残すため）
 					var proxyString = Settings.NetworkSettings.LocalProxySettingsString;
 					if (!string.IsNullOrWhiteSpace(proxyString))
 					{
 						cefSettings.CefCommandLineArgs["proxy-server"] = proxyString;
 					}
-					// ログレベルを上げてログファイルを指定 （トラブルシューティング用）
-					cefSettings.LogSeverity = LogSeverity.Verbose;
+
+					// ログ設定: デバッグビルドのみ出力、リリースビルドでは無効
+#if DEBUG
+					cefSettings.LogSeverity = LogSeverity.Info;
 					cefSettings.LogFile = Path.Combine(CachePath, "cef.log");
+#else
+					cefSettings.LogSeverity = LogSeverity.Disable;
+#endif
 
 					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 					CefSharp.Cef.Initialize(cefSettings);
 
-					// デバッガ環境でも初期化完了を確認
+					// 初期化完了を確認
 					int waitCount = 0;
 					while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < 50)
 					{
