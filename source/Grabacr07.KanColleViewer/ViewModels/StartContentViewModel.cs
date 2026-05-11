@@ -109,9 +109,15 @@ namespace Grabacr07.KanColleViewer.ViewModels
 					this.IsUpdateAvailable = true;
 					this.UpdateStatusText = $"アップデートがあります ({result.LatestVersion})";
 
-					if (Uri.TryCreate(result.ReleaseUrl, UriKind.Absolute, out var uri))
+					if (Uri.TryCreate(result.ReleaseUrl, UriKind.Absolute, out var uri)
+						&& uri.Scheme == Uri.UriSchemeHttps
+						&& uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase))
 					{
 						this.UpdateUri = uri;
+					}
+					else
+					{
+						Debug.WriteLine($"[UpdateChecker] 不正な ReleaseUrl を破棄しました: {result.ReleaseUrl}");
 					}
 				}
 				else
