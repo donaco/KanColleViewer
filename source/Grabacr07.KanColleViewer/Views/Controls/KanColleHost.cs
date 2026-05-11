@@ -248,6 +248,20 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 		}
 
+		/// <summary>
+		/// CSS 文字列を JavaScript 文字列リテラルとして安全に埋め込むためにエスケープします。
+		/// </summary>
+		private static string EscapeForJsString(string value)
+		{
+			if (string.IsNullOrEmpty(value)) return string.Empty;
+
+			return value
+				.Replace("\\", "\\\\")  // \ → \\ （必ず最初に処理）
+				.Replace("\"", "\\\"")  // " → \"
+				.Replace("\r", "")      // CR 除去
+				.Replace("\n", " ");    // LF → スペース
+		}
+
 		private void ApplyStyleSheet()
 		{
 			try
@@ -255,7 +269,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				if (this.WebBrowser == null) return; // null時遅延　エラー回避
 				if (this.WebBrowser.TryGetKanColleCanvas(out var canvas))
 				{
-					var js = $"var style = document.createElement(\"style\"); style.innerHTML = \"{Regex.Replace(this.UserStyleSheet, "\r|\n", " ")}\"; document.body.appendChild(style);";
+					var escapedCss = EscapeForJsString(this.UserStyleSheet);
+					var js = $"var style = document.createElement(\"style\"); style.innerHTML = \"{escapedCss}\"; document.body.appendChild(style);";
 					this.WebBrowser.GetMainFrame().ExecuteJavaScriptAsync(js);
 					canvas.ExecuteJavaScriptAsync(js);
 
