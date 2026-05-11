@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
@@ -138,11 +139,18 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		public void Navigate()
 		{
-			Uri uri;
-			if (this.UriRequested != null && Uri.TryCreate(this.SourceString, UriKind.Absolute, out uri))
+			if (this.UriRequested == null) return;
+
+			if (!Uri.TryCreate(this.SourceString, UriKind.Absolute, out var uri)) return;
+
+			// http / https のみ許可（file://, javascript: 等を排除）
+			if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
 			{
-				this.UriRequested(this, uri);
+				Debug.WriteLine($"[Navigator] 許可されていないスキームを拒否しました: {uri.Scheme}");
+				return;
 			}
+
+			this.UriRequested(this, uri);
 		}
 	}
 }
