@@ -229,10 +229,33 @@ namespace Grabacr07.KanColleWrapper
 
 			firstTime.Subscribe(x =>
 			{
-				this.Master = new Master(x.start2.Data);
-				this.Homeport = new Homeport(proxy);
-				this.SetRequireInfo(x.requireInfo.Data);
-				this.IsStarted = true;
+				// CapturedProcessor が先に初期化済みの場合は何もしない（二重初期化防止）
+				if (this.IsStarted) return;
+
+				// UIスレッドで実行し、CapturedProcessor の Dispatcher.Invoke と競合させない
+				// Dispatcher.Invoke は直列実行されるため、どちらが先に入っても
+				// 2回目の Invoke 内で IsStarted == true となり Homeport の上書きを防止できる
+				if (Application.Current != null)
+				{
+					Application.Current.Dispatcher.Invoke(() =>
+					{
+						if (this.IsStarted) return;
+
+						this.Master = new Master(x.start2.Data);
+						this.Homeport = new Homeport(proxy);
+						this.SetRequireInfo(x.requireInfo.Data);
+						this.IsStarted = true;
+					});
+				}
+				else
+				{
+					// UI が存在しない（テスト等）の場合
+					if (this.IsStarted) return;
+					this.Master = new Master(x.start2.Data);
+					this.Homeport = new Homeport(proxy);
+					this.SetRequireInfo(x.requireInfo.Data);
+					this.IsStarted = true;
+				}
 			});
 
 			start2Source
