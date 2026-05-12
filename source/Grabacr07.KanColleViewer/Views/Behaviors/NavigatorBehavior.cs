@@ -66,7 +66,11 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 
 			void SetProperties()
 			{
-				if (this.Navigator != null && Uri.TryCreate(e.Browser.MainFrame.Url, UriKind.Absolute, out var uri))
+				if (this.Navigator != null
+					&& Uri.TryCreate(e.Browser.MainFrame.Url, UriKind.Absolute, out var uri)
+					&& (uri.Scheme == Uri.UriSchemeHttp
+						|| uri.Scheme == Uri.UriSchemeHttps
+						|| uri.Scheme == "about"))
 				{
 					this.Navigator.Source = uri;
 					this.Navigator.CanGoBack = this.AssociatedObject.CanGoBack;
