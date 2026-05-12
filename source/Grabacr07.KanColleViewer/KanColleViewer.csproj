@@ -235,6 +235,7 @@
     <Compile Include="Composition\PluginHost.cs" />
     <Compile Include="Composition\PluginMetadata.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
+    <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
     <Compile Include="Models\Cef\CapturedHttp.cs" />
     <Compile Include="Models\Cef\CaptureLogService.cs" />
     <Compile Include="Models\Cef\ContextMenuHandler.cs" />

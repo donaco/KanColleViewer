@@ -180,6 +180,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured)
 		{
 			webBrowser.RequestHandler = new CustomRequestHandler(onCaptured);
+			webBrowser.DownloadHandler = new BlockDownloadHandler();
 		}
 
 		public static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs args)
