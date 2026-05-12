@@ -197,6 +197,9 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 			if (dialog.ShowDialog() != true) return;
 
+			// パス検証（無効文字・拡張子チェック）
+			if (!IsValidExportPath(dialog.FileName, ".csv")) return;
+
 			try
 			{
 				using (var writer = new StreamWriter(dialog.FileName, false, Encoding.UTF8))
@@ -232,6 +235,9 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 			if (dialog.ShowDialog() != true) return;
 
+			// パス検証（無効文字・拡張子チェック）
+			if (!IsValidExportPath(dialog.FileName, ".xml")) return;
+
 			try
 			{
 				var document = new XDocument(
@@ -255,6 +261,25 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			{
 				System.Diagnostics.Debug.WriteLine($"[MasterDataViewer] XML エクスポートに失敗: {ex.Message}");
 			}
+		}
+
+		/// <summary>
+		/// エクスポート先パスの妥当性を検証します。
+		/// </summary>
+		/// <param name="path">検証するファイルパス。</param>
+		/// <param name="expectedExtension">期待する拡張子（例: ".csv"）。</param>
+		/// <returns>パスが有効な場合 true。</returns>
+		private static bool IsValidExportPath(string path, string expectedExtension)
+		{
+			if (string.IsNullOrWhiteSpace(path)) return false;
+
+			// 無効文字チェック
+			if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0) return false;
+
+			// 拡張子チェック（大文字小文字を区別しない）
+			if (!Path.GetExtension(path).Equals(expectedExtension, StringComparison.OrdinalIgnoreCase)) return false;
+
+			return true;
 		}
 
 		/// <summary>
