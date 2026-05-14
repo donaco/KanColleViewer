@@ -319,6 +319,9 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
+			// 検証：正規サーバー以外からの注入を遮断する
+			if (!KanColleServerOrigin.IsValid(url)) return;
+
 			try
 			{
 				this.capturedProcessor.Process(url, responseBody);

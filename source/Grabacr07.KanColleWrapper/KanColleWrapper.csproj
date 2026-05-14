@@ -162,6 +162,7 @@
     <Compile Include="ApiDataDeserializer.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
+    <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
     <Compile Include="Calculator.cs" />
     <Compile Include="Counter.cs" />

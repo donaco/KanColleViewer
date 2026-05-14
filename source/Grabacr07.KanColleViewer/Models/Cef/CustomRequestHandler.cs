@@ -86,6 +86,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		{
 			if (request?.Url == null) return null;
 
+			// ① オリジン検証：艦これ正規サーバー以外からのレスポンスは処理しない
+			if (!Grabacr07.KanColleWrapper.KanColleServerOrigin.IsValid(request.Url))
+				return null;
+
+			// ② パス検証：kcsapi 等のゲーム API エンドポイントのみ対象とする（既存ロジック）
 			if (!(request.Url.Contains("kcsapi") || request.Url.Contains("/api/") || request.Url.Contains("/kcs2/index.php")))
 			{
 				return null;
