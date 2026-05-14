@@ -319,7 +319,7 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
 		{
-			// 検証：正規サーバー以外からの注入を遮断する
+			// オリジン検証：正規サーバー以外からの注入を遮断する
 			if (!KanColleServerOrigin.IsValid(url)) return;
 
 			try
@@ -334,6 +334,15 @@ namespace Grabacr07.KanColleWrapper
 
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
+
+				// api_result 検証：サーバーがエラーを返したレスポンスは内部状態を変更しない
+				// api_result が存在しない場合は後方互換性のため続行する
+				try
+				{
+					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int>();
+					if (apiResult.HasValue && apiResult.Value != 1) return;
+				}
+				catch { /* 解析できない場合は続行 */ }
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
