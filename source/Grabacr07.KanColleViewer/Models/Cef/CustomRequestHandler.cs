@@ -214,18 +214,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				{
 					try
 					{
+						// ゲーム API の POST は Bytes のみ。File タイプは艦これでは使用しないため無視する。
 						if (element.Type == PostDataElementType.Bytes)
 						{
 							var bytes = element.Bytes;
 							if (bytes != null && bytes.Length > 0) bytesList.AddRange(bytes);
-						}
-						else if (element.Type == PostDataElementType.File)
-						{
-							var filePath = element.File;
-							if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-							{
-								bytesList.AddRange(File.ReadAllBytes(filePath));
-							}
 						}
 					}
 					catch
