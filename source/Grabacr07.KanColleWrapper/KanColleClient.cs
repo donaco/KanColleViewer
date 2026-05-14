@@ -174,13 +174,11 @@ namespace Grabacr07.KanColleWrapper
 							this.Master = new Master(start2);
 							this.Homeport = new Homeport(this.Proxy);
 							this.SetRequireInfo(requireInfo);
-							this.IsStarted = true;
-						}
-					}
-					catch
-					{
-					}
-				});
+								this.IsStarted = true;
+									}
+								}
+								catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
+							});
 
 			var start = this.Proxy.api_req_map_start;
 			var end = this.Proxy.api_port;
@@ -192,30 +190,10 @@ namespace Grabacr07.KanColleWrapper
 				.Repeat()
 				.Subscribe();
 
-			/// <summary>
-			/// プロキシのイベントが発火しているかチェックするデバッグ用ログ　後で削除
-			/// </summary>
-			try
-			{
-				var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
-				proxy.ApiSessionSource
-					.Subscribe(s =>
-					{
-						try
-						{
-						}
-						catch (Exception)
-						{
-						}
-					});
 			}
-			catch (Exception)
-			{
-			}
-		}
 
-		public void Initialieze()
-		{
+			public void Initialieze()
+			{
 			var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
 
 			var start2Source = proxy.api_start2_getData.TryParse<kcsapi_start2>();
@@ -326,7 +304,7 @@ namespace Grabacr07.KanColleWrapper
 			{
 				this.capturedProcessor.Process(url, responseBody);
 			}
-			catch { /* swallow */ }
+			catch (Exception ex) { LogError("ProcessCaptured/capturedProcessor", ex); }
 
 			try
 			{
@@ -342,7 +320,7 @@ namespace Grabacr07.KanColleWrapper
 					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int>();
 					if (apiResult.HasValue && apiResult.Value != 1) return;
 				}
-				catch { /* 解析できない場合は続行 */ }
+				catch (Exception ex) { LogError("ProcessCaptured/api_result parse", ex); }
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
@@ -410,10 +388,27 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleMissionResult(url, normalized)) return;
 				// 将来的なフォールバック追加箇所はここに追加
 			}
-			catch { /* swallow */ }
+			catch (Exception ex) { LogError("ProcessCaptured", ex); }
 		}
 
 		#region ProcessCaptured helpers (refactor)
+
+		/// <summary>
+		/// 例外をログに記録します。アプリを落とさないよう、再スローはしません。
+		/// </summary>
+		/// <param name="context">どの処理で発生したかを示す文字列（例: メソッド名や API パス）</param>
+		/// <param name="ex">発生した例外</param>
+		private static void LogError(string context, Exception ex)
+		{
+			try
+			{
+				System.Diagnostics.Debug.WriteLine($"[KanColleClient] Error in {context}: {ex}");
+			}
+			catch
+			{
+				// ログ出力自体が失敗しても何もしない
+			}
+		}
 
 		private void RunOnUi(Action action)
 		{
@@ -428,9 +423,7 @@ namespace Grabacr07.KanColleWrapper
 					action();
 				}
 			}
-			catch
-			{
-			}
+			catch (Exception ex) { LogError("RunOnUi", ex); }
 		}
 
 		/// <summary>
@@ -457,7 +450,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				}
@@ -485,7 +478,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				}
@@ -526,13 +519,13 @@ namespace Grabacr07.KanColleWrapper
 										this.hasPendingAirResult = false;
 										this.pendingAirResult = AirSuperiority.None;
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleMapStart", ex); }
 								});
 							}
 						}
 					}
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleMapStart", ex); }
 
 				RunOnUi(() =>
 				{
@@ -540,12 +533,12 @@ namespace Grabacr07.KanColleWrapper
 					{
 						this.IsInSortie = true;
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				});
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -583,7 +576,7 @@ namespace Grabacr07.KanColleWrapper
 									{
 										this.SortieInfo.Next(cellNo);
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleMapNext", ex); }
 									// ※クリアは UI スレッドで行っておく
 									this.hasPendingAirResult = false;
 									this.pendingAirResult = AirSuperiority.None;
@@ -620,18 +613,18 @@ namespace Grabacr07.KanColleWrapper
 													// 防空戦は CellNo なしで制空結果のみ表示（例: "5-5 [優勢]"）
 													this.SortieInfo.SetDestructionAirResult(airResult);
 												}
-												catch { }
+												catch (Exception ex) { LogError("TryHandleMapNext", ex); }
 											});
 										}
 									}
 								}
 							}
 						}
-						catch { /* 防空戦の解析失敗は無視 */ }
+						catch (Exception ex) { LogError("TryHandleMapNext", ex); }
 					}
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleMapNext", ex); }
 
 			return true;
 		}
@@ -731,7 +724,7 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 				}
-				catch { parsedBattleAir = false; }
+				catch (Exception ex) { LogError("TryHandleBattle", ex); }
 			}
 
 			RunOnUi(() =>
@@ -772,7 +765,7 @@ namespace Grabacr07.KanColleWrapper
 						this.hasPendingAirResult = true;
 					}
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleBattle", ex); }
 			});
 
 			return true;
@@ -800,7 +793,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 
 			// 設定値
 			var showSortieInfo = this.Settings?.ShowSortieInfo ?? false;
@@ -878,7 +871,7 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 				}
-				catch { parsedAir = false; }
+				catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 			}
 
 			// WinRank 取得（既存ロジック）
@@ -895,10 +888,10 @@ namespace Grabacr07.KanColleWrapper
 						var data = root["api_data"] ?? root;
 						winRank = data?["api_win_rank"]?.Value<string>();
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 
 			RunOnUi(() =>
 			{
@@ -924,7 +917,7 @@ namespace Grabacr07.KanColleWrapper
 							}, System.Windows.Threading.DispatcherPriority.Background);
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 
 					// parsedAir が true のときだけ制空結果を反映。
 					// JSON に含まれていない場合は、もし battle 側で解析して保留している値があればそれを反映する。
@@ -951,7 +944,7 @@ namespace Grabacr07.KanColleWrapper
 					// 使用済みフラグはクリア（次回判定へ影響しないよう）
 					this.lastBattleApiType = null;
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 			});
 
 			return true;
@@ -993,13 +986,13 @@ namespace Grabacr07.KanColleWrapper
 							this.Homeport?.AirBases?.Update(ab, abi);
 
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -1033,7 +1026,7 @@ namespace Grabacr07.KanColleWrapper
 								{
 									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
-								catch
+								catch (Exception ex)
 								{
 									// 初期化に失敗したら以降の処理をスキップ
 									return;
@@ -1071,26 +1064,20 @@ namespace Grabacr07.KanColleWrapper
 										if (slotItems != null)
 										{
 											this.Homeport.Itemyard.Update(slotItems);
-											// 内部通知が必要なら呼び出す（安全側）
-											try
-											{
-												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-												mi?.Invoke(this.Homeport?.Itemyard, null);
-											}
-											catch { }
+											try { this.Homeport?.Itemyard?.RaiseSlotItemsChanged(); } catch { }
 										}
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePort", ex); }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandlePort", ex); }
 
 							// UI バインディングが更新されないケースに備え、明示的に通知を出す
 							try
 							{
 								this.Homeport?.Organization?.NotifyUpdated();
 							}
-							catch
+							catch (Exception ex)
 							{
 							}
 
@@ -1108,15 +1095,15 @@ namespace Grabacr07.KanColleWrapper
 											f.State.Update();
 											f.RaiseShipsUpdated();
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandlePort", ex); }
 									}
 								}
 							}
-							catch
+							catch (Exception ex)
 							{
 							}
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 
@@ -1133,14 +1120,14 @@ namespace Grabacr07.KanColleWrapper
 									{
 										org.Fleets[returningDeckId].Homing();
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePort", ex); }
 									this.sortieDeckIds.Remove(returningDeckId);
 								}
 							}
 
 							this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 
@@ -1152,7 +1139,7 @@ namespace Grabacr07.KanColleWrapper
 							this.hasPendingAirResult = false;
 							this.pendingAirResult = AirSuperiority.None;
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandlePort", ex); }
 					});
 				}
 				else
@@ -1160,7 +1147,7 @@ namespace Grabacr07.KanColleWrapper
 					// 解析失敗でも true を返してハンドリング済みとする（既存ハンドラと同様の挙動）
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -1184,11 +1171,11 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.Homeport?.UpdateAdmiral(basic);
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleBasic", ex); }
 					});
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleBasic", ex); }
 
 			return true;
 		}
@@ -1216,7 +1203,7 @@ namespace Grabacr07.KanColleWrapper
 					{
 						apiMaterialArray = matTok.Select(t => (int?)t ?? 0).ToArray();
 					}
-					catch { apiMaterialArray = null; }
+					catch (Exception ex) { apiMaterialArray = null; LogError("TryHandleClearItemGet", ex); }
 				}
 
 				// 装備枠の増加を推測して即時反映
@@ -1255,7 +1242,7 @@ namespace Grabacr07.KanColleWrapper
 									deltaCapacity += slotIncrease;
 								}
 							}
-							catch { /* swallow */ }
+							catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 						}
 
 						if (deltaCapacity > 0)
@@ -1280,14 +1267,14 @@ namespace Grabacr07.KanColleWrapper
 											this.Homeport.UpdateAdmiral(cloned);
 										}
 									}
-									catch { /* swallow */ }
+									catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 								}
-								catch { /* swallow */ }
+								catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 							});
 						}
 					}
 				}
-				catch { /* swallow */ }
+				catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 
 				// UI スレッドで安全に反映
 				if (apiMaterialArray != null)
@@ -1319,13 +1306,10 @@ namespace Grabacr07.KanColleWrapper
 								}
 
 								if (abs != null)
-								{
-									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-									mi?.Invoke(materials, new object[] { abs });
-								}
+									materials.Update(abs);
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 					});
 				}
 
@@ -1337,10 +1321,10 @@ namespace Grabacr07.KanColleWrapper
 					{
 						this.Homeport?.Organization?.NotifyUpdated();
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 				});
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
 
 			return true;
 		}
@@ -1362,11 +1346,11 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.Homeport?.Materials.Update(mats);
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleMaterial", ex); }
 					});
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleMaterial", ex); }
 
 			return true;
 		}
@@ -1388,11 +1372,11 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.Homeport?.Itemyard.Update(useitems);
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleUseItem", ex); }
 					});
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleUseItem", ex); }
 
 			return true;
 		}
@@ -1427,12 +1411,10 @@ namespace Grabacr07.KanColleWrapper
 										abs[1] = materials.Ammunition + (apiMat.Length > 1 ? apiMat[1] : 0);
 										abs[2] = materials.Steel + (apiMat.Length > 2 ? apiMat[2] : 0);
 										abs[3] = materials.Bauxite + (apiMat.Length > 3 ? apiMat[3] : 0);
-
-										var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-										mi?.Invoke(materials, new object[] { abs });
+										materials.Update(abs);
 									}
 								}
-								catch
+								catch (Exception ex)
 								{
 								}
 							}
@@ -1464,7 +1446,7 @@ namespace Grabacr07.KanColleWrapper
 													// MemberTable.Remove が利用可能であれば直接削除
 													this.Homeport?.Itemyard?.SlotItems?.Remove(id);
 												}
-												catch
+												catch (Exception ex)
 												{
 												}
 											}
@@ -1473,19 +1455,15 @@ namespace Grabacr07.KanColleWrapper
 										// Itemyard の内部通知を呼び出す（private メソッドをリフレクションで呼ぶ）
 										try
 										{
-											var iy = this.Homeport?.Itemyard;
-											if (iy != null)
-											{
-												var mi2 = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-												mi2?.Invoke(iy, null);
-											}
+											try { this.Homeport?.Itemyard?.RaiseSlotItemsChanged(); }
+											catch (Exception ex) { LogError("TryHandleDestroyItem2", ex); }
 										}
-										catch
+										catch (Exception ex)
 										{
 										}
 									}
 								}
-								catch
+								catch (Exception ex)
 								{
 								}
 							}
@@ -1496,13 +1474,13 @@ namespace Grabacr07.KanColleWrapper
 							// カウンタープラグイン用イベント発火
 							try { this.ItemDestroyed?.Invoke(this, EventArgs.Empty); } catch { }
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -1530,7 +1508,7 @@ namespace Grabacr07.KanColleWrapper
 						apiMat = matTok.Select(t => (int?)t ?? 0).ToArray();
 					}
 				}
-				catch
+				catch (Exception ex)
 				{
 					apiMat = null;
 				}
@@ -1544,7 +1522,7 @@ namespace Grabacr07.KanColleWrapper
 					var unset = data?["api_unset_list"];
 					if (unset != null && unset.HasValues) hasUnsetList = true;
 				}
-				catch
+				catch (Exception ex)
 				{
 					hasUnsetList = false;
 				}
@@ -1572,7 +1550,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 				}
 
 				// UI スレッドで反映
@@ -1590,13 +1568,9 @@ namespace Grabacr07.KanColleWrapper
 							{
 								var materials = this.Homeport?.Materials;
 								if (materials != null)
-								{
-									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-									// サーバ値をそのまま渡す（絶対値更新）
-									mi?.Invoke(materials, new object[] { apiMat });
-								}
+									materials.Update(apiMat);
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 						}
 
 						// 解体対象の艦を Organization から削除
@@ -1625,34 +1599,29 @@ namespace Grabacr07.KanColleWrapper
 										}
 										// いずれにせよ Ship 自体は削除
 										try { org.Ships.Remove(ship); }
-										catch
+										catch (Exception ex)
 										{
 											// MemberTable.Remove(Ship) のオーバーロードがなければ id で削除
 											try { org.Ships.Remove(shipId); } catch { }
 										}
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 								}
 
 								// 艦娘一覧の変更通知
-								try { var mi2 = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic); mi2?.Invoke(org, null); }
-								catch
-								{
-									// フォールバック: NotifyUpdated
-									try { org.NotifyUpdated(); } catch { }
-								}
+								try { org.RaiseShipsChanged(); } catch { org.NotifyUpdated(); }
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 
 						// 装備数・組織の UI 再評価
-						try { this.Homeport?.Itemyard?.GetType().GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(this.Homeport?.Itemyard, null); } catch { }
+						try { this.Homeport?.Itemyard?.RaiseSlotItemsChanged(); } catch { }
 						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 				});
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleDestroyShip", ex); }
 
 			return true;
 		}
@@ -1666,7 +1635,7 @@ namespace Grabacr07.KanColleWrapper
 
 			JToken root;
 			try { root = JToken.Parse(normalized); }
-			catch
+			catch (Exception ex)
 			{
 				// 解析失敗は安全に終了（既存の挙動を維持）
 				return true;
@@ -1684,7 +1653,7 @@ namespace Grabacr07.KanColleWrapper
 			{
 				slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
 			}
-			catch { slotTok = null; }
+			catch (Exception ex) { slotTok = null; LogError("TryHandlePowerup", ex); }
 
 			// requestBody から api_id_items を取り出して削除対象ID配列を用意する（CEF 経路で使う）
 			// 注: powerup の api_id_items は「改修素材にした艦の ID」の場合があるため、実行時に艦テーブルに存在するかで判定
@@ -1711,10 +1680,10 @@ namespace Grabacr07.KanColleWrapper
 								.Where(v => v > 0)
 								.ToArray();
 						}
-						catch { apiIdItemsRaw = null; }
+						catch (Exception ex) { apiIdItemsRaw = null; LogError("TryHandlePowerup", ex); }
 					}
 				}
-				catch { apiIdItemsRaw = null; }
+				catch (Exception ex) { apiIdItemsRaw = null; LogError("TryHandlePowerup", ex); }
 			}
 
 			RunOnUi(() =>
@@ -1746,7 +1715,7 @@ namespace Grabacr07.KanColleWrapper
 											else this.Homeport.Organization.Update(new[] { raw });
 											updatedShipIds.Add(raw.api_id);
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 									}
 								}
 							}
@@ -1762,12 +1731,12 @@ namespace Grabacr07.KanColleWrapper
 										else this.Homeport.Organization.Update(new[] { raw });
 										updatedShipIds.Add(raw.api_id);
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 								}
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 2) デッキ更新（配列 / 単一）
 					try
@@ -1789,7 +1758,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 3) 装備アイテム更新：api_slot_item / api_slotitem があれば Itemyard を更新
 					try
@@ -1811,10 +1780,10 @@ namespace Grabacr07.KanColleWrapper
 										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
 										mi?.Invoke(this.Homeport?.Itemyard, null);
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 						}
 						else if (slotTok != null && slotTok.Type == JTokenType.Object)
 						{
@@ -1829,10 +1798,10 @@ namespace Grabacr07.KanColleWrapper
 										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
 										mi?.Invoke(this.Homeport?.Itemyard, null);
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 						}
 
 						// 追加: requestBody にあった api_id_items を「艦 ID のみ」として扱う（Organization.Powerup と同様）。
@@ -1854,10 +1823,10 @@ namespace Grabacr07.KanColleWrapper
 												if (s != null) shipsToRemove.Add(s);
 											}
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 									}
 								}
-								catch { }
+								catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 								var isUnsetList = unsetListTok != null;
 
@@ -1878,12 +1847,12 @@ namespace Grabacr07.KanColleWrapper
 
 										// api_id_items が実際に艦の ID を表す場合は艦自体を Organization から削除する
 										try { org.Ships.Remove(ship); }
-										catch
+										catch (Exception ex)
 										{
 											try { org.Ships.Remove(ship.Id); } catch { }
 										}
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 								}
 
 								// Itemyard の再描画通知（装備解除時は必須、通常時も保険として呼ぶ）
@@ -1893,20 +1862,16 @@ namespace Grabacr07.KanColleWrapper
 									var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
 									mi?.Invoke(iy2, null);
 								}
-								catch { }
+								catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 								// 艦娘一覧の変更通知（既存実装に合わせる）
-								try
-								{
-									var mi2 = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-									mi2?.Invoke(org, null);
-								}
-								catch { try { org.NotifyUpdated(); } catch { } }
+								try { org.RaiseShipsChanged(); }
+								catch (Exception ex) { LogError("TryHandlePowerup/RaiseShipsChanged", ex); try { org.NotifyUpdated(); } catch (Exception ex2) { LogError("TryHandlePowerup/NotifyUpdated", ex2); } }
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 4) api_unset_list: 無条件削除は避け、装備一覧の再描画通知のみ行う（安全側）
 					try
@@ -1922,37 +1887,10 @@ namespace Grabacr07.KanColleWrapper
 									mi?.Invoke(iy, null);
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 						}
 					}
-					catch { }
-
-					try
-					{
-						var sb = new System.Text.StringBuilder();
-						sb.AppendFormat("TryHandlePowerup: slotTok={0}, unsetList={1}, api_id_items={2}, slotItemsCount={3}",
-							slotTok != null, unsetListTok != null, apiIdItemsRaw?.Length ?? 0, this.Homeport?.Itemyard?.SlotItems?.Count ?? -1);
-
-						// 各艦の slot に対して Itemyard に存在するかを列挙（問題特定用）
-						try
-						{
-							foreach (var s in org.Ships.Values)
-							{
-								try
-								{
-									var ids = s.RawData.api_slot ?? new int[0];
-									foreach (var id in ids)
-									{
-										if (id <= 0) continue;
-										bool has = this.Homeport?.Itemyard?.SlotItems?.ContainsKey(id) ?? false;
-									}
-								}
-								catch { }
-							}
-						}
-						catch { }
-					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 5) 影響艦隊のみ再計算・再通知（ship 更新反映）
 					try
@@ -1971,7 +1909,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 最終保険: Itemyard の現在状態に合わせ艦娘の Slot を再構築して UI を確実に再同期する（装備消失の回避策）
 					try
@@ -1985,18 +1923,14 @@ namespace Grabacr07.KanColleWrapper
 							try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
 					// 6) 組織・UI レベルの最終通知
-					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-					try
-					{
-						var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-						mi?.Invoke(org, null);
-					}
-					catch { try { org?.NotifyUpdated(); } catch { } }
+					try { this.Homeport?.Organization?.NotifyUpdated(); } catch (Exception ex) { LogError("TryHandlePowerup/NotifyUpdated", ex); }
+					try { org?.RaiseShipsChanged(); }
+					catch (Exception ex) { LogError("TryHandlePowerup/RaiseShipsChanged", ex); try { org?.NotifyUpdated(); } catch (Exception ex2) { LogError("TryHandlePowerup/NotifyUpdated2", ex2); } }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 			});
 
 			return true;
@@ -2017,7 +1951,7 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.Homeport.Quests.Update(questlist);
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
@@ -2026,7 +1960,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -2077,7 +2011,7 @@ namespace Grabacr07.KanColleWrapper
 										// 直接既存インスタンスを更新して通知を発火させる（確実な UI 更新）
 										existing.Update(raw);
 									}
-									catch
+									catch (Exception ex)
 									{
 										// 個別失敗は記録せずフォールバック
 										toCreate.Add(raw);
@@ -2113,13 +2047,13 @@ namespace Grabacr07.KanColleWrapper
 							// 組織レベルの再通知で DataTemplate 等の再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -2163,7 +2097,7 @@ namespace Grabacr07.KanColleWrapper
 
 										updatedShipIds.Add(rawShip.api_id);
 									}
-									catch { /* 個別失敗は無視して続行 */ }
+									catch (Exception ex) { LogError("TryHandleShip3", ex); }
 								}
 							}
 
@@ -2194,11 +2128,11 @@ namespace Grabacr07.KanColleWrapper
 							// 組織レベルで再通知して DataTemplate 等の再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch { /* swallow */ }
+						catch (Exception ex) { LogError("TryHandleShip3", ex); }
 					});
 				}
 			}
-			catch { /* swallow */ }
+			catch (Exception ex) { LogError("TryHandleShip3", ex); }
 
 			return true;
 		}
@@ -2235,7 +2169,7 @@ namespace Grabacr07.KanColleWrapper
 			{
 				root = JToken.Parse(normalized);
 			}
-			catch
+			catch (Exception ex)
 			{
 				// JSON 解析できなければ終了
 				return true;
@@ -2329,7 +2263,7 @@ namespace Grabacr07.KanColleWrapper
 					// 組織レベルの再通知で UI 再評価を促す
 					try { org.NotifyUpdated(); } catch { }
 				}
-				catch
+				catch (Exception ex)
 				{
 				}
 			});
@@ -2383,7 +2317,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 
 						try
 						{
@@ -2406,7 +2340,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 					}
 
 					// 重要: api_unset_list に含まれる装備を Itemyard から削除しない。
@@ -2423,13 +2357,13 @@ namespace Grabacr07.KanColleWrapper
 							// 受信 JSON の他フィールド（api_slotitem 等）を使って明示的に同期する。
 							try
 							{
-								var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-								mi?.Invoke(iy, null);
+								try { iy.RaiseSlotItemsChanged(); }
+								catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 
 					// 影響を受ける艦隊を再計算・再通知
 					foreach (var id in affected.Distinct())
@@ -2444,19 +2378,14 @@ namespace Grabacr07.KanColleWrapper
 								try { fleet.RaiseShipsUpdated(); } catch { }
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleSlotDeprive", ex); }
 					}
 
 					// 組織・艦娘一覧の再通知
 					try { org.NotifyUpdated(); } catch { }
-					try
-					{
-						var mi = org.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-						mi?.Invoke(org, null);
-					}
-					catch { }
+					try { org.RaiseShipsChanged(); } catch { }
 				}
-				catch
+				catch (Exception ex)
 				{
 				}
 			});
@@ -2478,7 +2407,7 @@ namespace Grabacr07.KanColleWrapper
 				var root = JToken.Parse(normalized);
 				isSuccess = root["api_result"] != null && root["api_result"].Value<int>() == 1;
 			}
-			catch
+			catch (Exception ex)
 			{
 				isSuccess = false;
 			}
@@ -2503,7 +2432,7 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleOpenExslot", ex); }
 			}
 
 			if (shipId <= 0) return true;
@@ -2550,9 +2479,9 @@ namespace Grabacr07.KanColleWrapper
 
 						try { org.NotifyUpdated(); } catch { }
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleOpenExslot", ex); }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleOpenExslot", ex); }
 			});
 
 			return true;
@@ -2583,7 +2512,7 @@ namespace Grabacr07.KanColleWrapper
 						if (key == "api_slot_ex" || key == "api_slot_ex_id") int.TryParse(val, out slotExId);
 					}
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleSlotsetEx", ex); }
 			}
 
 			// レスポンス側から api_data.api_slot_ex 等が来ていればそれを優先する
@@ -2628,7 +2557,7 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleSlotsetEx", ex); }
 
 			if (shipId <= 0) return true;
 
@@ -2666,9 +2595,9 @@ namespace Grabacr07.KanColleWrapper
 
 						try { org.NotifyUpdated(); } catch { }
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleSlotsetEx", ex); }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleSlotsetEx", ex); }
 			});
 
 			return true;
@@ -2702,7 +2631,7 @@ namespace Grabacr07.KanColleWrapper
 							var changeTok = dataTok?["api_change_count"];
 							if (changeTok != null) int.TryParse(changeTok.ToString(), out respChangeCount);
 						}
-						catch { /* ignore parse errors */ }
+						catch (Exception ex) { LogError("TryHandleDecks", ex); }
 
 						// requestBody があれば api_id を取り、なければ lastChangeDeckId をフォールバックで使う
 						int deckId = -1;
@@ -2720,7 +2649,7 @@ namespace Grabacr07.KanColleWrapper
 									}
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleDecks", ex); }
 						}
 
 						if (deckId == -1 && this.lastChangeDeckId != -1) deckId = this.lastChangeDeckId;
@@ -2764,7 +2693,7 @@ namespace Grabacr07.KanColleWrapper
 										org.NotifyUpdated();
 									}
 								}
-								catch
+								catch (Exception ex)
 								{
 								}
 							});
@@ -2773,7 +2702,7 @@ namespace Grabacr07.KanColleWrapper
 							return true;
 						}
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				}
@@ -2804,7 +2733,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleDecks", ex); }
 					});
 
 					return true;
@@ -2828,7 +2757,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleDecks", ex); }
 					});
 
 					return true;
@@ -2901,7 +2830,7 @@ namespace Grabacr07.KanColleWrapper
 							var changeTok = dataTok?["api_change_count"];
 							if (changeTok != null && int.TryParse(changeTok.ToString(), out var cc)) respChangeCount = cc;
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleDecks", ex); }
 
 						RunOnUi(() =>
 						{
@@ -3023,7 +2952,7 @@ namespace Grabacr07.KanColleWrapper
 												}
 											}
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandleDecks", ex); }
 									}
 
 									try { fleet.RaiseShipsUpdated(); } catch { }
@@ -3034,22 +2963,22 @@ namespace Grabacr07.KanColleWrapper
 											try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
 										}
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleDecks", ex); }
 
 									try { org.NotifyUpdated(); } catch { }
 									return;
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleDecks", ex); }
 						});
 					}
-					catch
+					catch (Exception ex)
 					{
 						// swallow
 					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -3089,7 +3018,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandlePresetDeck", ex); }
 					});
 					return true;
 				}
@@ -3112,12 +3041,12 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandlePresetDeck", ex); }
 					});
 					return true;
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true; // マッチしたが解析失敗でも早期 return（既存ハンドラと同挙動）
@@ -3151,7 +3080,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandlePresetSelect", ex); }
 					});
 					return true;
 				}
@@ -3191,11 +3120,11 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandlePresetSelect", ex); }
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				// swallow
 			}
@@ -3231,7 +3160,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleHenseiCombined", ex); }
 					});
 					return true;
 				}
@@ -3261,12 +3190,12 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleHenseiCombined", ex); }
 				});
 
 				return true;
 			}
-			catch
+			catch (Exception ex)
 			{
 				// swallow
 			}
@@ -3313,12 +3242,12 @@ namespace Grabacr07.KanColleWrapper
 						try { fleet.RaiseShipsUpdated(); } catch { }
 						try { org.NotifyUpdated(); } catch { }
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				});
 			}
-			catch
+			catch (Exception ex)
 			{
 				// swallow
 			}
@@ -3357,9 +3286,9 @@ namespace Grabacr07.KanColleWrapper
 									}
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleShipDeck", ex); }
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
@@ -3368,7 +3297,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -3387,7 +3316,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -3418,43 +3347,10 @@ namespace Grabacr07.KanColleWrapper
 							var arr = matTok.Select(t => (int?)t ?? 0).ToArray();
 							var materials = this.Homeport?.Materials;
 							if (materials != null && arr != null)
-							{
-								// 長さ8なら個別プロパティを更新（0..7 のマッピングは既存の Update(kcsapi_material[]) に合わせる）
-								if (arr.Length >= 8)
-								{
-									try
-									{
-										var ty = typeof(Materials);
-										ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[0]);
-										ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[1]);
-										ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[2]);
-										ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[3]);
-										// 既存コードのマッピングに合わせる：
-										// index4 -> InstantBuildMaterials
-										// index5 -> InstantRepairMaterials
-										// index6 -> DevelopmentMaterials
-										// index7 -> ImprovementMaterials
-										ty.GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[4]);
-										ty.GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[5]);
-										ty.GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[6]);
-										ty.GetProperty("ImprovementMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[7]);
-									}
-									catch { }
-								}
-								// 4 要素なら従来通り private Update(int[]) を呼ぶ
-								else if (arr.Length == 4)
-								{
-									try
-									{
-										var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-										mi?.Invoke(materials, new object[] { arr });
-									}
-									catch { }
-								}
-							}
+								materials.UpdateFull(arr);
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 
 					// 2) 生成された装備を反映: api_get_items / api_slot_item / api_slotitem などの複合対応
 					try
@@ -3485,7 +3381,7 @@ namespace Grabacr07.KanColleWrapper
 												api_alv = t["api_alv"]?.Value<int>() ?? 0,
 											});
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 									}
 
 									if (list.Count > 0)
@@ -3500,19 +3396,14 @@ namespace Grabacr07.KanColleWrapper
 													iy.SlotItems.Add(new SlotItem(raw));
 												}
 											}
-											catch { }
+											catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 										}
 
-										// 通知
-										try
-										{
-											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-											mi?.Invoke(iy, null);
-										}
-										catch { }
+										try { iy.RaiseSlotItemsChanged(); }
+										catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 									}
 								}
-								catch { }
+								catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 							}
 
 							// api_slot_item / api_slotitem (フル情報)
@@ -3539,7 +3430,7 @@ namespace Grabacr07.KanColleWrapper
 													try { iy.SlotItems[r.api_id].Remodel(r.api_level, r.api_slotitem_id); } catch { }
 												}
 											}
-											catch { }
+											catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 										}
 
 										try
@@ -3547,10 +3438,10 @@ namespace Grabacr07.KanColleWrapper
 											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
 											mi?.Invoke(iy, null);
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 									}
 								}
-								catch { }
+								catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 							}
 
 							// 3) api_unset_items / api_unset_list があれば UI 再描画通知（削除は慎重に行う）
@@ -3559,18 +3450,13 @@ namespace Grabacr07.KanColleWrapper
 								var unsetTok = data["api_unset_items"] ?? data["api_unset_list"] ?? data["api_unset_slot"];
 								if (unsetTok != null)
 								{
-									try
-									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(iy, null);
-									}
-									catch { }
+									try { iy.RaiseSlotItemsChanged(); } catch { }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 
 					// 4) Dockyard / CreatedSlotItem 更新（Dockyard.CreateSlotItem と同等の反映）
 					try
@@ -3590,18 +3476,18 @@ namespace Grabacr07.KanColleWrapper
 										// Dockyard.CreateSlotItem に相当する処理は内部 private のため簡易に CreatedSlotItem を作る
 										dockyard.GetType().GetProperty("CreatedSlotItem", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(dockyard, new CreatedSlotItem(createTok));
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 
 					// 最後に UI 全体更新を促す
 					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 			});
 
 			return true;
@@ -3671,7 +3557,7 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 				// swallow
 			}
@@ -3695,28 +3581,13 @@ namespace Grabacr07.KanColleWrapper
 						// UI スレッドで即時に InstantBuildMaterials を 1 減算
 						RunOnUi(() =>
 						{
-							try
-							{
-								var materials = this.Homeport?.Materials;
-								if (materials != null)
-								{
-									var propBuild = typeof(Materials).GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-									if (propBuild != null)
-									{
-										var cur = (int)propBuild.GetValue(materials);
-										var next = Math.Max(0, cur - 1);
-										propBuild.SetValue(materials, next);
-									}
-								}
-							}
-							catch (Exception)
-							{
-							}
+							try { this.Homeport?.Materials?.DecrementInstantBuildMaterials(); }
+							catch (Exception) { }
 						});
 					}
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleCreateShip", ex); }
 
 			// createship のレスポンスに資源情報が含まれていれば既存ロジックで反映（残す）
 			try
@@ -3725,7 +3596,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 					JToken root;
 					try { root = JToken.Parse(normalized); }
-					catch { root = null; }
+					catch (Exception ex) { root = null; LogError("TryHandleCreateShip", ex); }
 
 					if (root != null)
 					{
@@ -3742,20 +3613,17 @@ namespace Grabacr07.KanColleWrapper
 									{
 										var materials = this.Homeport?.Materials;
 										if (materials != null && matArr != null && matArr.Length >= 4)
-										{
-											var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-											mi?.Invoke(materials, new object[] { matArr });
-										}
+											materials.Update(matArr);
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleCreateShip", ex); }
 								});
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleCreateShip", ex); }
 						}
 					}
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleCreateShip", ex); }
 
 			return true;
 		}
@@ -3785,7 +3653,7 @@ namespace Grabacr07.KanColleWrapper
 									try { this.ApplyPendingCreateMaterialsForKdock(rawK.api_id, rawK.api_state); } catch { }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleKdock", ex); }
 
 							// Dock の変化は UI に影響するため全体再通知・艦隊再計算
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
@@ -3798,7 +3666,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleKdock", ex); }
 					});
 					return true;
 				}
@@ -3829,11 +3697,11 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleKdock", ex); }
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -3908,7 +3776,7 @@ namespace Grabacr07.KanColleWrapper
 												{
 													if (kdockStateMap != null && kdockStateMap.TryGetValue(kd.api_id, out var s)) state = s;
 												}
-												catch { state = null; }
+												catch (Exception ex) { state = null; LogError("TryHandleGetShip", ex); }
 
 												// pending materials を適用（api_state を渡す）
 												try { this.ApplyPendingCreateMaterialsForKdock(kd.api_id, state); } catch { }
@@ -4031,16 +3899,8 @@ namespace Grabacr07.KanColleWrapper
 											try
 											{
 												org?.Ships.Add(new Ship(this.Homeport, ship));
-												// private メソッド RaiseShipsChanged をリフレクションで呼ぶ
-												try
-												{
-													var mi = org?.GetType().GetMethod("RaiseShipsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-													mi?.Invoke(org, null);
-												}
-												catch (Exception)
-												{
-													try { org?.NotifyUpdated(); } catch { }
-												}
+												try { org?.RaiseShipsChanged(); }
+												catch (Exception) { try { org?.NotifyUpdated(); } catch { } }
 											}
 											catch (Exception)
 											{
@@ -4153,70 +4013,33 @@ namespace Grabacr07.KanColleWrapper
 				if (materials == null || req == null) return;
 
 				// 1) 燃料/弾薬/鋼材/ボーキ を差し引く（負にならないようガード）
-				try
-				{
-					var newMat = new int[4];
-					newMat[0] = Math.Max(0, materials.Fuel - (req.Length > 0 ? req[0] : 0));
-					newMat[1] = Math.Max(0, materials.Ammunition - (req.Length > 1 ? req[1] : 0));
-					newMat[2] = Math.Max(0, materials.Steel - (req.Length > 2 ? req[2] : 0));
-					newMat[3] = Math.Max(0, materials.Bauxite - (req.Length > 3 ? req[3] : 0));
-
-					var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-					mi?.Invoke(materials, new object[] { newMat });
-				}
-				catch (Exception)
-				{
-				}
+				var newMat = new int[4];
+				newMat[0] = Math.Max(0, materials.Fuel - (req.Length > 0 ? req[0] : 0));
+				newMat[1] = Math.Max(0, materials.Ammunition - (req.Length > 1 ? req[1] : 0));
+				newMat[2] = Math.Max(0, materials.Steel - (req.Length > 2 ? req[2] : 0));
+				newMat[3] = Math.Max(0, materials.Bauxite - (req.Length > 3 ? req[3] : 0));
+				materials.Update(newMat);
 
 				// 2) api_item5 は開発資材 (DevelopmentMaterials) として減算する
-				try
+				if (req.Length > 4)
 				{
-					if (req.Length > 4)
-					{
-						var decDev = req[4];
-						if (decDev != 0)
-						{
-							var propDev = typeof(Materials).GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							if (propDev != null)
-							{
-								var cur = (int)propDev.GetValue(materials);
-								var next = Math.Max(0, cur - decDev);
-								propDev.SetValue(materials, next);
-							}
-						}
-					}
-				}
-				catch (Exception)
-				{
+					materials.DecrementDevelopmentMaterials(req[4]);
 				}
 
 				// 3) api_state による InstantBuildMaterials の減算（api_state == 3 の場合は使用とみなして -1）
 				//    ただし、createship_speedchange 等ですでに即時減算済みなら二重減算しない
-				try
+				bool alreadyApplied = false;
+				lock (this.appliedBuildKdock)
 				{
-					bool alreadyApplied = false;
-					lock (this.appliedBuildKdock)
+					if (this.appliedBuildKdock.Contains(kdockId))
 					{
-						if (this.appliedBuildKdock.Contains(kdockId))
-						{
-							alreadyApplied = true;
-							this.appliedBuildKdock.Remove(kdockId);
-						}
-					}
-
-					if (!alreadyApplied && api_state.HasValue && api_state.Value == 3)
-					{
-						var propBuild = typeof(Materials).GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-						if (propBuild != null)
-						{
-							var cur = (int)propBuild.GetValue(materials);
-							var next = Math.Max(0, cur - 1);
-							propBuild.SetValue(materials, next);
-						}
+						alreadyApplied = true;
+						this.appliedBuildKdock.Remove(kdockId);
 					}
 				}
-				catch (Exception)
+				if (!alreadyApplied && api_state.HasValue && api_state.Value == 3)
 				{
+					materials.DecrementInstantBuildMaterials();
 				}
 			}
 			catch (Exception)
@@ -4245,41 +4068,12 @@ namespace Grabacr07.KanColleWrapper
 							// 1) 資源反映 (api_after_material)
 							try
 							{
-								if (rem.api_after_material != null)
+								if (rem.api_after_material != null && materials != null)
 								{
-									var arr = rem.api_after_material;
-									if (materials != null)
-									{
-										// 長さ8 -> 個別プロパティ更新
-										if (arr.Length >= 8)
-										{
-											var ty = typeof(Materials);
-											try
-											{
-												ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[0]);
-												ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[1]);
-												ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[2]);
-												ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[3]);
-												ty.GetProperty("InstantBuildMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[4]);
-												ty.GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[5]);
-												ty.GetProperty("DevelopmentMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[6]);
-												ty.GetProperty("ImprovementMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(materials, arr[7]);
-											}
-											catch { }
-										}
-										else if (arr.Length >= 4)
-										{
-											try
-											{
-												var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-												mi?.Invoke(materials, new object[] { new[] { arr[0], arr[1], arr[2], arr[3] } });
-											}
-											catch { }
-										}
-									}
+									materials.UpdateFull(rem.api_after_material);
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 
 							// 2) api_after_slot の反映（生成・改修された装備）
 							try
@@ -4287,7 +4081,6 @@ namespace Grabacr07.KanColleWrapper
 								if (rem.api_after_slot != null && iy != null)
 								{
 									var a = rem.api_after_slot;
-									// kcsapi_slotitem に合わせて一時オブジェクトを作る
 									var raw = new kcsapi_slotitem
 									{
 										api_id = a.api_id,
@@ -4301,7 +4094,6 @@ namespace Grabacr07.KanColleWrapper
 									{
 										if (iy.SlotItems.ContainsKey(raw.api_id))
 										{
-											// 既存なら Remodel を呼ぶ（UI バインディングを発火）
 											try { iy.SlotItems[raw.api_id].Remodel(raw.api_level, raw.api_slotitem_id); } catch { }
 										}
 										else
@@ -4309,20 +4101,14 @@ namespace Grabacr07.KanColleWrapper
 											try { iy.SlotItems.Add(new SlotItem(raw)); } catch { }
 										}
 									}
-									catch { }
+									catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 
-									// 通知
-									try
-									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(iy, null);
-									}
-									catch { }
+									try { iy.RaiseSlotItemsChanged(); } catch { }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 
-							// 3) api_use_slot_id: 使用（消費）された装備 ID の削除（存在すれば MemberTable から削除）
+							// 3) api_use_slot_id: 使用（消費）された装備 ID の削除
 							try
 							{
 								if (rem.api_use_slot_id != null && rem.api_use_slot_id.Length > 0 && iy != null)
@@ -4331,26 +4117,21 @@ namespace Grabacr07.KanColleWrapper
 									{
 										try { iy.SlotItems.Remove(id); } catch { }
 									}
-									try
-									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(iy, null);
-									}
-									catch { }
+									try { iy.RaiseSlotItemsChanged(); } catch { }
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 
 							// 最後に組織レベルの更新通知で UI を確実に再描画
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 					});
 
 					return true;
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleRemodelSlot", ex); }
 
 			return true;
 		}
@@ -4441,18 +4222,13 @@ namespace Grabacr07.KanColleWrapper
 											newMat[1] = Math.Max(0, materials.Ammunition - totalConsume[1]);
 											newMat[2] = Math.Max(0, materials.Steel - totalConsume[2]);
 											newMat[3] = Math.Max(0, materials.Bauxite - totalConsume[3]);
-
-											var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-											mi?.Invoke(materials, new object[] { newMat });
+											materials.Update(newMat);
 										}
 									}
-									catch
-									{
-										// 念のため swallow（Materials による反映は安全に行いたい）
-									}
+									catch (Exception ex) { LogError("TryHandleNdockList", ex); }
 								}
 							}
-							catch
+							catch (Exception ex)
 							{
 							}
 
@@ -4467,7 +4243,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
@@ -4501,11 +4277,11 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch { }
+						catch (Exception ex) { LogError("TryHandleNdockList", ex); }
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 			return true;
@@ -4550,7 +4326,7 @@ namespace Grabacr07.KanColleWrapper
 					addMaterials = matTok.Select(t => (int?)t ?? 0).ToArray();
 				}
 			}
-			catch { addMaterials = null; }
+			catch (Exception ex) { addMaterials = null; LogError("TryHandleNyukyoStart", ex); }
 
 			RunOnUi(() =>
 			{
@@ -4578,32 +4354,17 @@ namespace Grabacr07.KanColleWrapper
 								abs[1] = materials.Ammunition + (addMaterials.Length > 1 ? addMaterials[1] : 0);
 								abs[2] = materials.Steel + (addMaterials.Length > 2 ? addMaterials[2] : 0);
 								abs[3] = materials.Bauxite + (addMaterials.Length > 3 ? addMaterials[3] : 0);
-
-								var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-								mi?.Invoke(materials, new object[] { abs });
+								materials.Update(abs);
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleNyukyoStart", ex); }
 
 					// 高速修復材の即時減算（UI に即時反映）
-					try
+					if (highspeedRequested)
 					{
-						if (highspeedRequested)
-						{
-							var materials = this.Homeport?.Materials;
-							if (materials != null)
-							{
-								var prop = typeof(Materials).GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								if (prop != null)
-								{
-									var cur = (int)prop.GetValue(materials);
-									prop.SetValue(materials, Math.Max(0, cur - 1));
-								}
-							}
-						}
+						try { this.Homeport?.Materials?.DecrementInstantRepairMaterials(); } catch { }
 					}
-					catch { }
 
 					// 所属艦隊の状態を更新
 					try { this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update(); } catch { }
@@ -4611,7 +4372,7 @@ namespace Grabacr07.KanColleWrapper
 					// 全体 UI の再評価
 					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleNyukyoStart", ex); }
 			});
 
 			return true;
@@ -4651,7 +4412,7 @@ namespace Grabacr07.KanColleWrapper
 					addMaterials = matTok.Select(t => (int?)t ?? 0).ToArray();
 				}
 			}
-			catch { addMaterials = null; }
+			catch (Exception ex) { addMaterials = null; LogError("TryHandleNyukyoSpeedChange", ex); }
 
 			RunOnUi(() =>
 			{
@@ -4679,34 +4440,19 @@ namespace Grabacr07.KanColleWrapper
 								abs[1] = materials.Ammunition + (addMaterials.Length > 1 ? addMaterials[1] : 0);
 								abs[2] = materials.Steel + (addMaterials.Length > 2 ? addMaterials[2] : 0);
 								abs[3] = materials.Bauxite + (addMaterials.Length > 3 ? addMaterials[3] : 0);
-
-								var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-								mi?.Invoke(materials, new object[] { abs });
+								materials.Update(abs);
 							}
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleNyukyoSpeedChange", ex); }
 
 					// 高速修復材（speedchange は高速修復の結果なので -1 すると安全）
-					try
-					{
-						var materials = this.Homeport?.Materials;
-						if (materials != null)
-						{
-							var prop = typeof(Materials).GetProperty("InstantRepairMaterials", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-							if (prop != null)
-							{
-								var cur = (int)prop.GetValue(materials);
-								prop.SetValue(materials, Math.Max(0, cur - 1));
-							}
-						}
-					}
-					catch { }
+					try { this.Homeport?.Materials?.DecrementInstantRepairMaterials(); } catch { }
 
 					// UI 更新
 					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 				}
-				catch { }
+				catch (Exception ex) { LogError("TryHandleNyukyoSpeedChange", ex); }
 			});
 
 			return true;
@@ -4729,12 +4475,11 @@ namespace Grabacr07.KanColleWrapper
 					{
 						try
 						{
-							// Materials の private Update(int[]) をリフレクションで呼ぶ
+							// 資源反映
 							var materials = this.Homeport?.Materials;
 							if (materials != null && charge.api_material != null)
 							{
-								var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-								mi?.Invoke(materials, new object[] { charge.api_material });
+								materials.Update(charge.api_material);
 							}
 
 							// Ships の補給反映
@@ -4753,7 +4498,7 @@ namespace Grabacr07.KanColleWrapper
 
 										if (affectedFleet == null) affectedFleet = org.GetFleet(ship.Id);
 									}
-									catch
+									catch (Exception ex)
 									{
 									}
 								}
@@ -4771,13 +4516,13 @@ namespace Grabacr07.KanColleWrapper
 							// カウンタープラグイン用イベント発火
 							try { this.SupplyCompleted?.Invoke(this, EventArgs.Empty); } catch { }
 						}
-						catch
+						catch (Exception ex)
 						{
 						}
 					});
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -4812,7 +4557,7 @@ namespace Grabacr07.KanColleWrapper
 							if (key == "api_base_id") int.TryParse(val, out baseId);
 						}
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleSetPlane", ex); }
 				}
 
 				if (areaId <= 0 || baseId <= 0)
@@ -4837,7 +4582,7 @@ namespace Grabacr07.KanColleWrapper
 						planeInfo = planeTok.ToObject<kcsapi_plane_info[]>();
 					}
 				}
-				catch { planeInfo = null; }
+				catch (Exception ex) { planeInfo = null; LogError("TryHandleSetPlane", ex); }
 
 				try
 				{
@@ -4847,7 +4592,7 @@ namespace Grabacr07.KanColleWrapper
 						distance = distanceTok.ToObject<ApiDistance>();
 					}
 				}
-				catch { distance = null; }
+				catch (Exception ex) { distance = null; LogError("TryHandleSetPlane", ex); }
 
 				if (planeInfo == null && distance == null)
 				{
@@ -4870,12 +4615,12 @@ namespace Grabacr07.KanColleWrapper
 							airBase.UpdateFromSetPlane(planeInfo, distance, baseId);
 						}
 					}
-					catch
+					catch (Exception ex)
 					{
 					}
 				});
 			}
-			catch
+			catch (Exception ex)
 			{
 			}
 
@@ -4942,7 +4687,7 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 				}
-				catch { /* フォールバック失敗しても続行 */ }
+				catch (Exception ex) { LogError("TryHandleAirCorpsChangeOrSet", ex); }
 
 				// requestBody から得られた情報で個別更新を試みる
 				if (areaId > 0 && baseId > 0)
@@ -5002,14 +4747,14 @@ namespace Grabacr07.KanColleWrapper
 					var f = data["api_after_fuel"];
 					if (f != null && f.Type == JTokenType.Integer) afterFuel = f.Value<int>();
 				}
-				catch { afterFuel = null; }
+				catch (Exception ex) { afterFuel = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				try
 				{
 					var b = data["api_after_bauxite"];
 					if (b != null && b.Type == JTokenType.Integer) afterBauxite = b.Value<int>();
 				}
-				catch { afterBauxite = null; }
+				catch (Exception ex) { afterBauxite = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				// api_plane_info を取得
 				kcsapi_plane_info[] planeInfo = null;
@@ -5021,7 +4766,7 @@ namespace Grabacr07.KanColleWrapper
 						planeInfo = planeTok.ToObject<kcsapi_plane_info[]>();
 					}
 				}
-				catch { planeInfo = null; }
+				catch (Exception ex) { planeInfo = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				// api_distance を取得
 				ApiDistance distance = null;
@@ -5033,7 +4778,7 @@ namespace Grabacr07.KanColleWrapper
 						distance = distanceTok.ToObject<ApiDistance>();
 					}
 				}
-				catch { distance = null; }
+				catch (Exception ex) { distance = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				// UI スレッドで安全に反映
 				RunOnUi(() =>
@@ -5045,59 +4790,13 @@ namespace Grabacr07.KanColleWrapper
 						// 資源の更新
 						if (materials != null && (afterFuel.HasValue || afterBauxite.HasValue))
 						{
-							int curFuel = 0, curAmmo = 0, curSteel = 0, curBaux = 0;
 							try
 							{
-								var ty = typeof(Materials);
-								var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								var pAmmo = ty.GetProperty("Ammunition", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								var pSteel = ty.GetProperty("Steel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-								if (pFuel != null) curFuel = (int)pFuel.GetValue(materials);
-								if (pAmmo != null) curAmmo = (int)pAmmo.GetValue(materials);
-								if (pSteel != null) curSteel = (int)pSteel.GetValue(materials);
-								if (pBaux != null) curBaux = (int)pBaux.GetValue(materials);
+								int newFuel = afterFuel ?? materials.Fuel;
+								int newBaux = afterBauxite ?? materials.Bauxite;
+								materials.SetFuelAndBauxite(newFuel, newBaux);
 							}
-							catch { }
-
-							int newFuel = afterFuel ?? curFuel;
-							int newBaux = afterBauxite ?? curBaux;
-
-							try
-							{
-								var ty = typeof(Materials);
-								var pFuel = ty.GetProperty("Fuel", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-								var pBaux = ty.GetProperty("Bauxite", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-								bool setFuel = false, setBaux = false;
-
-								if (afterFuel.HasValue && pFuel != null)
-								{
-									pFuel.SetValue(materials, newFuel);
-									setFuel = true;
-								}
-								if (afterBauxite.HasValue && pBaux != null)
-								{
-									pBaux.SetValue(materials, newBaux);
-									setBaux = true;
-								}
-
-								if (!(setFuel && setBaux))
-								{
-									var mi = typeof(Materials).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(int[]) }, null);
-									if (mi != null)
-									{
-										var arr = new int[4];
-										arr[0] = newFuel;
-										arr[1] = curAmmo;
-										arr[2] = curSteel;
-										arr[3] = newBaux;
-										mi.Invoke(materials, new object[] { arr });
-									}
-								}
-							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleAirCorpsSupply", ex); }
 						}
 
 						// 航空隊の搭載数を更新（api_plane_info がある場合）
@@ -5115,20 +4814,20 @@ namespace Grabacr07.KanColleWrapper
 										{
 											kvp.Value?.UpdateFromSupply(planeInfo, distance);
 										}
-										catch { }
+										catch (Exception ex) { LogError("TryHandleAirCorpsSupply", ex); }
 									}
 								}
 							}
-							catch { }
+							catch (Exception ex) { LogError("TryHandleAirCorpsSupply", ex); }
 						}
 
 						// UI 全体更新を促す
 						try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 					}
-					catch { }
+					catch (Exception ex) { LogError("TryHandleAirCorpsSupply", ex); }
 				});
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleAirCorpsSupply", ex); }
 
 			return true;
 		}
@@ -5154,7 +4853,7 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 			}
-			catch { }
+			catch (Exception ex) { LogError("TryHandleMissionResult", ex); }
 
 			return true;
 		}

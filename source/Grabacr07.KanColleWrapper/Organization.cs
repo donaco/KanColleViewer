@@ -175,7 +175,7 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		private void RaiseShipsChanged()
+		internal void RaiseShipsChanged()
 		{
 			this.RaisePropertyChanged("Ships");
 		}

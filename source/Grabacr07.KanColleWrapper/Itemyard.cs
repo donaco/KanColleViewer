@@ -169,7 +169,7 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 
-		private void RaiseSlotItemsChanged()
+		internal void RaiseSlotItemsChanged()
 		{
 			this.RaisePropertyChanged(nameof(this.SlotItems));
 			this.RaisePropertyChanged(nameof(this.SlotItemsCount));

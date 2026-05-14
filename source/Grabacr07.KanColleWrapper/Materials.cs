@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -214,7 +214,7 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		private void Update(int[] source)
+		internal void Update(int[] source)
 		{
 			if (source != null && source.Length == 4)
 			{
@@ -223,6 +223,52 @@ namespace Grabacr07.KanColleWrapper
 				this.Steel = source[2];
 				this.Bauxite = source[3];
 			}
+		}
+
+		/// <summary>
+		/// 長さ 8 の資源配列で全資材を更新します。
+		/// インデックス: 0=燃料, 1=弾薬, 2=鋼材, 3=ボーキ, 4=高速建造材, 5=高速修復材, 6=開発資材, 7=改修資材
+		/// </summary>
+		internal void UpdateFull(int[] source)
+		{
+			if (source == null) return;
+			if (source.Length >= 8)
+			{
+				this.Fuel = source[0];
+				this.Ammunition = source[1];
+				this.Steel = source[2];
+				this.Bauxite = source[3];
+				this.InstantBuildMaterials = source[4];
+				this.InstantRepairMaterials = source[5];
+				this.DevelopmentMaterials = source[6];
+				this.ImprovementMaterials = source[7];
+			}
+			else if (source.Length >= 4)
+			{
+				this.Update(source);
+			}
+		}
+
+		internal void SetFuelAndBauxite(int fuel, int bauxite)
+		{
+			this.Fuel = fuel;
+			this.Bauxite = bauxite;
+		}
+
+		internal void DecrementInstantBuildMaterials()
+		{
+			this.InstantBuildMaterials = Math.Max(0, this.InstantBuildMaterials - 1);
+		}
+
+		internal void DecrementInstantRepairMaterials()
+		{
+			this.InstantRepairMaterials = Math.Max(0, this.InstantRepairMaterials - 1);
+		}
+
+		internal void DecrementDevelopmentMaterials(int amount)
+		{
+			if (amount > 0)
+				this.DevelopmentMaterials = Math.Max(0, this.DevelopmentMaterials - amount);
 		}
 	}
 }
