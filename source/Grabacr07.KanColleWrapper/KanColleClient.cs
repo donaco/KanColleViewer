@@ -450,7 +450,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				}
@@ -478,7 +478,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				}
@@ -533,12 +533,12 @@ namespace Grabacr07.KanColleWrapper
 					{
 						this.IsInSortie = true;
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				});
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -986,13 +986,13 @@ namespace Grabacr07.KanColleWrapper
 							this.Homeport?.AirBases?.Update(ab, abi);
 
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
@@ -1026,7 +1026,7 @@ namespace Grabacr07.KanColleWrapper
 								{
 									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
-								catch (Exception ex)
+								catch (Exception)
 								{
 									// 初期化に失敗したら以降の処理をスキップ
 									return;
@@ -1077,7 +1077,7 @@ namespace Grabacr07.KanColleWrapper
 							{
 								this.Homeport?.Organization?.NotifyUpdated();
 							}
-							catch (Exception ex)
+							catch (Exception)
 							{
 							}
 
@@ -1099,11 +1099,11 @@ namespace Grabacr07.KanColleWrapper
 									}
 								}
 							}
-							catch (Exception ex)
+							catch (Exception)
 							{
 							}
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 
@@ -1127,7 +1127,7 @@ namespace Grabacr07.KanColleWrapper
 
 							this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 
@@ -1147,7 +1147,7 @@ namespace Grabacr07.KanColleWrapper
 					// 解析失敗でも true を返してハンドリング済みとする（既存ハンドラと同様の挙動）
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
@@ -1414,7 +1414,7 @@ namespace Grabacr07.KanColleWrapper
 										materials.Update(abs);
 									}
 								}
-								catch (Exception ex)
+								catch (Exception)
 								{
 								}
 							}
@@ -1446,7 +1446,7 @@ namespace Grabacr07.KanColleWrapper
 													// MemberTable.Remove が利用可能であれば直接削除
 													this.Homeport?.Itemyard?.SlotItems?.Remove(id);
 												}
-												catch (Exception ex)
+												catch (Exception)
 												{
 												}
 											}
@@ -1458,12 +1458,12 @@ namespace Grabacr07.KanColleWrapper
 											try { this.Homeport?.Itemyard?.RaiseSlotItemsChanged(); }
 											catch (Exception ex) { LogError("TryHandleDestroyItem2", ex); }
 										}
-										catch (Exception ex)
+										catch (Exception)
 										{
 										}
 									}
 								}
-								catch (Exception ex)
+								catch (Exception)
 								{
 								}
 							}
@@ -1474,13 +1474,13 @@ namespace Grabacr07.KanColleWrapper
 							// カウンタープラグイン用イベント発火
 							try { this.ItemDestroyed?.Invoke(this, EventArgs.Empty); } catch { }
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
@@ -1508,7 +1508,7 @@ namespace Grabacr07.KanColleWrapper
 						apiMat = matTok.Select(t => (int?)t ?? 0).ToArray();
 					}
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
 					apiMat = null;
 				}
@@ -1522,7 +1522,7 @@ namespace Grabacr07.KanColleWrapper
 					var unset = data?["api_unset_list"];
 					if (unset != null && unset.HasValues) hasUnsetList = true;
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
 					hasUnsetList = false;
 				}
@@ -1599,7 +1599,7 @@ namespace Grabacr07.KanColleWrapper
 										}
 										// いずれにせよ Ship 自体は削除
 										try { org.Ships.Remove(ship); }
-										catch (Exception ex)
+										catch (Exception)
 										{
 											// MemberTable.Remove(Ship) のオーバーロードがなければ id で削除
 											try { org.Ships.Remove(shipId); } catch { }
@@ -1635,7 +1635,7 @@ namespace Grabacr07.KanColleWrapper
 
 			JToken root;
 			try { root = JToken.Parse(normalized); }
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// 解析失敗は安全に終了（既存の挙動を維持）
 				return true;
@@ -1847,7 +1847,7 @@ namespace Grabacr07.KanColleWrapper
 
 										// api_id_items が実際に艦の ID を表す場合は艦自体を Organization から削除する
 										try { org.Ships.Remove(ship); }
-										catch (Exception ex)
+										catch (Exception)
 										{
 											try { org.Ships.Remove(ship.Id); } catch { }
 										}
@@ -1951,7 +1951,7 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.Homeport.Quests.Update(questlist);
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
@@ -1960,7 +1960,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -2011,7 +2011,7 @@ namespace Grabacr07.KanColleWrapper
 										// 直接既存インスタンスを更新して通知を発火させる（確実な UI 更新）
 										existing.Update(raw);
 									}
-									catch (Exception ex)
+									catch (Exception)
 									{
 										// 個別失敗は記録せずフォールバック
 										toCreate.Add(raw);
@@ -2047,13 +2047,13 @@ namespace Grabacr07.KanColleWrapper
 							// 組織レベルの再通知で DataTemplate 等の再評価を促す
 							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -2169,7 +2169,7 @@ namespace Grabacr07.KanColleWrapper
 			{
 				root = JToken.Parse(normalized);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// JSON 解析できなければ終了
 				return true;
@@ -2263,7 +2263,7 @@ namespace Grabacr07.KanColleWrapper
 					// 組織レベルの再通知で UI 再評価を促す
 					try { org.NotifyUpdated(); } catch { }
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
 				}
 			});
@@ -2385,7 +2385,7 @@ namespace Grabacr07.KanColleWrapper
 					try { org.NotifyUpdated(); } catch { }
 					try { org.RaiseShipsChanged(); } catch { }
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
 				}
 			});
@@ -2407,7 +2407,7 @@ namespace Grabacr07.KanColleWrapper
 				var root = JToken.Parse(normalized);
 				isSuccess = root["api_result"] != null && root["api_result"].Value<int>() == 1;
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				isSuccess = false;
 			}
@@ -2693,7 +2693,7 @@ namespace Grabacr07.KanColleWrapper
 										org.NotifyUpdated();
 									}
 								}
-								catch (Exception ex)
+								catch (Exception)
 								{
 								}
 							});
@@ -2702,7 +2702,7 @@ namespace Grabacr07.KanColleWrapper
 							return true;
 						}
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				}
@@ -2972,13 +2972,13 @@ namespace Grabacr07.KanColleWrapper
 							catch (Exception ex) { LogError("TryHandleDecks", ex); }
 						});
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 						// swallow
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
@@ -3046,7 +3046,7 @@ namespace Grabacr07.KanColleWrapper
 					return true;
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true; // マッチしたが解析失敗でも早期 return（既存ハンドラと同挙動）
@@ -3124,7 +3124,7 @@ namespace Grabacr07.KanColleWrapper
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// swallow
 			}
@@ -3195,7 +3195,7 @@ namespace Grabacr07.KanColleWrapper
 
 				return true;
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// swallow
 			}
@@ -3242,12 +3242,12 @@ namespace Grabacr07.KanColleWrapper
 						try { fleet.RaiseShipsUpdated(); } catch { }
 						try { org.NotifyUpdated(); } catch { }
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				});
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// swallow
 			}
@@ -3288,7 +3288,7 @@ namespace Grabacr07.KanColleWrapper
 							}
 							catch (Exception ex) { LogError("TryHandleShipDeck", ex); }
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
@@ -3297,7 +3297,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -3316,7 +3316,7 @@ namespace Grabacr07.KanColleWrapper
 				{
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -3557,7 +3557,7 @@ namespace Grabacr07.KanColleWrapper
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// swallow
 			}
@@ -3701,7 +3701,7 @@ namespace Grabacr07.KanColleWrapper
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -4228,7 +4228,7 @@ namespace Grabacr07.KanColleWrapper
 									catch (Exception ex) { LogError("TryHandleNdockList", ex); }
 								}
 							}
-							catch (Exception ex)
+							catch (Exception)
 							{
 							}
 
@@ -4243,7 +4243,7 @@ namespace Grabacr07.KanColleWrapper
 								}
 							}
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
@@ -4281,7 +4281,7 @@ namespace Grabacr07.KanColleWrapper
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 			return true;
@@ -4498,7 +4498,7 @@ namespace Grabacr07.KanColleWrapper
 
 										if (affectedFleet == null) affectedFleet = org.GetFleet(ship.Id);
 									}
-									catch (Exception ex)
+									catch (Exception)
 									{
 									}
 								}
@@ -4516,13 +4516,13 @@ namespace Grabacr07.KanColleWrapper
 							// カウンタープラグイン用イベント発火
 							try { this.SupplyCompleted?.Invoke(this, EventArgs.Empty); } catch { }
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 						}
 					});
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
@@ -4615,12 +4615,12 @@ namespace Grabacr07.KanColleWrapper
 							airBase.UpdateFromSetPlane(planeInfo, distance, baseId);
 						}
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 					}
 				});
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 			}
 
