@@ -44,7 +44,7 @@ namespace Grabacr07.KanColleWrapper
 		public CreatedSlotItem CreatedSlotItem
 		{
 			get { return this._CreatedSlotItem; }
-			private set
+			internal set
 			{
 				if (this._CreatedSlotItem != value)
 				{

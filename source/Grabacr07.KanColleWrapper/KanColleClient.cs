@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -1774,35 +1773,33 @@ namespace Grabacr07.KanColleWrapper
 									// 既存ハンドラに合わせ Update を呼ぶ
 									iy?.Update(slotItems);
 
-									// 内部通知を確実に発行
-									try
-									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(this.Homeport?.Itemyard, null);
+												// 内部通知を確実に発行
+												try
+												{
+													iy?.RaiseSlotItemsChanged();
+												}
+												catch (Exception ex) { LogError("TryHandlePowerup", ex); }
+											}
+										}
+										catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 									}
-									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
-								}
-							}
-							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
-						}
-						else if (slotTok != null && slotTok.Type == JTokenType.Object)
-						{
-							try
-							{
-								var single = slotTok.ToObject<kcsapi_slotitem>();
-								if (single != null)
-								{
-									iy?.Update(new[] { single });
-									try
+									else if (slotTok != null && slotTok.Type == JTokenType.Object)
 									{
-										var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-										mi?.Invoke(this.Homeport?.Itemyard, null);
+										try
+										{
+											var single = slotTok.ToObject<kcsapi_slotitem>();
+											if (single != null)
+											{
+												iy?.Update(new[] { single });
+												try
+												{
+													iy?.RaiseSlotItemsChanged();
+												}
+												catch (Exception ex) { LogError("TryHandlePowerup", ex); }
+											}
+										}
+										catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 									}
-									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
-								}
-							}
-							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
-						}
 
 						// 追加: requestBody にあった api_id_items を「艦 ID のみ」として扱う（Organization.Powerup と同様）。
 						// 装備 ID を直接削除しない（装備解除後の api_unset_list による誤削除防止）。
@@ -1858,9 +1855,7 @@ namespace Grabacr07.KanColleWrapper
 								// Itemyard の再描画通知（装備解除時は必須、通常時も保険として呼ぶ）
 								try
 								{
-									var iy2 = this.Homeport?.Itemyard;
-									var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-									mi?.Invoke(iy2, null);
+									this.Homeport?.Itemyard?.RaiseSlotItemsChanged();
 								}
 								catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 
@@ -1880,12 +1875,7 @@ namespace Grabacr07.KanColleWrapper
 						{
 							try
 							{
-								var iy = this.Homeport?.Itemyard;
-								if (iy != null)
-								{
-									var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-									mi?.Invoke(iy, null);
-								}
+								this.Homeport?.Itemyard?.RaiseSlotItemsChanged();
 							}
 							catch (Exception ex) { LogError("TryHandlePowerup", ex); }
 						}
@@ -3433,18 +3423,17 @@ namespace Grabacr07.KanColleWrapper
 											catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 										}
 
-										try
-										{
-											var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-											mi?.Invoke(iy, null);
+													try
+													{
+														iy?.RaiseSlotItemsChanged();
+													}
+													catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
+												}
+											}
+											catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 										}
-										catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
-									}
-								}
-								catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
-							}
 
-							// 3) api_unset_items / api_unset_list があれば UI 再描画通知（削除は慎重に行う）
+										// 3) api_unset_items / api_unset_list があれば UI 再描画通知
 							try
 							{
 								var unsetTok = data["api_unset_items"] ?? data["api_unset_list"] ?? data["api_unset_slot"];
@@ -3474,7 +3463,7 @@ namespace Grabacr07.KanColleWrapper
 									try
 									{
 										// Dockyard.CreateSlotItem に相当する処理は内部 private のため簡易に CreatedSlotItem を作る
-										dockyard.GetType().GetProperty("CreatedSlotItem", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(dockyard, new CreatedSlotItem(createTok));
+														dockyard.CreatedSlotItem = new CreatedSlotItem(createTok);
 									}
 									catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 								}
@@ -3817,24 +3806,23 @@ namespace Grabacr07.KanColleWrapper
 																}
 															}
 
-															// 内部通知を確実に発行
-															try
-															{
-																var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-																mi?.Invoke(iy, null);
+																	// 内部通知を確実に発行
+																	try
+																	{
+																		iy?.RaiseSlotItemsChanged();
+																	}
+																	catch (Exception)
+																	{
+																	}
+																}
+																else
+																{
+																	this.Homeport?.Itemyard?.Update(newItems);
+																}
 															}
 															catch (Exception)
 															{
 															}
-														}
-														else
-														{
-															this.Homeport?.Itemyard?.Update(newItems);
-														}
-													}
-													catch (Exception)
-													{
-													}
 												}
 											}
 										}
@@ -3845,15 +3833,7 @@ namespace Grabacr07.KanColleWrapper
 										// AddFromDock 後に内部通知を呼ぶ（保険）
 										try
 										{
-											var iy = this.Homeport?.Itemyard;
-											if (iy != null)
-											{
-												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-												if (mi != null)
-												{
-													mi.Invoke(iy, null);
-												}
-											}
+											this.Homeport?.Itemyard?.RaiseSlotItemsChanged();
 										}
 										catch (Exception)
 										{
@@ -3941,8 +3921,7 @@ namespace Grabacr07.KanColleWrapper
 											this.Homeport.Itemyard.Update(newItems);
 											try
 											{
-												var mi = typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-												if (mi != null) mi.Invoke(this.Homeport?.Itemyard, null);
+												this.Homeport?.Itemyard?.RaiseSlotItemsChanged();
 											}
 											catch (Exception)
 											{
