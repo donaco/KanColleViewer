@@ -97,8 +97,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 				.Select(a =>
 				{
 					var w = new ExpeditionWrapper(a.Id, a.Expedition);
-					w.Subscribe(nameof(ExpeditionWrapper.State), () => this.Update()).AddTo(this.wrapperDisposable);
-					w.AddTo(this.wrapperDisposable);
+						w.Subscribe(nameof(ExpeditionWrapper.State), () => this.Update()).AddTo(w);
+						w.AddTo(this.wrapperDisposable);
 					return w;
 				})
 				.ToArray();
