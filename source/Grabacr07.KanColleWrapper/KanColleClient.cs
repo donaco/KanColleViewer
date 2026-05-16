@@ -1035,7 +1035,9 @@ namespace Grabacr07.KanColleWrapper
 							{
 								try
 								{
-									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+								var oldHomeport = this.Homeport;
+								oldHomeport?.Dispose();
+								this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
 								catch (Exception)
 								{

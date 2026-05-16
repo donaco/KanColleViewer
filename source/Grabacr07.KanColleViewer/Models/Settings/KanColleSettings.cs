@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Reactive.Disposables;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -13,8 +14,10 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 	/// <summary>
 	/// 艦これの動作に関連する設定を表す静的プロパティを公開します。
 	/// </summary>
-	public class KanColleSettings : IKanColleClientSettings
+	public class KanColleSettings : IKanColleClientSettings, IDisposable
 	{
+
+		private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 		/// <summary>
 		/// 建造中の艦の名前を表示するかどうかを示す設定値を取得します。
 		/// </summary>
@@ -129,11 +132,16 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		public KanColleSettings()
 		{
-			NotificationShorteningTime.Subscribe(_ => this.RaisePropertyChanged(nameof(NotificationShorteningTime)));
-			ReSortieCondition.Subscribe(_ => this.RaisePropertyChanged(nameof(ReSortieCondition)));
-			ViewRangeCalcType.Subscribe(_ => this.RaisePropertyChanged(nameof(ViewRangeCalcType)));
-			IsViewRangeCalcIncludeFirstFleet.Subscribe(_ => this.RaisePropertyChanged(nameof(IsViewRangeCalcIncludeFirstFleet)));
-			IsViewRangeCalcIncludeSecondFleet.Subscribe(_ => this.RaisePropertyChanged(nameof(IsViewRangeCalcIncludeSecondFleet)));
+			_subscriptions.Add(NotificationShorteningTime.Subscribe(_ => this.RaisePropertyChanged(nameof(NotificationShorteningTime))));
+			_subscriptions.Add(ReSortieCondition.Subscribe(_ => this.RaisePropertyChanged(nameof(ReSortieCondition))));
+			_subscriptions.Add(ViewRangeCalcType.Subscribe(_ => this.RaisePropertyChanged(nameof(ViewRangeCalcType))));
+			_subscriptions.Add(IsViewRangeCalcIncludeFirstFleet.Subscribe(_ => this.RaisePropertyChanged(nameof(IsViewRangeCalcIncludeFirstFleet))));
+			_subscriptions.Add(IsViewRangeCalcIncludeSecondFleet.Subscribe(_ => this.RaisePropertyChanged(nameof(IsViewRangeCalcIncludeSecondFleet))));
+		}
+
+		public void Dispose()
+		{
+			_subscriptions.Dispose();
 		}
 
 		protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
