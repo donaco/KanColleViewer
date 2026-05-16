@@ -42,8 +42,6 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
-			Disposable.Create(() => this.fleetDisposable.Dispose()).AddTo(this);
-
 			KanColleClient.Current
 				.Subscribe(nameof(KanColleClient.IsStarted), () => this.InitializeCore(), false)
 				.AddTo(this);
@@ -129,7 +127,11 @@ namespace Grabacr07.KanColleViewer.Plugins
 			this.Updated?.Invoke(this, EventArgs.Empty);
 		}
 
-		public void Dispose() => this.compositDisposable.Dispose();
+		public void Dispose()
+		{
+			this.fleetDisposable.Dispose();
+			this.compositDisposable.Dispose();
+		}
 		ICollection<IDisposable> IDisposableHolder.CompositeDisposable => this.compositDisposable;
 	}
 }
