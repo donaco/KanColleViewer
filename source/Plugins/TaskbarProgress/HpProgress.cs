@@ -27,7 +27,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private const string guid = "DA0E7091-F4A6-4467-9812-3C3E0DF946EA";
 
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
-		private readonly List<IDisposable> fleetHandlers = new List<IDisposable>();
+		private MultipleDisposable fleetDisposable = new MultipleDisposable();
 		private bool initialized;
 
 		public string Id => guid + "-1";
@@ -42,6 +42,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
+			Disposable.Create(() => this.fleetDisposable.Dispose()).AddTo(this);
+
 			KanColleClient.Current
 				.Subscribe(nameof(KanColleClient.IsStarted), () => this.InitializeCore(), false)
 				.AddTo(this);
@@ -64,22 +66,23 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			if (!this.initialized) return;
 
-			foreach (var handler in this.fleetHandlers)
-			{
-				handler.Dispose();
-			}
-			this.fleetHandlers.Clear();
+			this.fleetDisposable.Dispose();
+			this.fleetDisposable = new MultipleDisposable();
 
 			foreach (var fleet in KanColleClient.Current.Homeport.Organization.Fleets.Values)
 			{
-				this.fleetHandlers.Add(fleet.Subscribe(nameof(Fleet.Ships), this.Update));
-				this.fleetHandlers.Add(fleet.Subscribe(nameof(Fleet.IsInSortie), this.Update));
+				fleet.Subscribe(nameof(Fleet.Ships), this.Update).AddTo(this.fleetDisposable);
+				fleet.Subscribe(nameof(Fleet.IsInSortie), this.Update).AddTo(this.fleetDisposable);
 			}
+
+			this.Update();
 		}
 
 		public void Update()
 		{
-			var org = KanColleClient.Current.Homeport.Organization;
+			var org = KanColleClient.Current.Homeport?.Organization;
+			if (org == null) return;
+
 			Ship[] ships;
 			if (org.Fleets.Values.Any(x => x.IsInSortie))
 			{
@@ -91,9 +94,10 @@ namespace Grabacr07.KanColleViewer.Plugins
 			}
 			else
 			{
-				ships = org.Combined
+				ships = org.Combined && org.CombinedFleet != null
 					? org.CombinedFleet.Fleets.SelectMany(x => x.Ships).ToArray()
-					: org.Fleets[1].Ships.ToArray();
+					: org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships?.ToArray() ?? Array.Empty<Ship>()
+												: Array.Empty<Ship>();
 			}
 
 			if (!ships.Any())
