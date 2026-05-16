@@ -15,7 +15,7 @@ namespace Counter
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
 	[ExportMetadata("Description", "回数カウント機能や出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.1.1")]
+	[ExportMetadata("Version", "2.1.2")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
@@ -168,6 +168,14 @@ namespace Counter
 			{
 				System.Diagnostics.Debug.WriteLine($"[Counter] 保存エラー: {ex.Message}");
 			}
+
+			// ← 追加: イベント購読を解除してメモリリークを防ぐ
+			if (this.viewModel?.Counters != null)
+			{
+				foreach (var counter in this.viewModel.Counters)
+					counter.Dispose();
+			}
+			this.viewModel?.SortieHistory?.Dispose();
 		}
 
 		public void RequestNotify(string type, string header, string body)

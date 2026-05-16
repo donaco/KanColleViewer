@@ -1,14 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models.Raw;
 
 namespace Grabacr07.KanColleWrapper
 {
-	public abstract class CounterBase : Notifier
+	public abstract class CounterBase : Notifier, IDisposable
 	{
+		// サブクラスが Subscribe() の戻り値をここへ登録する
+		protected readonly CompositeDisposable Disposables = new CompositeDisposable();
+
 		#region Count 変更通知プロパティ
 
 		private int _Count;
@@ -32,16 +36,24 @@ namespace Grabacr07.KanColleWrapper
 		{
 			this.Count = 0;
 		}
+
+		public void Dispose()
+		{
+			this.Disposables.Dispose();
+		}
 	}
 
 	public class ItemDestroyCounter : CounterBase
 	{
 		public ItemDestroyCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_kousyou_destroyitem2
-				.TryParse()
-				.Where(x => x.IsSuccess)
-				.Subscribe(_ => this.Count++);
+			// DisposeWith の代わりに Add() で管理（Rx 2.2.5 対応）
+			this.Disposables.Add(
+				proxy.api_req_kousyou_destroyitem2
+					.TryParse()
+					.Where(x => x.IsSuccess)
+					.Subscribe(_ => this.Count++)
+			);
 		}
 	}
 
@@ -49,23 +61,26 @@ namespace Grabacr07.KanColleWrapper
 	{
 		public SupplyCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_hokyu_charge
-				.TryParse()
-				.Where(x => x.IsSuccess)
-				.Subscribe(_ => this.Count++);
+			this.Disposables.Add(
+				proxy.api_req_hokyu_charge
+					.TryParse()
+					.Where(x => x.IsSuccess)
+					.Subscribe(_ => this.Count++)
+			);
 		}
 	}
-
 
 	public class MissionCounter : CounterBase
 	{
 		public MissionCounter(KanColleProxy proxy)
 		{
-			proxy.api_req_mission_result
-				.TryParse<kcsapi_mission_result>()
-				.Where(x => x.IsSuccess)
-				.Where(x => x.Data.api_clear_result == 1)
-				.Subscribe(_ => this.Count++);
+			this.Disposables.Add(
+				proxy.api_req_mission_result
+					.TryParse<kcsapi_mission_result>()
+					.Where(x => x.IsSuccess)
+					.Where(x => x.Data.api_clear_result == 1)
+					.Subscribe(_ => this.Count++)
+			);
 		}
 	}
 }

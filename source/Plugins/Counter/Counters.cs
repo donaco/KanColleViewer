@@ -12,12 +12,18 @@ using Livet;
 
 namespace Counter
 {
-	public abstract class CounterBase : NotificationObject
+	public abstract class CounterBase : NotificationObject, IDisposable
 	{
+		// ← サブクラスが登録解除処理をここへ積む
+		private readonly List<Action> _cleanups = new List<Action>();
+
+		protected void RegisterCleanup(Action cleanup)
+		{
+			this._cleanups.Add(cleanup);
+		}
+
 		#region Text 変更通知プロパティ
-
 		private string _Text;
-
 		public string Text
 		{
 			get { return this._Text; }
@@ -30,13 +36,10 @@ namespace Counter
 				}
 			}
 		}
-
 		#endregion
 
 		#region Count 変更通知プロパティ
-
 		private int _Count;
-
 		public int Count
 		{
 			get { return this._Count; }
@@ -49,16 +52,10 @@ namespace Counter
 				}
 			}
 		}
-
 		#endregion
 
 		#region IsEnabled 変更通知プロパティ
-
 		private bool _IsEnabled = true;
-
-		/// <summary>
-		/// カウントの有効/無効を切り替えます。false の場合、カウントアップをスキップします。
-		/// </summary>
 		public bool IsEnabled
 		{
 			get { return this._IsEnabled; }
@@ -71,78 +68,85 @@ namespace Counter
 				}
 			}
 		}
-
 		#endregion
 
 		public void Reset()
 		{
 			this.Count = 0;
 		}
+
+		public void Dispose()
+		{
+			foreach (var cleanup in this._cleanups)
+				cleanup();
+			this._cleanups.Clear();
+		}
 	}
 
-	/// <summary>
-	/// 補給をカウント
-	/// </summary>
+	/// <summary>補給をカウント</summary>
 	public class SupplyCounter : CounterBase
 	{
 		public SupplyCounter(KanColleProxy proxy)
 		{
-			KanColleClient.Current.SupplyCompleted += (sender, e) =>
+			// ← ハンドラーをフィールドに保持して登録解除できるようにする
+			EventHandler handler = (sender, e) =>
 			{
 				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] SupplyCompleted イベント発火!");
 				this.Count++;
 			};
 
+			KanColleClient.Current.SupplyCompleted += handler;
+			this.RegisterCleanup(() => KanColleClient.Current.SupplyCompleted -= handler); // ← 解除を登録
+
 			this.Text = "艦娘に補給した回数";
 		}
 	}
 
-	/// <summary>
-	/// 装備の破棄をカウント
-	/// </summary>
+	/// <summary>装備の破棄をカウント</summary>
 	public class ItemDestroyCounter : CounterBase
 	{
 		public ItemDestroyCounter(KanColleProxy proxy)
 		{
-			KanColleClient.Current.ItemDestroyed += (sender, e) =>
+			EventHandler handler = (sender, e) =>
 			{
 				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] ItemDestroyed イベント発火!");
 				this.Count++;
 			};
 
+			KanColleClient.Current.ItemDestroyed += handler;
+			this.RegisterCleanup(() => KanColleClient.Current.ItemDestroyed -= handler); // ← 解除を登録
+
 			this.Text = "装備を破棄した回数";
 		}
 	}
 
-	/// <summary>
-	/// 遠征の成功をカウント
-	/// </summary>
+	/// <summary>遠征の成功をカウント</summary>
 	public class MissionCounter : CounterBase
 	{
 		public MissionCounter(KanColleProxy proxy)
 		{
-			KanColleClient.Current.MissionSucceeded += (sender, e) =>
+			EventHandler handler = (sender, e) =>
 			{
 				if (!this.IsEnabled) return;
 				System.Diagnostics.Debug.WriteLine("[Counter] MissionSucceeded イベント発火!");
 				this.Count++;
 			};
 
+			KanColleClient.Current.MissionSucceeded += handler;
+			this.RegisterCleanup(() => KanColleClient.Current.MissionSucceeded -= handler); // ← 解除を登録
+
 			this.Text = "遠征に成功した回数";
 		}
 	}
 
-	/// <summary>
-	/// 出撃をカウント
-	/// </summary>
+	/// <summary>出撃をカウント</summary>
 	public class SortieCounter : CounterBase
 	{
 		public SortieCounter(KanColleProxy proxy)
 		{
-			// SortieInfo.IsActive が true になったタイミング（= api_req_map/start）でカウント
-			KanColleClient.Current.SortieInfo.PropertyChanged += (sender, e) =>
+			PropertyChangedEventHandler handler = (sender, e) =>
 			{
 				if (!this.IsEnabled) return;
 				if (e.PropertyName == nameof(SortieInfo.IsActive)
@@ -152,6 +156,9 @@ namespace Counter
 					this.Count++;
 				}
 			};
+
+			KanColleClient.Current.SortieInfo.PropertyChanged += handler;
+			this.RegisterCleanup(() => KanColleClient.Current.SortieInfo.PropertyChanged -= handler); // ← 解除を登録
 
 			this.Text = "海域に出撃した回数";
 		}
@@ -687,7 +694,7 @@ namespace Counter
 	/// 直近の出撃履歴を保持・表示するカウンターです。
 	/// BossOnly が true の場合、ボスセルでの戦闘結果のみを記録します。
 	/// </summary>
-	public class SortieHistoryCounter : NotificationObject
+	public class SortieHistoryCounter : NotificationObject, IDisposable
 	{
 		private readonly int _maxHistory;
 		private readonly SortieInfo _sortieInfo;
@@ -1147,6 +1154,17 @@ namespace Counter
 			else
 			{
 				restoreAction();
+			}
+		}
+
+		/// <summary>
+		/// イベント購読を解除してリソースを解放します。
+		/// </summary>
+		public void Dispose()
+		{
+			if (this._sortieInfo != null)
+			{
+				this._sortieInfo.PropertyChanged -= this.SortieInfo_PropertyChanged;
 			}
 		}
 	}
