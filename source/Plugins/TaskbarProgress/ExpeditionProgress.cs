@@ -61,10 +61,15 @@ namespace Grabacr07.KanColleViewer.Plugins
 				.AddTo(this);
 
 			var timer = new DispatcherTimer(DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(Settings.Default.Interval), };
-			timer.Tick += (sender, e) => this.Update();
+			EventHandler tickHandler = (sender, e) => this.Update();
+			timer.Tick += tickHandler;
 			timer.Start();
 
-			Disposable.Create(() => timer.Stop()).AddTo(this);
+			Disposable.Create(() =>
+			{
+				timer.Stop();
+				timer.Tick -= tickHandler;
+			}).AddTo(this);
 			Disposable.Create(() => Settings.Default.Save()).AddTo(this);
 		}
 
