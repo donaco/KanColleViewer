@@ -144,9 +144,6 @@ namespace Grabacr07.KanColleWrapper
 		// Initialieze() の Subscribe を管理する（再呼出し時に前回分を破棄）
 		private System.Reactive.Disposables.CompositeDisposable _initializeDisposables;
 
-		// IsInSortie 管理の Subscribe を保持するフィールド
-		private IDisposable _isInSortieSubscription;
-
 		private KanColleClient()
 		{
 			this.Initialieze();
@@ -185,17 +182,7 @@ namespace Grabacr07.KanColleWrapper
 					catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
 				});
 
-			var start = this.Proxy.api_req_map_start;
-			var end = this.Proxy.api_port;
-
-			this._isInSortieSubscription = this.Proxy.ApiSessionSource
-				.SkipUntil(start.Do(_ => this.IsInSortie = true))
-				.TakeUntil(end)
-				.Finally(() => this.IsInSortie = false)
-				.Repeat()
-				.Subscribe();
-
-		}
+			}
 
 		public void Initialieze()
 		{
@@ -254,6 +241,15 @@ namespace Grabacr07.KanColleWrapper
 				requireInfoSource
 					.SkipUntil(firstTime)
 					.Subscribe(x => this.SetRequireInfo(x.Data)));
+
+			// IsInSortie 管理: 再呼出し時は前回分が _initializeDisposables.Dispose() で破棄される
+			_initializeDisposables.Add(
+				proxy.ApiSessionSource
+					.SkipUntil(proxy.api_req_map_start.Do(_ => this.IsInSortie = true))
+					.TakeUntil(proxy.api_port)
+					.Finally(() => this.IsInSortie = false)
+					.Repeat()
+					.Subscribe());
 		}
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）

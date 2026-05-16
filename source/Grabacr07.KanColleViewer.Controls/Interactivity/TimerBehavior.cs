@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleViewer.Interactivity
 		private static void IntervalChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var instance = (TimerBehavior)d;
-if (instance.timer == null) return;
+			if (instance.timer == null) return;
 			instance.timer.Stop();
 			instance.timer.Interval = (TimeSpan)e.NewValue;
 			instance.timer.Start();

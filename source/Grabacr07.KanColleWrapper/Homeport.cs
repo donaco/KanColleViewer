@@ -1,4 +1,4 @@
-using Grabacr07.KanColleWrapper.Models;
+﻿using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq; // 追加
@@ -295,27 +295,27 @@ namespace Grabacr07.KanColleWrapper
 					catch
 					{
 					}
-					}));
+				}));
 
-					// 個別 basic も UI スレッドで反映
-					this.disposables.Add(proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
-					{
-						RunOnUi(() => this.UpdateAdmiral(x.Data));
-					}));
+			// 個別 basic も UI スレッドで反映
+			this.disposables.Add(proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
+			{
+				RunOnUi(() => this.UpdateAdmiral(x.Data));
+			}));
 
-					this.disposables.Add(proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment));
-				}
+			this.disposables.Add(proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment));
+		}
 
-				public void Dispose()
-				{
-					this.disposables.Dispose();
-					this.Materials?.Dispose();
-					this.Itemyard?.Dispose();
-					this.Organization?.Dispose();
-					this.Repairyard?.Dispose();
-					this.Dockyard?.Dispose();
-					this.Quests?.Dispose();
-				}
+		public void Dispose()
+		{
+			this.disposables.Dispose();
+			this.Materials?.Dispose();
+			this.Itemyard?.Dispose();
+			this.Organization?.Dispose();
+			this.Repairyard?.Dispose();
+			this.Dockyard?.Dispose();
+			this.Quests?.Dispose();
+		}
 
 		private static int ParseIntFromQuery(System.Collections.Specialized.NameValueCollection q, params string[] keys)
 		{

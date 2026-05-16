@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
 		private MultipleDisposable homeportDisposable = new MultipleDisposable();
 		private MultipleDisposable fleetDisposable = new MultipleDisposable();
-		private Dispatcher _dispatcher;
+		private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
 
 		public string Id => guid + "-1";
 
@@ -43,8 +43,6 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
-			_dispatcher = Dispatcher.CurrentDispatcher;
-
 			KanColleClient.Current
 				.Subscribe(nameof(KanColleClient.IsStarted), () => _dispatcher.BeginInvoke((Action)this.InitializeCore), false)
 				.AddTo(this);
