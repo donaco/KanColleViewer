@@ -20,13 +20,14 @@ namespace Grabacr07.KanColleViewer.Plugins
 	[ExportMetadata("Guid", guid)]
 	[ExportMetadata("Title", "タスク バー遠征モニター")]
 	[ExportMetadata("Description", "遠征の状況をタスク バー インジケーターに報告します。")]
-	[ExportMetadata("Version", "1.1.1")]
+	[ExportMetadata("Version", "1.1.2	")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class ExpeditionProgress : IPlugin, ITaskbarProgress, ISettings, IDisposableHolder
 	{
 		private const string guid = "C8BF00A6-9FD4-4CC4-8FC5-ECCC5675CDEB";
 
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
+		private MultipleDisposable wrapperDisposable = new MultipleDisposable();
 		private ExpeditionWrapper[] wrappers;
 		private bool initialized;
 
@@ -55,6 +56,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
+			Disposable.Create(() => this.wrapperDisposable.Dispose()).AddTo(this);
+
 			KanColleClient.Current
 				.Subscribe(nameof(KanColleClient.IsStarted), () => this.InitializeCore(), false)
 				.AddTo(this);
@@ -86,17 +89,20 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			if (!this.initialized) return;
 
-			if (this.wrappers != null)
-			{
-				foreach (var wrapper in this.wrappers) wrapper.Dispose();
-			}
+			this.wrapperDisposable.Dispose();
+			this.wrapperDisposable = new MultipleDisposable();
 
 			this.wrappers = KanColleClient.Current.Homeport.Organization.Fleets
 				.Skip(1)
 				.Select(x => new { x.Value.Id, x.Value.Expedition, })
 				.Where(a => a.Expedition != null)
-				.Select(a => new ExpeditionWrapper(a.Id, a.Expedition).AddTo(this))
-				.Do(x => x.Subscribe(nameof(ExpeditionWrapper.State), () => this.Update()).AddTo(this))
+				.Select(a =>
+				{
+					var w = new ExpeditionWrapper(a.Id, a.Expedition);
+					w.Subscribe(nameof(ExpeditionWrapper.State), () => this.Update()).AddTo(this.wrapperDisposable);
+					w.AddTo(this.wrapperDisposable);
+					return w;
+				})
 				.ToArray();
 
 			this.Update();
