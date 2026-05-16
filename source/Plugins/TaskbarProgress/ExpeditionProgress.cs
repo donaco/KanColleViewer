@@ -30,6 +30,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private MultipleDisposable homeportDisposable = new MultipleDisposable();
 		private MultipleDisposable wrapperDisposable = new MultipleDisposable();
 		private ExpeditionWrapper[] wrappers = Array.Empty<ExpeditionWrapper>();
+		private Dispatcher _dispatcher;
 
 		public string Id => guid + "-1";
 
@@ -56,8 +57,10 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
+			_dispatcher = Dispatcher.CurrentDispatcher;
+
 			KanColleClient.Current
-				.Subscribe(nameof(KanColleClient.IsStarted), () => this.InitializeCore(), false)
+				.Subscribe(nameof(KanColleClient.IsStarted), () => _dispatcher.BeginInvoke((Action)this.InitializeCore), false)
 				.AddTo(this);
 
 			var timer = new DispatcherTimer(DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(Settings.Default.Interval), };
@@ -87,7 +90,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 			if (homeport == null) return;
 
 			homeport.Organization
-				.Subscribe(nameof(Organization.Fleets), this.UpdateExpeditions)
+				.Subscribe(nameof(Organization.Fleets), () => _dispatcher.BeginInvoke((Action)this.UpdateExpeditions))
 				.AddTo(this.homeportDisposable);
 		}
 
@@ -105,7 +108,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 				.Select(a =>
 				{
 					var w = new ExpeditionWrapper(a.Id, a.Expedition);
-						w.Subscribe(nameof(ExpeditionWrapper.State), () => this.Update()).AddTo(w);
+						w.Subscribe(nameof(ExpeditionWrapper.State), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(w);
 						w.AddTo(this.wrapperDisposable);
 					return w;
 				})

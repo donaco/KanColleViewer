@@ -29,6 +29,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
 		private MultipleDisposable homeportDisposable = new MultipleDisposable();
 		private MultipleDisposable fleetDisposable = new MultipleDisposable();
+		private Dispatcher _dispatcher;
 
 		public string Id => guid + "-1";
 
@@ -42,8 +43,10 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Initialize()
 		{
+			_dispatcher = Dispatcher.CurrentDispatcher;
+
 			KanColleClient.Current
-				.Subscribe(nameof(KanColleClient.IsStarted), () => this.InitializeCore(), false)
+				.Subscribe(nameof(KanColleClient.IsStarted), () => _dispatcher.BeginInvoke((Action)this.InitializeCore), false)
 				.AddTo(this);
 		}
 
@@ -60,7 +63,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 			if (homeport == null) return;
 
 			homeport.Organization
-				.Subscribe(nameof(Organization.Fleets), this.UpdateFleets)
+				.Subscribe(nameof(Organization.Fleets), () => _dispatcher.BeginInvoke((Action)this.UpdateFleets))
 				.AddTo(this.homeportDisposable);
 		}
 
@@ -73,8 +76,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 			foreach (var fleet in KanColleClient.Current.Homeport.Organization.Fleets.Values)
 			{
-				fleet.Subscribe(nameof(Fleet.Ships), this.Update).AddTo(this.fleetDisposable);
-				fleet.Subscribe(nameof(Fleet.IsInSortie), this.Update).AddTo(this.fleetDisposable);
+				fleet.Subscribe(nameof(Fleet.Ships), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(this.fleetDisposable);
+				fleet.Subscribe(nameof(Fleet.IsInSortie), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(this.fleetDisposable);
 			}
 
 			this.Update();
