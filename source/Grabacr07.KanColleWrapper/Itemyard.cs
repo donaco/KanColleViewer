@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
@@ -11,9 +12,10 @@ using Newtonsoft.Json;
 
 namespace Grabacr07.KanColleWrapper
 {
-	public class Itemyard : Notifier
+	public class Itemyard : Notifier, IDisposable
 	{
 		private readonly Homeport homeport;
+		private readonly CompositeDisposable disposables = new CompositeDisposable();
 
 		/// <summary>
 		/// <see cref="SlotItems"/> の装備数を取得します。
@@ -75,18 +77,23 @@ namespace Grabacr07.KanColleWrapper
 			this.SlotItems = new MemberTable<SlotItem>();
 			this.UseItems = new MemberTable<UseItem>();
 
-			proxy.api_get_member_slot_item.TryParse<kcsapi_slotitem[]>().Subscribe(x => this.Update(x.Data));
-			proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(x => this.CreateItem(x.Data));
-			proxy.api_req_kousyou_destroyitem2.TryParse<kcsapi_destroyitem2>().Subscribe(this.DestroyItem);
+			this.disposables.Add(proxy.api_get_member_slot_item.TryParse<kcsapi_slotitem[]>().Subscribe(x => this.Update(x.Data)));
+			this.disposables.Add(proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(x => this.CreateItem(x.Data)));
+			this.disposables.Add(proxy.api_req_kousyou_destroyitem2.TryParse<kcsapi_destroyitem2>().Subscribe(this.DestroyItem));
 			// 出撃中の装備数調整は諦め！
 
-			proxy.api_get_member_useitem.TryParse<kcsapi_useitem[]>().Subscribe(x => this.Update(x.Data));
+			this.disposables.Add(proxy.api_get_member_useitem.TryParse<kcsapi_useitem[]>().Subscribe(x => this.Update(x.Data)));
 
-			proxy.api_req_kousyou_remodel_slot.TryParse<kcsapi_remodel_slot>().Subscribe(x =>
+			this.disposables.Add(proxy.api_req_kousyou_remodel_slot.TryParse<kcsapi_remodel_slot>().Subscribe(x =>
 			{
 				this.RemoveFromRemodel(x.Data);
 				this.RemodelSlotItem(x.Data);
-			});
+			}));
+		}
+
+		public void Dispose()
+		{
+			this.disposables.Dispose();
 		}
 
 

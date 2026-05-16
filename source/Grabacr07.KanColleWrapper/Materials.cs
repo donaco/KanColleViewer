@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models.Raw;
 
@@ -9,8 +10,9 @@ namespace Grabacr07.KanColleWrapper
 	/// <summary>
 	/// 資源および資材の保有状況を表します。
 	/// </summary>
-	public class Materials : Notifier
+	public class Materials : Notifier, IDisposable
 	{
+		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		#region Fuel 変更通知プロパティ
 
 		private int _Fuel;
@@ -193,9 +195,14 @@ namespace Grabacr07.KanColleWrapper
 
 		internal Materials(KanColleProxy proxy)
 		{
-			proxy.api_get_member_material.TryParse<kcsapi_material[]>().Subscribe(x => this.Update(x.Data));
-			proxy.api_req_hokyu_charge.TryParse<kcsapi_charge>().Subscribe(x => this.Update(x.Data.api_material));
-			proxy.api_req_kousyou_destroyship.TryParse<kcsapi_destroyship>().Subscribe(x => this.Update(x.Data.api_material));
+			this.disposables.Add(proxy.api_get_member_material.TryParse<kcsapi_material[]>().Subscribe(x => this.Update(x.Data)));
+			this.disposables.Add(proxy.api_req_hokyu_charge.TryParse<kcsapi_charge>().Subscribe(x => this.Update(x.Data.api_material)));
+			this.disposables.Add(proxy.api_req_kousyou_destroyship.TryParse<kcsapi_destroyship>().Subscribe(x => this.Update(x.Data.api_material)));
+		}
+
+		public void Dispose()
+		{
+			this.disposables.Dispose();
 		}
 
 

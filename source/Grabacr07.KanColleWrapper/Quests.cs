@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -19,8 +20,9 @@ using System.Web;
 
 namespace Grabacr07.KanColleWrapper
 {
-	public class Quests : Notifier
+	public class Quests : Notifier, IDisposable
 	{
+		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		#region All 変更通知プロパティ
 
 		private IReadOnlyCollection<Quest> _All;
@@ -106,10 +108,16 @@ namespace Grabacr07.KanColleWrapper
 			this.IsUntaken = true;
 			this.All = this.Current = new List<Quest>();
 
-			proxy.api_get_member_questlist
-				.Select(Serialize)
-				.Where(x => x != null)
-				.Subscribe(this.Update);
+			this.disposables.Add(
+				proxy.api_get_member_questlist
+					.Select(Serialize)
+					.Where(x => x != null)
+					.Subscribe(this.Update));
+		}
+
+		public void Dispose()
+		{
+			this.disposables.Dispose();
 		}
 
 		private static kcsapi_questlist Serialize(Session session)

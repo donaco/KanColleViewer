@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.IO;
@@ -13,9 +14,10 @@ namespace Grabacr07.KanColleWrapper
 	/// <summary>
 	/// 複数の入渠ドックを持つ工廠を表します。
 	/// </summary>
-	public class Repairyard : Notifier
+	public class Repairyard : Notifier, IDisposable
 	{
 		private readonly Homeport homeport;
+		private readonly CompositeDisposable disposables = new CompositeDisposable();
 
 		#region Docks 変更通知プロパティ
 
@@ -42,9 +44,14 @@ namespace Grabacr07.KanColleWrapper
 			this.homeport = parent;
 			this.Docks = new MemberTable<RepairingDock>();
 
-			proxy.api_get_member_ndock.TryParse<kcsapi_ndock[]>().Subscribe(x => this.Update(x.Data));
-			proxy.api_req_nyukyo_start.TryParse().Subscribe(this.Start);
-			proxy.api_req_nyukyo_speedchange.TryParse().Subscribe(this.ChangeSpeed);
+			this.disposables.Add(proxy.api_get_member_ndock.TryParse<kcsapi_ndock[]>().Subscribe(x => this.Update(x.Data)));
+			this.disposables.Add(proxy.api_req_nyukyo_start.TryParse().Subscribe(this.Start));
+			this.disposables.Add(proxy.api_req_nyukyo_speedchange.TryParse().Subscribe(this.ChangeSpeed));
+		}
+
+		public void Dispose()
+		{
+			this.disposables.Dispose();
 		}
 
 		internal void Update(kcsapi_ndock[] source)

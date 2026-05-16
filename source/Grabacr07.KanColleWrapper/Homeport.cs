@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows; // 追加
 using System.Web;
@@ -16,8 +17,9 @@ namespace Grabacr07.KanColleWrapper
 	/// <summary>
 	/// 母港を表します。
 	/// </summary>
-	public class Homeport : Notifier
+	public class Homeport : Notifier, IDisposable
 	{
+		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		/// <summary>
 		/// 艦隊の編成状況にアクセスできるようにします。
 		/// </summary>
@@ -107,7 +109,7 @@ namespace Grabacr07.KanColleWrapper
 			this.AirBases = new AirBases();
 
 			// port は UI スレッドで反映する
-			proxy.api_port.TryParse<kcsapi_port>().Subscribe(x =>
+			this.disposables.Add(proxy.api_port.TryParse<kcsapi_port>().Subscribe(x =>
 			{
 				RunOnUi(() =>
 				{
@@ -118,9 +120,9 @@ namespace Grabacr07.KanColleWrapper
 					this.Organization.Combined = x.Data.api_combined_flag != 0;
 					this.Materials.Update(x.Data.api_material);
 				});
-			});
+			}));
 
-			proxy.ApiSessionSource.Subscribe(session =>
+			this.disposables.Add(proxy.ApiSessionSource.Subscribe(session =>
 			{
 				try
 				{
@@ -173,10 +175,10 @@ namespace Grabacr07.KanColleWrapper
 				catch
 				{
 				}
-			});
+			}));
 
 			// 生セッションから api_air_base 系を取り出して AirBases を更新する
-			proxy.api_port.Subscribe(session =>
+			this.disposables.Add(proxy.api_port.Subscribe(session =>
 			{
 				try
 				{
@@ -226,10 +228,10 @@ namespace Grabacr07.KanColleWrapper
 				catch
 				{
 				}
-			});
+			}));
 
 			// --- 追加: change_name / set_action の成功レスポンスを検知して即時反映 ---
-			proxy.ApiSessionSource
+			this.disposables.Add(proxy.ApiSessionSource
 				.Where(s => (s.Request?.PathAndQuery ?? "").StartsWith("/kcsapi/api_req_air_corps/", StringComparison.OrdinalIgnoreCase))
 				.Subscribe(session =>
 				{
@@ -293,16 +295,27 @@ namespace Grabacr07.KanColleWrapper
 					catch
 					{
 					}
-				});
+					}));
 
-			// 個別 basic も UI スレッドで反映
-			proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
-			{
-				RunOnUi(() => this.UpdateAdmiral(x.Data));
-			});
+					// 個別 basic も UI スレッドで反映
+					this.disposables.Add(proxy.api_get_member_basic.TryParse<kcsapi_basic>().Subscribe(x =>
+					{
+						RunOnUi(() => this.UpdateAdmiral(x.Data));
+					}));
 
-			proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment);
-		}
+					this.disposables.Add(proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment));
+				}
+
+				public void Dispose()
+				{
+					this.disposables.Dispose();
+					this.Materials?.Dispose();
+					this.Itemyard?.Dispose();
+					this.Organization?.Dispose();
+					this.Repairyard?.Dispose();
+					this.Dockyard?.Dispose();
+					this.Quests?.Dispose();
+				}
 
 		private static int ParseIntFromQuery(System.Collections.Specialized.NameValueCollection q, params string[] keys)
 		{
