@@ -1,4 +1,4 @@
-using Grabacr07.KanColleWrapper.Models;
+﻿using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 using Nekoxy;
 using Newtonsoft.Json;
@@ -141,6 +141,9 @@ namespace Grabacr07.KanColleWrapper
 		// 入渠
 		private readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
 
+		// Initialieze() の Subscribe を管理する（再呼出し時に前回分を破棄）
+		private System.Reactive.Disposables.CompositeDisposable _initializeDisposables;
+
 		private KanColleClient()
 		{
 			this.Initialieze();
@@ -204,7 +207,11 @@ namespace Grabacr07.KanColleWrapper
 			// Homeport の初期化と require_info の適用に Master のインスタンスが必要なため、初回のみ足並み揃えて実行
 			// 2 回目以降は受信したタイミングでそれぞれ更新すればよい
 
-			firstTime.Subscribe(x =>
+			// 再呼出し時は前回の購読を破棄してから再登録
+			_initializeDisposables?.Dispose();
+			_initializeDisposables = new System.Reactive.Disposables.CompositeDisposable();
+
+			_initializeDisposables.Add(firstTime.Subscribe(x =>
 			{
 				// CapturedProcessor が先に初期化済みの場合は何もしない（二重初期化防止）
 				if (this.IsStarted) return;
@@ -233,15 +240,17 @@ namespace Grabacr07.KanColleWrapper
 					this.SetRequireInfo(x.requireInfo.Data);
 					this.IsStarted = true;
 				}
-			});
+			}));
 
-			start2Source
-				.SkipUntil(firstTime)
-				.Subscribe(x => this.Master = new Master(x.Data));
+			_initializeDisposables.Add(
+				start2Source
+					.SkipUntil(firstTime)
+					.Subscribe(x => this.Master = new Master(x.Data)));
 
-			requireInfoSource
-				.SkipUntil(firstTime)
-				.Subscribe(x => this.SetRequireInfo(x.Data));
+			_initializeDisposables.Add(
+				requireInfoSource
+					.SkipUntil(firstTime)
+					.Subscribe(x => this.SetRequireInfo(x.Data)));
 		}
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）
@@ -319,7 +328,7 @@ namespace Grabacr07.KanColleWrapper
 					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int>();
 					if (apiResult.HasValue && apiResult.Value != 1) return;
 				}
-				catch (Exception ex) { LogError("ProcessCaptured/api_result parse", ex); }
+				catch (Newtonsoft.Json.JsonException) { /* JSON としてパース不能なレスポンスは想定内：無視してスキップ */ }
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
