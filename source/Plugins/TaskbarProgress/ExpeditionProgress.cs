@@ -27,9 +27,9 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private const string guid = "C8BF00A6-9FD4-4CC4-8FC5-ECCC5675CDEB";
 
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
+		private MultipleDisposable homeportDisposable = new MultipleDisposable();
 		private MultipleDisposable wrapperDisposable = new MultipleDisposable();
-		private ExpeditionWrapper[] wrappers;
-		private bool initialized;
+		private ExpeditionWrapper[] wrappers = Array.Empty<ExpeditionWrapper>();
 
 		public string Id => guid + "-1";
 
@@ -75,22 +75,25 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		private void InitializeCore()
 		{
-			if (this.initialized) return;
-
 			var homeport = KanColleClient.Current.Homeport;
-			if (homeport != null)
-			{
-				this.initialized = true;
 
-				homeport.Organization
-					.Subscribe(nameof(Organization.Fleets), this.UpdateExpeditions)
-					.AddTo(this);
-			}
+			this.wrapperDisposable.Dispose();
+			this.wrapperDisposable = new MultipleDisposable();
+			this.wrappers = Array.Empty<ExpeditionWrapper>();
+
+			this.homeportDisposable.Dispose();
+			this.homeportDisposable = new MultipleDisposable();
+
+			if (homeport == null) return;
+
+			homeport.Organization
+				.Subscribe(nameof(Organization.Fleets), this.UpdateExpeditions)
+				.AddTo(this.homeportDisposable);
 		}
 
 		public void UpdateExpeditions()
 		{
-			if (!this.initialized) return;
+			if (KanColleClient.Current.Homeport?.Organization == null) return;
 
 			this.wrapperDisposable.Dispose();
 			this.wrapperDisposable = new MultipleDisposable();
@@ -113,7 +116,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Update()
 		{
-			if (!this.initialized) return;
+			if (KanColleClient.Current.Homeport?.Organization == null) return;
 
 			if (this.wrappers.Length == 0)
 			{
@@ -165,6 +168,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		public void Dispose()
 		{
 			this.wrapperDisposable.Dispose();
+			this.homeportDisposable.Dispose();
 			this.compositDisposable.Dispose();
 		}
 		ICollection<IDisposable> IDisposableHolder.CompositeDisposable => this.compositDisposable;

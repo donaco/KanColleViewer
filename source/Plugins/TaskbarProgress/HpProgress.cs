@@ -27,8 +27,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private const string guid = "DA0E7091-F4A6-4467-9812-3C3E0DF946EA";
 
 		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
+		private MultipleDisposable homeportDisposable = new MultipleDisposable();
 		private MultipleDisposable fleetDisposable = new MultipleDisposable();
-		private bool initialized;
 
 		public string Id => guid + "-1";
 
@@ -49,20 +49,21 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		private void InitializeCore()
 		{
-			if (this.initialized) return;
-
 			var homeport = KanColleClient.Current.Homeport;
+
+			this.homeportDisposable.Dispose();
+			this.homeportDisposable = new MultipleDisposable();
+
 			if (homeport == null) return;
 
-			this.initialized = true;
 			homeport.Organization
 				.Subscribe(nameof(Organization.Fleets), this.UpdateFleets)
-				.AddTo(this);
+				.AddTo(this.homeportDisposable);
 		}
 
 		public void UpdateFleets()
 		{
-			if (!this.initialized) return;
+			if (KanColleClient.Current.Homeport?.Organization == null) return;
 
 			this.fleetDisposable.Dispose();
 			this.fleetDisposable = new MultipleDisposable();
@@ -130,6 +131,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		public void Dispose()
 		{
 			this.fleetDisposable.Dispose();
+			this.homeportDisposable.Dispose();
 			this.compositDisposable.Dispose();
 		}
 		ICollection<IDisposable> IDisposableHolder.CompositeDisposable => this.compositDisposable;
