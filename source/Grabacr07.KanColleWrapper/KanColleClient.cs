@@ -144,6 +144,9 @@ namespace Grabacr07.KanColleWrapper
 		// Initialieze() の Subscribe を管理する（再呼出し時に前回分を破棄）
 		private System.Reactive.Disposables.CompositeDisposable _initializeDisposables;
 
+		// IsInSortie 管理の Subscribe を保持するフィールド
+		private IDisposable _isInSortieSubscription;
+
 		private KanColleClient()
 		{
 			this.Initialieze();
@@ -185,7 +188,7 @@ namespace Grabacr07.KanColleWrapper
 			var start = this.Proxy.api_req_map_start;
 			var end = this.Proxy.api_port;
 
-			this.Proxy.ApiSessionSource
+			this._isInSortieSubscription = this.Proxy.ApiSessionSource
 				.SkipUntil(start.Do(_ => this.IsInSortie = true))
 				.TakeUntil(end)
 				.Finally(() => this.IsInSortie = false)
