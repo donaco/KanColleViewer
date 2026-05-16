@@ -51,6 +51,9 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			var homeport = KanColleClient.Current.Homeport;
 
+			this.fleetDisposable.Dispose();
+			this.fleetDisposable = new MultipleDisposable();
+
 			this.homeportDisposable.Dispose();
 			this.homeportDisposable = new MultipleDisposable();
 
