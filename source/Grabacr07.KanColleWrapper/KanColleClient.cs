@@ -179,11 +179,11 @@ namespace Grabacr07.KanColleWrapper
 							this.Master = new Master(start2);
 							this.Homeport = new Homeport(this.Proxy);
 							this.SetRequireInfo(requireInfo);
-								this.IsStarted = true;
-									}
-								}
-								catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
-							});
+							this.IsStarted = true;
+						}
+					}
+					catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
+				});
 
 			var start = this.Proxy.api_req_map_start;
 			var end = this.Proxy.api_port;
@@ -195,10 +195,10 @@ namespace Grabacr07.KanColleWrapper
 				.Repeat()
 				.Subscribe();
 
-			}
+		}
 
-			public void Initialieze()
-			{
+		public void Initialieze()
+		{
 			var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
 
 			var start2Source = proxy.api_start2_getData.TryParse<kcsapi_start2>();
