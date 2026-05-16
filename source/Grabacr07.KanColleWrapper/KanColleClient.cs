@@ -1,4 +1,4 @@
-﻿using Grabacr07.KanColleWrapper.Models;
+using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 using Nekoxy;
 using Newtonsoft.Json;
@@ -1035,9 +1035,7 @@ namespace Grabacr07.KanColleWrapper
 							{
 								try
 								{
-								var oldHomeport = this.Homeport;
-								oldHomeport?.Dispose();
-								this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
 								}
 								catch (Exception)
 								{
