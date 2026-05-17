@@ -241,15 +241,6 @@ namespace Grabacr07.KanColleWrapper
 				requireInfoSource
 					.SkipUntil(firstTime)
 					.Subscribe(x => this.SetRequireInfo(x.Data)));
-
-			// IsInSortie 管理: 再呼出し時は前回分が _initializeDisposables.Dispose() で破棄される
-			_initializeDisposables.Add(
-				proxy.ApiSessionSource
-					.SkipUntil(proxy.api_req_map_start.Do(_ => this.IsInSortie = true))
-					.TakeUntil(proxy.api_port)
-					.Finally(() => this.IsInSortie = false)
-					.Repeat()
-					.Subscribe());
 		}
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）

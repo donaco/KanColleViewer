@@ -43,10 +43,6 @@ namespace Grabacr07.KanColleWrapper
 		{
 			this.homeport = parent;
 			this.Docks = new MemberTable<RepairingDock>();
-
-			this.disposables.Add(proxy.api_get_member_ndock.TryParse<kcsapi_ndock[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_nyukyo_start.TryParse().Subscribe(this.Start));
-			this.disposables.Add(proxy.api_req_nyukyo_speedchange.TryParse().Subscribe(this.ChangeSpeed));
 		}
 
 		public void Dispose()

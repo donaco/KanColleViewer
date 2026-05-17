@@ -76,19 +76,6 @@ namespace Grabacr07.KanColleWrapper
 
 			this.SlotItems = new MemberTable<SlotItem>();
 			this.UseItems = new MemberTable<UseItem>();
-
-			this.disposables.Add(proxy.api_get_member_slot_item.TryParse<kcsapi_slotitem[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(x => this.CreateItem(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_destroyitem2.TryParse<kcsapi_destroyitem2>().Subscribe(this.DestroyItem));
-			// 出撃中の装備数調整は諦め！
-
-			this.disposables.Add(proxy.api_get_member_useitem.TryParse<kcsapi_useitem[]>().Subscribe(x => this.Update(x.Data)));
-
-			this.disposables.Add(proxy.api_req_kousyou_remodel_slot.TryParse<kcsapi_remodel_slot>().Subscribe(x =>
-			{
-				this.RemoveFromRemodel(x.Data);
-				this.RemodelSlotItem(x.Data);
-			}));
 		}
 
 		public void Dispose()
