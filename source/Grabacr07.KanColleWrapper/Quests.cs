@@ -98,7 +98,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Quests(KanColleProxy proxy)
+		internal Quests()
 		{
 			this.IsUntaken = true;
 			this.All = this.Current = new List<Quest>();

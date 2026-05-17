@@ -70,7 +70,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Itemyard(Homeport parent, KanColleProxy proxy)
+		internal Itemyard(Homeport parent)
 		{
 			this.homeport = parent;
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
@@ -86,7 +85,7 @@ namespace Counter
 	/// <summary>補給をカウント</summary>
 	public class SupplyCounter : CounterBase
 	{
-		public SupplyCounter(KanColleProxy proxy)
+		public SupplyCounter()
 		{
 			// ← ハンドラーをフィールドに保持して登録解除できるようにする
 			EventHandler handler = (sender, e) =>
@@ -106,7 +105,7 @@ namespace Counter
 	/// <summary>装備の破棄をカウント</summary>
 	public class ItemDestroyCounter : CounterBase
 	{
-		public ItemDestroyCounter(KanColleProxy proxy)
+		public ItemDestroyCounter()
 		{
 			EventHandler handler = (sender, e) =>
 			{
@@ -125,7 +124,7 @@ namespace Counter
 	/// <summary>遠征の成功をカウント</summary>
 	public class MissionCounter : CounterBase
 	{
-		public MissionCounter(KanColleProxy proxy)
+		public MissionCounter()
 		{
 			EventHandler handler = (sender, e) =>
 			{
@@ -144,7 +143,7 @@ namespace Counter
 	/// <summary>出撃をカウント</summary>
 	public class SortieCounter : CounterBase
 	{
-		public SortieCounter(KanColleProxy proxy)
+		public SortieCounter()
 		{
 			PropertyChangedEventHandler handler = (sender, e) =>
 			{
@@ -798,9 +797,8 @@ namespace Counter
 		/// <summary>
 		/// コンストラクタ
 		/// </summary>
-		/// <param name="proxy">KanColleProxy のインスタンス</param>
 		/// <param name="maxHistory">保持する履歴の最大件数</param>
-		public SortieHistoryCounter(KanColleProxy proxy, int maxHistory = 20)
+		public SortieHistoryCounter(int maxHistory = 20)
 		{
 			this._maxHistory = maxHistory;
 			this.History = new ObservableCollection<SortieRecord>();

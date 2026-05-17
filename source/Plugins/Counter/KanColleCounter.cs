@@ -31,30 +31,17 @@ namespace Counter
 		public void Initialize()
 		{
 			try
-			{
-				var proxy = KanColleClient.Current?.Proxy;
-				if (proxy == null)
-				{
-					System.Diagnostics.Debug.WriteLine("[Counter] KanColleProxy が取得できませんでした。プラグインは無効状態で起動します。");
-					this.viewModel = new CounterViewModel
-					{
-						Counters = new ObservableCollection<CounterBase>(),
-						SortieHistory = null,
-					};
-					return;
-				}
-
-				this.viewModel = new CounterViewModel
+			{				this.viewModel = new CounterViewModel
 				{
 					Counters = new ObservableCollection<CounterBase>
 					{
-						new SupplyCounter(proxy),
-						new ItemDestroyCounter(proxy),
-						new MissionCounter(proxy),
-						new SortieCounter(proxy),
+						new SupplyCounter(),
+						new ItemDestroyCounter(),
+						new MissionCounter(),
+						new SortieCounter(),
 					},
 					// --- 直近12件を表示(表示数を指定) ---
-					SortieHistory = new SortieHistoryCounter(proxy, 12),
+					SortieHistory = new SortieHistoryCounter(12),
 				};
 
 				// --- 保存データを復元 ---

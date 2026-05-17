@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Dockyard(KanColleProxy proxy)
+		internal Dockyard()
 		{
 			this.Docks = new MemberTable<BuildingDock>();
 		}

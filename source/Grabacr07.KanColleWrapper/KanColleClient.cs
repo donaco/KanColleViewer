@@ -1,13 +1,11 @@
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Nekoxy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -141,106 +139,45 @@ namespace Grabacr07.KanColleWrapper
 		// 入渠
 		private readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
 
-		// Initialieze() の Subscribe を管理する（再呼出し時に前回分を破棄）
-		private System.Reactive.Disposables.CompositeDisposable _initializeDisposables;
-
 		private KanColleClient()
-		{
-			this.Initialieze();
-
-			// CapturedProcessor を初期化
-			this.capturedProcessor = new CapturedProcessor(
-				// getProxy
-				() => this.Proxy ?? (this.Proxy = new KanColleProxy()),
-				// isStartedProvider
-				() => this.IsStarted,
-				// onInitialized
-				(start2, requireInfo) =>
-				{
-					try
+			{
+				// CapturedProcessor を初期化
+				this.capturedProcessor = new CapturedProcessor(
+					// isStartedProvider
+					() => this.IsStarted,
+					// onInitialized
+					(start2, requireInfo) =>
 					{
-						// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
-						if (Application.Current != null)
+						try
 						{
-							Application.Current.Dispatcher.Invoke(() =>
+							// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
+							if (Application.Current != null)
 							{
+								Application.Current.Dispatcher.Invoke(() =>
+								{
+									this.Master = new Master(start2);
+									this.Homeport = new Homeport();
+									this.SetRequireInfo(requireInfo);
+									this.IsStarted = true;
+								});
+							}
+							else
+							{
+								// UI が存在しない（テスト等）の場合は通常実行
 								this.Master = new Master(start2);
-								this.Homeport = new Homeport(this.Proxy);
+								this.Homeport = new Homeport();
 								this.SetRequireInfo(requireInfo);
 								this.IsStarted = true;
-							});
+							}
 						}
-						else
-						{
-							// UI が存在しない（テスト等）の場合は通常実行
-							this.Master = new Master(start2);
-							this.Homeport = new Homeport(this.Proxy);
-							this.SetRequireInfo(requireInfo);
-							this.IsStarted = true;
-						}
-					}
-					catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
-				});
+						catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
+					});
 
 			}
 
 		public void Initialieze()
 		{
-			var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
-
-			var start2Source = proxy.api_start2_getData.TryParse<kcsapi_start2>();
-			var requireInfoSource = proxy.api_get_member_require_info.TryParse<kcsapi_require_info>();
-			var firstTime = start2Source
-				.CombineLatest(requireInfoSource, (start2, requireInfo) => new { start2, requireInfo, })
-				.FirstAsync();
-
-			// Homeport の初期化と require_info の適用に Master のインスタンスが必要なため、初回のみ足並み揃えて実行
-			// 2 回目以降は受信したタイミングでそれぞれ更新すればよい
-
-			// 再呼出し時は前回の購読を破棄してから再登録
-			_initializeDisposables?.Dispose();
-			_initializeDisposables = new System.Reactive.Disposables.CompositeDisposable();
-
-			_initializeDisposables.Add(firstTime.Subscribe(x =>
-			{
-				// CapturedProcessor が先に初期化済みの場合は何もしない（二重初期化防止）
-				if (this.IsStarted) return;
-
-				// UIスレッドで実行し、CapturedProcessor の Dispatcher.Invoke と競合させない
-				// Dispatcher.Invoke は直列実行されるため、どちらが先に入っても
-				// 2回目の Invoke 内で IsStarted == true となり Homeport の上書きを防止できる
-				if (Application.Current != null)
-				{
-					Application.Current.Dispatcher.Invoke(() =>
-					{
-						if (this.IsStarted) return;
-
-						this.Master = new Master(x.start2.Data);
-						this.Homeport = new Homeport(proxy);
-						this.SetRequireInfo(x.requireInfo.Data);
-						this.IsStarted = true;
-					});
-				}
-				else
-				{
-					// UI が存在しない（テスト等）の場合
-					if (this.IsStarted) return;
-					this.Master = new Master(x.start2.Data);
-					this.Homeport = new Homeport(proxy);
-					this.SetRequireInfo(x.requireInfo.Data);
-					this.IsStarted = true;
-				}
-			}));
-
-			_initializeDisposables.Add(
-				start2Source
-					.SkipUntil(firstTime)
-					.Subscribe(x => this.Master = new Master(x.Data)));
-
-			_initializeDisposables.Add(
-				requireInfoSource
-					.SkipUntil(firstTime)
-					.Subscribe(x => this.SetRequireInfo(x.Data)));
+			this.Proxy = this.Proxy ?? new KanColleProxy();
 		}
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）
@@ -389,7 +326,8 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
 
 				if (TryHandleMissionResult(url, normalized)) return;
-				// 将来的なフォールバック追加箇所はここに追加
+					if (TryHandleUpdateComment(url, normalized, requestBody)) return;
+					// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch (Exception ex) { LogError("ProcessCaptured", ex); }
 		}
@@ -1020,7 +958,7 @@ namespace Grabacr07.KanColleWrapper
 						try
 						{
 							// Homeport が未初期化の可能性があるので安全に作成してから反映
-							if (this.Homeport == null) this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+							if (this.Homeport == null) this.Homeport = new Homeport();
 							this.Homeport?.AirBases?.Update(ab, abi);
 
 						}
@@ -1062,7 +1000,7 @@ namespace Grabacr07.KanColleWrapper
 							{
 								try
 								{
-									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+									this.Homeport = new Homeport();
 								}
 								catch (Exception)
 								{
@@ -4925,5 +4863,34 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		#endregion
+
+		/// <summary>
+		/// コメント更新 (api_req_member/updatecomment)
+		/// </summary>
+		private bool TryHandleUpdateComment(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_member/updatecomment")) return false;
+			try
+			{
+				if (string.IsNullOrEmpty(requestBody)) return true;
+				var comment = "";
+				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					var kv = pair.Split(new[] { '=' }, 2);
+					if (kv.Length == 2 && kv[0] == "api_cmt")
+					{
+						comment = Uri.UnescapeDataString(kv[1]);
+						break;
+					}
+				}
+				RunOnUi(() =>
+				{
+					try { this.Homeport?.UpdateComment(comment); }
+					catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
+				});
+			}
+			catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
+			return true;
+		}
 	}
 }

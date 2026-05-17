@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 
 namespace Grabacr07.KanColleWrapper
@@ -14,7 +13,6 @@ namespace Grabacr07.KanColleWrapper
 	/// </summary>
 	public class Homeport : Notifier, IDisposable
 	{
-		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		/// <summary>
 		/// 艦隊の編成状況にアクセスできるようにします。
 		/// </summary>
@@ -93,23 +91,19 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
-		internal Homeport(KanColleProxy proxy)
+		internal Homeport()
 		{
-			this.Materials = new Materials(proxy);
-			this.Itemyard = new Itemyard(this, proxy);
-			this.Organization = new Organization(this, proxy);
-			this.Repairyard = new Repairyard(this, proxy);
-			this.Dockyard = new Dockyard(proxy);
-			this.Quests = new Quests(proxy);
+			this.Materials = new Materials();
+			this.Itemyard = new Itemyard(this);
+			this.Organization = new Organization(this);
+			this.Repairyard = new Repairyard(this);
+			this.Dockyard = new Dockyard();
+			this.Quests = new Quests();
 			this.AirBases = new AirBases();
-
-			// 将来用: updatecomment は CEF 実装まで Nekoxy 購読を保持
-			this.disposables.Add(proxy.api_req_member_updatecomment.TryParse().Subscribe(this.UpdateComment));
 		}
 
 		public void Dispose()
 		{
-			this.disposables.Dispose();
 			this.Materials?.Dispose();
 			this.Itemyard?.Dispose();
 			this.Organization?.Dispose();
@@ -123,18 +117,10 @@ namespace Grabacr07.KanColleWrapper
 			this.Admiral = new Admiral(data);
 		}
 
-		private void UpdateComment(SvData data)
+		internal void UpdateComment(string comment)
 		{
-			if (data == null || !data.IsSuccess) return;
-
-			try
-			{
-				this.Admiral.Comment = data.Request["api_cmt"];
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine("艦隊名の変更に失敗しました: {0}", ex);
-			}
+			if (this.Admiral == null) return;
+			this.Admiral.Comment = comment;
 		}
 
 		internal void StartConditionCount()

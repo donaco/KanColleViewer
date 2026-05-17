@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models.Raw;
 
@@ -45,42 +44,32 @@ namespace Grabacr07.KanColleWrapper
 
 	public class ItemDestroyCounter : CounterBase
 	{
-		public ItemDestroyCounter(KanColleProxy proxy)
+		public ItemDestroyCounter(KanColleClient client)
 		{
-			// DisposeWith の代わりに Add() で管理（Rx 2.2.5 対応）
-			this.Disposables.Add(
-				proxy.api_req_kousyou_destroyitem2
-					.TryParse()
-					.Where(x => x.IsSuccess)
-					.Subscribe(_ => this.Count++)
-			);
+			EventHandler handler = (_, __) => this.Count++;
+			client.ItemDestroyed += handler;
+			this.Disposables.Add(System.Reactive.Disposables.Disposable.Create(() => client.ItemDestroyed -= handler));
 		}
 	}
 
 	public class SupplyCounter : CounterBase
 	{
-		public SupplyCounter(KanColleProxy proxy)
+		public SupplyCounter(KanColleClient client)
 		{
-			this.Disposables.Add(
-				proxy.api_req_hokyu_charge
-					.TryParse()
-					.Where(x => x.IsSuccess)
-					.Subscribe(_ => this.Count++)
-			);
+			EventHandler handler = (_, __) => this.Count++;
+			client.SupplyCompleted += handler;
+			this.Disposables.Add(System.Reactive.Disposables.Disposable.Create(() => client.SupplyCompleted -= handler));
 		}
 	}
 
 	public class MissionCounter : CounterBase
 	{
-		public MissionCounter(KanColleProxy proxy)
+		public MissionCounter(KanColleClient client)
 		{
-			this.Disposables.Add(
-				proxy.api_req_mission_result
-					.TryParse<kcsapi_mission_result>()
-					.Where(x => x.IsSuccess)
-					.Where(x => x.Data.api_clear_result == 1)
-					.Subscribe(_ => this.Count++)
-			);
+			EventHandler handler = (_, __) => this.Count++;
+			client.MissionSucceeded += handler;
+			this.Disposables.Add(System.Reactive.Disposables.Disposable.Create(() => client.MissionSucceeded -= handler));
 		}
 	}
 }
+

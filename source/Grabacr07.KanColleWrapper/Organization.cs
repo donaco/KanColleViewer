@@ -107,7 +107,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		public Organization(Homeport parent, KanColleProxy proxy)
+		public Organization(Homeport parent)
 		{
 			this.homeport = parent;
 

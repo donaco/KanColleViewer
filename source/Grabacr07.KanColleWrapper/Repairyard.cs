@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.IO;
-using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 
@@ -39,7 +35,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Repairyard(Homeport parent, KanColleProxy proxy)
+		internal Repairyard(Homeport parent)
 		{
 			this.homeport = parent;
 			this.Docks = new MemberTable<RepairingDock>();
@@ -63,12 +59,12 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		private void Start(SvData data)
+		private void Start(string shipIdStr, string highspeedStr)
 		{
 			try
 			{
-				var ship = this.homeport.Organization.Ships[int.Parse(data.Request["api_ship_id"])];
-				var highspeed = data.Request["api_highspeed"] == "1";
+				var ship = this.homeport.Organization.Ships[int.Parse(shipIdStr)];
+				var highspeed = highspeedStr == "1";
 
 				if (highspeed)
 				{
@@ -82,11 +78,11 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		private void ChangeSpeed(SvData data)
+		private void ChangeSpeed(string ndockIdStr)
 		{
 			try
 			{
-				var dock = this.Docks[int.Parse(data.Request["api_ndock_id"])];
+				var dock = this.Docks[int.Parse(ndockIdStr)];
 				var ship = dock.Ship;
 
 				dock.Finish();

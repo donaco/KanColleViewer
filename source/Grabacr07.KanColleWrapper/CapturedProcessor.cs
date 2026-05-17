@@ -14,13 +14,11 @@ namespace Grabacr07.KanColleWrapper
 		private kcsapi_start2 capturedStart2Data;
 		private kcsapi_require_info capturedRequireInfoData;
 
-		private readonly Func<KanColleProxy> getProxy;
 		private readonly Func<bool> isStartedProvider;
 		private readonly Action<kcsapi_start2, kcsapi_require_info> onInitialized;
 
-		public CapturedProcessor(Func<KanColleProxy> getProxy, Func<bool> isStartedProvider, Action<kcsapi_start2, kcsapi_require_info> onInitialized)
+		public CapturedProcessor(Func<bool> isStartedProvider, Action<kcsapi_start2, kcsapi_require_info> onInitialized)
 		{
-			this.getProxy = getProxy ?? throw new ArgumentNullException(nameof(getProxy));
 			this.isStartedProvider = isStartedProvider ?? (() => false);
 			this.onInitialized = onInitialized ?? throw new ArgumentNullException(nameof(onInitialized));
 		}
@@ -76,16 +74,13 @@ namespace Grabacr07.KanColleWrapper
 
 					// 両方デシリアライズに成功したらコールバックで初期化
 					if (this.capturedStart2 && this.capturedRequireInfo && this.capturedStart2Data != null && this.capturedRequireInfoData != null)
-					{
-						try
 						{
-							Debug.WriteLine("CapturedProcessor: both required endpoints deserialized -> invoking onInitialized");
+							try
+							{
+								Debug.WriteLine("CapturedProcessor: both required endpoints deserialized -> invoking onInitialized");
 
-							// Ensure proxy exists in same manner as previous logic
-							var proxy = this.getProxy();
-
-							// コールバック実行（KanColleClient 側で Master/Homeport を構築）
-							this.onInitialized(this.capturedStart2Data, this.capturedRequireInfoData);
+								// コールバック実行（KanColleClient 側で Master/Homeport を構築）
+								this.onInitialized(this.capturedStart2Data, this.capturedRequireInfoData);
 
 							// 初期化後はフラグとデータをクリア
 							this.capturedStart2 = false;

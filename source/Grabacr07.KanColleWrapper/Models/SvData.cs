@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
+using System;
 using System.Collections.Specialized;
-using Nekoxy;
+using System.Web;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Grabacr07.KanColleWrapper.Internal;
 
 namespace Grabacr07.KanColleWrapper.Models
 {
@@ -46,65 +37,9 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Parse methods (generic)
 
-		public static SvData<T> Parse<T>(Session session)
-		{
-			var bytes = Encoding.UTF8.GetBytes(session.GetResponseAsJson());
-			var serializer = new DataContractJsonSerializer(typeof(svdata<T>));
-			using (var stream = new MemoryStream(bytes))
-			{
-				var rawResult = serializer.ReadObject(stream) as svdata<T>;
-				var result = new SvData<T>(rawResult, session.Request.BodyAsString);
-				return result;
-			}
-		}
-
-		public static bool TryParse<T>(Session session, out SvData<T> result)
-		{
-			try
-			{
-				result = Parse<T>(session);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine(ex);
-				result = null;
-				return false;
-			}
-
-			return true;
-		}
-
 		#endregion
 
 		#region Parse methods (non generic)
-
-		public static SvData Parse(Session session)
-		{
-			var bytes = Encoding.UTF8.GetBytes(session.GetResponseAsJson());
-			var serializer = new DataContractJsonSerializer(typeof(svdata));
-			using (var stream = new MemoryStream(bytes))
-			{
-				var rawResult = serializer.ReadObject(stream) as svdata;
-				var result = new SvData(rawResult, session.Request.BodyAsString);
-				return result;
-			}
-		}
-
-		public static bool TryParse(Session session, out SvData result)
-		{
-			try
-			{
-				result = Parse(session);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine(ex);
-				result = null;
-				return false;
-			}
-
-			return true;
-		}
 
 		#endregion
 	}

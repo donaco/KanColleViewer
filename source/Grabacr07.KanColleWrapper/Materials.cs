@@ -193,7 +193,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Materials(KanColleProxy proxy)
+		internal Materials()
 		{
 		}
 

@@ -11,7 +11,6 @@ using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Win32;
-using Nekoxy;
 
 namespace Grabacr07.KanColleViewer.Models
 {
@@ -113,22 +112,22 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public static HttpClientHandler GetProxyConfiguredHandler()
 		{
-			switch (HttpProxy.UpstreamProxyConfig.Type)
+			switch (Settings.NetworkSettings.Proxy.Type.Value)
 			{
-				case ProxyConfigType.DirectAccess:
+				case Grabacr07.KanColleWrapper.ProxyType.DirectAccess:
 					return new HttpClientHandler
 					{
 						UseProxy = false,
 					};
 
-				case ProxyConfigType.SpecificProxy:
+				case Grabacr07.KanColleWrapper.ProxyType.SpecificProxy:
 					return new HttpClientHandler
 					{
 						UseProxy = true,
-						Proxy = new WebProxy($"{HttpProxy.UpstreamProxyConfig.SpecificProxyHost}:{HttpProxy.UpstreamProxyConfig.SpecificProxyPort}"),
+						Proxy = new WebProxy($"{Settings.NetworkSettings.Proxy.Host.Value}:{Settings.NetworkSettings.Proxy.Port.Value}"),
 					};
 
-				case ProxyConfigType.SystemProxy:
+				case Grabacr07.KanColleWrapper.ProxyType.SystemProxy:
 					return new HttpClientHandler();
 
 				default:

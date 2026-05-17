@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -108,19 +108,10 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		private void UpdateMessage()
 		{
-			#region messages (const)
-			// いつか多言語リソースに移す… いつか…
-			const string message10048 = @"既にポート {0} で通信を待ち受けているアプリケーションが存在するため、開始に失敗しました。
-アプリケーションを終了するか、以下で待ち受けポートを変更できます。";
 			const string messageUnexpectedException = @"だめだった :;(∩´﹏`∩);:
 {0}";
-			#endregion
 
-			if (this.Bootstrapper.Result == ProxyBootstrapResult.WsaEAddrInUse)
-			{
-				this.Message = string.Format(message10048, this.Bootstrapper.ListeningPort);
-			}
-			else if (this.Bootstrapper.Result == ProxyBootstrapResult.UnexpectedException)
+			if (this.Bootstrapper.Result == ProxyBootstrapResult.UnexpectedException)
 			{
 				this.Message = string.Format(messageUnexpectedException, this.Bootstrapper.Exception.Message);
 			}
