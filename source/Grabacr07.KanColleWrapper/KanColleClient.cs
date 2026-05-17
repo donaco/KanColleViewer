@@ -1161,18 +1161,20 @@ namespace Grabacr07.KanColleWrapper
 							if (org != null)
 							{
 								var returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
-								foreach (var returningDeckId in returning)
-								{
-									try
+									if (returning.Length > 0)
 									{
-										org.Fleets[returningDeckId].Homing();
+										try
+										{
+											// 脱出フラグのクリアや全艦 Situation のリセットも含めて一括処理
+											org.Homing();
+										}
+										catch (Exception ex) { LogError("TryHandlePort", ex); }
+										foreach (var returningDeckId in returning)
+											this.sortieDeckIds.Remove(returningDeckId);
 									}
-									catch (Exception ex) { LogError("TryHandlePort", ex); }
-									this.sortieDeckIds.Remove(returningDeckId);
 								}
-							}
 
-							this.IsInSortie = this.sortieDeckIds.Count > 0;
+								this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
 						catch (Exception)
 						{
