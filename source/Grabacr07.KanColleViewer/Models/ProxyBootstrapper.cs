@@ -24,8 +24,6 @@ namespace Grabacr07.KanColleViewer.Models
 		public ProxyBootstrapper()
 		{
 			this.Result = ProxyBootstrapResult.None;
-
-			KanColleClient.Current.Proxy.UpstreamProxySettings = new Settings.NetworkSettings.Proxy();
 		}
 
 		public void Try()

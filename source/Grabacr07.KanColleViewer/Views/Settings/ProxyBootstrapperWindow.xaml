@@ -59,52 +59,7 @@
 		<StackPanel Grid.Row="1"
 					IsEnabled="{Binding IsEditable}"
 					Margin="12,0">
-			<Rectangle Style="{DynamicResource SeparatorStyleKey}"
-					   Margin="0,0,0,12" />
-
-			<CheckBox Content="待ち受けポートを変更する"
-					  IsChecked="{Binding Source={x:Static settings:NetworkSettings+LocalProxy.IsEnabled}, Path=Value}" />
-			<StackPanel IsEnabled="{Binding Source={x:Static settings:NetworkSettings+LocalProxy.IsEnabled}, Path=Value}"
-						Margin="20,6,0,6">
-				<Grid Margin="0,4">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto" />
-						<ColumnDefinition Width="Auto" />
-						<ColumnDefinition Width="Auto" />
-					</Grid.ColumnDefinitions>
-
-					<TextBlock Grid.Column="0">
-						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
-						<Run Text=": " />
-					</TextBlock>
-					<metro:PromptTextBox Grid.Column="1"
-										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-										 Width="100">
-						<metro:PromptTextBox.Text>
-							<Binding Source="{x:Static settings:NetworkSettings+LocalProxy.Port}"
-									 Path="Value"
-									 UpdateSourceTrigger="PropertyChanged">
-								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
-													 Max="65535" />
-								</Binding.ValidationRules>
-							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
-
-					<TextBlock Grid.Column="2"
-							   Style="{DynamicResource DetailTextStyleKey}"
-							   Margin="5">
-						<Run Text="(既定値:" />
-						<Run Text="{Binding Source={x:Static settings:NetworkSettings+LocalProxy.Port}, Path=Default, Mode=OneWay}" />
-						<Run Text=")" />
-					</TextBlock>
-				</Grid>
-				<TextBlock Text="※設定を変更したら [再試行] ボタンを押してください。"
-						   Style="{DynamicResource DetailTextStyleKey}"
-						   Margin="0,4" />
 			</StackPanel>
-		</StackPanel>
 
 		<DockPanel Grid.Row="2"
 				   IsEnabled="{Binding IsEditable}"

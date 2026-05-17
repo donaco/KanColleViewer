@@ -241,8 +241,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			NetworkSettings.Proxy.SocksPort.Value = ushort.TryParse(this.SpecificSocksProxyPort, out port) ? port : NetworkSettings.Proxy.SocksPort.Default;
 			NetworkSettings.Proxy.IsUseHttpProxyForAllProtocols.Value = this.IsUseHttpProxyForAllProtocols;
 			this.RevertToSavedSettings();    // Parse 結果書き戻し
-
-			KanColleClient.Current.Proxy.UpstreamProxySettings = new NetworkSettings.Proxy();
 		}
 
 		public void Cancel()

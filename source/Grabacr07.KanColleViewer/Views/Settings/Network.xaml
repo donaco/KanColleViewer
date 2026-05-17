@@ -260,60 +260,9 @@
 			</StackPanel>
 		</StackPanel>
 
-		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-
-		<TextBlock Text="ローカル待ち受けポート設定"
-				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
-
-		<StackPanel Margin="20,0,0,0">
-			<TextBlock Text="※反映にはアプリケーションの再起動が必要です。"
-					   Style="{DynamicResource DetailTextStyleKey}" />
-
-			<Border Height="8" />
-			<CheckBox Content="待ち受けポートを変更する"
-					  IsChecked="{Binding Source={x:Static ms:NetworkSettings+LocalProxy.IsEnabled}, Path=Value}" />
-
-			<Border Height="4" />
-			<StackPanel IsEnabled="{Binding Source={x:Static ms:NetworkSettings+LocalProxy.IsEnabled}, Path=Value}"
-						Margin="20,0,0,0">
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto" />
-						<ColumnDefinition Width="Auto" />
-						<ColumnDefinition Width="Auto" />
-					</Grid.ColumnDefinitions>
-
-					<TextBlock Grid.Column="0">
-						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
-						<Run Text=": " />
-					</TextBlock>
-					<metro:PromptTextBox Grid.Column="1"
-										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-										 Width="80">
-						<metro:PromptTextBox.Text>
-							<Binding Source="{x:Static ms:NetworkSettings+LocalProxy.Port}"
-									 Path="Value"
-									 UpdateSourceTrigger="PropertyChanged">
-								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
-													 Max="65535" />
-								</Binding.ValidationRules>
-							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
-
-					<TextBlock Grid.Column="2"
-							   Style="{DynamicResource DetailTextStyleKey}"
-							   Margin="5">
-						<Run Text="(既定値:" />
-						<Run Text="{Binding Source={x:Static ms:NetworkSettings+LocalProxy.Port}, Path=Default, Mode=OneWay}" />
-						<Run Text=")" />
-					</TextBlock>
-				</Grid>
-			</StackPanel>
-		</StackPanel>
 		<!-- 開発者向けオプション -->
 		<StackPanel IsEnabled="{Binding Source={x:Static ms:GeneralSettings.IsRemoteDebuggingEnabled}, Path=Value, Mode=OneWay}">
+			<Border Height="4" />
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 			<TextBlock Text="開発者ツールの表示設定"
 					   Style="{DynamicResource SettingsHeaderTextStyleKey}" />

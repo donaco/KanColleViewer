@@ -81,10 +81,6 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			// ポート番号の有効範囲 (1～65535)
 			// ushort 型は 0～65535 のため、0 のみ不正値として扱う
 
-			// ローカル待ち受けポート（現在未使用。設定値の破損防止のため保持）
-			if (NetworkSettings.LocalProxy.Port.Value == 0)
-				NetworkSettings.LocalProxy.Port.Value = NetworkSettings.LocalProxy.Port.Default;
-
 			// 上流プロキシ: HTTP ポート
 			if (NetworkSettings.Proxy.Port.Value == 0)
 				NetworkSettings.Proxy.Port.Value = NetworkSettings.Proxy.Port.Default;

@@ -73,24 +73,6 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			}
 		}
 
-		// LocalProxy は Nekoxy 時代のローカル待ち受けプロキシ設定。
-		// CEF 一本化により現在は使用していないが、将来の再利用に備えて定義を保持する。
-		// IsEnabled / Port の値は LocalProxySettingsString では参照されない。
-		public static class LocalProxy
-		{
-			public static SerializableProperty<bool> IsEnabled { get; }
-				= new SerializableProperty<bool>(GetKey(), Providers.Local, false);
-
-			public static SerializableProperty<ushort> Port { get; }
-				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 37564);
-
-
-			private static string GetKey([CallerMemberName] string propertyName = "")
-			{
-				return nameof(NetworkSettings) + "." + nameof(LocalProxy) + "." + propertyName;
-			}
-		}
-
 		public static string LocalProxySettingsString
 		{
 			get
