@@ -100,14 +100,7 @@ namespace Grabacr07.KanColleViewer
 
 				CefBridge.Initialize();
 
-				// BootstrapProxy() で Views.Settings.ProxyBootstrapper.Show() が呼ばれるより前に
-				// Application.MainWindow を設定しておく。これ大事
-				// 後に設定した場合、Views.Settings.ProxyBootstrapper が閉じると共にアプリも終了してしまう。
-				this.MainWindow = WindowService.Current.GetMainWindow();
-
-				if (BootstrapProxy())
-				{
-					this.compositeDisposable.Add(ProxyBootstrapper.Shutdown);
+					this.MainWindow = WindowService.Current.GetMainWindow();
 					this.MainWindow.Show();
 
 					var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
@@ -127,12 +120,6 @@ namespace Grabacr07.KanColleViewer
 #endif
 					base.OnStartup(e);
 					this.ChangeState(ApplicationState.Running);
-				}
-				else
-				{
-					this.ChangeState(ApplicationState.Terminate);
-					this.Shutdown();
-				}
 			}
 #if !DEBUG
 			else

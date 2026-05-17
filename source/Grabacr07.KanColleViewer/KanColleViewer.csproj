@@ -249,7 +249,6 @@
     <Compile Include="Models\ProductInfo.cs" />
     <Compile Include="Models\Migration\_XmlFileReader.cs" />
     <Compile Include="Models\Helper.cs" />
-    <Compile Include="Models\ProxyBootstrapper.cs" />
     <Compile Include="Models\Migration\_ProxySettings.cs" />
     <Compile Include="Models\ResourceService.cs" />
     <Compile Include="Models\SallyArea.cs" />
@@ -311,7 +310,6 @@
     <Compile Include="ViewModels\FleetWindowViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModelBase.cs" />
-    <Compile Include="ViewModels\ProxyBootstrapperViewModel.cs" />
     <Compile Include="ViewModels\InformationViewModel.cs" />
     <Compile Include="Models\INavigator.cs" />
     <Compile Include="ViewModels\Contents\MaterialsViewModel.cs" />
@@ -416,9 +414,6 @@
     </Compile>
     <Compile Include="Views\Settings\PluginSettingsWindow.xaml.cs">
       <DependentUpon>PluginSettingsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\ProxyBootstrapperWindow.xaml.cs">
-      <DependentUpon>ProxyBootstrapperWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings\Notification.xaml.cs">
       <DependentUpon>Notification.xaml</DependentUpon>
@@ -573,10 +568,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Settings\PluginSettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\ProxyBootstrapperWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

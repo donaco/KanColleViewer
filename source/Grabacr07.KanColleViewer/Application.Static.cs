@@ -7,7 +7,6 @@ using CefSharp;
 using CefSharp.Wpf;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
-using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Desktop;
 
@@ -22,28 +21,6 @@ namespace Grabacr07.KanColleViewer
 		}
 
 		public static Application Instance => Current as Application;
-
-		/// <summary>
-		/// <see cref="ProxyBootstrapper"/> を使用し、<see cref="KanColleProxy"/> を起動することを試みます。
-		/// 必要に応じて、ユーザーに操作を求めるダイアログを表示します。
-		/// </summary>
-		/// <returns><see cref="KanColleProxy"/> の起動に成功した場合は true、それ以外の場合は false。</returns>
-		private static bool BootstrapProxy()
-		{
-			var bootstrapper = new ProxyBootstrapper();
-			bootstrapper.Try();
-
-			if (bootstrapper.Result == ProxyBootstrapResult.Success)
-			{
-				return true;
-			}
-
-			var vmodel = new ProxyBootstrapperViewModel(bootstrapper) { Title = ProductInfo.Title, };
-			var window = new Views.Settings.ProxyBootstrapper { DataContext = vmodel, };
-			window.ShowDialog();
-
-			return vmodel.DialogResult;
-		}
 
 		private static void ReportException(string caller, object sender, Exception exception)
 		{
