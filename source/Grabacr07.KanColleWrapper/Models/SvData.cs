@@ -35,12 +35,5 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 
 
-		#region Parse methods (generic)
-
-		#endregion
-
-		#region Parse methods (non generic)
-
-		#endregion
-	}
-}
+			}
+		}

@@ -83,19 +83,30 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.IsEditable = false;
 			this.Status = "再試行中...";
 
-			// ToDo: async void なので刺されそう
-			await Task.WhenAll(Task.Run(() => this.Bootstrapper.Try()), Task.Delay(TimeSpan.FromMilliseconds(1500)));
-
-			this.IsEditable = true;
-			this.Status = "";
-
-			if (this.Bootstrapper.Result == ProxyBootstrapResult.Success)
+			try
 			{
-				this.DialogResult = true;
-				this.Close();
+				// async void は WPF イベントハンドラとして XAML から呼ばれるため変更不可。
+				// 代わりに内部を try-catch で保護し、未処理例外によるクラッシュを防ぐ。
+				await Task.WhenAll(Task.Run(() => this.Bootstrapper.Try()), Task.Delay(TimeSpan.FromMilliseconds(1500)));
+
+				this.IsEditable = true;
+				this.Status = "";
+
+				if (this.Bootstrapper.Result == ProxyBootstrapResult.Success)
+				{
+					this.DialogResult = true;
+					this.Close();
+				}
+				else
+				{
+					this.UpdateMessage();
+				}
 			}
-			else
+			catch (Exception ex)
 			{
+				System.Diagnostics.Debug.WriteLine("ProxyBootstrapperViewModel.Retry: " + ex);
+				this.IsEditable = true;
+				this.Status = "";
 				this.UpdateMessage();
 			}
 		}

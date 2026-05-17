@@ -17,6 +17,7 @@ namespace Grabacr07.KanColleWrapper
 		private readonly Homeport homeport;
 		private readonly CompositeDisposable disposables = new CompositeDisposable();
 
+		private readonly object _evacuationLock = new object();
 		private readonly List<int> evacuatedShipsIds = new List<int>();
 		private readonly List<int> towShipIds = new List<int>();
 
@@ -170,10 +171,13 @@ namespace Grabacr07.KanColleWrapper
 				this.Ships = new MemberTable<Ship>(source.Select(x => new Ship(this.homeport, x)));
 
 				if (KanColleClient.Current.IsInSortie)
-				{
-					foreach (var id in this.evacuatedShipsIds) this.Ships[id].Situation |= ShipSituation.Evacuation;
-					foreach (var id in this.towShipIds) this.Ships[id].Situation |= ShipSituation.Tow;
-				}
+					{
+						lock (this._evacuationLock)
+						{
+							foreach (var id in this.evacuatedShipsIds) this.Ships[id].Situation |= ShipSituation.Evacuation;
+							foreach (var id in this.towShipIds) this.Ships[id].Situation |= ShipSituation.Tow;
+						}
+					}
 
 				foreach (var fleet in this.Fleets.Values)
 				{
@@ -407,12 +411,9 @@ namespace Grabacr07.KanColleWrapper
 						{
 							try { iy.SlotItems.Remove(id); } catch { }
 						}
-						try
-						{
-							typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-								?.Invoke(iy, null);
-						}
-						catch { }
+						// RaiseSlotItemsChanged は internal メソッドのため直接呼び出し可能
+						// （Organization と Itemyard は同一アセンブリ Grabacr07.KanColleWrapper 内）
+						iy.RaiseSlotItemsChanged();
 					}
 				}
 				catch { }
@@ -488,8 +489,11 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		internal void AddEvacuatedShips(int evacuatedShipId, int towShipId)
 		{
-			this.evacuatedShipsIds.Add(evacuatedShipId);
-			this.towShipIds.Add(towShipId);
+			lock (this._evacuationLock)
+			{
+				this.evacuatedShipsIds.Add(evacuatedShipId);
+				this.towShipIds.Add(towShipId);
+			}
 		}
 
 		internal void Homing()
@@ -499,8 +503,11 @@ namespace Grabacr07.KanColleWrapper
 			Debug.WriteLine("Organization.Homing: invoked.");
 #endif
 
-			this.evacuatedShipsIds.Clear();
-			this.towShipIds.Clear();
+			lock (this._evacuationLock)
+			{
+				this.evacuatedShipsIds.Clear();
+				this.towShipIds.Clear();
+			}
 
 			foreach (var ship in this.Ships.Values)
 			{
@@ -532,8 +539,11 @@ namespace Grabacr07.KanColleWrapper
 					target.Update(ship);
 
 					// 出撃中マーカー等を維持
-					if (this.evacuatedShipsIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Evacuation;
-					if (this.towShipIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Tow;
+						lock (this._evacuationLock)
+						{
+							if (this.evacuatedShipsIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Evacuation;
+							if (this.towShipIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Tow;
+						}
 				}
 			}
 

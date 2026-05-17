@@ -73,6 +73,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			}
 		}
 
+		// LocalProxy は Nekoxy 時代のローカル待ち受けプロキシ設定。
+		// CEF 一本化により現在は使用していないが、将来の再利用に備えて定義を保持する。
+		// IsEnabled / Port の値は LocalProxySettingsString では参照されない。
 		public static class LocalProxy
 		{
 			public static SerializableProperty<bool> IsEnabled { get; }
@@ -95,13 +98,11 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				switch (Proxy.Type.Value)
 				{
 					case ProxyType.SystemProxy:
-						{
-							var port = LocalProxy.IsEnabled ? LocalProxy.Port.Value : LocalProxy.Port.Default;
-							var proxyConfig = new Win32.WinHttpCurrentUserIEProxyConfig();
-							Win32.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(ref proxyConfig);
-							var settings = IEStyleProxySettingsBuilder.Parse(proxyConfig.Proxy);
-							return settings.ToIEStyleSettings("127.0.0.1", port);
-						}
+						// CEF 一本化後はシステムプロキシを CEF 自身に委ねる。
+						// proxy-server に空文字を渡すことで CEF がシステムプロキシ設定を自動適用する。
+						// ※ 旧実装では Nekoxy 経由のローカルプロキシ(127.0.0.1:37564)を指定していたが、
+						//    Nekoxy 削除後はそのポートに何もリスンしていないため接続不能になる不具合があった。
+						return string.Empty;
 
 					case ProxyType.SpecificProxy:
 						// 指定プロキシの場合、CEF の proxy-server に指定プロキシ設定を渡す

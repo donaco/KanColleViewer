@@ -9,6 +9,7 @@ namespace Grabacr07.KanColleWrapper
 		private readonly object capturedLock = new object();
 		private bool capturedStart2;
 		private bool capturedRequireInfo;
+		// lastCapturedAt は現在未使用。将来のタイムアウト検出やデバッグ用途に向けて保持。
 		private DateTime lastCapturedAt = DateTime.MinValue;
 
 		private kcsapi_start2 capturedStart2Data;
