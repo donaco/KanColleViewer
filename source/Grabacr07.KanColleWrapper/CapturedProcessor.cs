@@ -31,6 +31,11 @@ namespace Grabacr07.KanColleWrapper
 		{
 			if (string.IsNullOrEmpty(url)) return;
 
+			// lock 外で呼び出すコールバック引数を保持する変数
+			// null のままであれば lock 内で条件が揃わなかったことを示す
+			kcsapi_start2 pendingStart2 = null;
+			kcsapi_require_info pendingRequireInfo = null;
+
 			try
 			{
 				var now = DateTime.UtcNow;
@@ -72,26 +77,33 @@ namespace Grabacr07.KanColleWrapper
 						}
 					}
 
-					// 両方デシリアライズに成功したらコールバックで初期化
-					if (this.capturedStart2 && this.capturedRequireInfo && this.capturedStart2Data != null && this.capturedRequireInfoData != null)
-						{
-							try
-							{
-								Debug.WriteLine("CapturedProcessor: both required endpoints deserialized -> invoking onInitialized");
+					// 両方揃ったらコールバック引数をローカルに退避してフラグをクリアする。
+					// onInitialized 自体は lock 解放後に呼び出す。
+					// これにより onInitialized 内の Dispatcher.Invoke（同期）がデッドロックを
+					// 引き起こすリスクを排除する。
+					if (this.capturedStart2 && this.capturedRequireInfo
+						&& this.capturedStart2Data != null && this.capturedRequireInfoData != null)
+					{
+						pendingStart2 = this.capturedStart2Data;
+						pendingRequireInfo = this.capturedRequireInfoData;
+						this.capturedStart2 = false;
+						this.capturedRequireInfo = false;
+						this.capturedStart2Data = null;
+						this.capturedRequireInfoData = null;
+					}
+				}
 
-								// コールバック実行（KanColleClient 側で Master/Homeport を構築）
-								this.onInitialized(this.capturedStart2Data, this.capturedRequireInfoData);
-
-							// 初期化後はフラグとデータをクリア
-							this.capturedStart2 = false;
-							this.capturedRequireInfo = false;
-							this.capturedStart2Data = null;
-							this.capturedRequireInfoData = null;
-						}
-						catch (Exception ex)
-						{
-							Debug.WriteLine("CapturedProcessor: initialization callback failed: " + ex);
-						}
+				// lock の外で onInitialized を呼び出す
+				if (pendingStart2 != null && pendingRequireInfo != null)
+				{
+					try
+					{
+						Debug.WriteLine("CapturedProcessor: both required endpoints deserialized -> invoking onInitialized");
+						this.onInitialized(pendingStart2, pendingRequireInfo);
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine("CapturedProcessor: initialization callback failed: " + ex);
 					}
 				}
 			}

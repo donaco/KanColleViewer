@@ -92,11 +92,11 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		{
 			get
 			{
-				var port = LocalProxy.IsEnabled ? LocalProxy.Port.Value : LocalProxy.Port.Default;
 				switch (Proxy.Type.Value)
 				{
 					case ProxyType.SystemProxy:
 						{
+							var port = LocalProxy.IsEnabled ? LocalProxy.Port.Value : LocalProxy.Port.Default;
 							var proxyConfig = new Win32.WinHttpCurrentUserIEProxyConfig();
 							Win32.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(ref proxyConfig);
 							var settings = IEStyleProxySettingsBuilder.Parse(proxyConfig.Proxy);
@@ -104,16 +104,14 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 						}
 
 					case ProxyType.SpecificProxy:
-						//指定プロキシの場合、HTTPだけNekoxyを通し、後は指定プロキシに流す
+						// 指定プロキシの場合、CEF の proxy-server に指定プロキシ設定を渡す
 						{
 							var settings = IEStyleProxySettingsBuilder.Parse(new Proxy());
-							return settings.ToIEStyleSettings("127.0.0.1", port);
+							return settings.ToIEStyleSettings();
 						}
 					case ProxyType.DirectAccess:
-						//プロキシを使用しない場合、HTTPだけNekoxyを通し、後は直アクセス
-						// return $"http=127.0.0.1:{port}";
-						// 変更後（HTTP と HTTPS をローカルプロキシへ）
-						return $"http=127.0.0.1:{port};https=127.0.0.1:{port}";
+						// プロキシを使用しない場合、CEF に対して空文字を返し proxy-server を設定しない
+						return string.Empty;
 					default:
 						throw new IndexOutOfRangeException();
 				}

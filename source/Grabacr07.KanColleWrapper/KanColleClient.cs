@@ -28,7 +28,7 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 艦これの通信をフックするプロキシを取得します。
 		/// </summary>
-		public KanColleProxy Proxy { get; private set; }
+		public KanColleProxy Proxy { get; private set; } = new KanColleProxy();
 
 		/// <summary>
 		/// ユーザーに依存しないマスター情報を取得します。
@@ -175,10 +175,14 @@ namespace Grabacr07.KanColleWrapper
 
 			}
 
-		public void Initialieze()
+		public void Initialize()
 		{
-			this.Proxy = this.Proxy ?? new KanColleProxy();
+			// Proxy はインスタンス生成時に初期化済みのため、ここでの処理は不要。
 		}
+
+		/// <summary>スペルミスのあった旧メソッド名。後方互換のため残します。</summary>
+		[System.Obsolete("Initialize() を使用してください。このメソッドは将来のバージョンで削除されます。")]
+		public void Initialieze() => this.Initialize();
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）
 		private void SetRequireInfo(kcsapi_require_info data)

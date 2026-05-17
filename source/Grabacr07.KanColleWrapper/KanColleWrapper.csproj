@@ -165,7 +165,6 @@
     <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
     <Compile Include="Calculator.cs" />
-    <Compile Include="Counter.cs" />
     <Compile Include="DisposableNotifier.cs" />
     <Compile Include="Dockyard.cs" />
     <Compile Include="EnumerableEx.cs" />
@@ -182,7 +181,6 @@
     <Compile Include="Models\Mission.cs" />
     <Compile Include="Itemyard.cs" />
     <Compile Include="IProxySettings.cs" />
-    <Compile Include="KanColleProxyExtensions.cs" />
     <Compile Include="Models\ConditionRejuvenatedEventArgs.cs" />
     <Compile Include="Models\CreatedSlotItem.cs" />
     <Compile Include="Models\FleetCondition.cs" />
@@ -223,11 +221,6 @@
     <Compile Include="Models\ViewRange.cs" />
     <Compile Include="Notifier.cs" />
     <Compile Include="Organization.cs" />
-    <Compile Include="KanColleProxy.Endpoints.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>KanColleProxy.Endpoints.tt</DependentUpon>
-    </Compile>
     <Compile Include="MemberTable.cs" />
     <Compile Include="Models\ExpeditionReturnedEventArgs.cs" />
     <Compile Include="Models\FleetSituation.cs" />
