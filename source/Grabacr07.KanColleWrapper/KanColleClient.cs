@@ -296,6 +296,10 @@ namespace Grabacr07.KanColleWrapper
 		private AirSuperiority pendingAirResult = AirSuperiority.None;
 		private bool hasPendingAirResult = false;
 
+		// goback_port のために battleresult から受け取った脱出艦・曳航艦IDを保持する
+		private int[] pendingEscapeShipIds = null;
+		private int[] pendingTowShipIds = null;
+
 		#endregion
 
 		/// <summary>
@@ -381,6 +385,7 @@ namespace Grabacr07.KanColleWrapper
 
 				if (TryHandleRemodelSlot(url, normalized, requestBody)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
+				if (TryHandleGobackPort(url)) return;
 
 				// 入渠系
 				if (TryHandleNyukyoStart(url, normalized, requestBody)) return;
@@ -899,6 +904,41 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
+
+			// goback_port のために連合艦隊脱出情報を記録（combined_battle_battleresult のみ）
+			try
+			{
+				var escape = cbrLocal?.api_escape;
+				if (escape != null && escape.api_escape_idx != null && escape.api_tow_idx != null)
+				{
+					// 脱出艦・曳航艦のインデックスを艦船IDに変換してキャッシュ
+					var org = this.Homeport?.Organization;
+					if (org != null)
+					{
+						// 連合艦隊（第1+第2艦隊）を結合した Ship 配列を構築（Nekoxy の購読側と同じ方式）
+						var combinedShips = org.Fleets.OrderBy(f => f.Key)
+							.Take(2)
+							.SelectMany(f => f.Value.Ships)
+							.ToArray();
+
+						this.pendingEscapeShipIds = escape.api_escape_idx
+							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
+							.Select(idx => combinedShips[idx - 1].Id)
+							.ToArray();
+						this.pendingTowShipIds = escape.api_tow_idx
+							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
+							.Select(idx => combinedShips[idx - 1].Id)
+							.ToArray();
+					}
+				}
+				else
+				{
+					// 脱出なし or 単艦戦の場合はクリア
+					this.pendingEscapeShipIds = null;
+					this.pendingTowShipIds = null;
+				}
+			}
+			catch (Exception ex) { LogError("TryHandleBattleResult/escape", ex); }
 
 			RunOnUi(() =>
 			{
@@ -4841,6 +4881,52 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 			catch (Exception ex) { LogError("TryHandleMissionResult", ex); }
+
+			return true;
+		}
+
+		/// <summary>
+		/// 連合艦隊 goback_port：脱出艦・曳航艦の退避フラグを Organization に反映します。
+		/// 脱出情報は TryHandleBattleResult でキャッシュ済みのものを使用します。
+		/// </summary>
+		private bool TryHandleGobackPort(string url)
+		{
+			if (!url.Contains("/kcsapi/api_req_combined_battle/goback_port")) return false;
+
+			try
+			{
+				var escapeIds = this.pendingEscapeShipIds;
+				var towIds = this.pendingTowShipIds;
+
+				// キャッシュがなければ何もしない（goback_port は脱出がない場合でも来ることがある）
+				if (escapeIds == null || escapeIds.Length == 0 || towIds == null || towIds.Length == 0)
+				{
+					this.pendingEscapeShipIds = null;
+					this.pendingTowShipIds = null;
+					return true;
+				}
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+						if (org == null) return;
+
+						if (this.IsInSortie && escapeIds.Length >= 1 && towIds.Length >= 1)
+						{
+							org.AddEvacuatedShips(escapeIds[0], towIds[0]);
+						}
+					}
+					catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
+					finally
+					{
+						this.pendingEscapeShipIds = null;
+						this.pendingTowShipIds = null;
+					}
+				});
+			}
+			catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
 
 			return true;
 		}

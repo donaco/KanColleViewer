@@ -516,9 +516,18 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
-		#region 出撃 (Sortie / Homing / Escape)
+		/// <summary>
+			/// CEF 経由で受信した goback_port 時に、脱出艦・曳航艦を記録します。
+			/// </summary>
+			internal void AddEvacuatedShips(int evacuatedShipId, int towShipId)
+			{
+				this.evacuatedShipsIds.Add(evacuatedShipId);
+				this.towShipIds.Add(towShipId);
+			}
 
-		private void SubscribeSortieSessions(KanColleProxy proxy)
+			#region 出撃 (Sortie / Homing / Escape)
+
+			private void SubscribeSortieSessions(KanColleProxy proxy)
 		{
 #if DEBUG
 			Debug.WriteLine("Organization.SubscribeSortieSessions: subscribing to sortie sessions.");
