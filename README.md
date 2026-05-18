@@ -97,4 +97,8 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The 3-Clause BSD License
 * **ライセンス全文 :** [licenses/CefSharp.txt](licenses/CefSharp.txt)
 
+### [System.Reactive](https://github.com/dotnet/reactive)
+* **用途 :** 非同期処理
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/System.Reactive.txt](licenses/System.Reactive.txt)
 
