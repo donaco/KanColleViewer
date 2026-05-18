@@ -93,7 +93,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			this.Settings = new SlotItemCatalogWindowSettings();
 
 			// UI スレッドの SynchronizationContext を取得（コンストラクタは UI スレッドで実行される）
-			var uiScheduler = new SynchronizationContextScheduler(SynchronizationContext.Current);
+			var context = SynchronizationContext.Current ?? new SynchronizationContext();
+			var uiScheduler = new SynchronizationContextScheduler(context);
 
 			// 装備種類リストを初期化（マスターに存在する Type のみ）
 			var master = KanColleClient.Current.Master;
