@@ -72,12 +72,6 @@ StatefulModel
     ・用途 : M-V-Whatever の Model 向けインフラストラクチャ
     ・ライセンス : The MIT License (MIT)
 
-Rx (Reactive Extensions)
-(https://rx.codeplex.com/)
-    ・用途 : 非同期処理
-    ・ライセンス : Apache License Version 2.0
-    ・ライセンス全文 : Licenses/Apache.txt
-
 Desktop Toast
 (https://github.com/emoacht/DesktopToast)
     The MIT License (MIT)
@@ -99,6 +93,14 @@ CefSharp.Wpf
     ・用途 : 内蔵 Web ブラウザー
     ・ライセンス : The 3-Clause BSD License
     ・ライセンス全文 : Licenses/CefSharp.txt
+
+System.Reactive (Reactive Extensions for .NET)
+(https://github.com/dotnet/reactive)
+    ver 6.1.0
+    Copyright (c) .NET Foundation and Contributors
+    ・用途 : 非同期処理
+    ・ライセンス : The MIT License (MIT)
+    ・ライセンス全文 : Licenses/System.Reactive.txt
 
 
 

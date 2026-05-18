@@ -76,11 +76,6 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/StatefulModel.txt](licenses/StatefulModel.txt)
 
-#### [Rx (Reactive Extensions)](https://rx.codeplex.com/)
-* **用途 :** 非同期処理
-* **ライセンス :** Apache License Version 2.0
-* **ライセンス全文 :** [licenses/Apache.txt](licenses/Apache.txt)
-
 #### [Desktop Toast](https://github.com/emoacht/DesktopToast)
 > The MIT License (MIT)
 >
