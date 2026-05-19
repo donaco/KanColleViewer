@@ -259,9 +259,9 @@ namespace Grabacr07.KanColleWrapper
 			this.Bauxite = bauxite;
 		}
 
-		internal void DecrementInstantBuildMaterials()
+		internal void DecrementInstantBuildMaterials(int amount = 1)
 		{
-			this.InstantBuildMaterials = Math.Max(0, this.InstantBuildMaterials - 1);
+			this.InstantBuildMaterials = Math.Max(0, this.InstantBuildMaterials - amount);
 		}
 
 		internal void DecrementInstantRepairMaterials()

@@ -3478,12 +3478,12 @@ namespace Grabacr07.KanColleWrapper
 			// dict と keyId を外側スコープで宣言して後続から参照できるようにする
 			Dictionary<string, string> dict = null;
 			int keyId = -1;
+			int[] items = null;
 
 			try
 			{
 				var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
-				int kdockIdFound = -1;
-				int[] items = null;
+				int kdockIdFound = -1;				
 
 				// requestBody を dict にパース（ここで全てのキーを取得）
 				dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -3550,10 +3550,13 @@ namespace Grabacr07.KanColleWrapper
 							if (!this.appliedBuildKdock.Contains(kdId)) this.appliedBuildKdock.Add(kdId);
 						}
 
-						// UI スレッドで即時に InstantBuildMaterials を 1 減算
+						// api_item1 が 1000 以上の場合は高速建造材を 10 消費、それ以外は 1 消費
+						int buildCost = (items != null && items.Length >= 1 && items[0] >= 1000) ? 10 : 1;
+
+						// UI スレッドで即時に InstantBuildMaterials を減算
 						RunOnUi(() =>
 						{
-							try { this.Homeport?.Materials?.DecrementInstantBuildMaterials(); }
+							try { this.Homeport?.Materials?.DecrementInstantBuildMaterials(buildCost); }
 							catch (Exception) { }
 						});
 					}
