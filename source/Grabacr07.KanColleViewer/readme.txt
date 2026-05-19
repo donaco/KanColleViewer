@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-                                             version 4.7.3  2026/05/10
+version 4.8.0  2026/05/17
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -72,37 +72,6 @@ StatefulModel
     ・用途 : M-V-Whatever の Model 向けインフラストラクチャ
     ・ライセンス : The MIT License (MIT)
 
-Nekoxy
-(https://github.com/veigr/Nekoxy)
-    The MIT License (MIT)
-    Copyright (c) 2015 veigr
-    ・用途 : HTTP通信キャプチャ
-    ・ライセンス : The MIT License (MIT)
-    ・ライセンス全文 : Licenses/Nekoxy.txt
-
-TrotiNet
-(https://github.com/krys-g/TrotiNet)
-    TrotiNet is a proxy library implemented in C#. It aims at delivering a simple,
-    reusable framework for developing any sort of C# proxies.
-    TrotiNet is distributed under the GNU Lesser General Public License v3.0
-    (LGPL). See: http://www.gnu.org/licenses/lgpl.html
-    ・用途 : ローカル HTTP Proxy
-    ・ライセンス : GNU LESSER GENERAL PUBLIC LICENSE Version 3
-    ・ライセンス全文 : Licenses/LGPL.txt , Licenses/GPL.txt
-    ・ソースコード : https://github.com/Grabacr07/KanColleViewer/blob/master/externals/TrotiNet-master.zip
-
-Apache log4net
-(https://logging.apache.org/log4net/)
-    ・用途 : TrotiNet の依存ライブラリ (ログ出力用/未使用)
-    ・ライセンス : Apache License Version 2.0
-    ・ライセンス全文 : Licenses/Apache.txt
-
-Rx (Reactive Extensions)
-(https://rx.codeplex.com/)
-    ・用途 : 非同期処理
-    ・ライセンス : Apache License Version 2.0
-    ・ライセンス全文 : Licenses/Apache.txt
-
 Desktop Toast
 (https://github.com/emoacht/DesktopToast)
     The MIT License (MIT)
@@ -125,6 +94,14 @@ CefSharp.Wpf
     ・ライセンス : The 3-Clause BSD License
     ・ライセンス全文 : Licenses/CefSharp.txt
 
+System.Reactive (Reactive Extensions for .NET)
+(https://github.com/dotnet/reactive)
+    ver 6.1.0
+    Copyright (c) .NET Foundation and Contributors
+    ・用途 : 非同期処理
+    ・ライセンス : The MIT License (MIT)
+    ・ライセンス全文 : Licenses/System.Reactive.txt
+
 
 
 ■免責事項
@@ -134,7 +111,12 @@ CefSharp.Wpf
 
 
 ■更新履歴
+<<<<<<< HEAD
 2026/05/10 - version 4.7.3
+=======
+2026/xx/xx - version 4.8.0
+2026/05/19 - version 4.7.3
+>>>>>>> Cef_Only
 2026/05/10 - version 4.7.2
 2026/04/20 - version 4.7.1
 2026/04/01 - version 4.7.0 

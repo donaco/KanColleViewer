@@ -59,14 +59,9 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Dockyard(KanColleProxy proxy)
+		internal Dockyard()
 		{
 			this.Docks = new MemberTable<BuildingDock>();
-
-			this.disposables.Add(proxy.api_get_member_kdock.TryParse<kcsapi_kdock[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_getship.TryParse<kcsapi_kdock_getship>().Subscribe(x => this.GetShip(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_createship_speedchange.TryParse().Subscribe(this.ChangeSpeed));
-			this.disposables.Add(proxy.api_req_kousyou_createitem.TryParse<kcsapi_createitem>().Subscribe(this.CreateSlotItem));
 		}
 
 		public void Dispose()

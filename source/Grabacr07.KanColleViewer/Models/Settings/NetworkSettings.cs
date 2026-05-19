@@ -73,47 +73,28 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			}
 		}
 
-		public static class LocalProxy
-		{
-			public static SerializableProperty<bool> IsEnabled { get; }
-				= new SerializableProperty<bool>(GetKey(), Providers.Local, false);
-
-			public static SerializableProperty<ushort> Port { get; }
-				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 37564);
-
-
-			private static string GetKey([CallerMemberName] string propertyName = "")
-			{
-				return nameof(NetworkSettings) + "." + nameof(LocalProxy) + "." + propertyName;
-			}
-		}
-
 		public static string LocalProxySettingsString
 		{
 			get
 			{
-				var port = LocalProxy.IsEnabled ? LocalProxy.Port.Value : LocalProxy.Port.Default;
 				switch (Proxy.Type.Value)
 				{
 					case ProxyType.SystemProxy:
-						{
-							var proxyConfig = new Win32.WinHttpCurrentUserIEProxyConfig();
-							Win32.WinHttp.WinHttpGetIEProxyConfigForCurrentUser(ref proxyConfig);
-							var settings = IEStyleProxySettingsBuilder.Parse(proxyConfig.Proxy);
-							return settings.ToIEStyleSettings("127.0.0.1", port);
-						}
+						// CEF 一本化後はシステムプロキシを CEF 自身に委ねる。
+						// proxy-server に空文字を渡すことで CEF がシステムプロキシ設定を自動適用する。
+						// ※ 旧実装では Nekoxy 経由のローカルプロキシ(127.0.0.1:37564)を指定していたが、
+						//    Nekoxy 削除後はそのポートに何もリスンしていないため接続不能になる不具合があった。
+						return string.Empty;
 
 					case ProxyType.SpecificProxy:
-						//指定プロキシの場合、HTTPだけNekoxyを通し、後は指定プロキシに流す
+						// 指定プロキシの場合、CEF の proxy-server に指定プロキシ設定を渡す
 						{
 							var settings = IEStyleProxySettingsBuilder.Parse(new Proxy());
-							return settings.ToIEStyleSettings("127.0.0.1", port);
+							return settings.ToIEStyleSettings();
 						}
 					case ProxyType.DirectAccess:
-						//プロキシを使用しない場合、HTTPだけNekoxyを通し、後は直アクセス
-						// return $"http=127.0.0.1:{port}";
-						// 変更後（HTTP と HTTPS をローカルプロキシへ）
-						return $"http=127.0.0.1:{port};https=127.0.0.1:{port}";
+						// プロキシを使用しない場合、CEF に対して空文字を返し proxy-server を設定しない
+						return string.Empty;
 					default:
 						throw new IndexOutOfRangeException();
 				}

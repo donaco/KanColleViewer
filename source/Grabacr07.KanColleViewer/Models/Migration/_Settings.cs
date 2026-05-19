@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -11,6 +11,12 @@ using Livet;
 namespace Grabacr07.KanColleViewer.Models.Migration
 {
 	/// <summary>互換性のために残されています。</summary>
+	/// <remarks>
+	/// Settings.xml 形式（Nekoxy 時代）からの移行コード。
+	/// 移行完了後は Settings.xml を自動削除するため、実行は一度きり。
+	/// 旧バージョンからのアップデートユーザーが十分に減った時点で
+	/// このクラスおよび _ProxySettings.cs を削除可能。
+	/// </remarks>
 	[Obsolete]
 	[Serializable]
 	[XmlRoot("Settings")]

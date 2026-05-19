@@ -193,11 +193,8 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		internal Materials(KanColleProxy proxy)
+		internal Materials()
 		{
-			this.disposables.Add(proxy.api_get_member_material.TryParse<kcsapi_material[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_hokyu_charge.TryParse<kcsapi_charge>().Subscribe(x => this.Update(x.Data.api_material)));
-			this.disposables.Add(proxy.api_req_kousyou_destroyship.TryParse<kcsapi_destroyship>().Subscribe(x => this.Update(x.Data.api_material)));
 		}
 
 		public void Dispose()
@@ -262,9 +259,9 @@ namespace Grabacr07.KanColleWrapper
 			this.Bauxite = bauxite;
 		}
 
-		internal void DecrementInstantBuildMaterials()
+		internal void DecrementInstantBuildMaterials(int amount = 1)
 		{
-			this.InstantBuildMaterials = Math.Max(0, this.InstantBuildMaterials - 1);
+			this.InstantBuildMaterials = Math.Max(0, this.InstantBuildMaterials - amount);
 		}
 
 		internal void DecrementInstantRepairMaterials()

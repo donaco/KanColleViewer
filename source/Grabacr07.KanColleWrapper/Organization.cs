@@ -1,15 +1,11 @@
 using Grabacr07.KanColleWrapper.Internal;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -21,6 +17,7 @@ namespace Grabacr07.KanColleWrapper
 		private readonly Homeport homeport;
 		private readonly CompositeDisposable disposables = new CompositeDisposable();
 
+		private readonly object _evacuationLock = new object();
 		private readonly List<int> evacuatedShipsIds = new List<int>();
 		private readonly List<int> towShipIds = new List<int>();
 
@@ -111,41 +108,12 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 
-		public Organization(Homeport parent, KanColleProxy proxy)
+		public Organization(Homeport parent)
 		{
 			this.homeport = parent;
 
 			this.Ships = new MemberTable<Ship>();
 			this.Fleets = new MemberTable<Fleet>();
-
-			// ↓ 全て disposables.Add() で管理
-			this.disposables.Add(proxy.api_get_member_ship.TryParse<kcsapi_ship2[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_get_member_ship2.TryParse<kcsapi_ship2[]>().Subscribe(x =>
-			{
-				this.Update(x.Data);
-				this.Update(x.Fleets);
-			}));
-			this.disposables.Add(proxy.api_get_member_ship3.TryParse<kcsapi_ship3>().Subscribe(x =>
-			{
-				this.Update(x.Data.api_ship_data);
-				this.Update(x.Data.api_deck_data);
-			}));
-			this.disposables.Add(proxy.api_get_member_deck.TryParse<kcsapi_deck[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_get_member_deck_port.TryParse<kcsapi_deck[]>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_get_member_ship_deck.TryParse<kcsapi_ship_deck>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_hensei_preset_select.TryParse<kcsapi_deck>().Subscribe(x => this.Update(x.Data)));
-			this.disposables.Add(proxy.api_req_hensei_change.TryParse().Subscribe(this.Change));
-			this.disposables.Add(proxy.api_req_hokyu_charge.TryParse<kcsapi_charge>().Subscribe(x => this.Charge(x.Data)));
-			this.disposables.Add(proxy.api_req_kaisou_powerup.TryParse<kcsapi_powerup>().Subscribe(this.Powerup));
-			this.disposables.Add(proxy.api_req_kaisou_slot_exchange_index.TryParse<kcsapi_slot_exchange_index>().Subscribe(this.ExchangeSlot));
-			this.disposables.Add(proxy.api_req_kaisou_slot_deprive.TryParse<kcsapi_slot_deprive>().Subscribe(x => this.DepriveSlotItem(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_getship.TryParse<kcsapi_kdock_getship>().Subscribe(x => this.GetShip(x.Data)));
-			this.disposables.Add(proxy.api_req_kousyou_destroyship.TryParse<kcsapi_destroyship>().Subscribe(this.DestoryShip));
-			this.disposables.Add(proxy.api_req_member_updatedeckname.TryParse().Subscribe(this.UpdateFleetName));
-			this.disposables.Add(proxy.api_req_hensei_combined.TryParse<kcsapi_hensei_combined>()
-				.Subscribe(x => this.Combined = x.Data.api_combined != 0));
-
-			this.SubscribeSortieSessions(proxy);
 		}
 
 
@@ -203,10 +171,13 @@ namespace Grabacr07.KanColleWrapper
 				this.Ships = new MemberTable<Ship>(source.Select(x => new Ship(this.homeport, x)));
 
 				if (KanColleClient.Current.IsInSortie)
-				{
-					foreach (var id in this.evacuatedShipsIds) this.Ships[id].Situation |= ShipSituation.Evacuation;
-					foreach (var id in this.towShipIds) this.Ships[id].Situation |= ShipSituation.Tow;
-				}
+					{
+						lock (this._evacuationLock)
+						{
+							foreach (var id in this.evacuatedShipsIds) this.Ships[id].Situation |= ShipSituation.Evacuation;
+							foreach (var id in this.towShipIds) this.Ships[id].Situation |= ShipSituation.Tow;
+						}
+					}
 
 				foreach (var fleet in this.Fleets.Values)
 				{
@@ -440,12 +411,9 @@ namespace Grabacr07.KanColleWrapper
 						{
 							try { iy.SlotItems.Remove(id); } catch { }
 						}
-						try
-						{
-							typeof(Itemyard).GetMethod("RaiseSlotItemsChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-								?.Invoke(iy, null);
-						}
-						catch { }
+						// RaiseSlotItemsChanged は internal メソッドのため直接呼び出し可能
+						// （Organization と Itemyard は同一アセンブリ Grabacr07.KanColleWrapper 内）
+						iy.RaiseSlotItemsChanged();
 					}
 				}
 				catch { }
@@ -516,117 +484,30 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
-		#region 出撃 (Sortie / Homing / Escape)
-
-		private void SubscribeSortieSessions(KanColleProxy proxy)
+		/// <summary>
+		/// CEF 経由で受信した goback_port 時に、脱出艦・曳航艦を記録します。
+		/// </summary>
+		internal void AddEvacuatedShips(int evacuatedShipId, int towShipId)
 		{
-#if DEBUG
-			Debug.WriteLine("Organization.SubscribeSortieSessions: subscribing to sortie sessions.");
-#endif
-			// Repeat() パターンも含めて管理
-			this.disposables.Add(
-				proxy.ApiSessionSource
-					.SkipUntil(proxy.api_req_map_start.TryParse().Do(this.Sortie))
-					.TakeUntil(proxy.api_port)
-					.Finally(this.Homing)
-					.Repeat()
-					.Subscribe()
-			);
-
-			int[] evacuationOfferedShipIds = null;
-			int[] towOfferedShipIds = null;
-
-			this.disposables.Add(
-				proxy.api_req_combined_battle_battleresult
-					.TryParse<kcsapi_combined_battle_battleresult>()
-					.Where(x => x.Data.api_escape != null)
-					.Select(x => x.Data)
-					.Subscribe(x =>
-					{
-						if (this.CombinedFleet == null) return;
-						var ships = this.CombinedFleet.Fleets.SelectMany(f => f.Ships).ToArray();
-						evacuationOfferedShipIds = x.api_escape.api_escape_idx.Select(idx => ships[idx - 1].Id).ToArray();
-						towOfferedShipIds = x.api_escape.api_tow_idx.Select(idx => ships[idx - 1].Id).ToArray();
-					})
-			);
-
-			this.disposables.Add(
-				proxy.api_req_combined_battle_goback_port
-					.Subscribe(_ =>
-					{
-						if (KanColleClient.Current.IsInSortie
-							&& evacuationOfferedShipIds != null
-							&& evacuationOfferedShipIds.Length >= 1
-							&& towOfferedShipIds != null
-							&& towOfferedShipIds.Length >= 1)
-						{
-							this.evacuatedShipsIds.Add(evacuationOfferedShipIds[0]);
-							this.towShipIds.Add(towOfferedShipIds[0]);
-						}
-					})
-			);
-
-			this.disposables.Add(
-				proxy.api_get_member_ship_deck
-					.Subscribe(_ =>
-					{
-						evacuationOfferedShipIds = null;
-						towOfferedShipIds = null;
-					})
-			);
-		}
-
-
-		private void Sortie(SvData data)
-		{
-			if (data == null || !data.IsSuccess)
+			lock (this._evacuationLock)
 			{
-				Debug.WriteLine("Organization.Sortie: received null or unsuccessful SvData.");
-				return;
-			}
-
-			try
-			{
-				var id = int.Parse(data.Request["api_deck_id"]);
-				// Sortie の中のデバッグ行をガード
-#if DEBUG
-				Debug.WriteLine($"Organization.Sortie: detected sortie for deck {id} (Request keys: {string.Join(",", data.Request.Keys)})");
-#endif
-
-				var fleet = this.Fleets[id];
-				if (fleet == null)
-				{
-					Debug.WriteLine($"Organization.Sortie: fleet {id} not found in Fleets collection.");
-				}
-				else
-				{
-					Debug.WriteLine($"Organization.Sortie: before Sortie -> Fleet.Id={fleet.Id}, IsInSortie={fleet.IsInSortie}");
-					fleet.Sortie();
-					Debug.WriteLine($"Organization.Sortie: after Sortie -> Fleet.Id={fleet.Id}, IsInSortie={fleet.IsInSortie}");
-				}
-
-				if (this.Combined && id == 1)
-				{
-					Debug.WriteLine("Organization.Sortie: combined fleet flag set, also marking fleet 2 as sortie.");
-					this.Fleets[2].Sortie();
-					Debug.WriteLine($"Organization.Sortie: fleet 2 IsInSortie={this.Fleets[2].IsInSortie}");
-				}
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine("艦隊の出撃を検知できませんでした: {0}", ex);
+				this.evacuatedShipsIds.Add(evacuatedShipId);
+				this.towShipIds.Add(towShipId);
 			}
 		}
 
-		private void Homing()
+		internal void Homing()
 		{
 			// Homing の開始ログ
 #if DEBUG
 			Debug.WriteLine("Organization.Homing: invoked.");
 #endif
 
-			this.evacuatedShipsIds.Clear();
-			this.towShipIds.Clear();
+			lock (this._evacuationLock)
+			{
+				this.evacuatedShipsIds.Clear();
+				this.towShipIds.Clear();
+			}
 
 			foreach (var ship in this.Ships.Values)
 			{
@@ -658,8 +539,11 @@ namespace Grabacr07.KanColleWrapper
 					target.Update(ship);
 
 					// 出撃中マーカー等を維持
-					if (this.evacuatedShipsIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Evacuation;
-					if (this.towShipIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Tow;
+						lock (this._evacuationLock)
+						{
+							if (this.evacuatedShipsIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Evacuation;
+							if (this.towShipIds.Any(x => target.Id == x)) target.Situation |= ShipSituation.Tow;
+						}
 				}
 			}
 
@@ -675,7 +559,6 @@ namespace Grabacr07.KanColleWrapper
 			}
 		}
 
-		#endregion
 		public void Dispose()
 		{
 			this.disposables.Dispose();

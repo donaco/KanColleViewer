@@ -15,7 +15,7 @@ namespace Counter
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
 	[ExportMetadata("Description", "回数カウント機能や出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.1.2")]
+	[ExportMetadata("Version", "2.1.3")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
@@ -31,30 +31,17 @@ namespace Counter
 		public void Initialize()
 		{
 			try
-			{
-				var proxy = KanColleClient.Current?.Proxy;
-				if (proxy == null)
-				{
-					System.Diagnostics.Debug.WriteLine("[Counter] KanColleProxy が取得できませんでした。プラグインは無効状態で起動します。");
-					this.viewModel = new CounterViewModel
-					{
-						Counters = new ObservableCollection<CounterBase>(),
-						SortieHistory = null,
-					};
-					return;
-				}
-
-				this.viewModel = new CounterViewModel
+			{				this.viewModel = new CounterViewModel
 				{
 					Counters = new ObservableCollection<CounterBase>
 					{
-						new SupplyCounter(proxy),
-						new ItemDestroyCounter(proxy),
-						new MissionCounter(proxy),
-						new SortieCounter(proxy),
+						new SupplyCounter(),
+						new ItemDestroyCounter(),
+						new MissionCounter(),
+						new SortieCounter(),
 					},
 					// --- 直近12件を表示(表示数を指定) ---
-					SortieHistory = new SortieHistoryCounter(proxy, 12),
+					SortieHistory = new SortieHistoryCounter(12),
 				};
 
 				// --- 保存データを復元 ---

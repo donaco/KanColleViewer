@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
@@ -90,6 +92,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			this.Title = "所有装備一覧";
 			this.Settings = new SlotItemCatalogWindowSettings();
 
+			// UI スレッドの SynchronizationContext を取得（コンストラクタは UI スレッドで実行される）
+			var context = SynchronizationContext.Current ?? new SynchronizationContext();
+			var uiScheduler = new SynchronizationContextScheduler(context);
+
 			// 装備種類リストを初期化（マスターに存在する Type のみ）
 			var master = KanColleClient.Current.Master;
 			var presentTypes = master.SlotItems.Values
@@ -151,7 +157,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				SlotItemType.噴式戦闘爆撃機,
 				SlotItemType.局地戦闘機,
 				SlotItemType.大型飛行艇,
-				SlotItemType.陸上偵察機,				
+				SlotItemType.陸上偵察機,
 
 				SlotItemType.機関部強化,
 				SlotItemType.増設バルジ,
@@ -164,7 +170,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				SlotItemType.司令部施設,
 				SlotItemType.艦艇修理施設,
 				// 必要に応じて残りを追加...
-};
+			};
 
 			this.SlotItemTypes = presentTypes
 				.OrderBy(t =>
@@ -185,7 +191,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				.Throttle(TimeSpan.FromMilliseconds(100))
 				.Select(_ => this.UpdateCore())
 				.Do(_ => this.IsReloading = false)
-				.ObserveOnDispatcher()
+				.ObserveOn(uiScheduler)             // Rx-XAML -> Rx-Core SynchronizationContextScheduler
 				.Subscribe(x => this.SlotItems = x)
 				.AddTo(this);
 

@@ -1,13 +1,11 @@
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Nekoxy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -30,7 +28,7 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 艦これの通信をフックするプロキシを取得します。
 		/// </summary>
-		public KanColleProxy Proxy { get; private set; }
+		public KanColleProxy Proxy { get; private set; } = new KanColleProxy();
 
 		/// <summary>
 		/// ユーザーに依存しないマスター情報を取得します。
@@ -141,116 +139,50 @@ namespace Grabacr07.KanColleWrapper
 		// 入渠
 		private readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
 
-		// Initialieze() の Subscribe を管理する（再呼出し時に前回分を破棄）
-		private System.Reactive.Disposables.CompositeDisposable _initializeDisposables;
-
 		private KanColleClient()
-		{
-			this.Initialieze();
-
-			// CapturedProcessor を初期化
-			this.capturedProcessor = new CapturedProcessor(
-				// getProxy
-				() => this.Proxy ?? (this.Proxy = new KanColleProxy()),
-				// isStartedProvider
-				() => this.IsStarted,
-				// onInitialized
-				(start2, requireInfo) =>
-				{
-					try
+			{
+				// CapturedProcessor を初期化
+				this.capturedProcessor = new CapturedProcessor(
+					// isStartedProvider
+					() => this.IsStarted,
+					// onInitialized
+					(start2, requireInfo) =>
 					{
-						// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
-						if (Application.Current != null)
+						try
 						{
-							Application.Current.Dispatcher.Invoke(() =>
+							// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
+							if (Application.Current != null)
 							{
+								Application.Current.Dispatcher.Invoke(() =>
+								{
+									this.Master = new Master(start2);
+									this.Homeport = new Homeport();
+									this.SetRequireInfo(requireInfo);
+									this.IsStarted = true;
+								});
+							}
+							else
+							{
+								// UI が存在しない（テスト等）の場合は通常実行
 								this.Master = new Master(start2);
-								this.Homeport = new Homeport(this.Proxy);
+								this.Homeport = new Homeport();
 								this.SetRequireInfo(requireInfo);
 								this.IsStarted = true;
-							});
+							}
 						}
-						else
-						{
-							// UI が存在しない（テスト等）の場合は通常実行
-							this.Master = new Master(start2);
-							this.Homeport = new Homeport(this.Proxy);
-							this.SetRequireInfo(requireInfo);
-							this.IsStarted = true;
-						}
-					}
-					catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
-				});
+						catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
+					});
 
 			}
 
-		public void Initialieze()
+		public void Initialize()
 		{
-			var proxy = this.Proxy ?? (this.Proxy = new KanColleProxy());
-
-			var start2Source = proxy.api_start2_getData.TryParse<kcsapi_start2>();
-			var requireInfoSource = proxy.api_get_member_require_info.TryParse<kcsapi_require_info>();
-			var firstTime = start2Source
-				.CombineLatest(requireInfoSource, (start2, requireInfo) => new { start2, requireInfo, })
-				.FirstAsync();
-
-			// Homeport の初期化と require_info の適用に Master のインスタンスが必要なため、初回のみ足並み揃えて実行
-			// 2 回目以降は受信したタイミングでそれぞれ更新すればよい
-
-			// 再呼出し時は前回の購読を破棄してから再登録
-			_initializeDisposables?.Dispose();
-			_initializeDisposables = new System.Reactive.Disposables.CompositeDisposable();
-
-			_initializeDisposables.Add(firstTime.Subscribe(x =>
-			{
-				// CapturedProcessor が先に初期化済みの場合は何もしない（二重初期化防止）
-				if (this.IsStarted) return;
-
-				// UIスレッドで実行し、CapturedProcessor の Dispatcher.Invoke と競合させない
-				// Dispatcher.Invoke は直列実行されるため、どちらが先に入っても
-				// 2回目の Invoke 内で IsStarted == true となり Homeport の上書きを防止できる
-				if (Application.Current != null)
-				{
-					Application.Current.Dispatcher.Invoke(() =>
-					{
-						if (this.IsStarted) return;
-
-						this.Master = new Master(x.start2.Data);
-						this.Homeport = new Homeport(proxy);
-						this.SetRequireInfo(x.requireInfo.Data);
-						this.IsStarted = true;
-					});
-				}
-				else
-				{
-					// UI が存在しない（テスト等）の場合
-					if (this.IsStarted) return;
-					this.Master = new Master(x.start2.Data);
-					this.Homeport = new Homeport(proxy);
-					this.SetRequireInfo(x.requireInfo.Data);
-					this.IsStarted = true;
-				}
-			}));
-
-			_initializeDisposables.Add(
-				start2Source
-					.SkipUntil(firstTime)
-					.Subscribe(x => this.Master = new Master(x.Data)));
-
-			_initializeDisposables.Add(
-				requireInfoSource
-					.SkipUntil(firstTime)
-					.Subscribe(x => this.SetRequireInfo(x.Data)));
-
-			// IsInSortie 管理: 再呼出し時は前回分が _initializeDisposables.Dispose() で破棄される
-			_initializeDisposables.Add(
-				proxy.ApiSessionSource
-					.SkipUntil(proxy.api_req_map_start.Do(_ => this.IsInSortie = true))
-					.TakeUntil(proxy.api_port)
-					.Finally(() => this.IsInSortie = false)
-					.Repeat()
-					.Subscribe());
+			// Proxy はインスタンス生成時に初期化済みのため、ここでの処理は不要。
 		}
+
+		/// <summary>スペルミスのあった旧メソッド名。後方互換のため残します。</summary>
+		[System.Obsolete("Initialize() を使用してください。このメソッドは将来のバージョンで削除されます。")]
+		public void Initialieze() => this.Initialize();
 
 		// SetRequireInfo の先頭に診断ログを追加（既存メソッドを置き換え）
 		private void SetRequireInfo(kcsapi_require_info data)
@@ -295,6 +227,10 @@ namespace Grabacr07.KanColleWrapper
 		// battle で解析したが表示を保留した制空情報を一時保持する
 		private AirSuperiority pendingAirResult = AirSuperiority.None;
 		private bool hasPendingAirResult = false;
+
+		// goback_port のために battleresult から受け取った脱出艦・曳航艦IDを保持する
+		private int[] pendingEscapeShipIds = null;
+		private int[] pendingTowShipIds = null;
 
 		#endregion
 
@@ -381,6 +317,7 @@ namespace Grabacr07.KanColleWrapper
 
 				if (TryHandleRemodelSlot(url, normalized, requestBody)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
+				if (TryHandleGobackPort(url)) return;
 
 				// 入渠系
 				if (TryHandleNyukyoStart(url, normalized, requestBody)) return;
@@ -393,7 +330,8 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
 
 				if (TryHandleMissionResult(url, normalized)) return;
-				// 将来的なフォールバック追加箇所はここに追加
+					if (TryHandleUpdateComment(url, normalized, requestBody)) return;
+					// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch (Exception ex) { LogError("ProcessCaptured", ex); }
 		}
@@ -900,6 +838,41 @@ namespace Grabacr07.KanColleWrapper
 			}
 			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 
+			// goback_port のために連合艦隊脱出情報を記録（combined_battle_battleresult のみ）
+			try
+			{
+				var escape = cbrLocal?.api_escape;
+				if (escape != null && escape.api_escape_idx != null && escape.api_tow_idx != null)
+				{
+					// 脱出艦・曳航艦のインデックスを艦船IDに変換してキャッシュ
+					var org = this.Homeport?.Organization;
+					if (org != null)
+					{
+						// 連合艦隊（第1+第2艦隊）を結合した Ship 配列を構築（Nekoxy の購読側と同じ方式）
+						var combinedShips = org.Fleets.OrderBy(f => f.Key)
+							.Take(2)
+							.SelectMany(f => f.Value.Ships)
+							.ToArray();
+
+						this.pendingEscapeShipIds = escape.api_escape_idx
+							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
+							.Select(idx => combinedShips[idx - 1].Id)
+							.ToArray();
+						this.pendingTowShipIds = escape.api_tow_idx
+							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
+							.Select(idx => combinedShips[idx - 1].Id)
+							.ToArray();
+					}
+				}
+				else
+				{
+					// 脱出なし or 単艦戦の場合はクリア
+					this.pendingEscapeShipIds = null;
+					this.pendingTowShipIds = null;
+				}
+			}
+			catch (Exception ex) { LogError("TryHandleBattleResult/escape", ex); }
+
 			RunOnUi(() =>
 			{
 				try
@@ -989,7 +962,7 @@ namespace Grabacr07.KanColleWrapper
 						try
 						{
 							// Homeport が未初期化の可能性があるので安全に作成してから反映
-							if (this.Homeport == null) this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+							if (this.Homeport == null) this.Homeport = new Homeport();
 							this.Homeport?.AirBases?.Update(ab, abi);
 
 						}
@@ -1031,7 +1004,7 @@ namespace Grabacr07.KanColleWrapper
 							{
 								try
 								{
-									this.Homeport = new Homeport(this.Proxy ?? (this.Proxy = new KanColleProxy()));
+									this.Homeport = new Homeport();
 								}
 								catch (Exception)
 								{
@@ -1121,18 +1094,20 @@ namespace Grabacr07.KanColleWrapper
 							if (org != null)
 							{
 								var returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
-								foreach (var returningDeckId in returning)
-								{
-									try
+									if (returning.Length > 0)
 									{
-										org.Fleets[returningDeckId].Homing();
+										try
+										{
+											// 脱出フラグのクリアや全艦 Situation のリセットも含めて一括処理
+											org.Homing();
+										}
+										catch (Exception ex) { LogError("TryHandlePort", ex); }
+										foreach (var returningDeckId in returning)
+											this.sortieDeckIds.Remove(returningDeckId);
 									}
-									catch (Exception ex) { LogError("TryHandlePort", ex); }
-									this.sortieDeckIds.Remove(returningDeckId);
 								}
-							}
 
-							this.IsInSortie = this.sortieDeckIds.Count > 0;
+								this.IsInSortie = this.sortieDeckIds.Count > 0;
 						}
 						catch (Exception)
 						{
@@ -3503,12 +3478,12 @@ namespace Grabacr07.KanColleWrapper
 			// dict と keyId を外側スコープで宣言して後続から参照できるようにする
 			Dictionary<string, string> dict = null;
 			int keyId = -1;
+			int[] items = null;
 
 			try
 			{
 				var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
-				int kdockIdFound = -1;
-				int[] items = null;
+				int kdockIdFound = -1;				
 
 				// requestBody を dict にパース（ここで全てのキーを取得）
 				dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -3575,10 +3550,13 @@ namespace Grabacr07.KanColleWrapper
 							if (!this.appliedBuildKdock.Contains(kdId)) this.appliedBuildKdock.Add(kdId);
 						}
 
-						// UI スレッドで即時に InstantBuildMaterials を 1 減算
+						// api_item1 が 1000 以上の場合は高速建造材を 10 消費、それ以外は 1 消費
+						int buildCost = (items != null && items.Length >= 1 && items[0] >= 1000) ? 10 : 1;
+
+						// UI スレッドで即時に InstantBuildMaterials を減算
 						RunOnUi(() =>
 						{
-							try { this.Homeport?.Materials?.DecrementInstantBuildMaterials(); }
+							try { this.Homeport?.Materials?.DecrementInstantBuildMaterials(buildCost); }
 							catch (Exception) { }
 						});
 					}
@@ -4845,6 +4823,81 @@ namespace Grabacr07.KanColleWrapper
 			return true;
 		}
 
+		/// <summary>
+		/// 連合艦隊 goback_port：脱出艦・曳航艦の退避フラグを Organization に反映します。
+		/// 脱出情報は TryHandleBattleResult でキャッシュ済みのものを使用します。
+		/// </summary>
+		private bool TryHandleGobackPort(string url)
+		{
+			if (!url.Contains("/kcsapi/api_req_combined_battle/goback_port")) return false;
+
+			try
+			{
+				var escapeIds = this.pendingEscapeShipIds;
+				var towIds = this.pendingTowShipIds;
+
+				// キャッシュがなければ何もしない（goback_port は脱出がない場合でも来ることがある）
+				if (escapeIds == null || escapeIds.Length == 0 || towIds == null || towIds.Length == 0)
+				{
+					this.pendingEscapeShipIds = null;
+					this.pendingTowShipIds = null;
+					return true;
+				}
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var org = this.Homeport?.Organization;
+						if (org == null) return;
+
+						if (this.IsInSortie && escapeIds.Length >= 1 && towIds.Length >= 1)
+						{
+							org.AddEvacuatedShips(escapeIds[0], towIds[0]);
+						}
+					}
+					catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
+					finally
+					{
+						this.pendingEscapeShipIds = null;
+						this.pendingTowShipIds = null;
+					}
+				});
+			}
+			catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
+
+			return true;
+		}
+
 		#endregion
+
+		/// <summary>
+		/// コメント更新 (api_req_member/updatecomment)
+		/// </summary>
+		private bool TryHandleUpdateComment(string url, string normalized, string requestBody)
+		{
+			if (!url.Contains("/kcsapi/api_req_member/updatecomment")) return false;
+			try
+			{
+				if (string.IsNullOrEmpty(requestBody)) return true;
+				var comment = "";
+				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+				{
+					var kv = pair.Split(new[] { '=' }, 2);
+					if (kv.Length == 2 && kv[0] == "api_cmt")
+					{
+						comment = Uri.UnescapeDataString(kv[1]);
+						break;
+					}
+				}
+				RunOnUi(() =>
+				{
+					try { this.Homeport?.UpdateComment(comment); }
+					catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
+				});
+			}
+			catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
+			return true;
+		}
 	}
 }
