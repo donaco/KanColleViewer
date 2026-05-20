@@ -111,12 +111,9 @@ System.Reactive (Reactive Extensions for .NET)
 
 
 ■更新履歴
-<<<<<<< HEAD
 2026/05/10 - version 4.7.3
-=======
 2026/xx/xx - version 4.8.0
 2026/05/19 - version 4.7.3
->>>>>>> Cef_Only
 2026/05/10 - version 4.7.2
 2026/04/20 - version 4.7.1
 2026/04/01 - version 4.7.0 
