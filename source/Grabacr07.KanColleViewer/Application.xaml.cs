@@ -17,7 +17,7 @@ using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
 using Livet;
 using MetroRadiance.UI;
-using MetroTrilithon.Lifetime;
+using MetroTrilithon.Lifetime; // Phase 1: Infrastructure/Lifetime に内製化済み
 
 namespace Grabacr07.KanColleViewer
 {
@@ -46,6 +46,9 @@ namespace Grabacr07.KanColleViewer
 	{
 		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
 		private event PropertyChangedEventHandler propertyChangedInternal;
+#if !DEBUG
+		private Mutex _appMutex;
+#endif
 
 		public DirectoryInfo LocalAppData = new DirectoryInfo(
 			Path.Combine(
@@ -65,8 +68,8 @@ namespace Grabacr07.KanColleViewer
 			// 開発中に多重起動検知ついてると起動できなくて鬱陶しいので
 			// デバッグ時は外すんじゃもん
 #if !DEBUG
-			var appInstance = new MetroTrilithon.Desktop.ApplicationInstance().AddTo(this);
-			if (appInstance.IsFirst)
+			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
+			if (isFirstInstance)
 #endif
 			{
 				this.DispatcherUnhandledException += (sender, args) =>
@@ -111,12 +114,8 @@ namespace Grabacr07.KanColleViewer
 
 					}
 #if !DEBUG
-					appInstance.CommandLineArgsReceived += (sender, args) =>
-					{
-						// 多重起動を検知したら、メイン ウィンドウを最前面に出す
-						this.Dispatcher.Invoke(() => WindowService.Current.MainWindow.Activate());
-						this.ProcessCommandLineParameter(args.CommandLineArgs);
-					};
+					// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
+					_appMutex = appMutex;
 #endif
 					base.OnStartup(e);
 					this.ChangeState(ApplicationState.Running);
@@ -124,7 +123,8 @@ namespace Grabacr07.KanColleViewer
 #if !DEBUG
 			else
 			{
-				appInstance.SendCommandLineArgs(e.Args);
+				appMutex.ReleaseMutex();
+				appMutex.Dispose();
 				this.ChangeState(ApplicationState.Terminate);
 				this.Shutdown();
 			}
@@ -175,16 +175,28 @@ namespace Grabacr07.KanColleViewer
 				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown error: {ex}");
 			}
 
-			try
-			{
-				// Dispose を先に実行してリソース解放
-				System.Diagnostics.Debug.WriteLine("Application: Disposing resources...");
-				this.compositeDisposable.Dispose();
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
-			}
+					try
+						{
+							// Dispose を先に実行してリソース解放
+							System.Diagnostics.Debug.WriteLine("Application: Disposing resources...");
+							this.compositeDisposable.Dispose();
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
+						}
+
+			#if !DEBUG
+						try
+						{
+							this._appMutex?.ReleaseMutex();
+							this._appMutex?.Dispose();
+						}
+						catch (Exception ex)
+						{
+							System.Diagnostics.Debug.WriteLine($"Application: Mutex dispose error: {ex}");
+						}
+			#endif
 
 			base.OnExit(e);
 

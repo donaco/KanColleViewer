@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Markup;
 
 [assembly: AssemblyTitle("提督業も忙しい！")]
 [assembly: AssemblyDescription("提督業も忙しい！")]
@@ -14,5 +15,8 @@ using System.Windows;
 [assembly: ThemeInfo(
 	ResourceDictionaryLocation.None,
 	ResourceDictionaryLocation.SourceAssembly)]
+
+// Phase 1: MetroTrilithon.UI.Controls を内製化したため XAML 名前空間を再定義
+[assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/personal/controls", "MetroTrilithon.UI.Controls")]
 
 [assembly: AssemblyVersion("4.8.0")]

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\CefSharp.Common.147.0.100\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.147.0.100\build\CefSharp.Common.props')" />
   <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.147.0.10\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.147.0.10\build\chromiumembeddedframework.runtime.win-x86.props')" />
@@ -213,6 +213,11 @@
     <Compile Include="Composition\Plugin.cs" />
     <Compile Include="Composition\PluginHost.cs" />
     <Compile Include="Composition\PluginMetadata.cs" />
+    <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
+    <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
+    <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
+    <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
+    <Compile Include="Infrastructure\Mvvm\NotifierAndExtensions.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
     <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
     <Compile Include="Models\Cef\CapturedHttp.cs" />
@@ -698,14 +703,7 @@
       <Project>{0af0b9ff-d981-4d0f-a41f-c3ab6fe2f16d}</Project>
       <Name>MetroRadiance</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MetroTrilithon\source\MetroTrilithon.Desktop\MetroTrilithon.Desktop.csproj">
-      <Project>{4e2eb2e0-e5fe-4feb-a3e5-5f2f05cd1a67}</Project>
-      <Name>MetroTrilithon.Desktop</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
-      <Project>{df381709-9f44-44ed-a7d6-ecdf157e620d}</Project>
-      <Name>MetroTrilithon</Name>
-    </ProjectReference>
+    <!-- MetroTrilithon 参照削除済み (Phase 1): Infrastructure/ に内製化 -->
   </ItemGroup>
   <ItemGroup>
     <DesignData Include="SampleData\ShipCatalogSortWorkerSampleData.xaml" />

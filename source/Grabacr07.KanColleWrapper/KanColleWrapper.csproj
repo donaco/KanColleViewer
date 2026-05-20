@@ -144,6 +144,7 @@
     <Compile Include="ApiDataDeserializer.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
+    <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
     <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
     <Compile Include="Calculator.cs" />
@@ -292,10 +293,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MetroTrilithon\source\MetroTrilithon\MetroTrilithon.csproj">
-      <Project>{df381709-9f44-44ed-a7d6-ecdf157e620d}</Project>
-      <Name>MetroTrilithon</Name>
-    </ProjectReference>
+    <!-- MetroTrilithon 参照削除済み (Phase 1): Infrastructure/ に内製化 -->
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

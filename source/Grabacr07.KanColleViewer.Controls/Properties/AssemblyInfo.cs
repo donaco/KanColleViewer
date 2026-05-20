@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Markup;
@@ -19,6 +19,10 @@ using System.Windows.Markup;
 [assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls", "Grabacr07.KanColleViewer.Controls")]
 [assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters", "Grabacr07.KanColleViewer.Converters")]
 [assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity", "Grabacr07.KanColleViewer.Interactivity")]
+// Phase 1: MetroTrilithon.UI.Controls を KanColleViewer.Controls に内製化
+[assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/personal/controls", "MetroTrilithon.UI.Controls")]
+[assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/personal/converters", "MetroTrilithon.UI.Converters")]
+[assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/personal/interactivity", "MetroTrilithon.UI.Interactivity")]
 
 [assembly: AssemblyVersion("1.3.2")]
 [assembly: AssemblyInformationalVersion("1.3.2")]
