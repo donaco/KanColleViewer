@@ -4,3 +4,6 @@
 [submodule "source/MetroTrilithon"]
 	path = source/MetroTrilithon
 	url = https://github.com/Grabacr07/MetroTrilithon
+[submodule "source/Plugins/MaterialChartPlugin"]
+	path = source/Plugins/MaterialChartPlugin
+	url = https://github.com/donaco/MaterialChartPlugin
