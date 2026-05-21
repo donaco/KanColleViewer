@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Livet;
 
 namespace MetroTrilithon.Mvvm
 {
@@ -30,7 +31,7 @@ namespace MetroTrilithon.Mvvm
     /// <summary>
     /// <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントのリスナー。
     /// </summary>
-    internal sealed class PropertyChangedEventListener : IDisposable
+    internal sealed class InternalPropertyChangedEventListener : IDisposable
     {
         private readonly INotifyPropertyChanged _source;
         private readonly Dictionary<string, List<PropertyChangedEventHandler>> _handlers
@@ -38,13 +39,13 @@ namespace MetroTrilithon.Mvvm
         private PropertyChangedEventHandler _globalHandler;
         private bool _isDisposed;
 
-        public PropertyChangedEventListener(INotifyPropertyChanged source)
+        public InternalPropertyChangedEventListener(INotifyPropertyChanged source)
         {
             this._source = source;
             this._source.PropertyChanged += this.OnPropertyChanged;
         }
 
-        public PropertyChangedEventListener(INotifyPropertyChanged source, PropertyChangedEventHandler handler)
+        public InternalPropertyChangedEventListener(INotifyPropertyChanged source, PropertyChangedEventHandler handler)
             : this(source)
         {
             this._globalHandler = handler;
@@ -82,18 +83,14 @@ namespace MetroTrilithon.Mvvm
     {
         public static IDisposable Subscribe(this INotifyPropertyChanged source, PropertyChangedEventHandler handler)
         {
-            return new PropertyChangedEventListener(source, handler);
+            return new InternalPropertyChangedEventListener(source, handler);
         }
 
         public static IDisposable Subscribe(this INotifyPropertyChanged source, Action<string> action)
         {
-            return new PropertyChangedEventListener(source, (sender, args) => action(args.PropertyName));
+            return new InternalPropertyChangedEventListener(source, (sender, args) => action(args.PropertyName));
         }
 
-        /// <summary>
-        /// 指定したプロパティ名で発生した <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントを購読します。
-        /// </summary>
-        /// <param name="immediately">true の場合、呼び出し時点で action を即時実行します。</param>
         public static ListenerWrapper Subscribe(this INotifyPropertyChanged source, string propertyName, Action action, bool immediately = true)
         {
             return new ListenerWrapper(source).Subscribe(propertyName, action, immediately);
@@ -101,11 +98,11 @@ namespace MetroTrilithon.Mvvm
 
         public sealed class ListenerWrapper : IDisposable
         {
-            private readonly PropertyChangedEventListener _listener;
+            private readonly InternalPropertyChangedEventListener _listener;
 
             internal ListenerWrapper(INotifyPropertyChanged source)
             {
-                this._listener = new PropertyChangedEventListener(source);
+                this._listener = new InternalPropertyChangedEventListener(source);
             }
 
             public ListenerWrapper Subscribe(string propertyName, Action action, bool immediately = true)
@@ -116,6 +113,29 @@ namespace MetroTrilithon.Mvvm
             }
 
             void IDisposable.Dispose() => this._listener.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// ViewModel や ICollection に AddTo できるオーバーロードを MetroTrilithon.Mvvm 名前空間で提供します。
+    /// </summary>
+    public static class DisposableExtensionsForMvvm
+    {
+        public static T AddTo<T>(this T disposable, ViewModel viewModel) where T : IDisposable
+        {
+            viewModel?.CompositeDisposable.Add(disposable);
+            return disposable;
+        }
+
+        public static T AddTo<T>(this T disposable, ICollection<IDisposable> collection) where T : IDisposable
+        {
+            collection?.Add(disposable);
+            return disposable;
+        }
+
+        public static void AddTo(this PropertyChangedExtensions.ListenerWrapper wrapper, ViewModel viewModel)
+        {
+            viewModel?.CompositeDisposable.Add((IDisposable)wrapper);
         }
     }
 }

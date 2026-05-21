@@ -213,11 +213,15 @@
     <Compile Include="Composition\Plugin.cs" />
     <Compile Include="Composition\PluginHost.cs" />
     <Compile Include="Composition\PluginMetadata.cs" />
+    <Compile Include="Infrastructure\Desktop\SystemEnvironment.cs" />
     <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
     <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
     <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
+    <Compile Include="Infrastructure\Mvvm\MetroTrilithonMvvm.cs" />
     <Compile Include="Infrastructure\Mvvm\NotifierAndExtensions.cs" />
+    <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
+    <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
     <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
     <Compile Include="Models\Cef\CapturedHttp.cs" />

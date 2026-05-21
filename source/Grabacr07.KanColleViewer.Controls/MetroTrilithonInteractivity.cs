@@ -82,6 +82,9 @@ namespace MetroTrilithon.UI.Interactivity
 
     public class TaskbarMessage : InteractionMessage
     {
+        public TaskbarMessage() { }
+        public TaskbarMessage(string messageKey) : base(messageKey) { }
+
         public TaskbarItemProgressState? ProgressState
         {
             get { return (TaskbarItemProgressState?)this.GetValue(ProgressStateProperty); }
@@ -122,13 +125,13 @@ namespace MetroTrilithon.UI.Interactivity
         public static readonly DependencyProperty ThumbnailClipMarginProperty =
             DependencyProperty.Register(nameof(ThumbnailClipMargin), typeof(Thickness?), typeof(TaskbarMessage), new UIPropertyMetadata(null));
 
-        public TaskbarItemThumbButtonInfoCollection ThumbButtonInfos
+        public ThumbButtonInfoCollection ThumbButtonInfos
         {
-            get { return (TaskbarItemThumbButtonInfoCollection)this.GetValue(ThumbButtonInfosProperty); }
+            get { return (ThumbButtonInfoCollection)this.GetValue(ThumbButtonInfosProperty); }
             set { this.SetValue(ThumbButtonInfosProperty, value); }
         }
         public static readonly DependencyProperty ThumbButtonInfosProperty =
-            DependencyProperty.Register(nameof(ThumbButtonInfos), typeof(TaskbarItemThumbButtonInfoCollection), typeof(TaskbarMessage), new UIPropertyMetadata(null));
+            DependencyProperty.Register(nameof(ThumbButtonInfos), typeof(ThumbButtonInfoCollection), typeof(TaskbarMessage), new UIPropertyMetadata(null));
 
         protected override Freezable CreateInstanceCore() => new TaskbarMessage();
     }
@@ -160,6 +163,72 @@ namespace MetroTrilithon.UI.Interactivity
             if (message.Description != null) taskbarInfo.Description = message.Description;
             if (message.ThumbnailClipMargin != null) taskbarInfo.ThumbnailClipMargin = message.ThumbnailClipMargin.Value;
             if (message.ThumbButtonInfos != null) taskbarInfo.ThumbButtonInfos = message.ThumbButtonInfos;
+        }
+    }
+
+    public class TaskbarThumbnailBehavior : Behavior<FrameworkElement>
+    {
+        private Window _owner;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            this.AssociatedObject.Loaded += this.AssociatedObjectOnLoaded;
+            this.AssociatedObject.Unloaded += this.AssociatedObjectOnUnloaded;
+        }
+
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            this.AssociatedObject.Loaded -= this.AssociatedObjectOnLoaded;
+            this.AssociatedObject.Unloaded -= this.AssociatedObjectOnUnloaded;
+        }
+
+        public void UpdateClipMargin()
+        {
+            var element = this.AssociatedObject;
+            var window = this.GetWindow();
+            if (window == null) return;
+
+            var screenPoint = element.PointToScreen(new Point(.0, .0));
+            var clientPoint = window.PointFromScreen(screenPoint);
+            var clipMargin = new Thickness(
+                clientPoint.X,
+                clientPoint.Y,
+                window.ActualWidth - (clientPoint.X + element.ActualWidth),
+                window.ActualHeight - (clientPoint.Y + element.ActualHeight));
+
+            (window.TaskbarItemInfo ?? (window.TaskbarItemInfo = new TaskbarItemInfo())).ThumbnailClipMargin = clipMargin;
+        }
+
+        public void ResetClipMargin()
+        {
+            var window = this.GetWindow();
+            if (window?.TaskbarItemInfo == null) return;
+            window.TaskbarItemInfo.ThumbnailClipMargin = new Thickness(.0);
+        }
+
+        private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
+        {
+            this.UpdateClipMargin();
+            var window = this.GetWindow();
+            if (window != null) window.LayoutUpdated += this.OwnerOnLayoutUpdated;
+        }
+
+        private void AssociatedObjectOnUnloaded(object sender, RoutedEventArgs e)
+        {
+            this.ResetClipMargin();
+            var window = this.GetWindow();
+            if (window != null) window.LayoutUpdated -= this.OwnerOnLayoutUpdated;
+        }
+
+        private void OwnerOnLayoutUpdated(object sender, EventArgs e) => this.UpdateClipMargin();
+
+        private Window GetWindow()
+        {
+            if (this._owner == null)
+                this._owner = Window.GetWindow(this.AssociatedObject);
+            return this._owner;
         }
     }
 }

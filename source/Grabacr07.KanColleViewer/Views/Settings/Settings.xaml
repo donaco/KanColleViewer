@@ -4,7 +4,7 @@
 			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:mti="http://schemes.grabacr.net/winfx/2015/personal/interactivity"
+			 xmlns:mti="clr-namespace:MetroTrilithon.UI.Interactivity;assembly=KanColleViewer.Controls"
 			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Views.Settings"

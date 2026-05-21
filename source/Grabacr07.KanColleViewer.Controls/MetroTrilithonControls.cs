@@ -9,9 +9,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 
-// MetroTrilithon.Controls (RichText 系)
-namespace MetroTrilithon.Controls
+// MetroTrilithon.UI.Controls (CallMethodButton / SortButton / TabHeader / RichTextView / HyperlinkEx / RichText系)
+namespace MetroTrilithon.UI.Controls
 {
+    // RichText 系（PluginViewModel / RichText.cs から MetroTrilithon.UI.Controls で参照される）
     public abstract class RichText
     {
         public string Text { get; set; }
@@ -23,11 +24,7 @@ namespace MetroTrilithon.Controls
     }
 
     public class Regular : RichText { }
-}
 
-// MetroTrilithon.UI.Controls (CallMethodButton / SortButton / TabHeader / RichTextView / HyperlinkEx)
-namespace MetroTrilithon.UI.Controls
-{
     /// <summary>
     /// クリックされたときに、指定したメソッドを実行する <see cref="Button"/> を表します。
     /// </summary>
@@ -143,13 +140,13 @@ namespace MetroTrilithon.UI.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(RichTextView), new FrameworkPropertyMetadata(typeof(RichTextView)));
         }
 
-        public IEnumerable<MetroTrilithon.Controls.RichText> Source
+        public IEnumerable<RichText> Source
         {
-            get { return (IEnumerable<MetroTrilithon.Controls.RichText>)this.GetValue(SourceProperty); }
+            get { return (IEnumerable<RichText>)this.GetValue(SourceProperty); }
             set { this.SetValue(SourceProperty, value); }
         }
         public static readonly DependencyProperty SourceProperty =
-            DependencyProperty.Register(nameof(Source), typeof(IEnumerable<MetroTrilithon.Controls.RichText>), typeof(RichTextView),
+            DependencyProperty.Register(nameof(Source), typeof(IEnumerable<RichText>), typeof(RichTextView),
                 new UIPropertyMetadata(null, (d, e) => ((RichTextView)d).UpdateDocument()));
 
         public Collection<DataTemplate> RichTextTemplates
@@ -176,9 +173,57 @@ namespace MetroTrilithon.UI.Controls
             }
             this.Document = new FlowDocument(paragraph) { TextAlignment = TextAlignment.Left };
         }
+
     }
 
-    public class HyperlinkEx : System.Windows.Documents.Hyperlink
+    public class WebBrowserHelper
+    {
+        public static readonly DependencyProperty ScriptErrorsSuppressedProperty =
+            DependencyProperty.RegisterAttached("ScriptErrorsSuppressed", typeof(bool), typeof(WebBrowserHelper), new PropertyMetadata(default(bool), ScriptErrorsSuppressedChangedCallback));
+
+        public static void SetScriptErrorsSuppressed(WebBrowser browser, bool value) => browser.SetValue(ScriptErrorsSuppressedProperty, value);
+        public static bool GetScriptErrorsSuppressed(WebBrowser browser) => (bool)browser.GetValue(ScriptErrorsSuppressedProperty);
+
+        private static void ScriptErrorsSuppressedChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is WebBrowser browser && e.NewValue is bool)
+            {
+                try
+                {
+                    var ax = GetAxWebbrowser2(browser);
+                    ax?.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, ax, new[] { e.NewValue });
+                }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            }
+        }
+
+        public static readonly DependencyProperty AllowWebBrowserDropProperty =
+            DependencyProperty.RegisterAttached("AllowWebBrowserDrop", typeof(bool), typeof(WebBrowserHelper), new PropertyMetadata(true, AllowWebBrowserDropChangedCallback));
+
+        public static void SetAllowWebBrowserDrop(DependencyObject element, bool value) => element.SetValue(AllowWebBrowserDropProperty, value);
+        public static bool GetAllowWebBrowserDrop(DependencyObject element) => (bool)element.GetValue(AllowWebBrowserDropProperty);
+
+        private static void AllowWebBrowserDropChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is WebBrowser browser && e.NewValue is bool)
+            {
+                try
+                {
+                    var ax = GetAxWebbrowser2(browser);
+                    ax?.GetType().InvokeMember("RegisterAsDropTarget", BindingFlags.SetProperty, null, ax, new[] { e.NewValue });
+                }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            }
+        }
+
+        public static object GetAxWebbrowser2(WebBrowser browser)
+        {
+            var prop = typeof(WebBrowser).GetProperty("AxIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
+            return prop?.GetValue(browser, null);
+        }
+    }
+
+    public class HyperlinkEx : Hyperlink
     {
         public Uri Uri
         {
@@ -196,6 +241,21 @@ namespace MetroTrilithon.UI.Controls
                 try { System.Diagnostics.Process.Start(this.Uri.ToString()); }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
+        }
+    }
+
+    public static class Extensions
+    {
+        public static System.Windows.Controls.Dock Reverse(this System.Windows.Controls.Dock d)
+        {
+            switch (d)
+            {
+                case System.Windows.Controls.Dock.Top: return System.Windows.Controls.Dock.Bottom;
+                case System.Windows.Controls.Dock.Left: return System.Windows.Controls.Dock.Right;
+                case System.Windows.Controls.Dock.Right: return System.Windows.Controls.Dock.Left;
+                case System.Windows.Controls.Dock.Bottom: return System.Windows.Controls.Dock.Top;
+            }
+            return d;
         }
     }
 }
