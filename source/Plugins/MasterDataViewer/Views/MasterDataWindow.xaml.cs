@@ -1,4 +1,4 @@
-using MetroRadiance.UI.Controls;
+using Grabacr07.KanColleViewer.Controls.Metro;
 
 namespace Grabacr07.KanColleViewer.Plugins.Views
 {

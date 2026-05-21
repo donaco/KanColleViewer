@@ -24,6 +24,8 @@
     <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
+    <NoWarn>0436</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>

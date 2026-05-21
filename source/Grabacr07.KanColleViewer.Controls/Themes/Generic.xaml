@@ -14,6 +14,8 @@
 		<ResourceDictionary Source="/KanColleViewer.Controls;component/Themes/Generic.RichTextView.xaml" />
 		<ResourceDictionary Source="/KanColleViewer.Controls;component/Themes/Generic.SortButton.xaml" />
 		<ResourceDictionary Source="/KanColleViewer.Controls;component/Themes/Generic.TabHeader.xaml" />
+		<!-- Phase 4: MetroWindow / CaptionButton / SystemButtons / TabView / ResizeGrip の内製テンプレート -->
+		<ResourceDictionary Source="/KanColleViewer.Controls;component/Themes/Generic.MetroControls.xaml" />
 	</ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

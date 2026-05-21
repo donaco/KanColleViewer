@@ -141,6 +141,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>Generic.xaml</DependentUpon>
     </Page>
+    <Page Include="Themes\Generic.MetroControls.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Generic.Modernizable.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -175,6 +178,12 @@
     <Compile Include="MetroTrilithonControls.cs" />
     <Compile Include="MetroTrilithonConverters.cs" />
     <Compile Include="MetroTrilithonInteractivity.cs" />
+    <Compile Include="Metro\CaptionButton.cs" />
+    <Compile Include="Metro\MetroWindow.cs" />
+    <Compile Include="Metro\ResizeGrip.cs" />
+    <Compile Include="Metro\SystemButtons.cs" />
+    <Compile Include="Metro\TabView.cs" />
+    <Compile Include="Metro\WindowPlacementHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

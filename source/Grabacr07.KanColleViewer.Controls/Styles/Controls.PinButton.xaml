@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-					xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls">
+					xmlns:metro="clr-namespace:Grabacr07.KanColleViewer.Controls.Metro">
 
 	<Style x:Key="PinButtonStyleKey"
 		   TargetType="{x:Type metro:CaptionButton}">

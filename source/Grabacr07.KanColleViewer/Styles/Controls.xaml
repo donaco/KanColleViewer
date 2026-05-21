@@ -110,13 +110,6 @@
 				Value="True" />
 		<Setter Property="TextOptions.TextFormattingMode"
 				Value="Display" />
-		<Setter Property="ShellChrome">
-			<Setter.Value>
-				<WindowChrome ResizeBorderThickness="1"
-							  GlassFrameThickness="0"
-							  CornerRadius="0" />
-			</Setter.Value>
-		</Setter>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type metro:MetroWindow}">
@@ -141,7 +134,6 @@
 								</Border>
 								<ContentPresenter Grid.Row="1"
 												  Margin="{TemplateBinding Padding}"
-												  LayoutTransform="{TemplateBinding DpiScaleTransform}"
 												  TextOptions.TextFormattingMode="{TemplateBinding TextOptions.TextFormattingMode}" />
 							</Grid>
 						</AdornerDecorator>
