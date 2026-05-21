@@ -226,6 +226,7 @@
     <Compile Include="Infrastructure\Mvvm\RelayCommand.cs" />
     <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
     <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
+    <Compile Include="Models\AppThemeService.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
     <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
     <Compile Include="Models\Cef\CapturedHttp.cs" />
@@ -453,6 +454,18 @@
     <Compile Include="WindowService.cs" />
     <Page Include="Styles\Controls.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Themes\Accents\Blue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Themes\Accents\Orange.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Themes\Accents\Purple.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Themes\Dark.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Accents\Red.xaml">

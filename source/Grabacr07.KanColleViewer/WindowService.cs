@@ -14,7 +14,6 @@ using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Livet;
 using Livet.Messaging;
-using MetroRadiance.UI;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using CefSharp.Wpf;
@@ -55,7 +54,7 @@ namespace Grabacr07.KanColleViewer
 		private MultipleDisposable fleetStateListeners = new MultipleDisposable();
 
 		// 大破時のアクセントカラー (Red)
-		private static readonly Accent HeavilyDamagedAccent = Accent.FromColor(Colors.Red);
+		private static readonly Color HeavilyDamagedColor = Colors.Red;
 
 		public WindowServiceMode Mode
 		{
@@ -175,18 +174,21 @@ namespace Grabacr07.KanColleViewer
 			switch (this.currentMode)
 			{
 				case WindowServiceMode.NotStarted:
-					ThemeService.Current.ChangeAccent(Accent.Purple);
+					AppThemeService.Current.ChangeAccent(AppAccent.Purple);
 					break;
 
 				case WindowServiceMode.Started:
-					ThemeService.Current.ChangeAccent(Accent.Blue);
+					AppThemeService.Current.ChangeAccent(AppAccent.Blue);
 					break;
 
 				case WindowServiceMode.InSortie:
 					// 出撃中の艦隊に大破艦がいる場合は赤、それ以外はオレンジ
 					var hasHeavilyDamaged = KanColleClient.Current.Homeport.Organization.Fleets.Values
 						.Any(f => f.IsInSortie && f.State.Situation.HasFlag(FleetSituation.HeavilyDamaged));
-					ThemeService.Current.ChangeAccent(hasHeavilyDamaged ? HeavilyDamagedAccent : Accent.Orange);
+					if (hasHeavilyDamaged)
+						AppThemeService.Current.ChangeAccent(HeavilyDamagedColor);
+					else
+						AppThemeService.Current.ChangeAccent(AppAccent.Orange);
 					break;
 			}
 		}
