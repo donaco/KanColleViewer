@@ -15,7 +15,6 @@ using Grabacr07.KanColleViewer.Views.Controls;
 using Livet.Messaging;
 using MetroTrilithon.UI.Controls;
 using MetroTrilithon.Mvvm;
-using MetroTrilithon.UI.Controls;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
