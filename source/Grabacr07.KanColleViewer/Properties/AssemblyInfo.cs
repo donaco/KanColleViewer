@@ -19,4 +19,7 @@ using System.Windows.Markup;
 // Phase 1: MetroTrilithon.UI.Controls を内製化したため XAML 名前空間を再定義
 [assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/personal/controls", "MetroTrilithon.UI.Controls")]
 
+// Phase 4: 内製コントロール (PromptTextBox, PromptComboBox, ExpanderButton, Int32Rule 等) を kcvc に登録
+[assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls", "Grabacr07.KanColleViewer.Views.Controls")]
+
 [assembly: AssemblyVersion("4.8.0")]

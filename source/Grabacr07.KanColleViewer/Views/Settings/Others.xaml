@@ -6,6 +6,8 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
@@ -48,7 +50,7 @@
 				<Run Text="{Binding Resources.Settings_Screenshot_FolderTextBox_Label, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<Run Text=":  " />
 			</TextBlock>
-			<metro:PromptTextBox Grid.Row="0"
+			<controls:PromptTextBox Grid.Row="0"
 								 Grid.Column="1"
 								 Text="{Binding Source={x:Static ms:ScreenshotSettings.Destination}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 								 Prompt="{Binding Resources.Settings_Screenshot_FolderTextBox_Prompt, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
@@ -110,7 +112,7 @@
 		<TextBlock Text="{Binding Resources.Settings_Language, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
-		<metro:PromptComboBox Margin="20,0,0,0"
+		<controls:PromptComboBox Margin="20,0,0,0"
 							  HorizontalAlignment="Left"
 							  Prompt=""
 							  ItemsSource="{Binding Cultures}"
@@ -127,7 +129,7 @@
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<metro:PromptTextBox Text="{Binding UserStyleSheetSettings.UserStyleSheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+			<controls:PromptTextBox Text="{Binding UserStyleSheetSettings.UserStyleSheet, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 								 Height="100"
 								 AcceptsReturn="True"
 								 TextWrapping="NoWrap"

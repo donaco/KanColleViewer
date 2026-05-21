@@ -4,6 +4,8 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 mc:Ignorable="d"
@@ -33,19 +35,19 @@
 					<ColumnDefinition />
 				</Grid.ColumnDefinitions>
 
-				<metro:PromptTextBox Prompt="例: 40"
+				<controls:PromptTextBox Prompt="例: 40"
 									 Width="60">
-					<metro:PromptTextBox.Text>
+					<controls:PromptTextBox.Text>
 						<Binding Source="{x:Static ms:KanColleSettings.ReSortieCondition}"
 								 Path="Value"
 								 UpdateSourceTrigger="PropertyChanged">
 							<Binding.ValidationRules>
-								<metro:Int32Rule Min="0"
+								<controls:Int32Rule Min="0"
 												 Max="49" />
 							</Binding.ValidationRules>
 						</Binding>
-					</metro:PromptTextBox.Text>
-				</metro:PromptTextBox>
+					</controls:PromptTextBox.Text>
+				</controls:PromptTextBox>
 				<TextBlock Grid.Column="2"
 						   Style="{DynamicResource DetailTextStyleKey}">
 					<Run Text="※通常は、間宮アイコンが消灯する 40 か、自然回復上限の 49 に設定します。" />
@@ -65,7 +67,7 @@
 		<StackPanel Margin="20,0,0,0">
 			<TextBlock Text="艦隊の索敵値の算出に使用する計算式は、以下を使用する" />
 
-			<metro:PromptComboBox ItemsSource="{Binding ViewRangeSettingsCollection}"
+			<controls:PromptComboBox ItemsSource="{Binding ViewRangeSettingsCollection}"
 								  Margin="0,5"
 								  DisplayMemberPath="Name"
 								  SelectedItem="{Binding SelectedViewRangeCalcType}"

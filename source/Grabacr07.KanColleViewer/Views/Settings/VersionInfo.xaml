@@ -107,26 +107,28 @@
 		
 		<StackPanel Grid.Row="1"
 					Grid.Column="0">
-			<metro:BindableTextBlock TextSource="{Binding Libraries}"
-									 TextWrapping="Wrap"
-									 FontFamily="Segoe UI"
-									 FontSize="11">
-				<metro:BindableTextBlock.TextTemplates>
+			<!-- Phase 4: metro:BindableTextBlock / metro:InlineHolder を ItemsControl で代替 -->
+			<ItemsControl ItemsSource="{Binding Libraries}"
+						  FontFamily="Segoe UI"
+						  FontSize="11">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel Orientation="Horizontal" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.Resources>
 					<DataTemplate DataType="{x:Type settings:HyperlinkViewModel}">
-						<metro:InlineHolder>
-							<metro2:HyperlinkEx Uri="{Binding Uri}">
-								<Run Text="{Binding Text, Mode=OneWay}" />
-							</metro2:HyperlinkEx>
-						</metro:InlineHolder>
+						<metro2:HyperlinkEx Uri="{Binding Uri}">
+							<Run Text="{Binding Text, Mode=OneWay}" />
+						</metro2:HyperlinkEx>
 					</DataTemplate>
 					<DataTemplate DataType="{x:Type settings:BindableTextViewModel}">
-						<metro:InlineHolder>
-							<Run Text="{Binding Text, Mode=OneWay}"
-								 Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-						</metro:InlineHolder>
+						<TextBlock Text="{Binding Text, Mode=OneWay}"
+								   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+								   Margin="0,1,4,1" />
 					</DataTemplate>
-				</metro:BindableTextBlock.TextTemplates>
-			</metro:BindableTextBlock>
+				</ItemsControl.Resources>
+			</ItemsControl>
 			
 			<StackPanel Orientation="Horizontal"
 						Margin="0,10,0,0">

@@ -4,6 +4,8 @@
 	<ResourceDictionary.MergedDictionaries>
 		<ResourceDictionary Source="/KanColleViewer;component/Themes/Generic.KanColleHost.xaml" />
 		<ResourceDictionary Source="/KanColleViewer;component/Themes/Generic.MetroComboBox.xaml" />
+		<!-- Phase 4: PromptTextBox / PromptComboBox / ExpanderButton の内製テンプレート -->
+		<ResourceDictionary Source="/KanColleViewer;component/Themes/Generic.InternalControls.xaml" />
 		<!-- CallMethodButton 等のスタイルは KanColleViewer.Controls;component/Themes/Generic.xaml に内製化済み -->
 	</ResourceDictionary.MergedDictionaries>
 

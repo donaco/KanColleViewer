@@ -6,6 +6,8 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 mc:Ignorable="d"
@@ -49,19 +51,19 @@
 						<Run Text="通知を早める" />
 						<Run Text=":" />
 					</TextBlock>
-					<metro:PromptTextBox Margin="4,0"
+					<controls:PromptTextBox Margin="4,0"
 										 Prompt=""
 										 Width="35">
-						<metro:PromptTextBox.Text>
+						<controls:PromptTextBox.Text>
 							<Binding Source="{x:Static ms:KanColleSettings.NotificationShorteningTime}"
 									 Path="Value"
 									 UpdateSourceTrigger="PropertyChanged">
 								<Binding.ValidationRules>
-									<metro:Int32Rule Min="0" />
+									<controls:Int32Rule Min="0" />
 								</Binding.ValidationRules>
 							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
+						</controls:PromptTextBox.Text>
+					</controls:PromptTextBox>
 					<TextBlock Text="秒"
 							   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
 				</StackPanel>

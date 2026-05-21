@@ -217,6 +217,7 @@
     <Compile Include="Composition\PluginHost.cs" />
     <Compile Include="Composition\PluginMetadata.cs" />
     <Compile Include="Infrastructure\Desktop\SystemEnvironment.cs" />
+    <Compile Include="Infrastructure\Interop\Dpi.cs" />
     <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
     <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
     <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
@@ -349,7 +350,10 @@
     <Compile Include="Views\Contents\Tools.xaml.cs">
       <DependentUpon>Tools.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Controls\ExpanderButton.cs" />
     <Compile Include="Views\Controls\MetroComboBox.cs" />
+    <Compile Include="Views\Controls\PromptComboBox.cs" />
+    <Compile Include="Views\Controls\PromptTextBox.cs" />
     <Compile Include="Views\Converters\HtmlBreakToNewLineConverter.cs" />
     <Compile Include="Views\Converters\RangeToBooleanConverter.cs" />
     <Compile Include="Views\Converters\StringToSlotItemIconTypeConverter.cs" />
@@ -445,6 +449,7 @@
     <Compile Include="Views\QuestWindow.xaml.cs">
       <DependentUpon>QuestWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Validation\Int32Rule.cs" />
     <Compile Include="Win32\INTERNET_CACHE_ENTRY_INFOA.cs" />
     <Compile Include="Win32\WinHttp.cs" />
     <Compile Include="Win32\WinInet.cs" />
@@ -470,6 +475,9 @@
     </Page>
     <Page Include="Themes\Accents\Red.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.InternalControls.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.KanColleHost.xaml">

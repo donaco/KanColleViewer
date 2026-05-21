@@ -6,6 +6,8 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Views.Settings"
 			 xmlns:composition="clr-namespace:Grabacr07.KanColleViewer.Composition"
 			 xmlns:compositionVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Composition"
@@ -55,7 +57,7 @@
 									BorderBrush="{DynamicResource ValidationErrorBrushKey}"
 									Margin="0,4">
 								<StackPanel>
-									<metro:ExpanderButton x:Name="DetailExpander"
+									<controls:ExpanderButton x:Name="DetailExpander"
 														  Direction="Down"
 														  Margin="5">
 										<StackPanel>
@@ -82,7 +84,7 @@
 											<TextBlock Text="{Binding Message}"
 													   Style="{DynamicResource DetailTextStyleKey}" />
 										</StackPanel>
-									</metro:ExpanderButton>
+									</controls:ExpanderButton>
 
 									<StackPanel Visibility="{Binding ElementName=DetailExpander, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"
 												Margin="5,0,5,5">

@@ -6,6 +6,8 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
@@ -46,17 +48,17 @@
 			</Viewbox>
 		</metro2:CallMethodButton>
 
-		<metro:PromptTextBox Grid.Column="2"
+		<controls:PromptTextBox Grid.Column="2"
 							 Text="{Binding SourceString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 							 Prompt="URL を入力し、Enter キーで移動します。"
 							 VerticalAlignment="Center"
 							 VerticalContentAlignment="Center"
 							 Padding="2">
-			<metro:PromptTextBox.InputBindings>
+			<controls:PromptTextBox.InputBindings>
 				<KeyBinding Key="Enter"
 							Command="{Binding NavigateCommand}" />
-			</metro:PromptTextBox.InputBindings>
-		</metro:PromptTextBox>
+			</controls:PromptTextBox.InputBindings>
+		</controls:PromptTextBox>
 
 		<metro2:CallMethodButton Grid.Column="3"
 								 MethodName="ReNavigate"

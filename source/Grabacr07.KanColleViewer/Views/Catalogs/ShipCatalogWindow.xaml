@@ -21,7 +21,6 @@
 				   xmlns:catalogs="clr-namespace:Grabacr07.KanColleViewer.Views.Catalogs"
 				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Catalogs"
 				   xmlns:contentsVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
-				   xmlns:kcvcn="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:ShipCatalogWindowViewModel}"
@@ -521,24 +520,24 @@
 												<RotateTransform Angle="90" />
 											</ed:RegularPolygon.RenderTransform>
 										</ed:RegularPolygon>
-										<metro:PromptComboBox DockPanel.Dock="Bottom"
+										<controls:PromptComboBox DockPanel.Dock="Bottom"
 															  ItemsSource="{Binding SelectableColumns}"
 															  SelectedItem="{Binding Current, Mode=TwoWay}"
 															  Prompt="並べ替え方法"
 															  Width="120"
 															  Margin="1,4,0,0">
-											<metro:PromptComboBox.ItemsPanel>
+											<controls:PromptComboBox.ItemsPanel>
 												<ItemsPanelTemplate>
 													<StackPanel Margin="02" />
 												</ItemsPanelTemplate>
-											</metro:PromptComboBox.ItemsPanel>
-											<metro:PromptComboBox.ItemTemplate>
+											</controls:PromptComboBox.ItemsPanel>
+											<controls:PromptComboBox.ItemTemplate>
 												<DataTemplate>
 													<TextBlock Text="{Binding Name}"
 															   Margin="2" />
 												</DataTemplate>
-											</metro:PromptComboBox.ItemTemplate>
-										</metro:PromptComboBox>
+											</controls:PromptComboBox.ItemTemplate>
+										</controls:PromptComboBox>
 										<RadioButton DockPanel.Dock="Left"
 													 Content="昇順"
 													 IsChecked="{Binding IsAscending, Mode=TwoWay}" />

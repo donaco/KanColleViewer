@@ -6,6 +6,8 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
@@ -61,7 +63,7 @@
 						Margin="20,0,0,0"
 						Grid.IsSharedSizeScope="True">
 				<StackPanel.Resources>
-					<Style TargetType="{x:Type metro:PromptTextBox}">
+					<Style TargetType="{x:Type controls:PromptTextBox}">
 						<Setter Property="Margin"
 								Value="0,3" />
 					</Style>
@@ -97,7 +99,7 @@
 						<Run Text="HTTP" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="0"
+					<controls:PromptTextBox Grid.Row="0"
 										 Grid.Column="1"
 										 Text="{Binding SpecificHttpProxyHost, Mode=TwoWay}"
 										 Prompt="{Binding Resources.Settings_Proxy_Host, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
@@ -106,21 +108,21 @@
 						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="0"
+					<controls:PromptTextBox Grid.Row="0"
 										 Grid.Column="4"
 										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MaxLength="5">
-						<metro:PromptTextBox.Text>
+						<controls:PromptTextBox.Text>
 							<Binding Path="SpecificHttpProxyPort"
 									 UpdateSourceTrigger="PropertyChanged">
 								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
+									<controls:Int32Rule Min="1"
 													 Max="65535"
 													 AllowsEmpty="True" />
 								</Binding.ValidationRules>
 							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
+						</controls:PromptTextBox.Text>
+					</controls:PromptTextBox>
 
 					<CheckBox Grid.Row="1"
 							  Grid.Column="1"
@@ -150,7 +152,7 @@
 						<Run Text="HTTPS" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="0"
+					<controls:PromptTextBox Grid.Row="0"
 										 Grid.Column="1"
 										 Text="{Binding SpecificHttpsProxyHost, Mode=TwoWay}"
 										 Prompt="{Binding Resources.Settings_Proxy_Host, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
@@ -159,21 +161,21 @@
 						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="0"
+					<controls:PromptTextBox Grid.Row="0"
 										 Grid.Column="4"
 										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MaxLength="5">
-						<metro:PromptTextBox.Text>
+						<controls:PromptTextBox.Text>
 							<Binding Path="SpecificHttpsProxyPort"
 									 UpdateSourceTrigger="PropertyChanged">
 								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
+									<controls:Int32Rule Min="1"
 													 Max="65535"
 													 AllowsEmpty="True" />
 								</Binding.ValidationRules>
 							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
+						</controls:PromptTextBox.Text>
+					</controls:PromptTextBox>
 
 					<TextBlock Grid.Row="1"
 							   Grid.Column="0"
@@ -181,7 +183,7 @@
 						<Run Text="FTP" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="1"
+					<controls:PromptTextBox Grid.Row="1"
 										 Grid.Column="1"
 										 Text="{Binding SpecificFtpProxyHost, Mode=TwoWay}"
 										 Prompt="{Binding Resources.Settings_Proxy_Host, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
@@ -190,21 +192,21 @@
 						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="1"
+					<controls:PromptTextBox Grid.Row="1"
 										 Grid.Column="4"
 										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MaxLength="5">
-						<metro:PromptTextBox.Text>
+						<controls:PromptTextBox.Text>
 							<Binding Path="SpecificFtpProxyPort"
 									 UpdateSourceTrigger="PropertyChanged">
 								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
+									<controls:Int32Rule Min="1"
 													 Max="65535"
 													 AllowsEmpty="True" />
 								</Binding.ValidationRules>
 							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
+						</controls:PromptTextBox.Text>
+					</controls:PromptTextBox>
 
 					<TextBlock Grid.Row="2"
 							   Grid.Column="0"
@@ -212,7 +214,7 @@
 						<Run Text="SOCKS" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="2"
+					<controls:PromptTextBox Grid.Row="2"
 										 Grid.Column="1"
 										 Text="{Binding SpecificSocksProxyHost, Mode=TwoWay}"
 										 Prompt="{Binding Resources.Settings_Proxy_Host, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
@@ -221,21 +223,21 @@
 						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=": " />
 					</TextBlock>
-					<metro:PromptTextBox Grid.Row="2"
+					<controls:PromptTextBox Grid.Row="2"
 										 Grid.Column="4"
 										 Prompt="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MaxLength="5">
-						<metro:PromptTextBox.Text>
+						<controls:PromptTextBox.Text>
 							<Binding Path="SpecificSocksProxyPort"
 									 UpdateSourceTrigger="PropertyChanged">
 								<Binding.ValidationRules>
-									<metro:Int32Rule Min="1"
+									<controls:Int32Rule Min="1"
 													 Max="65535"
 													 AllowsEmpty="True" />
 								</Binding.ValidationRules>
 							</Binding>
-						</metro:PromptTextBox.Text>
-					</metro:PromptTextBox>
+						</controls:PromptTextBox.Text>
+					</controls:PromptTextBox>
 				</Grid>
 			</StackPanel>
 

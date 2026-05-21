@@ -11,7 +11,7 @@ using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models;
 using Livet;
 using Livet.EventListeners;
-using MetroRadiance.Interop;
+using Grabacr07.KanColleViewer.Infrastructure.Interop;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
 {
@@ -72,7 +72,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 			if (newValue != null)
 			{
-				var dpi = source.systemDpi ?? (source.systemDpi = source.GetSystemDpi()) ?? Dpi.Default;
+				var dpi = source.systemDpi ?? (source.systemDpi = Dpi.GetSystemDpi(source)) ?? Dpi.Default;
 				source.items = newValue.SupportedValues
 					.Select(x => new ZoomFactorSelectorItem
 					{
@@ -133,7 +133,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private CustomPopupPlacement[] PopupPlacementCallback(Size popupSize, Size targetSize, Point offset)
 		{
-			var dpi = this.systemDpi ?? (this.systemDpi = this.GetSystemDpi()) ?? Dpi.Default;
+			var dpi = this.systemDpi ?? (this.systemDpi = Dpi.GetSystemDpi(this)) ?? Dpi.Default;
 			return new[]
 			{
 				new CustomPopupPlacement(new Point(offset.X * dpi.ScaleX, offset.Y* dpi.ScaleY), PopupPrimaryAxis.None),

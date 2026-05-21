@@ -5,6 +5,8 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
+				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
@@ -32,7 +34,7 @@
 					Margin="20,0,0,00">
 			<TextBlock Text="アプリケーション終了時の確認動作"
 					   Margin="0,0,10,0" />
-			<metro:PromptComboBox ItemsSource="{Binding ExitConfirmationTypes}"
+			<controls:PromptComboBox ItemsSource="{Binding ExitConfirmationTypes}"
 								  DisplayMemberPath="Display"
 								  SelectedValuePath="Value"
 								  SelectedValue="{Binding Source={x:Static ms:GeneralSettings.ExitConfirmationType}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -59,7 +61,7 @@
 			<TextBlock Grid.Row="0"
 					   Grid.Column="0"
 					   Text="インジケーターの動作" />
-			<metro:PromptComboBox Grid.Row="0"
+			<controls:PromptComboBox Grid.Row="0"
 								  Grid.Column="2"
 								  ItemsSource="{Binding TaskbarProgressFeatures}"
 								  DisplayMemberPath="Display"
@@ -69,7 +71,7 @@
 			<TextBlock Grid.Row="2"
 					   Grid.Column="0"
 					   Text="インジケーターの動作 (出撃中)" />
-			<metro:PromptComboBox Grid.Row="2"
+			<controls:PromptComboBox Grid.Row="2"
 								  Grid.Column="2"
 								  ItemsSource="{Binding TaskbarProgressFeatures}"
 								  DisplayMemberPath="Display"
