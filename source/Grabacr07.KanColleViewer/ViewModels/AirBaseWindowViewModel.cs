@@ -2,7 +2,7 @@ using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents.AirBases;
 using Grabacr07.KanColleViewer.ViewModels.Messages;
-using Livet.Commands;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using MetroTrilithon.Mvvm;
 using System;
 using System.Collections.ObjectModel;
@@ -74,7 +74,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.SelectedAirBase = airBasesVM.SelectedAirBase;
 
 			// 基地詳細ボタンコマンド
-			this.ShowAirBaseWindowCommand = new ViewModelCommand(() =>
+			this.ShowAirBaseWindowCommand = new RelayCommand(() =>
 			{
 				if (this.SelectedAirBase != null)
 				{

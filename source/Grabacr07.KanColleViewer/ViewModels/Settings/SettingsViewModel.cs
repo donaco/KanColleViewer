@@ -9,9 +9,9 @@ using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleViewer.ViewModels.Composition;
 using Grabacr07.KanColleWrapper.Models;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using MetroTrilithon.Mvvm;
 using Livet;
-using Livet.Commands;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
@@ -106,10 +106,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region CheckForUpdateCommand コマンド
 
-		private ViewModelCommand _CheckForUpdateCommand;
+		private RelayCommand _CheckForUpdateCommand;
 
-		public ViewModelCommand CheckForUpdateCommand
-			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new ViewModelCommand(this.CheckForUpdate));
+		public RelayCommand CheckForUpdateCommand
+			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new RelayCommand(this.CheckForUpdate));
 
 		#endregion
 

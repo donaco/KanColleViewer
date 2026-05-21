@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Livet;
-using Livet.Commands;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
@@ -106,9 +106,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region NavigateCommand コマンド
 
-		private ViewModelCommand _NavigateCommand;
+		private RelayCommand _NavigateCommand;
 
-		public ViewModelCommand NavigateCommand => this._NavigateCommand ?? (this._NavigateCommand = new ViewModelCommand(this.Navigate));
+		public RelayCommand NavigateCommand => this._NavigateCommand ?? (this._NavigateCommand = new RelayCommand(this.Navigate));
 
 		#endregion
 

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Livet;
-using Livet.Commands;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
@@ -81,10 +81,10 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region CheckForUpdateCommand コマンド
 
-		private ViewModelCommand _CheckForUpdateCommand;
+		private RelayCommand _CheckForUpdateCommand;
 
-		public ViewModelCommand CheckForUpdateCommand
-			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new ViewModelCommand(this.CheckForUpdate));
+		public RelayCommand CheckForUpdateCommand
+			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new RelayCommand(this.CheckForUpdate));
 
 		#endregion
 
