@@ -186,25 +186,10 @@
 				BorderBrush="{DynamicResource HighlightBorderBrushKey}"
 				BorderThickness="1"
 				CornerRadius="8"
-				Margin="16,0,0,0">
-			<StackPanel VerticalAlignment="Center"
-					HorizontalAlignment="Center">
-				<TextBlock Text="KCV"
-						   FontFamily="Segoe UI Light"
-						   FontSize="44"
-						   HorizontalAlignment="Center"
-						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-				<TextBlock Text="Version"
-						   Margin="0,4,0,0"
-						   FontSize="14"
-						   HorizontalAlignment="Center"
-						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-				<TextBlock Text="{Binding Source={x:Static models:ProductInfo.VersionString}, StringFormat=v{0}, Mode=OneWay}"
-						   Margin="0,2,0,0"
-						   FontSize="16"
-						   HorizontalAlignment="Center"
-						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-			</StackPanel>
+				Margin="16,0,0,0"
+				Padding="12">
+			<kcvc:AppIcon Background="{DynamicResource ThemeBrushKey}"
+					  SnapsToDevicePixels="True" />
 		</Border>
 	</Grid>
 </UserControl>

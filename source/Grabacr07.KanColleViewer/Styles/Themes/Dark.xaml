@@ -41,8 +41,8 @@
     <Color x:Key="InactiveForegroundColorKey">#FF787878</Color>
     <SolidColorBrush x:Key="InactiveForegroundBrushKey" Color="#FF787878" />
 
-    <Color x:Key="LinkForegroundColorKey">#FF3399FF</Color>
-    <SolidColorBrush x:Key="LinkForegroundBrushKey" Color="#FF3399FF" />
+    <Color x:Key="LinkForegroundColorKey">#FF7AC1FF</Color>
+	<SolidColorBrush x:Key="LinkForegroundBrushKey" Color="#FF7AC1FF" />
 
     <Color x:Key="ChromeBackgroundColorKey">#FF2D2D30</Color>
     <SolidColorBrush x:Key="ChromeBackgroundBrushKey" Color="#FF2D2D30" />
