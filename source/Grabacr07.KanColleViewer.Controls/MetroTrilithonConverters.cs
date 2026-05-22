@@ -71,9 +71,46 @@ namespace MetroTrilithon.UI.Converters
     public class EnumToBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            => value?.Equals(parameter) ?? false;
+        {
+            if (value == null || parameter == null) return false;
+
+            var parameterValue = parameter;
+            var valueType = value.GetType();
+            if (valueType.IsEnum && parameter is string parameterText)
+            {
+                try
+                {
+                    parameterValue = Enum.Parse(valueType, parameterText, true);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            return value.Equals(parameterValue);
+        }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => (value is bool b && b) ? parameter : Binding.DoNothing;
+        {
+            if (!(value is bool isChecked) || !isChecked || parameter == null)
+            {
+                return Binding.DoNothing;
+            }
+
+            if (targetType.IsEnum && parameter is string parameterText)
+            {
+                try
+                {
+                    return Enum.Parse(targetType, parameterText, true);
+                }
+                catch
+                {
+                    return Binding.DoNothing;
+                }
+            }
+
+            return parameter;
+        }
     }
 }
