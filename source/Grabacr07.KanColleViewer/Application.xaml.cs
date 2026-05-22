@@ -125,8 +125,6 @@ namespace Grabacr07.KanColleViewer
 
 					try
 					{
-						GeneralSettings.IsProxyMode.Value = true;
-
 						// フォールバック起動時はブラウザーに依存しない最小構成で起動する
 						WindowService.Current.AddTo(this).Initialize();
 
@@ -167,7 +165,6 @@ namespace Grabacr07.KanColleViewer
 			}
 			else
 			{
-				appMutex.ReleaseMutex();
 				appMutex.Dispose();
 				this.ChangeState(ApplicationState.Terminate);
 				this.Shutdown();

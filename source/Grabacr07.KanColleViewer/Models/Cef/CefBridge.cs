@@ -68,13 +68,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private static void DeleteCefTransientState()
 		{
-			TryDeleteDirectory(Path.Combine(CachePath, "GPUCache"));
-			TryDeleteDirectory(Path.Combine(CachePath, "Code Cache"));
-			TryDeleteDirectory(Path.Combine(CachePath, "ShaderCache"));
-			TryDeleteDirectory(Path.Combine(CachePath, "GrShaderCache"));
-			TryDeleteFile(Path.Combine(CachePath, "SingletonLock"));
-			TryDeleteFile(Path.Combine(CachePath, "SingletonCookie"));
-			TryDeleteFile(Path.Combine(CachePath, "SingletonSocket"));
+			TryDeleteDirectory(CachePath);
 		}
 
 		private static void MarkInitializeFailure()
@@ -145,7 +139,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					// デバッグ実行時の作業ディレクトリ不一致に対応する
 					Environment.CurrentDirectory = assemblyDirectory;
 
-
 					if (initialized || (CefSharp.Cef.IsInitialized ?? false)) return;
 
 					var retriedByCleanup = PrepareForInitializeRetry();
@@ -164,25 +157,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						throw new FileNotFoundException($"CefSharp.BrowserSubprocess.exe not found: '{browserSubprocessPath}'");
 					}
 
-					var effectiveCachePath = CefBridge.CachePath;
-					Directory.CreateDirectory(effectiveCachePath);
-
 					var cefSettings = new CefSettings
 					{
 						BrowserSubprocessPath = browserSubprocessPath,
-						CachePath = effectiveCachePath,
 					};
 
-
-					// GPU 関連は既定値を使用する
-					// （環境差が大きく、明示フラグが初期化失敗を誘発するため）
-
-					// 開発者向けオプション: リモートデバッグポートの開放
-					// 設定が有効な場合のみポートを開放する（デフォルト: 無効）
-					if (GeneralSettings.IsRemoteDebuggingEnabled)
-					{
-						cefSettings.CefCommandLineArgs["remote-debugging-port"] = "9222";
-					}
+					// CefSharp 既定のコマンドライン引数を一旦外し、
+					// このアプリで明示したものだけを使って切り分ける
+					cefSettings.CefCommandLineArgs.Clear();
 
 					// proxy-server は空でなければ設定する（Network.xaml の設定を残すため）
 					var proxyString = Settings.NetworkSettings.LocalProxySettingsString;
@@ -190,6 +172,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					{
 						cefSettings.CefCommandLineArgs["proxy-server"] = proxyString;
 					}
+
+					var cefCommandLineArgsSummary = cefSettings.CefCommandLineArgs.Count == 0
+						? "<none>"
+						: string.Join("; ", cefSettings.CefCommandLineArgs.Select(x => $"{x.Key}={x.Value}"));
 
 					// ログ設定: デバッグビルドのみ出力、リリースビルドでは無効
 #if DEBUG
@@ -208,7 +194,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					cefSettings.LogSeverity = LogSeverity.Disable;
 #endif
 
-					var initializeResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: true, browserProcessHandler: null);
+					var initializeResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: false, browserProcessHandler: null);
 
 					// 初期化完了を確認
 					int waitCount = 0;
@@ -226,7 +212,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						throw new InvalidOperationException(
 							$"Cef initialization failed. Result={initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}, LogFile='{LogFilePath}', " +
 							$"CurrentDirectory='{Environment.CurrentDirectory}', AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
-							$"CachePath='{effectiveCachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
+							$"DLLDirectoryApplied={true}, CEFArgs='{cefCommandLineArgsSummary}', " +
+							$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
 							$"Subprocess.Exists={File.Exists(subprocessPath)}('{subprocessPath}'), RetryCleanupApplied={retriedByCleanup}.");
 					}
 
