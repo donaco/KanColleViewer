@@ -118,9 +118,11 @@
 				</ItemsControl.ItemsPanel>
 				<ItemsControl.Resources>
 					<DataTemplate DataType="{x:Type settings:HyperlinkViewModel}">
-						<metro2:HyperlinkEx Uri="{Binding Uri}">
-							<Run Text="{Binding Text, Mode=OneWay}" />
-						</metro2:HyperlinkEx>
+						<TextBlock Margin="0,1,4,1">
+							<metro2:HyperlinkEx Uri="{Binding Uri}">
+								<Run Text="{Binding Text, Mode=OneWay}" />
+							</metro2:HyperlinkEx>
+						</TextBlock>
 					</DataTemplate>
 					<DataTemplate DataType="{x:Type settings:BindableTextViewModel}">
 						<TextBlock Text="{Binding Text, Mode=OneWay}"
@@ -174,11 +176,35 @@
 			</metro2:HyperlinkEx>
 		</TextBlock>
 
-		<kcvc:AppIcon Grid.Row="1"
-					  Grid.Column="1"
-					  Width="210"
-					  HorizontalAlignment="Right"
-					  Background="{DynamicResource ThemeBrushKey}"
-					  VerticalAlignment="Bottom" />
+		<Border Grid.Row="1"
+				Grid.Column="1"
+				Width="210"
+				Height="210"
+				HorizontalAlignment="Right"
+				VerticalAlignment="Bottom"
+				Background="{DynamicResource ThemeBrushKey}"
+				BorderBrush="{DynamicResource HighlightBorderBrushKey}"
+				BorderThickness="1"
+				CornerRadius="8"
+				Margin="16,0,0,0">
+			<StackPanel VerticalAlignment="Center"
+					HorizontalAlignment="Center">
+				<TextBlock Text="KCV"
+						   FontFamily="Segoe UI Light"
+						   FontSize="44"
+						   HorizontalAlignment="Center"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+				<TextBlock Text="Version"
+						   Margin="0,4,0,0"
+						   FontSize="14"
+						   HorizontalAlignment="Center"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+				<TextBlock Text="{Binding Source={x:Static models:ProductInfo.VersionString}, StringFormat=v{0}, Mode=OneWay}"
+						   Margin="0,2,0,0"
+						   FontSize="16"
+						   HorizontalAlignment="Center"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+			</StackPanel>
+		</Border>
 	</Grid>
 </UserControl>
