@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +48,23 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 					break;
 			}
 
-			if (target != null) target.IsSelected = true;
+			if (target == null)
+			{
+				return;
+			}
+
+			foreach (var tab in this.Content.TabItems)
+			{
+				tab.IsSelected = false;
+			}
+
+			foreach (var tab in this.Content.SystemTabItems)
+			{
+				tab.IsSelected = false;
+			}
+
+			target.IsSelected = true;
+			this.Content.SelectedItem = target;
 		}
 
 		public void ShowShipCatalog()
