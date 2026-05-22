@@ -45,9 +45,8 @@ namespace Grabacr07.KanColleViewer
 	{
 		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
 		private event PropertyChangedEventHandler propertyChangedInternal;
-#if !DEBUG
 		private Mutex _appMutex;
-#endif
+		private bool startedInFallbackMode;
 
 		public DirectoryInfo LocalAppData = new DirectoryInfo(
 			Path.Combine(
@@ -64,12 +63,8 @@ namespace Grabacr07.KanColleViewer
 		{
 			this.ChangeState(ApplicationState.Startup);
 
-			// 開発中に多重起動検知ついてると起動できなくて鬱陶しいので
-			// デバッグ時は外すんじゃもん
-#if !DEBUG
 			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
 			if (isFirstInstance)
-#endif
 			{
 				this.DispatcherUnhandledException += (sender, args) =>
 				{
@@ -80,6 +75,14 @@ namespace Grabacr07.KanColleViewer
 						this.Shutdown();
 						return;
 					}
+
+					if (this.State == ApplicationState.Startup || args.Exception is System.Windows.Markup.XamlParseException)
+					{
+						ReportException("Dispatcher", sender, args.Exception);
+						args.Handled = true;
+						return;
+					}
+
 					ReportRecoverableException("Dispatcher", sender, args.Exception);
 					args.Handled = true;  // 例外を処理済みとしてアプリ続行
 				};
@@ -93,14 +96,17 @@ namespace Grabacr07.KanColleViewer
 				KanColleClient.Current.Settings = new KanColleSettings();
 
 				AppThemeService.Current.Register(this, AppAccent.Purple);
-				PluginService.Current.AddTo(this).Initialize();
-				WindowService.Current.AddTo(this).Initialize();
-				NotifyService.Current.AddTo(this).Initialize();
 
 				Helper.SetMMCSSTask();
 				Helper.DeleteCacheIfRequested();
 
-				CefBridge.Initialize();
+				try
+				{
+					CefBridge.Initialize();
+
+					PluginService.Current.AddTo(this).Initialize();
+					WindowService.Current.AddTo(this).Initialize();
+					NotifyService.Current.AddTo(this).Initialize();
 
 					this.MainWindow = WindowService.Current.GetMainWindow();
 					this.MainWindow.Show();
@@ -110,16 +116,52 @@ namespace Grabacr07.KanColleViewer
 					{
 						navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
 						navigator.Navigate();
-
 					}
-#if !DEBUG
-					// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
-					_appMutex = appMutex;
-#endif
-					base.OnStartup(e);
-					this.ChangeState(ApplicationState.Running);
+				}
+				catch (Exception ex)
+				{
+					ReportRecoverableException("Startup", this, ex);
+					this.startedInFallbackMode = true;
+
+					var originalProxyMode = GeneralSettings.IsProxyMode.Value;
+					try
+					{
+						GeneralSettings.IsProxyMode.Value = true;
+
+						// フォールバック起動時はブラウザーに依存しない最小構成で起動する
+						WindowService.Current.AddTo(this).Initialize();
+
+						this.MainWindow = WindowService.Current.GetMainWindow();
+						this.MainWindow.Show();
+
+						MessageBox.Show(
+							"起動中にブラウザーエンジン (Cef) の初期化に失敗したため、ブラウザーを無効化したモードで起動しました。\r\nErrorReports と cef.log を確認してください。",
+							ProductInfo.Title,
+							MessageBoxButton.OK,
+							MessageBoxImage.Warning);
+					}
+					catch (Exception fallbackEx)
+					{
+						ReportException("StartupFallback", this, fallbackEx);
+						MessageBox.Show(
+							"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。\r\nErrorReports と cef.log を確認してください。",
+							ProductInfo.Title,
+							MessageBoxButton.OK,
+							MessageBoxImage.Error);
+						this.Shutdown();
+						return;
+					}
+					finally
+					{
+						GeneralSettings.IsProxyMode.Value = originalProxyMode;
+					}
+				}
+
+				// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
+				_appMutex = appMutex;
+				base.OnStartup(e);
+				this.ChangeState(ApplicationState.Running);
 			}
-#if !DEBUG
 			else
 			{
 				appMutex.ReleaseMutex();
@@ -127,7 +169,6 @@ namespace Grabacr07.KanColleViewer
 				this.ChangeState(ApplicationState.Terminate);
 				this.Shutdown();
 			}
-#endif
 		}
 
 
@@ -185,29 +226,21 @@ namespace Grabacr07.KanColleViewer
 							System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
 						}
 
-			#if !DEBUG
-						try
-						{
-							this._appMutex?.ReleaseMutex();
-							this._appMutex?.Dispose();
-						}
-						catch (Exception ex)
-						{
-							System.Diagnostics.Debug.WriteLine($"Application: Mutex dispose error: {ex}");
-						}
-			#endif
+			try
+			{
+				this._appMutex?.ReleaseMutex();
+				this._appMutex?.Dispose();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: Mutex dispose error: {ex}");
+			}
 
 			base.OnExit(e);
 
-			// デバッグ中は Visual Studio から状態を追えるように強制終了しない
-			if (Debugger.IsAttached)
-			{
-				System.Diagnostics.Debug.WriteLine("Application: Skip forcing process exit while debugging.");
-				return;
-			}
-
 			// 強制的にプロセスを終了（最終手段）
 			// 通常は必要ないが、バックグラウンドスレッドが残っている場合の保険
+#if !DEBUG
 			try
 			{
 				System.Diagnostics.Debug.WriteLine("Application: Forcing process exit...");
@@ -217,6 +250,20 @@ namespace Grabacr07.KanColleViewer
 			{
 				System.Diagnostics.Debug.WriteLine($"Application: Force exit error: {ex}");
 			}
+#else
+			if (this.startedInFallbackMode)
+			{
+				try
+				{
+					System.Diagnostics.Debug.WriteLine("Application: Forcing process exit in fallback mode...");
+					Environment.Exit(0);
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"Application: Force exit error: {ex}");
+				}
+			}
+#endif
 		}
 		#endregion
 

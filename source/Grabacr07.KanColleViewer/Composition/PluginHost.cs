@@ -74,7 +74,7 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// <summary>
 		/// 読み込まれたすべてのプラグインを配列で取得します。
 		/// </summary>
-		public Plugin[] Plugins => this.loadedPlugins.Values.ToArray();
+		public Plugin[] Plugins => this.loadedPlugins?.Values.ToArray() ?? Array.Empty<Plugin>();
 
 		/// <summary>
 		/// 何らかの原因で読み込みに失敗したプラグインの情報を配列で取得します。

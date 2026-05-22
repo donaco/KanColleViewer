@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,16 +30,15 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 			// ReSharper disable once DoNotCallOverridableMethodsInConstructor
 			owner.Subscribe(nameof(this.Content), () => this.Content = owner.Content).AddTo(this);
-
-			this.taskbarProgress = new TaskbarProgress().AddTo(this);
-			this.taskbarProgress
-				.Subscribe(nameof(TaskbarProgress.Updated), () => this.UpdateTaskbar())
-				.AddTo(this);
 		}
 
 		public InformationWindowViewModel(bool isMainWindow) : base(isMainWindow)
 		{
 			this.Settings = new WindowSettings(nameof(InformationWindow));
+			this.taskbarProgress = new TaskbarProgress().AddTo(this);
+			this.taskbarProgress
+				.Subscribe(nameof(TaskbarProgress.Updated), () => this.UpdateTaskbar())
+				.AddTo(this);
 		}
 
 		protected override void InitializeCore()

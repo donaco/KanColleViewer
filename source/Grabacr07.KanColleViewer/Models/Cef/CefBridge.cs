@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,9 +22,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		private static readonly string cefDirectory = ResolveCefDirectory();
 		private static bool initialized;
 		private static readonly object cefInitLock = new object();
+		private const string CefInitFailedMarkerFileName = "cef-init-failed.marker";
 
 		public static string CachePath => Path.Combine(Application.Instance.LocalAppData.FullName, "Chromium");
 		public static string LogFilePath => Path.Combine(CachePath, "cef.log");
+		private static string CefInitFailedMarkerPath => Path.Combine(CachePath, CefInitFailedMarkerFileName);
 
 		/// <summary>
 		/// libcef.dll が存在するディレクトリを解決します。
@@ -47,62 +50,141 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return archSubDir;
 		}
 
+		private static bool PrepareForInitializeRetry()
+		{
+			if (!File.Exists(CefInitFailedMarkerPath)) return false;
+
+			try
+			{
+				DeleteCefTransientState();
+			}
+			catch
+			{
+				// リトライ用のクリーンアップ失敗は初期化本体で再評価する
+			}
+
+			return true;
+		}
+
+		private static void DeleteCefTransientState()
+		{
+			TryDeleteDirectory(Path.Combine(CachePath, "GPUCache"));
+			TryDeleteDirectory(Path.Combine(CachePath, "Code Cache"));
+			TryDeleteDirectory(Path.Combine(CachePath, "ShaderCache"));
+			TryDeleteDirectory(Path.Combine(CachePath, "GrShaderCache"));
+			TryDeleteFile(Path.Combine(CachePath, "SingletonLock"));
+			TryDeleteFile(Path.Combine(CachePath, "SingletonCookie"));
+			TryDeleteFile(Path.Combine(CachePath, "SingletonSocket"));
+		}
+
+		private static void MarkInitializeFailure()
+		{
+			try
+			{
+				Directory.CreateDirectory(CachePath);
+				File.WriteAllText(CefInitFailedMarkerPath, DateTimeOffset.Now.ToString("O"));
+			}
+			catch
+			{
+				// マーカー作成失敗は本体の失敗要因ではないため握りつぶす
+			}
+		}
+
+		private static void ClearInitializeFailureMarker()
+		{
+			try
+			{
+				if (File.Exists(CefInitFailedMarkerPath))
+				{
+					File.Delete(CefInitFailedMarkerPath);
+				}
+			}
+			catch
+			{
+				// 成功時の後処理失敗は次回起動で吸収する
+			}
+		}
+
+		private static void TryDeleteDirectory(string path)
+		{
+			if (!Directory.Exists(path)) return;
+
+			try
+			{
+				Directory.Delete(path, true);
+			}
+			catch
+			{
+				// 他プロセスがロックしている場合は削除できなくても継続
+			}
+		}
+
+		private static void TryDeleteFile(string path)
+		{
+			if (!File.Exists(path)) return;
+
+			try
+			{
+				File.Delete(path);
+			}
+			catch
+			{
+				// 他プロセスがロックしている場合は削除できなくても継続
+			}
+		}
+
 		public static void Initialize()
 		{
 			lock (cefInitLock)
 			{
 				try
 				{
-					EnsureVCRuntimeAvailable();  // ← 追加
+					EnsureVCRuntimeAvailable();
 
 					// CefSharp はカレントディレクトリからもネイティブ DLL を探すため、
 					// デバッグ実行時の作業ディレクトリ不一致に対応する
 					Environment.CurrentDirectory = assemblyDirectory;
 
-					SetDllDirectory(cefDirectory);
 
 					if (initialized || (CefSharp.Cef.IsInitialized ?? false)) return;
 
+					var retriedByCleanup = PrepareForInitializeRetry();
+
 					// デバッガアタッチ時のタイミング問題対応
-					if (System.Diagnostics.Debugger.IsAttached)
+					if (Debugger.IsAttached)
 					{
 						Thread.Sleep(100);
 					}
 
-					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
 
-					// 結合する前にパスを決定して存在確認する
-					var browserSubprocessPath = Path.Combine(cefDirectory, "CefSharp.BrowserSubprocess.exe");
-
-					// フォールバック: ルート出力ディレクトリにも存在するか試す
-					var fallbackPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
-
-					if (!File.Exists(browserSubprocessPath) && File.Exists(fallbackPath))
-					{
-						browserSubprocessPath = fallbackPath;
-					}
-
+					// サブプロセス実行ファイルを明示（既定解決の揺らぎを避ける）
+					var browserSubprocessPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
 					if (!File.Exists(browserSubprocessPath))
 					{
-						throw new FileNotFoundException(
-							$"CefSettings.BrowserSubprocessPath not found. Tried: '{browserSubprocessPath}' and '{fallbackPath}'. " +
-							"Ensure CefSharp.BrowserSubprocess.exe and native dependencies are copied to the output folder (x86/x64).");
+						throw new FileNotFoundException($"CefSharp.BrowserSubprocess.exe not found: '{browserSubprocessPath}'");
 					}
+
+					var effectiveCachePath = CefBridge.CachePath;
+#if DEBUG
+					// 起動不具合の切り分け: デバッグ時は永続キャッシュを使わない
+					effectiveCachePath = string.Empty;
+#else
+					Directory.CreateDirectory(effectiveCachePath);
+#endif
 
 					var cefSettings = new CefSettings
 					{
 						BrowserSubprocessPath = browserSubprocessPath,
-						CachePath = CefBridge.CachePath,
 					};
 
-					cefSettings.CefCommandLineArgs["disable-features"] = "AudioServiceOutOfProcess";
-
-					// GPU アクセラレーション設定（設定値に基づいて切り替え）
-					if (GeneralSettings.IsGpuDisabled)
+					if (!string.IsNullOrEmpty(effectiveCachePath))
 					{
-						cefSettings.CefCommandLineArgs["disable-gpu"] = "1";
-						cefSettings.CefCommandLineArgs["disable-gpu-compositing"] = "1";
+						cefSettings.CachePath = effectiveCachePath;
 					}
+
+
+					// GPU 関連は既定値を使用する
+					// （環境差が大きく、明示フラグが初期化失敗を誘発するため）
 
 					// 開発者向けオプション: リモートデバッグポートの開放
 					// 設定が有効な場合のみポートを開放する（デフォルト: 無効）
@@ -121,23 +203,43 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					// ログ設定: デバッグビルドのみ出力、リリースビルドでは無効
 #if DEBUG
 					Directory.CreateDirectory(CachePath);
+					try
+					{
+						if (File.Exists(LogFilePath)) File.Delete(LogFilePath);
+					}
+					catch
+					{
+						// ログ初期化に失敗しても初期化処理自体は継続
+					}
 					cefSettings.LogSeverity = LogSeverity.Info;
 					cefSettings.LogFile = LogFilePath;
 #else
 					cefSettings.LogSeverity = LogSeverity.Disable;
 #endif
 
-					CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
-					CefSharp.Cef.Initialize(cefSettings);
+					var initializeResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: true, browserProcessHandler: null);
 
 					// 初期化完了を確認
 					int waitCount = 0;
-					while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < 50)
+					while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < 150)
 					{
 						Thread.Sleep(100);
 						waitCount++;
 					}
 
+					if (!(CefSharp.Cef.IsInitialized ?? false))
+					{
+						MarkInitializeFailure();
+						var libcefPath = Path.Combine(cefDirectory, "libcef.dll");
+						var subprocessPath = browserSubprocessPath;
+						throw new InvalidOperationException(
+							$"Cef initialization failed. Result={initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}, LogFile='{LogFilePath}', " +
+							$"CurrentDirectory='{Environment.CurrentDirectory}', AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
+							$"CachePath='{effectiveCachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
+							$"Subprocess.Exists={File.Exists(subprocessPath)}('{subprocessPath}'), RetryCleanupApplied={retriedByCleanup}.");
+					}
+
+					ClearInitializeFailureMarker();
 					initialized = true;
 				}
 				catch
@@ -185,65 +287,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			webBrowser.DownloadHandler = new BlockDownloadHandler();
 		}
 
-		public static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs args)
-		{
-			if (!args.Name.StartsWith("CefSharp"))
-				return null;
-
-			// アセンブリ名を取得（"CefSharp.Wpf, Version=..." → "CefSharp.Wpf"）
-			var shortName = args.Name.Split(new[] { ',' }, 2).FirstOrDefault();
-
-			// ① パス区切り文字・ファイル名として不正な文字を含む名前は拒否
-			if (string.IsNullOrEmpty(shortName)
-				|| shortName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
-				|| shortName.Contains('/') || shortName.Contains('\\'))
-			{
-				return null;
-			}
-
-			var assemblyFileName = shortName + ".dll";
-
-			// ② 候補パスを列挙（cefDirectory 優先、assemblyDirectory にフォールバック）
-			var candidates = new[]
-			{
-				Path.Combine(cefDirectory, assemblyFileName),
-				Path.Combine(assemblyDirectory, assemblyFileName),
-			};
-
-			// 許可ディレクトリ（正規化済み）
-			var allowedDirs = new[]
-			{
-				Path.GetFullPath(cefDirectory),
-				Path.GetFullPath(assemblyDirectory),
-			};
-
-			foreach (var candidate in candidates)
-			{
-				// ③ Path.GetFullPath で正規化（"../" 等を解決）
-				string fullPath;
-				try
-				{
-					fullPath = Path.GetFullPath(candidate);
-				}
-				catch
-				{
-					// 不正なパス文字列は無視
-					continue;
-				}
-
-				// ④ 正規化後のパスが許可ディレクトリ配下にあるか検証
-				var isAllowed = allowedDirs.Any(dir =>
-					fullPath.StartsWith(dir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-					|| string.Equals(fullPath, dir, StringComparison.OrdinalIgnoreCase));
-
-				if (!isAllowed) continue;
-				if (!File.Exists(fullPath)) continue;
-
-				return Assembly.LoadFrom(fullPath);
-			}
-
-			return null;
-		}
 
 		/// <summary>
 		/// 艦これのゲーム画面が含まれる IFrame を取得します。

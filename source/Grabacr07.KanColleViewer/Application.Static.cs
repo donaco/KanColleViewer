@@ -18,7 +18,6 @@ namespace Grabacr07.KanColleViewer
 		static Application()
 		{
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => ReportException("AppDomain", sender, args.ExceptionObject as Exception);
-			AppDomain.CurrentDomain.AssemblyResolve += CefBridge.ResolveCefSharpAssembly;
 		}
 
 		public static Application Instance => Current as Application;
