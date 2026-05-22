@@ -80,7 +80,7 @@ namespace Grabacr07.KanColleViewer
 						this.Shutdown();
 						return;
 					}
-					ReportException("Dispatcher", sender, args.Exception);
+					ReportRecoverableException("Dispatcher", sender, args.Exception);
 					args.Handled = true;  // 例外を処理済みとしてアプリ続行
 				};
 
@@ -198,6 +198,13 @@ namespace Grabacr07.KanColleViewer
 			#endif
 
 			base.OnExit(e);
+
+			// デバッグ中は Visual Studio から状態を追えるように強制終了しない
+			if (Debugger.IsAttached)
+			{
+				System.Diagnostics.Debug.WriteLine("Application: Skip forcing process exit while debugging.");
+				return;
+			}
 
 			// 強制的にプロセスを終了（最終手段）
 			// 通常は必要ないが、バックグラウンドスレッドが残っている場合の保険

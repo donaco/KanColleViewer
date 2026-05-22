@@ -23,6 +23,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		private static readonly object cefInitLock = new object();
 
 		public static string CachePath => Path.Combine(Application.Instance.LocalAppData.FullName, "Chromium");
+		public static string LogFilePath => Path.Combine(CachePath, "cef.log");
 
 		/// <summary>
 		/// libcef.dll が存在するディレクトリを解決します。
@@ -119,8 +120,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 					// ログ設定: デバッグビルドのみ出力、リリースビルドでは無効
 #if DEBUG
+					Directory.CreateDirectory(CachePath);
 					cefSettings.LogSeverity = LogSeverity.Info;
-					cefSettings.LogFile = Path.Combine(CachePath, "cef.log");
+					cefSettings.LogFile = LogFilePath;
 #else
 					cefSettings.LogSeverity = LogSeverity.Disable;
 #endif
