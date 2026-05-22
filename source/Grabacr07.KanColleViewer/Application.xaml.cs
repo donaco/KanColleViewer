@@ -123,7 +123,6 @@ namespace Grabacr07.KanColleViewer
 					ReportRecoverableException("Startup", this, ex);
 					this.startedInFallbackMode = true;
 
-					var originalProxyMode = GeneralSettings.IsProxyMode.Value;
 					try
 					{
 						GeneralSettings.IsProxyMode.Value = true;
@@ -132,6 +131,20 @@ namespace Grabacr07.KanColleViewer
 						WindowService.Current.AddTo(this).Initialize();
 
 						this.MainWindow = WindowService.Current.GetMainWindow();
+						if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
+						{
+							fallbackMainWindowViewModel.CanClose = true;
+						}
+						this.MainWindow.Closed += (s, args) =>
+						{
+							try
+							{
+								Environment.Exit(0);
+							}
+							catch
+							{
+							}
+						};
 						this.MainWindow.Show();
 
 						MessageBox.Show(
@@ -150,10 +163,6 @@ namespace Grabacr07.KanColleViewer
 							MessageBoxImage.Error);
 						this.Shutdown();
 						return;
-					}
-					finally
-					{
-						GeneralSettings.IsProxyMode.Value = originalProxyMode;
 					}
 				}
 
