@@ -31,6 +31,16 @@
 					  PanningMode="Both">
 			<Grid MinWidth="90"
 				  Background="{DynamicResource ActiveBackgroundBrushKey}">
+				<Grid.Resources>
+					<DataTemplate x:Key="TabItemTemplate">
+						<TextBlock Text="{Binding Name}"
+								   FontFamily="{DynamicResource DefaultFontFamilyKey}"
+								   FontSize="14"
+								   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Foreground}"
+								   VerticalAlignment="Center"
+								   Margin="19,0" />
+					</DataTemplate>
+				</Grid.Resources>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
@@ -38,7 +48,8 @@
 				</Grid.RowDefinitions>
 
 				<metro:TabView ItemsSource="{Binding TabItems}"
-							   SelectedValue="{Binding SelectedItem}" />
+							   SelectedValue="{Binding SelectedItem}"
+							   ItemTemplate="{StaticResource TabItemTemplate}" />
 
 				<Rectangle Grid.Row="1"
 						   Height=".99"
@@ -49,6 +60,7 @@
 				<metro:TabView Grid.Row="2"
 							   ItemsSource="{Binding SystemTabItems}"
 							   SelectedValue="{Binding SelectedItem}"
+							   ItemTemplate="{StaticResource TabItemTemplate}"
 							   Margin="0,0,0,20" />
 			</Grid>
 		</ScrollViewer>
