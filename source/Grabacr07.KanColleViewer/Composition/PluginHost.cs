@@ -36,6 +36,8 @@ namespace Grabacr07.KanColleViewer.Composition
 		private CompositionContainer container;
 		private Dictionary<Guid, Plugin> loadedPlugins;
 		private readonly List<LoadFailedPluginData> failedPlugins = new List<LoadFailedPluginData>();
+		private ResolveEventHandler pluginAssemblyResolver;
+		private string pluginsDirectoryPath;
 
 #pragma warning disable 649
 
@@ -100,6 +102,13 @@ namespace Grabacr07.KanColleViewer.Composition
 			{
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;
+			}
+
+			this.pluginsDirectoryPath = pluginsDir;
+			if (this.pluginAssemblyResolver == null)
+			{
+				this.pluginAssemblyResolver = this.ResolvePluginAssembly;
+				AppDomain.CurrentDomain.AssemblyResolve += this.pluginAssemblyResolver;
 			}
 
 			var catalog = new AggregateCatalog(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
@@ -259,8 +268,52 @@ namespace Grabacr07.KanColleViewer.Composition
 			}
 		}
 
+		private Assembly ResolvePluginAssembly(object sender, ResolveEventArgs args)
+		{
+			var name = new AssemblyName(args.Name).Name;
+			if (string.IsNullOrEmpty(name))
+			{
+				return null;
+			}
+
+			var fileName = name + ".dll";
+			var searchDirectories = new List<string>();
+			if (!string.IsNullOrEmpty(this.pluginsDirectoryPath))
+			{
+				searchDirectories.Add(this.pluginsDirectoryPath);
+			}
+
+			var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+			searchDirectories.Add(Path.Combine(baseDir, PluginsDirectory));
+			searchDirectories.Add(Path.GetFullPath(Path.Combine(baseDir, "..", "..", "Debug", PluginsDirectory)));
+
+			foreach (var dir in searchDirectories.Distinct().Where(Directory.Exists))
+			{
+				var candidates = Directory.EnumerateFiles(dir, fileName, SearchOption.AllDirectories);
+				foreach (var candidate in candidates)
+				{
+					try
+					{
+						return Assembly.LoadFrom(candidate);
+					}
+					catch
+					{
+						// 他候補を継続
+					}
+				}
+			}
+
+			return null;
+		}
+
 		public void Dispose()
 		{
+			if (this.pluginAssemblyResolver != null)
+			{
+				AppDomain.CurrentDomain.AssemblyResolve -= this.pluginAssemblyResolver;
+				this.pluginAssemblyResolver = null;
+			}
+
 			this.container?.Dispose();
 		}
 	}
