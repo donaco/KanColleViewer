@@ -146,12 +146,6 @@ namespace Grabacr07.KanColleViewer
 							}
 						};
 						this.MainWindow.Show();
-
-						MessageBox.Show(
-							"起動中にブラウザーエンジン (Cef) の初期化に失敗したため、ブラウザーを無効化したモードで起動しました。\r\nErrorReports と cef.log を確認してください。",
-							ProductInfo.Title,
-							MessageBoxButton.OK,
-							MessageBoxImage.Warning);
 					}
 					catch (Exception fallbackEx)
 					{

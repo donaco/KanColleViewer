@@ -165,22 +165,13 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					}
 
 					var effectiveCachePath = CefBridge.CachePath;
-#if DEBUG
-					// 起動不具合の切り分け: デバッグ時は永続キャッシュを使わない
-					effectiveCachePath = string.Empty;
-#else
 					Directory.CreateDirectory(effectiveCachePath);
-#endif
 
 					var cefSettings = new CefSettings
 					{
 						BrowserSubprocessPath = browserSubprocessPath,
+						CachePath = effectiveCachePath,
 					};
-
-					if (!string.IsNullOrEmpty(effectiveCachePath))
-					{
-						cefSettings.CachePath = effectiveCachePath;
-					}
 
 
 					// GPU 関連は既定値を使用する
