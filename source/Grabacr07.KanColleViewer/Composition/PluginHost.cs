@@ -189,12 +189,7 @@ namespace Grabacr07.KanColleViewer.Composition
 
 		private static void WriteDiagLog(string path, List<string> lines)
 		{
-			try
-			{
-				Directory.CreateDirectory(Path.GetDirectoryName(path));
-				File.WriteAllLines(path, lines, System.Text.Encoding.UTF8);
-			}
-			catch { }
+			// plugin-diag.log 出力を停止
 		}
 
 		/// <summary>
