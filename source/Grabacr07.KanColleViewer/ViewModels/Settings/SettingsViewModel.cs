@@ -43,9 +43,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public IReadOnlyCollection<BindableTextViewModel> Libraries { get; }
 
-		public List<PluginViewModel> LoadedPlugins { get; }
+		public List<PluginViewModel> LoadedPlugins => new List<PluginViewModel>(
+			PluginService.Current.Plugins.Select(x => new PluginViewModel(x)));
 
-		public List<LoadFailedPluginViewModel> FailedPlugins { get; }
+		public List<LoadFailedPluginViewModel> FailedPlugins => new List<LoadFailedPluginViewModel>(
+			PluginService.Current.FailedPlugins.Select(x => new LoadFailedPluginViewModel(x)));
 
 		#region UpdateStatusText 変更通知プロパティ
 
@@ -185,12 +187,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.SelectedViewRangeCalcType = this.ViewRangeSettingsCollection
 				.FirstOrDefault(x => x.Id == KanColleSettings.ViewRangeCalcType)
 				?? this.ViewRangeSettingsCollection.First();
-
-			this.LoadedPlugins = new List<PluginViewModel>(
-				PluginService.Current.Plugins.Select(x => new PluginViewModel(x)));
-
-			this.FailedPlugins = new List<LoadFailedPluginViewModel>(
-				PluginService.Current.FailedPlugins.Select(x => new LoadFailedPluginViewModel(x)));
 		}
 
 

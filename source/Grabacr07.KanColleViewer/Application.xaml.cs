@@ -59,13 +59,46 @@ namespace Grabacr07.KanColleViewer
 		/// </summary>
 		public ApplicationState State { get; private set; }
 
+		private void AppendStartupTrace(string message)
+		{
+			try
+			{
+				Directory.CreateDirectory(this.LocalAppData.FullName);
+				var tracePath = Path.Combine(this.LocalAppData.FullName, "startup-trace.log");
+				File.AppendAllText(tracePath, $"[{DateTimeOffset.Now:O}] {message}{Environment.NewLine}");
+			}
+			catch
+			{
+			}
+		}
+
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			this.ChangeState(ApplicationState.Startup);
+			this.AppendStartupTrace("OnStartup: begin");
+
+			var commandLineArgs = Environment.GetCommandLineArgs();
+			this.AppendStartupTrace($"OnStartup: args={string.Join(" ", commandLineArgs)}");
+
+			// ★ SetDllDirectory を先に確立する（PrepareNativePaths は CefSharp 型を参照しないため安全）
+			CefBridge.PrepareNativePaths();
+
+			// ★ Cef.ExecuteProcess() は CefBridge.ExecuteSubprocess() 経由で呼ぶ
+			// OnStartup メソッド内に直接 Cef 型の参照があると、このメソッドの JIT コンパイル時に
+			// CefSharp.Core.Runtime.dll (C++/CLI) が SetDllDirectory 呼び出し前にロードされ、
+			// libcef.dll が見つからないまま内部が null 状態で初期化されてしまう。
+			var cefSubprocessExitCode = CefBridge.ExecuteSubprocess();
+			if (cefSubprocessExitCode >= 0)
+			{
+				this.AppendStartupTrace($"OnStartup: Cef.ExecuteProcess handled subprocess exitCode={cefSubprocessExitCode}");
+				this.Shutdown(cefSubprocessExitCode);
+				return;
+			}
 
 			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
 			if (isFirstInstance)
 			{
+				this.AppendStartupTrace("OnStartup: first instance");
 				this.DispatcherUnhandledException += (sender, args) =>
 				{
 					if (args.Exception is DllNotFoundException dllEx)
@@ -89,8 +122,10 @@ namespace Grabacr07.KanColleViewer
 
 				DispatcherHelper.UIDispatcher = this.Dispatcher;
 
+				this.AppendStartupTrace("OnStartup: before SettingsHost.Load");
 				SettingsHost.Load();
 				this.compositeDisposable.Add(SettingsHost.Save);
+				this.AppendStartupTrace("OnStartup: after SettingsHost.Load");
 
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
@@ -100,12 +135,17 @@ namespace Grabacr07.KanColleViewer
 							Helper.SetMMCSSTask();
 							Helper.DeleteCacheIfRequested();
 
+							var startedWithFallback = false;
+
 							try
 							{
+								this.AppendStartupTrace("OnStartup: before CefBridge.Initialize");
 								CefBridge.Initialize();
+								this.AppendStartupTrace("OnStartup: after CefBridge.Initialize success");
 							}
 							catch (Exception ex)
 							{
+								this.AppendStartupTrace($"OnStartup: CefBridge.Initialize failed {ex.GetType().FullName}: {ex.Message}");
 								// === デバッグ用：詳細な例外ログを出力 ===
 #if DEBUG
 								try
@@ -131,11 +171,14 @@ InnerStackTrace:
 
 								ReportRecoverableException("Startup.CefInitialize", this, ex);
 								this.startedInFallbackMode = true;
+								startedWithFallback = true;
 
 								try
 								{
+									this.AppendStartupTrace("OnStartup: fallback before WindowService.Initialize");
 									// フォールバック起動時はブラウザーに依存しない最小構成で起動する
 									WindowService.Current.AddTo(this).Initialize();
+									this.AppendStartupTrace("OnStartup: fallback after WindowService.Initialize");
 
 									this.MainWindow = WindowService.Current.GetMainWindow();
 									if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
@@ -156,6 +199,7 @@ InnerStackTrace:
 								}
 								catch (Exception fallbackEx)
 								{
+									this.AppendStartupTrace($"OnStartup: fallback failed {fallbackEx.GetType().FullName}: {fallbackEx.Message}");
 									ReportException("StartupFallback", this, fallbackEx);
 									MessageBox.Show(
 										"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。\r\nErrorReports と cef.log を確認してください。",
@@ -165,28 +209,62 @@ InnerStackTrace:
 									this.Shutdown();
 									return;
 								}
-
-								return;
 							}
 
-							PluginService.Current.AddTo(this).Initialize();
-							WindowService.Current.AddTo(this).Initialize();
-							NotifyService.Current.AddTo(this).Initialize();
-
-							this.MainWindow = WindowService.Current.GetMainWindow();
-							this.MainWindow.Show();
-
-							var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
-							if (navigator != null)
+							if (!startedWithFallback)
 							{
-								navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
-								navigator.Navigate();
+								try
+								{
+									this.AppendStartupTrace("OnStartup: normal before WindowService.Initialize");
+									WindowService.Current.AddTo(this).Initialize();
+									this.AppendStartupTrace("OnStartup: normal after WindowService.Initialize");
+									this.MainWindow = WindowService.Current.GetMainWindow();
+									this.MainWindow.Show();
+									this.AppendStartupTrace("OnStartup: normal main window shown");
+
+									var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
+									if (navigator != null)
+									{
+										navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
+										navigator.Navigate();
+									}
+								}
+								catch (Exception windowEx)
+								{
+									this.AppendStartupTrace($"OnStartup: window init failed {windowEx.GetType().FullName}: {windowEx.Message}");
+									ReportException("Startup.Window", this, windowEx);
+									MessageBox.Show(
+										"メインウィンドウの初期化でエラーが発生しました。ErrorReports を確認してください。",
+										ProductInfo.Title,
+										MessageBoxButton.OK,
+										MessageBoxImage.Error);
+									this.Shutdown();
+									return;
+								}
+
+								try
+								{
+									this.AppendStartupTrace("OnStartup: before PluginService/NotifyService.Initialize");
+									PluginService.Current.AddTo(this).Initialize();
+									NotifyService.Current.AddTo(this).Initialize();
+									this.AppendStartupTrace("OnStartup: after PluginService/NotifyService.Initialize");
+								}
+								catch (Exception pluginEx)
+								{
+									this.AppendStartupTrace($"OnStartup: PluginOrNotify failed {pluginEx.GetType().FullName}: {pluginEx.Message}");
+									ReportRecoverableException("Startup.PluginOrNotify", this, pluginEx);
+								}
 							}
 
 				// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
 				_appMutex = appMutex;
 				base.OnStartup(e);
-				this.ChangeState(ApplicationState.Running);
+				// フォールバックモード時は Running にしない（CanClose が常に true になるよう State を Startup のままにする）
+				if (!this.startedInFallbackMode)
+				{
+					this.ChangeState(ApplicationState.Running);
+				}
+				this.AppendStartupTrace("OnStartup: completed and state=Running");
 			}
 			else
 			{

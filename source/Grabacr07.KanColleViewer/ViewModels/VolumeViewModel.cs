@@ -1,18 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Grabacr07.KanColleViewer.Models;
+using System.IO;
+using CefSharp.Wpf;
 using Livet;
-using Livet.EventListeners;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
 	public class VolumeViewModel : ViewModel
 	{
-		private Volume volume;
-
 		#region IsMute 変更通知プロパティ
 
 		private bool _IsMute;
@@ -33,40 +27,29 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		#endregion
 
 
-		public VolumeViewModel()
-		{
-			this.CreateVolumeInstanceIfNull();
-		}
+		public VolumeViewModel() { }
 
 		public void ToggleMute()
 		{
-			if (this.CreateVolumeInstanceIfNull())
-			{
-				this.volume.ToggleMute();
-			}
-		}
-
-		private bool CreateVolumeInstanceIfNull()
-		{
-			if (this.volume == null)
+			var newMute = !this.IsMute;
+			var browser = WindowService.Current.FindBrowser();
+			if (browser != null)
 			{
 				try
 				{
-					this.volume = Volume.GetInstance();
-					this.CompositeDisposable.Add(new PropertyChangedEventListener(this.volume)
-					{
-						{ nameof(this.volume.IsMute), (sender, args) => this.IsMute = this.volume.IsMute },
-					});
-					this.IsMute = this.volume.IsMute;
+					browser.GetBrowser()?.GetHost()?.SetAudioMuted(newMute);
+					this.IsMute = newMute;
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine(ex);
-					return false;
+					System.Diagnostics.Debug.WriteLine($"[VolumeViewModel.ToggleMute] {ex.Message}");
 				}
 			}
-
-			return true;
+			else
+			{
+				// ブラウザ未初期化でも UI 状態だけ更新しておく
+				this.IsMute = newMute;
+			}
 		}
 	}
 }

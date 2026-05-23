@@ -258,6 +258,11 @@ namespace Grabacr07.KanColleViewer
 			return null;
 		}
 
+		/// <summary>
+		/// アプリケーション内の最初の <see cref="ChromiumWebBrowser"/> を返します。
+		/// </summary>
+		public ChromiumWebBrowser FindBrowser() => this.FindFirstChromiumWebBrowser();
+
 		private T FindChild<T>(DependencyObject parent) where T : DependencyObject
 		{
 			if (parent == null) return null;

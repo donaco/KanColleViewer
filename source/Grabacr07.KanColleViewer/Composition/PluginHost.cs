@@ -90,7 +90,7 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// </summary>
 		public void Initialize()
 		{
-			var currentDir = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+			var currentDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location ?? Assembly.GetExecutingAssembly().Location);
 			if (currentDir == null)
 			{
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
@@ -98,8 +98,15 @@ namespace Grabacr07.KanColleViewer.Composition
 			}
 
 			var pluginsDir = Path.Combine(currentDir, PluginsDirectory);
+			var diagLog = Path.Combine(
+				Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+				"grabacr.net", "KanColleViewer", "plugin-diag.log");
+			var diagLines = new List<string> { $"[PLUGIN DIAG] {DateTime.Now:o}", $"CurrentDir: {currentDir}", $"PluginsDir: {pluginsDir} (Exists={Directory.Exists(pluginsDir)})" };
+
 			if (!Directory.Exists(pluginsDir))
 			{
+				diagLines.Add("PluginsDir not found. Aborting.");
+				WriteDiagLog(diagLog, diagLines);
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;
 			}
@@ -120,41 +127,53 @@ namespace Grabacr07.KanColleViewer.Composition
 				try
 				{
 					var asmCatalog = new AssemblyCatalog(filepath);
-					if (asmCatalog.Parts.ToList().Count > 0)
+					var partCount = asmCatalog.Parts.ToList().Count;
+					diagLines.Add($"  {Path.GetFileName(filepath)}: Parts={partCount}");
+					if (partCount > 0)
 					{
 						catalog.Catalogs.Add(asmCatalog);
 					}
 				}
 				catch (ReflectionTypeLoadException ex)
 				{
-					this.failedPlugins.Add(new LoadFailedPluginData
-					{
-						FilePath = filepath,
-						Message = ex.LoaderExceptions.Select(x => x.Message).ToString(Environment.NewLine),
-					});
+					var loaderMsg = string.Join(Environment.NewLine, ex.LoaderExceptions.Select(x => x?.Message ?? "(null)"));
+					var msg = $"ReflectionTypeLoadException: {loaderMsg}";
+					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED {msg}");
+					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = msg });
 				}
 				catch (BadImageFormatException ex)
 				{
-					this.failedPlugins.Add(new LoadFailedPluginData
-					{
-						FilePath = filepath,
-						Message = ex.ToString(),
-					});
+					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED BadImageFormat: {ex.Message}");
+					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
 				}
 				catch (FileLoadException ex)
 				{
-					this.failedPlugins.Add(new LoadFailedPluginData
-					{
-						FilePath = filepath,
-						Message = ex.ToString(),
-					});
+					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED FileLoad: {ex.Message}");
+					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
+				}
+				catch (Exception ex)
+				{
+					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED {ex.GetType().Name}: {ex.Message}");
+					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
 				}
 			}
 
-			this.container = new CompositionContainer(catalog);
-			this.container.ComposeParts(this);
+			try
+			{
+				this.container = new CompositionContainer(catalog);
+				this.container.ComposeParts(this);
+				diagLines.Add($"ComposeParts: OK");
+			}
+			catch (Exception ex)
+			{
+				diagLines.Add($"ComposeParts: FAILED {ex.GetType().Name}: {ex.Message}");
+				WriteDiagLog(diagLog, diagLines);
+				this.loadedPlugins = new Dictionary<Guid, Plugin>();
+				return;
+			}
 
 			this.loadedPlugins = this.Load(this.importedAll).ToDictionary(x => x.Id);
+			diagLines.Add($"Loaded plugins: {this.loadedPlugins.Count}");
 
 			this.Load(this.importedSettings);
 			this.Load(this.importedNotifiers);
@@ -162,6 +181,18 @@ namespace Grabacr07.KanColleViewer.Composition
 			this.Load(this.importedTools);
 			this.Load(this.importedLocalizables);
 			this.Load(this.importedTaskbarProgress);
+
+			WriteDiagLog(diagLog, diagLines);
+		}
+
+		private static void WriteDiagLog(string path, List<string> lines)
+		{
+			try
+			{
+				Directory.CreateDirectory(Path.GetDirectoryName(path));
+				File.WriteAllLines(path, lines, System.Text.Encoding.UTF8);
+			}
+			catch { }
 		}
 
 		/// <summary>
