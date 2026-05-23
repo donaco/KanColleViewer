@@ -81,6 +81,7 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// </summary>
 		public LoadFailedPluginData[] FailedPlugins => this.failedPlugins.ToArray();
 
+		public event Action PluginsReloaded;
 
 		private PluginService() { }
 
@@ -183,6 +184,7 @@ namespace Grabacr07.KanColleViewer.Composition
 			this.Load(this.importedTaskbarProgress);
 
 			WriteDiagLog(diagLog, diagLines);
+			this.PluginsReloaded?.Invoke();
 		}
 
 		private static void WriteDiagLog(string path, List<string> lines)

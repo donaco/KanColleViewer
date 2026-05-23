@@ -156,6 +156,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		private SettingsViewModel()
 		{
+			PluginService.Current.PluginsReloaded += () =>
+			{
+				this.RaisePropertyChanged(nameof(this.LoadedPlugins));
+				this.RaisePropertyChanged(nameof(this.FailedPlugins));
+			};
+
 			this.ScreenshotSettings = new ScreenshotSettingsViewModel().AddTo(this);
 			this.WindowSettings = new WindowSettingsViewModel().AddTo(this);
 			this.NetworkSettings = new NetworkSettingsViewModel().AddTo(this);
@@ -195,6 +201,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.WindowSettings.Initialize();
 			this.NetworkSettings.Initialize();
 			this.UserStyleSheetSettings.Initialize();
+			this.RaisePropertyChanged(nameof(this.LoadedPlugins));
+			this.RaisePropertyChanged(nameof(this.FailedPlugins));
 		}
 
 

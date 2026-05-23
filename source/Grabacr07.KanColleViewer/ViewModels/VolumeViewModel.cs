@@ -1,6 +1,5 @@
 using System;
-using System.IO;
-using CefSharp.Wpf;
+using Grabacr07.KanColleViewer.Models.Settings;
 using Livet;
 
 namespace Grabacr07.KanColleViewer.ViewModels
@@ -27,29 +26,30 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		#endregion
 
 
-		public VolumeViewModel() { }
+		public VolumeViewModel()
+		{
+			this.IsMute = GeneralSettings.IsMuted.Value;
+		}
 
 		public void ToggleMute()
 		{
 			var newMute = !this.IsMute;
+			GeneralSettings.IsMuted.Value = newMute;
+
 			var browser = WindowService.Current.FindBrowser();
 			if (browser != null)
 			{
 				try
 				{
 					browser.GetBrowser()?.GetHost()?.SetAudioMuted(newMute);
-					this.IsMute = newMute;
 				}
 				catch (Exception ex)
 				{
 					System.Diagnostics.Debug.WriteLine($"[VolumeViewModel.ToggleMute] {ex.Message}");
 				}
 			}
-			else
-			{
-				// ブラウザ未初期化でも UI 状態だけ更新しておく
-				this.IsMute = newMute;
-			}
+
+			this.IsMute = newMute;
 		}
 	}
 }
