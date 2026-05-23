@@ -97,66 +97,91 @@ namespace Grabacr07.KanColleViewer
 
 				AppThemeService.Current.Register(this, AppAccent.Purple);
 
-				Helper.SetMMCSSTask();
-				Helper.DeleteCacheIfRequested();
+							Helper.SetMMCSSTask();
+							Helper.DeleteCacheIfRequested();
 
-				try
-				{
-					CefBridge.Initialize();
-
-					PluginService.Current.AddTo(this).Initialize();
-					WindowService.Current.AddTo(this).Initialize();
-					NotifyService.Current.AddTo(this).Initialize();
-
-					this.MainWindow = WindowService.Current.GetMainWindow();
-					this.MainWindow.Show();
-
-					var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
-					if (navigator != null)
-					{
-						navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
-						navigator.Navigate();
-					}
-				}
-				catch (Exception ex)
-				{
-					ReportRecoverableException("Startup", this, ex);
-					this.startedInFallbackMode = true;
-
-					try
-					{
-						// フォールバック起動時はブラウザーに依存しない最小構成で起動する
-						WindowService.Current.AddTo(this).Initialize();
-
-						this.MainWindow = WindowService.Current.GetMainWindow();
-						if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
-						{
-							fallbackMainWindowViewModel.CanClose = true;
-						}
-						this.MainWindow.Closed += (s, args) =>
-						{
 							try
 							{
-								Environment.Exit(0);
+								CefBridge.Initialize();
 							}
-							catch
+							catch (Exception ex)
 							{
+								// === デバッグ用：詳細な例外ログを出力 ===
+#if DEBUG
+								try
+								{
+									var debugLogPath = Path.Combine(this.LocalAppData.FullName, "startup-exception.log");
+									Directory.CreateDirectory(this.LocalAppData.FullName);
+									var exceptionDetails = $@"[STARTUP EXCEPTION] {DateTimeOffset.Now:O}
+Exception Type: {ex.GetType().FullName}
+Message: {ex.Message}
+StackTrace:
+{ex.StackTrace}
+
+InnerException: {ex.InnerException?.GetType().FullName}
+InnerMessage: {ex.InnerException?.Message}
+InnerStackTrace:
+{ex.InnerException?.StackTrace}
+";
+									File.WriteAllText(debugLogPath, exceptionDetails);
+								}
+								catch { }
+#endif
+								// ===================================
+
+								ReportRecoverableException("Startup.CefInitialize", this, ex);
+								this.startedInFallbackMode = true;
+
+								try
+								{
+									// フォールバック起動時はブラウザーに依存しない最小構成で起動する
+									WindowService.Current.AddTo(this).Initialize();
+
+									this.MainWindow = WindowService.Current.GetMainWindow();
+									if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
+									{
+										fallbackMainWindowViewModel.CanClose = true;
+									}
+									this.MainWindow.Closed += (s, args) =>
+									{
+										try
+										{
+											Environment.Exit(0);
+										}
+										catch
+										{
+										}
+									};
+									this.MainWindow.Show();
+								}
+								catch (Exception fallbackEx)
+								{
+									ReportException("StartupFallback", this, fallbackEx);
+									MessageBox.Show(
+										"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。\r\nErrorReports と cef.log を確認してください。",
+										ProductInfo.Title,
+										MessageBoxButton.OK,
+										MessageBoxImage.Error);
+									this.Shutdown();
+									return;
+								}
+
+								return;
 							}
-						};
-						this.MainWindow.Show();
-					}
-					catch (Exception fallbackEx)
-					{
-						ReportException("StartupFallback", this, fallbackEx);
-						MessageBox.Show(
-							"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。\r\nErrorReports と cef.log を確認してください。",
-							ProductInfo.Title,
-							MessageBoxButton.OK,
-							MessageBoxImage.Error);
-						this.Shutdown();
-						return;
-					}
-				}
+
+							PluginService.Current.AddTo(this).Initialize();
+							WindowService.Current.AddTo(this).Initialize();
+							NotifyService.Current.AddTo(this).Initialize();
+
+							this.MainWindow = WindowService.Current.GetMainWindow();
+							this.MainWindow.Show();
+
+							var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
+							if (navigator != null)
+							{
+								navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
+								navigator.Navigate();
+							}
 
 				// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
 				_appMutex = appMutex;

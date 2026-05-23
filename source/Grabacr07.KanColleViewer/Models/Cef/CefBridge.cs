@@ -23,6 +23,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		private static bool initialized;
 		private static readonly object cefInitLock = new object();
 		private const string CefInitFailedMarkerFileName = "cef-init-failed.marker";
+		private const int DefaultInitializeWaitLimit = 150;
+		private const int DebugInitializeWaitLimit = 220;
+		private const int DebugInitializeRetryCount = 3;
+		private const int DebugInitializeRetryDelayMilliseconds = 700;
 
 		public static string CachePath => Path.Combine(Application.Instance.LocalAppData.FullName, "Chromium");
 		public static string LogFilePath => Path.Combine(CachePath, "cef.log");
@@ -66,9 +70,38 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return true;
 		}
 
+		private static void EnsureCefRuntimeFilesAvailable(string browserSubprocessPath)
+		{
+			var requiredFiles = new[]
+			{
+				Path.Combine(cefDirectory, "libcef.dll"),
+				Path.Combine(cefDirectory, "resources.pak"),
+				Path.Combine(cefDirectory, "icudtl.dat"),
+				Path.Combine(cefDirectory, "v8_context_snapshot.bin"),
+				browserSubprocessPath,
+				Path.Combine(assemblyDirectory, "locales", "en-US.pak"),
+			};
+
+			var missingFiles = requiredFiles
+				.Where(path => !File.Exists(path))
+				.ToArray();
+
+			if (missingFiles.Length == 0) return;
+
+			throw new FileNotFoundException(
+				"CEF runtime files are missing.\r\n" + string.Join("\r\n", missingFiles),
+				missingFiles[0]);
+		}
+
 		private static void DeleteCefTransientState()
 		{
 			TryDeleteDirectory(CachePath);
+		}
+
+		private static void DeleteDebugTransientState()
+		{
+			DeleteCefTransientState();
+			TryDeleteFile(CefInitFailedMarkerPath);
 		}
 
 		private static void MarkInitializeFailure()
@@ -127,55 +160,69 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			}
 		}
 
+		private static void AppendInitializeTrace(string message)
+		{
+#if DEBUG
+			try
+			{
+				Directory.CreateDirectory(CachePath);
+				var tracePath = Path.Combine(CachePath, "initialize-trace.log");
+				File.AppendAllText(tracePath, $"[{DateTimeOffset.Now:O}] {message}{Environment.NewLine}");
+			}
+			catch
+			{
+				// トレース書き込み失敗は初期化本体に影響させない
+			}
+#endif
+		}
+
 		public static void Initialize()
 		{
 			lock (cefInitLock)
 			{
 				try
 				{
+					AppendInitializeTrace("Initialize start");
 					EnsureVCRuntimeAvailable();
+					AppendInitializeTrace("VC runtime check completed");
 
 					// CefSharp はカレントディレクトリからもネイティブ DLL を探すため、
 					// デバッグ実行時の作業ディレクトリ不一致に対応する
 					Environment.CurrentDirectory = assemblyDirectory;
+					var dllDirectoryApplied = SetDllDirectory(cefDirectory);
+					AppendInitializeTrace($"SetDllDirectory applied: {dllDirectoryApplied}");
 
-					if (initialized || (CefSharp.Cef.IsInitialized ?? false)) return;
+					if (initialized || (CefSharp.Cef.IsInitialized ?? false))
+					{
+						AppendInitializeTrace("Initialize skipped: already initialized");
+						return;
+					}
 
 					var retriedByCleanup = PrepareForInitializeRetry();
+					AppendInitializeTrace($"PrepareForInitializeRetry: {retriedByCleanup}");
 
-					// デバッガアタッチ時のタイミング問題対応
+					// デバッガアタッチ時は前回の痕跡を積極的に除去し、タイミング問題を緩和する
 					if (Debugger.IsAttached)
 					{
-						Thread.Sleep(100);
+						AppendInitializeTrace("Debugger attached: delete transient state and wait");
+						DeleteDebugTransientState();
+						Thread.Sleep(700);  // デバッグ時は長めに待機（DLL ロード遅延対応）
 					}
 
 
 					// サブプロセス実行ファイルを明示（既定解決の揺らぎを避ける）
 					var browserSubprocessPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
-					if (!File.Exists(browserSubprocessPath))
-					{
-						throw new FileNotFoundException($"CefSharp.BrowserSubprocess.exe not found: '{browserSubprocessPath}'");
-					}
+					EnsureCefRuntimeFilesAvailable(browserSubprocessPath);
+					AppendInitializeTrace("CEF runtime files verification completed");
 
 					var cefSettings = new CefSettings
 					{
 						BrowserSubprocessPath = browserSubprocessPath,
+						RootCachePath = CachePath,
 					};
 
-					// CefSharp 既定のコマンドライン引数を一旦外し、
-					// このアプリで明示したものだけを使って切り分ける
-					cefSettings.CefCommandLineArgs.Clear();
-
-					// proxy-server は空でなければ設定する（Network.xaml の設定を残すため）
-					var proxyString = Settings.NetworkSettings.LocalProxySettingsString;
-					if (!string.IsNullOrWhiteSpace(proxyString))
-					{
-						cefSettings.CefCommandLineArgs["proxy-server"] = proxyString;
-					}
-
-					var cefCommandLineArgsSummary = cefSettings.CefCommandLineArgs.Count == 0
-						? "<none>"
-						: string.Join("; ", cefSettings.CefCommandLineArgs.Select(x => $"{x.Key}={x.Value}"));
+					// 既定設定を維持して CefSharp 145 の標準初期化経路を優先する
+					var cefCommandLineArgsSummary = "<default>";
 
 					// ログ設定: デバッグビルドのみ出力、リリースビルドでは無効
 #if DEBUG
@@ -190,39 +237,127 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					}
 					cefSettings.LogSeverity = LogSeverity.Info;
 					cefSettings.LogFile = LogFilePath;
+
+					// ===== ここから追加 =====
+					// CEF 初期化前の詳細ログを出力
+					var preInitDebugLog = $@"[PRE-INIT DEBUG] {DateTimeOffset.Now:O}
+AssemblyDirectory: {assemblyDirectory}
+CefDirectory: {cefDirectory}
+CurrentDirectory: {Environment.CurrentDirectory}
+BrowserSubprocessPath: {browserSubprocessPath}
+BrowserSubprocessPath.Exists: {File.Exists(browserSubprocessPath)}
+CachePath: {CachePath}
+LogFilePath: {LogFilePath}
+Is64BitProcess: {Environment.Is64BitProcess}
+CEFArgs: {cefCommandLineArgsSummary}
+ResourcesDirPath: <default>
+LocalesDirPath: <default>
+
+CEF関連ファイルチェック:
+- libcef.dll: {File.Exists(Path.Combine(cefDirectory, "libcef.dll"))}
+- resources.pak: {File.Exists(Path.Combine(cefDirectory, "resources.pak"))}
+- icudtl.dat: {File.Exists(Path.Combine(cefDirectory, "icudtl.dat"))}
+- v8_context_snapshot.bin: {File.Exists(Path.Combine(cefDirectory, "v8_context_snapshot.bin"))}
+- locales/ja.pak: {File.Exists(Path.Combine(cefDirectory, "locales", "ja.pak"))}
+- locales/en-US.pak: {File.Exists(Path.Combine(cefDirectory, "locales", "en-US.pak"))}
+- chrome_100_percent.pak: {File.Exists(Path.Combine(cefDirectory, "chrome_100_percent.pak"))}
+- chrome_200_percent.pak: {File.Exists(Path.Combine(cefDirectory, "chrome_200_percent.pak"))}
+";
+					File.WriteAllText(Path.Combine(CachePath, "pre-init-debug.log"), preInitDebugLog);
+					// ===== ここまで追加 =====
 #else
 					cefSettings.LogSeverity = LogSeverity.Disable;
 #endif
 
-					var initializeResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: false, browserProcessHandler: null);
+AppendInitializeTrace("Calling Cef.Initialize");
+var initializeResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: false, browserProcessHandler: null);
+AppendInitializeTrace($"Cef.Initialize returned: {initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}");
 
-					// 初期化完了を確認
-					int waitCount = 0;
-					while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < 150)
-					{
-						Thread.Sleep(100);
-						waitCount++;
-					}
+					// ===== ここから追加 =====
+					// 初期化直後のログ出力
+					var postInitDebugLog = $@"[POST-INIT DEBUG] {DateTimeOffset.Now:O}
+Initialize Result: {initializeResult}
+Cef.IsInitialized: {CefSharp.Cef.IsInitialized}
+";
+					File.WriteAllText(Path.Combine(CachePath, "post-init-debug.log"), postInitDebugLog);
+					// ===== ここまで追加 =====
 
-					if (!(CefSharp.Cef.IsInitialized ?? false))
-					{
-						MarkInitializeFailure();
-						var libcefPath = Path.Combine(cefDirectory, "libcef.dll");
-						var subprocessPath = browserSubprocessPath;
-						throw new InvalidOperationException(
-							$"Cef initialization failed. Result={initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}, LogFile='{LogFilePath}', " +
-							$"CurrentDirectory='{Environment.CurrentDirectory}', AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
-							$"DLLDirectoryApplied={true}, CEFArgs='{cefCommandLineArgsSummary}', " +
-							$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
-							$"Subprocess.Exists={File.Exists(subprocessPath)}('{subprocessPath}'), RetryCleanupApplied={retriedByCleanup}.");
-					}
+									// 初期化完了を確認
+									int waitCount = 0;
+									var initialWaitLimit = Debugger.IsAttached ? DebugInitializeWaitLimit : DefaultInitializeWaitLimit;
+									while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < initialWaitLimit)
+									{
+										Thread.Sleep(100);
+										waitCount++;
+									}
+									AppendInitializeTrace($"Initial wait completed: waitCount={waitCount}, waitLimit={initialWaitLimit}, IsInitialized={CefSharp.Cef.IsInitialized}");
+
+									if (!(CefSharp.Cef.IsInitialized ?? false))
+									{
+										if (Debugger.IsAttached && !retriedByCleanup)
+										{
+											bool? retryResult = null;
+											for (var retryAttempt = 1; retryAttempt <= DebugInitializeRetryCount && !(CefSharp.Cef.IsInitialized ?? false); retryAttempt++)
+											{
+#if DEBUG
+												File.WriteAllText(Path.Combine(CachePath, "debug-retry-info.log"),
+													$"[DEBUG RETRY] attempt={retryAttempt}/{DebugInitializeRetryCount} wait={DebugInitializeRetryDelayMilliseconds}ms\n");
+#endif
+												Thread.Sleep(DebugInitializeRetryDelayMilliseconds);
+												AppendInitializeTrace($"Calling Cef.Initialize retry attempt={retryAttempt}");
+												retryResult = CefSharp.Cef.Initialize(cefSettings, performDependencyCheck: false, browserProcessHandler: null);
+												AppendInitializeTrace($"Retry attempt={retryAttempt} result: {retryResult}, IsInitialized={CefSharp.Cef.IsInitialized}");
+
+#if DEBUG
+												File.WriteAllText(Path.Combine(CachePath, "post-debug-retry.log"),
+													$"[POST-DEBUG-RETRY] {DateTimeOffset.Now:O}\nRetryAttempt: {retryAttempt}\nRetry Initialize Result: {retryResult}\nCef.IsInitialized: {CefSharp.Cef.IsInitialized}\n");
+#endif
+
+												waitCount = 0;
+												while (!(CefSharp.Cef.IsInitialized ?? false) && waitCount < DebugInitializeWaitLimit)
+												{
+													Thread.Sleep(100);
+													waitCount++;
+												}
+												AppendInitializeTrace($"Retry wait completed: attempt={retryAttempt}, waitCount={waitCount}, waitLimit={DebugInitializeWaitLimit}, IsInitialized={CefSharp.Cef.IsInitialized}");
+											}
+
+											if (!(CefSharp.Cef.IsInitialized ?? false))
+											{
+												AppendInitializeTrace("Retry path failed");
+												MarkInitializeFailure();
+												var libcefPath = Path.Combine(cefDirectory, "libcef.dll");
+												var subprocessPath = browserSubprocessPath;
+												throw new InvalidOperationException(
+													$"Cef initialization retry failed. Result={retryResult}, IsInitialized={CefSharp.Cef.IsInitialized}, LogFile='{LogFilePath}', " +
+													$"CurrentDirectory='{Environment.CurrentDirectory}', AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
+													$"DLLDirectoryApplied={true}, CEFArgs='{cefCommandLineArgsSummary}', " +
+													$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
+													$"Subprocess.Exists={File.Exists(subprocessPath)}('{subprocessPath}'), RetryCleanupApplied={retriedByCleanup}, RetryCount={DebugInitializeRetryCount}.");
+											}
+										}
+										else
+										{
+											AppendInitializeTrace("Initial path failed without retry");
+											MarkInitializeFailure();
+											var libcefPath = Path.Combine(cefDirectory, "libcef.dll");
+											var subprocessPath = browserSubprocessPath;
+											throw new InvalidOperationException(
+												$"Cef initialization failed. Result={initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}, LogFile='{LogFilePath}', " +
+												$"CurrentDirectory='{Environment.CurrentDirectory}', AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
+												$"DLLDirectoryApplied={true}, CEFArgs='{cefCommandLineArgsSummary}', " +
+												$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, libcef.Exists={File.Exists(libcefPath)}('{libcefPath}'), " +
+												$"Subprocess.Exists={File.Exists(subprocessPath)}('{subprocessPath}'), RetryCleanupApplied={retriedByCleanup}.");
+										}
+									}
 
 					ClearInitializeFailureMarker();
 					initialized = true;
+					AppendInitializeTrace("Initialize completed successfully");
 				}
-				catch
+				catch (Exception ex)
 				{
-					// 初期化時の詳細ログは開発時のみに出す方針のため削除
+					AppendInitializeTrace($"Initialize exception: {ex.GetType().FullName}: {ex.Message}");
 					throw;
 				}
 			}
