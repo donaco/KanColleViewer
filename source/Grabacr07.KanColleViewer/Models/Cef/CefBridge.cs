@@ -218,13 +218,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						return;
 					}
 
-					PrepareForInitializeRetry();
-
-					if (Debugger.IsAttached)
+					if (!Debugger.IsAttached)
 					{
-						AppendInitializeTrace("Debugger attached: delete transient state and wait");
-						DeleteDebugTransientState();
-						Thread.Sleep(700);
+						PrepareForInitializeRetry();
 					}
 
 					var browserSubprocessPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");

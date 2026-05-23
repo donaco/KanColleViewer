@@ -108,9 +108,9 @@ namespace Grabacr07.KanColleViewer
 
 		private WindowService() { }
 
-		public void Initialize()
+		public void Initialize(bool useInformationWindowAsMainWindow = false)
 		{
-			if (GeneralSettings.IsProxyMode)
+			if (GeneralSettings.IsProxyMode || useInformationWindowAsMainWindow)
 			{
 				// プロキシ モード (艦これのウィンドウを表示しないやつ)
 				// KanColleWindow は作らず、InformationWindow を MainWindow として運用する

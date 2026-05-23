@@ -63,6 +63,12 @@ namespace Grabacr07.KanColleViewer.Models
 		{
 			if (GeneralSettings.ClearCacheOnNextStartup)
 			{
+				if (System.Diagnostics.Debugger.IsAttached)
+				{
+					System.Diagnostics.Debug.WriteLine("DeleteCacheIfRequested skipped during debugging.");
+					return;
+				}
+
 				try
 				{
 					Directory.Delete(CefBridge.CachePath, true);

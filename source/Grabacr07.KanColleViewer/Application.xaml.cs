@@ -139,6 +139,10 @@ namespace Grabacr07.KanColleViewer
 
 							try
 							{
+								if (Debugger.IsAttached)
+								{
+									this.AppendStartupTrace("OnStartup: debugger cache cleanup skipped");
+								}
 								this.AppendStartupTrace("OnStartup: before CefBridge.Initialize");
 								CefBridge.Initialize();
 								this.AppendStartupTrace("OnStartup: after CefBridge.Initialize success");
@@ -177,8 +181,12 @@ InnerStackTrace:
 								{
 									this.AppendStartupTrace("OnStartup: fallback before WindowService.Initialize");
 									// フォールバック起動時はブラウザーに依存しない最小構成で起動する
-									WindowService.Current.AddTo(this).Initialize();
+									WindowService.Current.AddTo(this).Initialize(useInformationWindowAsMainWindow: true);
 									this.AppendStartupTrace("OnStartup: fallback after WindowService.Initialize");
+
+									PluginService.Current.AddTo(this).Initialize();
+									NotifyService.Current.AddTo(this).Initialize();
+									this.AppendStartupTrace("OnStartup: fallback after PluginService/NotifyService.Initialize");
 
 									this.MainWindow = WindowService.Current.GetMainWindow();
 									if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
