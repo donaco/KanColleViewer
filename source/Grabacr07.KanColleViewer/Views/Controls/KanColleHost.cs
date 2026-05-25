@@ -14,6 +14,7 @@ using CefSharp.Wpf;
 using CefSharp.Wpf.Internals;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
+using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
@@ -56,19 +57,42 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			if (oldBrowser != null)
 			{
 				oldBrowser.FrameLoadEnd -= instance.HandleLoadEnd;
+				oldBrowser.IsBrowserInitializedChanged -= instance.HandleBrowserInitializedChanged;
 			}
 			if (newBrowser != null)
 			{
 				newBrowser.FrameLoadEnd += instance.HandleLoadEnd;
+				newBrowser.IsBrowserInitializedChanged += instance.HandleBrowserInitializedChanged;
 				newBrowser.MenuHandler = new ContextMenuHandler();
 				newBrowser.WpfKeyboardHandler = new InhibitTabKeyHandler(newBrowser);
-
+				instance.ApplyMuteIfReady(newBrowser);
 			}
 			if (instance.scrollViewer != null)
 			{
 				instance.scrollViewer.Content = newBrowser;
 			}
+		}
 
+		private void HandleBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if (!(e.NewValue is bool initialized) || !initialized) return;
+			if (!(sender is ChromiumWebBrowser browser)) return;
+
+			this.ApplyMuteIfReady(browser);
+		}
+
+		private void ApplyMuteIfReady(ChromiumWebBrowser browser)
+		{
+			try
+			{
+				if (browser?.IsBrowserInitialized == true)
+				{
+					browser.GetBrowser()?.GetHost()?.SetAudioMuted(GeneralSettings.IsMuted.Value);
+				}
+			}
+			catch
+			{
+			}
 		}
 
 		#endregion
