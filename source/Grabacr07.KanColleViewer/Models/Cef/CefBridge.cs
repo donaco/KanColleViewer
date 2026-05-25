@@ -222,6 +222,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					{
 						PrepareForInitializeRetry();
 					}
+					else
+					{
+						AppendInitializeTrace("Debugger attached: preserving CEF transient state");
+					}
 
 					var browserSubprocessPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
 					EnsureCefRuntimeFilesAvailable(browserSubprocessPath);
