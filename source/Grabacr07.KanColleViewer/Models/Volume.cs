@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models.CoreAudio;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Vannatech.CoreAudio.Constants;
 using Vannatech.CoreAudio.Enumerations;
 using Vannatech.CoreAudio.Externals;
@@ -13,7 +13,7 @@ using Vannatech.CoreAudio.Interfaces;
 
 namespace Grabacr07.KanColleViewer.Models
 {
-	public class Volume : NotificationObject, IAudioSessionEvents
+	public class Volume : ObservableObject, IAudioSessionEvents
 	{
 		private ISimpleAudioVolume simpleAudioVolume;
 		private IAudioSessionControl sessionControl;
@@ -30,7 +30,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this._IsMute != value)
 				{
 					this._IsMute = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}

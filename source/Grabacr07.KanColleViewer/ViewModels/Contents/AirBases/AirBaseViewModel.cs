@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 {
@@ -214,11 +213,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 			this.UpdateProperties();
 
-			var listener = new PropertyChangedEventListener(airBase)
-			{
-				(sender, args) => this.UpdateProperties(),
-			};
-			this.CompositeDisposable.Add(listener);
+			System.ComponentModel.PropertyChangedEventHandler handler = (s, e) => this.UpdateProperties();
+			airBase.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => airBase.PropertyChanged -= handler));
 		}
 
 		private void UpdateProperties()

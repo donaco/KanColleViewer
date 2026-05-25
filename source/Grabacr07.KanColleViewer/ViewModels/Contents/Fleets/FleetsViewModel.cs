@@ -7,7 +7,6 @@ using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet.Messaging;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using StatefulModel;

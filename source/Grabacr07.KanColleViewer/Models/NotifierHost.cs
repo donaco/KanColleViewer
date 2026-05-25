@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,7 +6,8 @@ using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 
@@ -16,7 +17,7 @@ namespace Grabacr07.KanColleViewer.Models
 	/// <see cref="KanColleClient"/> や関連するオブジェクトからのイベント、プラグインからのイベントを受信し、<see cref="INotifier"/>
 	/// を実装する各通知機能へイベントを配信します。
 	/// </summary>
-	public class NotifyService : NotificationObject, INotifier, IDisposableHolder
+	public class NotifyService : ObservableObject, INotifier, IDisposableHolder
 	{
 		#region singleton members
 
@@ -27,10 +28,10 @@ namespace Grabacr07.KanColleViewer.Models
 		private INotifier notifier;
 		private bool isRegistered;
 
-		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
-		private LivetCompositeDisposable dockyardDisposables;
-		private LivetCompositeDisposable repairyardDisposables;
-		private LivetCompositeDisposable organizationDisposables;
+		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
+		private CompositeDisposable dockyardDisposables;
+		private CompositeDisposable repairyardDisposables;
+		private CompositeDisposable organizationDisposables;
 
 		private NotifyService() { }
 
@@ -98,12 +99,12 @@ namespace Grabacr07.KanColleViewer.Models
 		private void UpdateDockyard(Dockyard dockyard)
 		{
 			this.dockyardDisposables?.Dispose();
-			this.dockyardDisposables = new LivetCompositeDisposable();
+			this.dockyardDisposables = new CompositeDisposable();
 
 			foreach (var dock in dockyard.Docks.Values)
 			{
 				dock.Completed += this.HandleDockyardCompleted;
-				this.dockyardDisposables.Add(() => dock.Completed -= this.HandleDockyardCompleted);
+				this.dockyardDisposables.Add(new DelegateDisposable(() => dock.Completed -= this.HandleDockyardCompleted));
 			}
 		}
 
@@ -131,12 +132,12 @@ namespace Grabacr07.KanColleViewer.Models
 		private void UpdateRepairyard(Repairyard repairyard)
 		{
 			this.repairyardDisposables?.Dispose();
-			this.repairyardDisposables = new LivetCompositeDisposable();
+			this.repairyardDisposables = new CompositeDisposable();
 
 			foreach (var dock in repairyard.Docks.Values)
 			{
 				dock.Completed += this.HandleRepairyardCompleted;
-				this.repairyardDisposables.Add(() => dock.Completed -= this.HandleRepairyardCompleted);
+				this.repairyardDisposables.Add(new DelegateDisposable(() => dock.Completed -= this.HandleRepairyardCompleted));
 			}
 		}
 
@@ -160,15 +161,15 @@ namespace Grabacr07.KanColleViewer.Models
 		private void UpdateFleets(Organization organization)
 		{
 			this.organizationDisposables?.Dispose();
-			this.organizationDisposables = new LivetCompositeDisposable();
+			this.organizationDisposables = new CompositeDisposable();
 
 			foreach (var fleet in organization.Fleets.Values)
 			{
 				fleet.Expedition.Returned += this.HandleExpeditionReturned;
-				this.organizationDisposables.Add(() => fleet.Expedition.Returned -= this.HandleExpeditionReturned);
+				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.Expedition.Returned -= this.HandleExpeditionReturned));
 
 				fleet.State.Condition.Rejuvenated += this.HandleConditionRejuvenated;
-				this.organizationDisposables.Add(() => fleet.State.Condition.Rejuvenated -= this.HandleConditionRejuvenated);
+				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.State.Condition.Rejuvenated -= this.HandleConditionRejuvenated));
 			}
 		}
 

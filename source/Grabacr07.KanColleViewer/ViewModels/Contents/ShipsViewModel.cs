@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
@@ -31,10 +30,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public ShipsViewModel()
 		{
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(KanColleClient.Current.Homeport.Organization)
-			{
-				{ nameof(Organization.Ships), (sender, args) => this.Update() }
-			});
+			var org = KanColleClient.Current.Homeport.Organization;
+			System.ComponentModel.PropertyChangedEventHandler handler = (s, e) => { if (e.PropertyName == nameof(Organization.Ships)) this.Update(); };
+			org.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => org.PropertyChanged -= handler));
 			this.Update();
 		}
 

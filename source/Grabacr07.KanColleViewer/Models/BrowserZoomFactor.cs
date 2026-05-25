@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Grabacr07.KanColleViewer.Models
 {
-	public class BrowserZoomFactor : NotificationObject, IZoomFactor
+	public class BrowserZoomFactor : ObservableObject, IZoomFactor
 	{
 		private const double neutral = 1.0;
 
@@ -41,7 +41,7 @@ namespace Grabacr07.KanColleViewer.Models
 				this.CurrentParcentage = (int)(value * 100);
 				this.CanZoomDown = (zoomTable.FirstOrDefault() ?? neutral) < value;
 				this.CanZoomUp = value < (zoomTable.LastOrDefault() ?? neutral);
-				this.RaisePropertyChanged();
+				this.OnPropertyChanged(string.Empty);
 			}
 		}
 
@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this._CurrentParcentage != value)
 				{
 					this._CurrentParcentage = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -78,7 +78,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this._CanZoomUp != value)
 				{
 					this._CanZoomUp = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -97,7 +97,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this._CanZoomDown != value)
 				{
 					this._CanZoomDown = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}

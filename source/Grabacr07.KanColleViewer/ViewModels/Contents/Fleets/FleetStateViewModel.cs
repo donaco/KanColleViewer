@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
@@ -33,10 +32,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public FleetStateViewModel(FleetState source)
 		{
 			this.Source = source;
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(source)
-			{
-				(sender, args) => this.RaisePropertyChanged(args.PropertyName),
-			});
+			System.ComponentModel.PropertyChangedEventHandler stateHandler = (s, e) => this.RaisePropertyChanged(e.PropertyName);
+			source.PropertyChanged += stateHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => source.PropertyChanged -= stateHandler));
 
 			this.Sortie = new SortieViewModel(source);
 			this.CompositeDisposable.Add(this.Sortie);

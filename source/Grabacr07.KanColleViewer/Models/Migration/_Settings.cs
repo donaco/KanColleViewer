@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Grabacr07.KanColleViewer.Models.Settings;
-using Livet;
 
 namespace Grabacr07.KanColleViewer.Models.Migration
 {
@@ -22,7 +21,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 	[XmlRoot("Settings")]
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	// ReSharper disable once InconsistentNaming
-	public class _Settings : NotificationObject
+	public class _Settings 
 	{
 		#region static members
 

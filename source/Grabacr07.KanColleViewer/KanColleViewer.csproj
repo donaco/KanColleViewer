@@ -314,10 +314,7 @@
     <Compile Include="ViewModels\InformationViewModel.cs" />
     <Compile Include="Models\INavigator.cs" />
     <Compile Include="ViewModels\Contents\MaterialsViewModel.cs" />
-    <Compile Include="ViewModels\Messages\ScreenshotMessage.cs" />
     <Compile Include="ViewModels\Messages\Response.cs" />
-    <Compile Include="ViewModels\Messages\SetWindowLocationMessage.cs" />
-    <Compile Include="ViewModels\Messages\ZoomMessage.cs" />
     <Compile Include="ViewModels\NavigatorViewModel.cs" />
     <Compile Include="ViewModels\NullViewModel.cs" />
     <Compile Include="ViewModels\Settings\UserStyleSheetSettingsViewModel.cs" />
