@@ -53,7 +53,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 				Padding = new Thickness(12),
 				Child = new TextBlock
 				{
-					Text = $"{this.Name} の表示中にエラーが発生しました。詳細は ErrorReports と cef.log を確認してください。\r\n\r\n{ex.GetType().Name}: {ex.Message}",
+					Text = $"{this.Name} の表示中にエラーが発生しました。詳細は cef.log を確認してください。\r\n\r\n{ex.GetType().Name}: {ex.Message}",
 					TextWrapping = TextWrapping.Wrap,
 				}
 			};

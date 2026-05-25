@@ -99,15 +99,9 @@ namespace Grabacr07.KanColleViewer.Composition
 			}
 
 			var pluginsDir = Path.Combine(currentDir, PluginsDirectory);
-			var diagLog = Path.Combine(
-				Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-				"grabacr.net", "KanColleViewer", "plugin-diag.log");
-			var diagLines = new List<string> { $"[PLUGIN DIAG] {DateTime.Now:o}", $"CurrentDir: {currentDir}", $"PluginsDir: {pluginsDir} (Exists={Directory.Exists(pluginsDir)})" };
 
 			if (!Directory.Exists(pluginsDir))
 			{
-				diagLines.Add("PluginsDir not found. Aborting.");
-				WriteDiagLog(diagLog, diagLines);
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;
 			}
@@ -129,7 +123,6 @@ namespace Grabacr07.KanColleViewer.Composition
 				{
 					var asmCatalog = new AssemblyCatalog(filepath);
 					var partCount = asmCatalog.Parts.ToList().Count;
-					diagLines.Add($"  {Path.GetFileName(filepath)}: Parts={partCount}");
 					if (partCount > 0)
 					{
 						catalog.Catalogs.Add(asmCatalog);
@@ -139,22 +132,18 @@ namespace Grabacr07.KanColleViewer.Composition
 				{
 					var loaderMsg = string.Join(Environment.NewLine, ex.LoaderExceptions.Select(x => x?.Message ?? "(null)"));
 					var msg = $"ReflectionTypeLoadException: {loaderMsg}";
-					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED {msg}");
 					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = msg });
 				}
 				catch (BadImageFormatException ex)
 				{
-					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED BadImageFormat: {ex.Message}");
 					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
 				}
 				catch (FileLoadException ex)
 				{
-					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED FileLoad: {ex.Message}");
 					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
 				}
 				catch (Exception ex)
 				{
-					diagLines.Add($"  {Path.GetFileName(filepath)}: FAILED {ex.GetType().Name}: {ex.Message}");
 					this.failedPlugins.Add(new LoadFailedPluginData { FilePath = filepath, Message = ex.ToString() });
 				}
 			}
@@ -163,18 +152,14 @@ namespace Grabacr07.KanColleViewer.Composition
 			{
 				this.container = new CompositionContainer(catalog);
 				this.container.ComposeParts(this);
-				diagLines.Add($"ComposeParts: OK");
 			}
 			catch (Exception ex)
 			{
-				diagLines.Add($"ComposeParts: FAILED {ex.GetType().Name}: {ex.Message}");
-				WriteDiagLog(diagLog, diagLines);
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;
 			}
 
 			this.loadedPlugins = this.Load(this.importedAll).ToDictionary(x => x.Id);
-			diagLines.Add($"Loaded plugins: {this.loadedPlugins.Count}");
 
 			this.Load(this.importedSettings);
 			this.Load(this.importedNotifiers);
@@ -182,14 +167,7 @@ namespace Grabacr07.KanColleViewer.Composition
 			this.Load(this.importedTools);
 			this.Load(this.importedLocalizables);
 			this.Load(this.importedTaskbarProgress);
-
-			WriteDiagLog(diagLog, diagLines);
 			this.PluginsReloaded?.Invoke();
-		}
-
-		private static void WriteDiagLog(string path, List<string> lines)
-		{
-			// plugin-diag.log 出力を停止
 		}
 
 		/// <summary>

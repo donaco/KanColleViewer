@@ -63,15 +63,6 @@ namespace Grabacr07.KanColleWrapper
 				var apiDataToken = root["api_data"];
 				if (apiDataToken == null)
 				{
-					// System.Diagnostics.Debug.WriteLine("TryDeserializeApiData: api_data not found.");
-					try
-					{
-						var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "grabacr.net", "KanColleViewer", "logs", "api_data_missing.log");
-						Directory.CreateDirectory(Path.GetDirectoryName(path));
-						var preview = json.Length > 4000 ? json.Substring(0, 4000) + "..." : json;
-						File.AppendAllText(path, $"{DateTime.Now:O} api_data not found in json preview:\n{preview}\n\n");
-					}
-					catch { }
 					return false;
 				}
 

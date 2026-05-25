@@ -184,18 +184,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private static void AppendInitializeTrace(string message)
 		{
-#if DEBUG
-			try
-			{
-				Directory.CreateDirectory(CachePath);
-				var tracePath = Path.Combine(CachePath, "initialize-trace.log");
-				File.AppendAllText(tracePath, $"[{DateTimeOffset.Now:O}] {message}{Environment.NewLine}");
-			}
-			catch
-			{
-				// トレース書き込み失敗は初期化本体に影響させない
-			}
-#endif
+			// initialize-trace.log 出力を停止
 		}
 
 		/// <summary>
@@ -212,8 +201,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				ResourcesDirPath = cefDirectory,
 				LocalesDirPath = Path.Combine(assemblyDirectory, "locales"),
 				LogSeverity = LogSeverity.Disable,
-				LogFile = LogFilePath,
 			};
+#if DEBUG
+			settings.LogFile = LogFilePath;
+#else
+			settings.LogFile = "NUL";
+#endif
 			return settings;
 		}
 
@@ -252,23 +245,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					AppendInitializeTrace("CEF runtime files verification completed");
 
 					Directory.CreateDirectory(CachePath);
-
-					// 診断ログ: Release/Debug 両方で出力（問題調査用）
-					var diagLog = $@"[CEF INIT DIAG] {DateTimeOffset.Now:O}
-AssemblyDirectory : {assemblyDirectory}
-CefDirectory      : {cefDirectory}
-CurrentDirectory  : {Environment.CurrentDirectory}
-SubprocessPath    : {browserSubprocessPath} (Exists={File.Exists(browserSubprocessPath)})
-CachePath         : {CachePath}
-Is64BitProcess    : {Environment.Is64BitProcess}
-libcef.dll        : {File.Exists(Path.Combine(cefDirectory, "libcef.dll"))}
-resources.pak     : {File.Exists(Path.Combine(cefDirectory, "resources.pak"))}
-icudtl.dat        : {File.Exists(Path.Combine(cefDirectory, "icudtl.dat"))}
-v8_context_snapshot.bin: {File.Exists(Path.Combine(cefDirectory, "v8_context_snapshot.bin"))}
-locales/en-US.pak : {File.Exists(Path.Combine(assemblyDirectory, "locales", "en-US.pak"))}
-";
-					try { File.WriteAllText(Path.Combine(CachePath, "cef-init-diag.log"), diagLog); } catch { }
-					AppendInitializeTrace(diagLog);
+#if !DEBUG
+					TryDeleteFile(LogFilePath);
+#endif
 
 					// CefSettings は Cef.Initialize() 内部で Dispose されるため毎回新規生成する
 					AppendInitializeTrace("Calling Cef.Initialize");
@@ -291,8 +270,7 @@ locales/en-US.pak : {File.Exists(Path.Combine(assemblyDirectory, "locales", "en-
 						$"AssemblyDirectory='{assemblyDirectory}', CefDirectory='{cefDirectory}', " +
 						$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, " +
 						$"libcef.Exists={libcefExists}('{Path.Combine(cefDirectory, "libcef.dll")}'), " +
-						$"Subprocess.Exists={File.Exists(browserSubprocessPath)}('{browserSubprocessPath}'). " +
-						$"See '{Path.Combine(CachePath, "cef-init-diag.log")}'");
+						$"Subprocess.Exists={File.Exists(browserSubprocessPath)}('{browserSubprocessPath}').");
 				}
 				catch (Exception ex)
 				{
