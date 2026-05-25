@@ -7,6 +7,7 @@ using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Views;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels
 {
 	/// <summary>

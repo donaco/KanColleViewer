@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 {
-	public class ShipTypeViewModel : ViewModel
+	public class ShipTypeViewModel : ViewModelBase
 	{
 		public Action SelectionChangedAction { get; set; }
 

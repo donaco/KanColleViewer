@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 using Livet.EventListeners;
 using Livet.Messaging;
 using MetroTrilithon.Lifetime;

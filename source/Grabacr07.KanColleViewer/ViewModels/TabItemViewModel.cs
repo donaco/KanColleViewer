@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Controls.Metro;
-using Livet;
-using Livet.EventListeners;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
@@ -44,12 +44,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region Status 変更通知プロパティ
 
-		private ViewModel _Status;
+		private ViewModelBase _Status;
 
 		/// <summary>
 		/// ステータス バーに表示するステータスを取得します。
 		/// </summary>
-		public virtual ViewModel Status
+		public virtual ViewModelBase Status
 		{
 			get { return this._Status; }
 			protected set
@@ -68,10 +68,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		{
 			if (Helper.IsInDesignMode) return;
 
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(ResourceService.Current)
-			{
-				(sender, args) => this.RaisePropertyChanged(nameof(this.Name)),
-			});
+			System.ComponentModel.PropertyChangedEventHandler handler = (s, a) => this.RaisePropertyChanged(nameof(this.Name));
+			ResourceService.Current.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= handler));
 		}
 	}
 }

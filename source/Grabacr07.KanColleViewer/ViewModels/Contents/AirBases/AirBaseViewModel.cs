@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 using Livet.EventListeners;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 {
 	/// <summary>
 	/// 個別の航空隊（海域ごと）の ViewModel
 	/// </summary>
-	public class AirBaseViewModel : ViewModel
+	public class AirBaseViewModel : ViewModelBase
 	{
 		private readonly AirBase source;
 

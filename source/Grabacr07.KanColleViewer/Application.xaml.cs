@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using CefSharp;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
@@ -15,7 +16,6 @@ using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
-using Livet;
 using MetroTrilithon.Lifetime; // Phase 1: Infrastructure/Lifetime に内製化済み
 
 namespace Grabacr07.KanColleViewer
@@ -43,7 +43,7 @@ namespace Grabacr07.KanColleViewer
 
 	sealed partial class Application : INotifyPropertyChanged, IDisposableHolder
 	{
-		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
+		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 		private event PropertyChangedEventHandler propertyChangedInternal;
 		private Mutex _appMutex;
 		private bool startedInFallbackMode;
@@ -104,10 +104,8 @@ namespace Grabacr07.KanColleViewer
 					args.Handled = true;  // 例外を処理済みとしてアプリ続行
 				};
 
-				DispatcherHelper.UIDispatcher = this.Dispatcher;
-
 				SettingsHost.Load();
-				this.compositeDisposable.Add(SettingsHost.Save);
+				this.compositeDisposable.Add(new DelegateDisposable(SettingsHost.Save));
 
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();

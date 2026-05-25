@@ -5,31 +5,52 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Properties;
-using Grabacr07.KanColleViewer.ViewModels.Messages;
-using Livet.Behaviors.Messaging;
-using Livet.Messaging;
+using MetroTrilithon.Mvvm;
+using Microsoft.Xaml.Behaviors;
 
 namespace Grabacr07.KanColleViewer.Views.Behaviors
 {
     /// <summary>
     /// ウィンドウ全体を画像として保存する機能を提供します。
     /// </summary>
-    internal class WindowScreenshotAction : InteractionMessageAction<Window>
+    internal class WindowScreenshotAction : Behavior<Window>
     {
-        protected override void InvokeAction(InteractionMessage message)
+        #region ViewModel 依存関係プロパティ
+
+        public WindowViewModel ViewModel
         {
-            if (message is ScreenshotMessage screenshotMessage)
+            get { return (WindowViewModel)this.GetValue(ViewModelProperty); }
+            set { this.SetValue(ViewModelProperty, value); }
+        }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(WindowViewModel), typeof(WindowScreenshotAction), new UIPropertyMetadata(null, OnViewModelChanged));
+
+        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var action = (WindowScreenshotAction)d;
+            if (e.OldValue is WindowViewModel old) old.ScreenshotRequested -= action.OnScreenshotRequested;
+            if (e.NewValue is WindowViewModel vm) vm.ScreenshotRequested += action.OnScreenshotRequested;
+        }
+
+        #endregion
+
+        protected override void OnDetaching()
+        {
+            if (this.ViewModel != null) this.ViewModel.ScreenshotRequested -= this.OnScreenshotRequested;
+            base.OnDetaching();
+        }
+
+        private void OnScreenshotRequested(object sender, ScreenshotRequestedEventArgs e)
+        {
+            try
             {
-                try
-                {
-                    this.CaptureWindow(screenshotMessage.Path, screenshotMessage.Format);
-                    StatusService.Current.Notify(Resources.Screenshot_Saved + Path.GetFileName(screenshotMessage.Path));
-                }
-                catch (Exception ex)
-                {
-                    StatusService.Current.Notify(Resources.Screenshot_Failed + ex.Message);
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
+                this.CaptureWindow(e.Path, (SupportedImageFormat)e.Format);
+                StatusService.Current.Notify(Resources.Screenshot_Saved + Path.GetFileName(e.Path));
+            }
+            catch (Exception ex)
+            {
+                StatusService.Current.Notify(Resources.Screenshot_Failed + ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex);
             }
         }
 

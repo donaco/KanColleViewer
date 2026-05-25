@@ -7,7 +7,6 @@ using Microsoft.Xaml.Behaviors;
 using CefSharp;
 using CefSharp.Wpf;
 using Grabacr07.KanColleViewer.Models;
-using Livet;
 
 namespace Grabacr07.KanColleViewer.Views.Behaviors
 {

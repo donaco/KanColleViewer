@@ -8,14 +8,12 @@ using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleViewer.ViewModels;
-using Grabacr07.KanColleViewer.ViewModels.Messages;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
-using Livet.Messaging;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CefSharp.Wpf;
 using CefSharp;
 using StatefulModel;
@@ -40,7 +38,7 @@ namespace Grabacr07.KanColleViewer
 		InSortie,
 	}
 
-	public class WindowService : NotificationObject, IDisposableHolder
+	public class WindowService : ObservableObject, IDisposableHolder
 	{
 		public static WindowService Current { get; } = new WindowService();
 
@@ -48,7 +46,7 @@ namespace Grabacr07.KanColleViewer
 		private InformationViewModel information;
 		private KanColleWindowViewModel kanColleWindow;
 		private InformationWindowViewModel informationWindow;
-		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
+		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 		// 各艦隊の Situation 変化購読を管理する
 		private MultipleDisposable fleetStateListeners = new MultipleDisposable();
@@ -80,7 +78,7 @@ namespace Grabacr07.KanColleViewer
 					}
 
 					this.UpdateAccent();
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -202,7 +200,7 @@ namespace Grabacr07.KanColleViewer
 
 		public void ClearZoomFactor()
 		{
-			this.kanColleWindow?.Messenger.Raise(new InteractionMessage { MessageKey = "WebBrowser.Zoom" });
+			this.kanColleWindow?.RaiseZoomRequested();
 		}
 
 		// 追加: DevTools を開くためのユーティリティ
@@ -281,7 +279,8 @@ namespace Grabacr07.KanColleViewer
 
 		public void SetLocationLeft()
 		{
-			this.kanColleWindow?.Messenger.Raise(new SetWindowLocationMessage { MessageKey = "Window.Location", Left = 0.0 });
+			var window = System.Windows.Application.Current?.MainWindow;
+			if (window != null) window.Left = 0.0;
 		}
 
 

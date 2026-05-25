@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Livet;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 
 namespace MetroTrilithon.Mvvm
 {
@@ -121,7 +121,7 @@ namespace MetroTrilithon.Mvvm
     /// </summary>
     public static class DisposableExtensionsForMvvm
     {
-        public static T AddTo<T>(this T disposable, ViewModel viewModel) where T : IDisposable
+        public static T AddTo<T>(this T disposable, ViewModelBase viewModel) where T : IDisposable
         {
             viewModel?.CompositeDisposable.Add(disposable);
             return disposable;
@@ -133,7 +133,7 @@ namespace MetroTrilithon.Mvvm
             return disposable;
         }
 
-        public static void AddTo(this PropertyChangedExtensions.ListenerWrapper wrapper, ViewModel viewModel)
+        public static void AddTo(this PropertyChangedExtensions.ListenerWrapper wrapper, ViewModelBase viewModel)
         {
             viewModel?.CompositeDisposable.Add((IDisposable)wrapper);
         }

@@ -4,7 +4,6 @@
 				   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-				   xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				   xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
@@ -23,14 +22,6 @@
 				   SizeToContent="Height">
 
 	<i:Interaction.Triggers>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.WindowAction">
-			<livet:WindowInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.Transition">
-			<livet:TransitionInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
 	</i:Interaction.Triggers>
 
 	<Grid>

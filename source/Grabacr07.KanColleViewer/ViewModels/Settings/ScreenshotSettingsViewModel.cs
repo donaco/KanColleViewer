@@ -4,16 +4,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
-using Livet;
-using Livet.Messaging.IO;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
-	public class ScreenshotSettingsViewModel : ViewModel
+	public class ScreenshotSettingsViewModel : ViewModelBase
 	{
 		#region CanOpenDestination 変更通知プロパティ
 
@@ -43,20 +43,19 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public void OpenDestinationSelectionDialog()
 		{
-			var message = new FolderSelectionMessage("FolderDialog.Screenshot.Open")
+			using (var dialog = new FolderBrowserDialog())
 			{
-				Title = Resources.Settings_Screenshot_FolderSelectionDialog_Title,
-				DialogPreference = Helper.IsWindows8OrGreater
-					? FolderSelectionDialogPreference.CommonItemDialog
-					: FolderSelectionDialogPreference.FolderBrowser,
-				SelectedPath = this.CanOpenDestination ? ScreenshotSettings.Destination : ""
-			};
-			this.Messenger.Raise(message);
+				dialog.Description = Resources.Settings_Screenshot_FolderSelectionDialog_Title;
+				dialog.SelectedPath = this.CanOpenDestination ? ScreenshotSettings.Destination : "";
 
-			var selectedPath = message.Response?.FirstOrDefault();
-			if (Directory.Exists(selectedPath))
-			{
-				ScreenshotSettings.Destination.Value = selectedPath;
+				if (dialog.ShowDialog() == DialogResult.OK)
+				{
+					var selectedPath = dialog.SelectedPath;
+					if (Directory.Exists(selectedPath))
+					{
+						ScreenshotSettings.Destination.Value = selectedPath;
+					}
+				}
 			}
 		}
 

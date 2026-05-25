@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Composition;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Composition
 {
-	public class LoadFailedPluginViewModel : ViewModel
+	public class LoadFailedPluginViewModel : ViewModelBase
 	{
 		#region Message 変更通知プロパティ
 

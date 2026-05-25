@@ -4,7 +4,6 @@
 			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:composition="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Composition"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Views.Settings"
@@ -43,8 +42,7 @@
 									   Cursor="Hand">
 								<i:Interaction.Triggers>
 									<i:EventTrigger EventName="MouseLeftButtonDown">
-										<livet:LivetCallMethodAction MethodName="Click"
-																	 MethodTarget="{Binding}" />
+										<i:CallMethodAction MethodName="Click" TargetObject="{Binding}" />
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
 								<Run Text="設定" />
@@ -64,8 +62,7 @@
 									   Cursor="Hand">
 								<i:Interaction.Triggers>
 									<i:EventTrigger EventName="MouseLeftButtonDown">
-										<livet:LivetCallMethodAction MethodName="Click"
-																	 MethodTarget="{Binding}" />
+										<i:CallMethodAction MethodName="Click" TargetObject="{Binding}" />
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
 								<Run Text="(テスト)" />

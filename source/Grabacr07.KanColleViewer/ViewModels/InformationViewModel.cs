@@ -7,12 +7,12 @@ using Grabacr07.KanColleViewer.ViewModels.Contents.AirBases;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
 using Grabacr07.KanColleViewer.ViewModels.Dev;
 using Grabacr07.KanColleViewer.ViewModels.Settings;
-using Livet;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels
 {
-	public class InformationViewModel : ViewModel
+	public class InformationViewModel : ViewModelBase
 	{
 		// ----- Tab items
 

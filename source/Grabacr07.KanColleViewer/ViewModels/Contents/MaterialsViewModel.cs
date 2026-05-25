@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
-using Livet;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
-	public class MaterialsViewModel : ViewModel
+	public class MaterialsViewModel : ViewModelBase
 	{
 		public Materials Model { get; }
 
@@ -99,7 +99,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 			this._SelectedItem2 = this.Values.FirstOrDefault(x => x.Key == KanColleSettings.DisplayMaterial2) ?? build;
 		}
 
-		public class MaterialViewModel : ViewModel
+		public class MaterialViewModel : ViewModelBase
 		{
 			public string Key { get; }
 

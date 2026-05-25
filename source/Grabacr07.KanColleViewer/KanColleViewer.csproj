@@ -221,6 +221,8 @@
     <Compile Include="Composition\PluginMetadata.cs" />
     <Compile Include="Infrastructure\Desktop\SystemEnvironment.cs" />
     <Compile Include="Infrastructure\Interop\Dpi.cs" />
+    <Compile Include="Infrastructure\Lifetime\CompositeDisposable.cs" />
+    <Compile Include="Infrastructure\Lifetime\DelegateDisposable.cs" />
     <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
     <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
     <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
@@ -228,6 +230,7 @@
     <Compile Include="Infrastructure\Mvvm\MetroTrilithonMvvm.cs" />
     <Compile Include="Infrastructure\Mvvm\NotifierAndExtensions.cs" />
     <Compile Include="Infrastructure\Mvvm\RelayCommand.cs" />
+    <Compile Include="Infrastructure\Mvvm\ViewModelBase.cs" />
     <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
     <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
     <Compile Include="Models\AppThemeService.cs" />
@@ -337,8 +340,11 @@
     <Compile Include="Views\Behaviors\FocusAction.cs" />
     <Compile Include="Views\Behaviors\NavigatorBehavior.cs" />
     <Compile Include="Views\Behaviors\ScreenshotAction.cs" />
-    <Compile Include="Views\Behaviors\SetWindowLocationAction.cs" />
+    <Compile Include="Views\Behaviors\TaskbarBehavior.cs" />
+    <Compile Include="Views\Behaviors\WindowActionBehavior.cs" />
+    <Compile Include="Views\Behaviors\WindowCloseCancelBehavior.cs" />
     <Compile Include="Views\Behaviors\WindowScreenshotAction.cs" />
+    <Compile Include="Views\Behaviors\WindowTransitionBehavior.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
@@ -768,17 +774,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-    <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
+  <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
   <Target Name="EnsureCefFilescopied" AfterTargets="Build">
     <ItemGroup>
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\locales\**\*.*" />
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*" />
     </ItemGroup>
-      <Copy SourceFiles="@(_CefFilesToCopy)" 
-          DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" 
-          SkipUnchangedFiles="true" />
-        <Message Importance="high" Text="CEF files copied to $(OutDir)" />
+    <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="CEF files copied to $(OutDir)" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

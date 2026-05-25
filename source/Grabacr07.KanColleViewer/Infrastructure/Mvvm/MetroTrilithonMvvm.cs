@@ -4,19 +4,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Shell;
-using Livet;
-using Livet.Messaging;
-using Livet.Messaging.Windows;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using MetroTrilithon.Serialization;
-using MetroTrilithon.Threading.Tasks;
-using MetroTrilithon.UI.Interactivity;
 
 namespace MetroTrilithon.Mvvm
 {
     /// <summary>
     /// ウィンドウにアタッチされる ViewModel の基底クラスです。
     /// </summary>
-    public class WindowViewModel : ViewModel
+    public class WindowViewModel : ViewModelBase
     {
         #region Title
 
@@ -55,6 +51,24 @@ namespace MetroTrilithon.Mvvm
         public bool DialogResult { get; protected set; }
         public WindowState WindowState { get; set; }
 
+        /// <summary>ウィンドウを閉じるよう View に要求するイベントです。</summary>
+        public event EventHandler CloseRequested;
+
+        /// <summary>ウィンドウをアクティブ化するよう View に要求するイベントです。</summary>
+        public event EventHandler ActivateRequested;
+
+        /// <summary>新しいウィンドウへの遷移を View に要求するイベントです。</summary>
+        public event EventHandler<TransitionRequestedEventArgs> TransitionRequested;
+
+        /// <summary>タスクバーの状態更新を View に要求するイベントです。</summary>
+        public event EventHandler<TaskbarUpdateEventArgs> TaskbarUpdateRequested;
+
+        /// <summary>スクリーンショット保存を View に要求するイベントです。</summary>
+        public event EventHandler<ScreenshotRequestedEventArgs> ScreenshotRequested;
+
+        /// <summary>WebBrowser のズームリセットを View に要求するイベントです。</summary>
+        public event EventHandler ZoomRequested;
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void Initialize()
         {
@@ -73,14 +87,14 @@ namespace MetroTrilithon.Mvvm
 
         public virtual void Activate()
         {
-            if (this.WindowState == WindowState.Minimized) this.SendWindowAction(WindowAction.Normal);
-            this.SendWindowAction(WindowAction.Active);
+            if (this.WindowState == WindowState.Minimized) this.RequestNormal();
+            this.ActivateRequested?.Invoke(this, EventArgs.Empty);
         }
 
         public virtual void Close()
         {
             if (this.IsClosed) return;
-            this.SendWindowAction(WindowAction.Close);
+            this.CloseRequested?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void Dispose(bool disposing)
@@ -90,27 +104,78 @@ namespace MetroTrilithon.Mvvm
             base.Dispose(disposing);
         }
 
-        protected void SendWindowAction(WindowAction action)
-            => this.Messenger.Raise(new WindowActionMessage(action, "Window.WindowAction"));
-
-        protected void Transition(ViewModel viewModel, Type windowType, TransitionMode mode, bool isOwned)
+        protected void RaiseCanCloseChanged()
         {
-            var message = new TransitionMessage(windowType, viewModel, mode, isOwned ? "Window.Transition.Child" : "Window.Transition");
-            this.Messenger.Raise(message);
+            this.RaisePropertyChanged(nameof(this.CanClose));
+        }
+
+        private void RequestNormal()
+        {
+            // 最小化からの復元は WindowState を変更することで対応
+            this.WindowState = WindowState.Normal;
+            this.RaisePropertyChanged(nameof(this.WindowState));
+        }
+
+        protected void SendTransition(object viewModel, Type windowType, bool isOwned)
+        {
+            this.TransitionRequested?.Invoke(this, new TransitionRequestedEventArgs(viewModel, windowType, isOwned));
         }
 
         protected void UpdateTaskbar(TaskbarItemProgressState state, double value)
         {
-            var message = new TaskbarMessage("Window.UpdateTaskbar")
-            {
-                ProgressState = state,
-                ProgressValue = value,
-            };
-            this.Messenger.RaiseAsync(message).Forget();
+            this.TaskbarUpdateRequested?.Invoke(this, new TaskbarUpdateEventArgs(state, value));
         }
 
-        protected void InvokeOnUIDispatcher(Action action)
-            => DispatcherHelper.UIDispatcher.BeginInvoke(action);
+        protected void RaiseScreenshotRequested(string path, object format)
+        {
+            this.ScreenshotRequested?.Invoke(this, new ScreenshotRequestedEventArgs(path, format));
+        }
+
+        public void RaiseZoomRequested()
+        {
+            this.ZoomRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>ウィンドウ遷移要求のイベント引数です。</summary>
+    public class TransitionRequestedEventArgs : EventArgs
+    {
+        public object ViewModel { get; }
+        public Type WindowType { get; }
+        public bool IsOwned { get; }
+
+        public TransitionRequestedEventArgs(object viewModel, Type windowType, bool isOwned)
+        {
+            this.ViewModel = viewModel;
+            this.WindowType = windowType;
+            this.IsOwned = isOwned;
+        }
+    }
+
+    /// <summary>タスクバー更新要求のイベント引数です。</summary>
+    public class TaskbarUpdateEventArgs : EventArgs
+    {
+        public TaskbarItemProgressState State { get; }
+        public double Value { get; }
+
+        public TaskbarUpdateEventArgs(TaskbarItemProgressState state, double value)
+        {
+            this.State = state;
+            this.Value = value;
+        }
+    }
+
+    /// <summary>スクリーンショット要求のイベント引数です。</summary>
+    public class ScreenshotRequestedEventArgs : EventArgs
+    {
+        public string Path { get; }
+        public object Format { get; }
+
+        public ScreenshotRequestedEventArgs(string path, object format)
+        {
+            this.Path = path;
+            this.Format = format;
+        }
     }
 
     /// <summary>
@@ -134,7 +199,7 @@ namespace MetroTrilithon.Mvvm
         }
     }
 
-    public class DisplayViewModel<T> : ViewModel
+    public class DisplayViewModel<T> : ViewModelBase
     {
         #region Value
 

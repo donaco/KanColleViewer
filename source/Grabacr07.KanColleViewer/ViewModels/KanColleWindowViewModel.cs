@@ -5,17 +5,15 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shell;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
-using Grabacr07.KanColleViewer.ViewModels.Messages;
 using Grabacr07.KanColleViewer.ViewModels.Settings;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleViewer.Views.Controls;
-using Livet.Messaging;
 using MetroTrilithon.UI.Controls;
 using MetroTrilithon.Mvvm;
-
 namespace Grabacr07.KanColleViewer.ViewModels
 {
 	/// <summary>
@@ -144,7 +142,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			if (this.Settings.IsSplit)
 			{
 				// ウィンドウ表示時点で既に分割設定されていた場合、このタイミングで分割ウィンドウも一緒に表示
-				this.Transition(this.splitWindow, typeof(InformationWindow), TransitionMode.NewOrActive, false);
+				this.SendTransition(this.splitWindow, typeof(InformationWindow), false);
 			}
 
 			this.UpdateTaskbar();
@@ -155,13 +153,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		{
 			var format = ScreenshotSettings.Format.Value;
 			var path = Helper.CreateScreenshotFilePath(format);
-
-			var message = new ScreenshotMessage("Screenshot.Save")
-			{
-				Path = path,
-				Format = format,
-			};
-			this.Messenger.Raise(message);
+			this.RaiseScreenshotRequested(path, format);
 		}
 
 
@@ -179,7 +171,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				this.splitWindow = new InformationWindowViewModel(this);
 				this.splitWindow.Closed += this.HandleSplitWindowClosed;
 
-				if (this.IsInitialized) this.Transition(this.splitWindow, typeof(InformationWindow), TransitionMode.NewOrActive, false);
+				if (this.IsInitialized) this.SendTransition(this.splitWindow, typeof(InformationWindow), false);
 
 				this.ContentVisibility = Visibility.Collapsed;
 				this.Settings.IsSplit.Value = true;

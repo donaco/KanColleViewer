@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 using Livet.EventListeners;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
-	public class FleetStateViewModel : ViewModel
+	public class FleetStateViewModel : ViewModelBase
 	{
 		public FleetState Source { get; }
 
