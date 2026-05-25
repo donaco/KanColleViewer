@@ -20,6 +20,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		// Assembly.GetExecutingAssembly または AppDomain.CurrentDomain.BaseDirectory を使う
 		private static readonly string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory;
 		private static readonly string cefDirectory = ResolveCefDirectory();
+		private const string MainProcessFileName = "KanColleViewer.exe";
+		private const string CustomBrowserSubprocessFileName = "KanColleViewer.BrowserSubprocess.exe";
+		private const string DefaultBrowserSubprocessFileName = "CefSharp.BrowserSubprocess.exe";
 		private static bool initialized;
 		private static readonly object cefInitLock = new object();
 		private const string CefInitFailedMarkerFileName = "cef-init-failed.marker";
@@ -70,6 +73,23 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			}
 
 			return true;
+		}
+
+		private static string ResolveBrowserSubprocessPath()
+		{
+			var mainProcessPath = Path.Combine(assemblyDirectory, MainProcessFileName);
+			if (File.Exists(mainProcessPath))
+			{
+				return mainProcessPath;
+			}
+
+			var customPath = Path.Combine(assemblyDirectory, CustomBrowserSubprocessFileName);
+			if (File.Exists(customPath))
+			{
+				return customPath;
+			}
+
+			return Path.Combine(assemblyDirectory, DefaultBrowserSubprocessFileName);
 		}
 
 		private static void EnsureCefRuntimeFilesAvailable(string browserSubprocessPath)
@@ -227,7 +247,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						AppendInitializeTrace("Debugger attached: preserving CEF transient state");
 					}
 
-					var browserSubprocessPath = Path.Combine(assemblyDirectory, "CefSharp.BrowserSubprocess.exe");
+					var browserSubprocessPath = ResolveBrowserSubprocessPath();
 					EnsureCefRuntimeFilesAvailable(browserSubprocessPath);
 					AppendInitializeTrace("CEF runtime files verification completed");
 
