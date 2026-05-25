@@ -1,7 +1,4 @@
-﻿<Catalogs:ShipCatalogSortWorker xmlns:Catalogs="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Catalogs" xmlns:Livet="clr-namespace:Livet;assembly=Livet" xmlns:Messaging="clr-namespace:Livet.Messaging;assembly=Livet">
-	<Catalogs:ShipCatalogSortWorker.CompositeDisposable>
-		<Livet:LivetCompositeDisposable Count="87" IsReadOnly="True"/>
-	</Catalogs:ShipCatalogSortWorker.CompositeDisposable>
+<Catalogs:ShipCatalogSortWorker xmlns:Catalogs="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Catalogs">
 	<Catalogs:ShipCatalogSortWorker.Columns>
 		<Catalogs:SortableColumn Name="Aliquam maecenas integer"/>
 		<Catalogs:SortableColumn Name="Praesent accumsan curabitur nam vestibulum"/>
@@ -22,9 +19,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Adipiscing facilisis elit enim vivamus"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="48" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -40,9 +34,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Eros lectus hendrerit"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="98" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -58,9 +49,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Morbi ligula"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="67" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -76,9 +64,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Vestibulum felis sem adipiscing"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="97" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -94,9 +79,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Sagittis nam adipiscing mattis mauris"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="89" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -112,9 +94,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Ante magna"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="76" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -130,9 +109,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Elit rutrum hac vestibulum enim"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="81" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -148,9 +124,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Mus curabitur euismod phasellus purus"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="38" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -166,9 +139,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Quam non"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="60" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>
@@ -184,9 +154,6 @@
 			<Catalogs:SortableColumnSelector.Current>
 				<Catalogs:SortableColumn Name="Vestibulum adipiscing bibendum laoreet dictumst"/>
 			</Catalogs:SortableColumnSelector.Current>
-			<Catalogs:SortableColumnSelector.CompositeDisposable>
-				<Livet:LivetCompositeDisposable Count="78" IsReadOnly="False"/>
-			</Catalogs:SortableColumnSelector.CompositeDisposable>
 			<Catalogs:SortableColumnSelector.Messenger>
 				<Messaging:InteractionMessenger/>
 			</Catalogs:SortableColumnSelector.Messenger>

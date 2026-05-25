@@ -4,7 +4,6 @@
 			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 xmlns:properties="clr-namespace:Grabacr07.KanColleViewer.Properties"
 			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"

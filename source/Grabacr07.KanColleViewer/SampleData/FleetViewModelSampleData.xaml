@@ -1,4 +1,4 @@
-﻿<fleets:FleetViewModel xmlns:Livet="clr-namespace:Livet;assembly=Livet"
+<fleets:FleetViewModel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					   xmlns:Models="clr-namespace:Grabacr07.KanColleWrapper.Models;assembly=KanColleWrapper"
 					   xmlns:contents="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
 					   xmlns:fleets="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.Fleets"
@@ -501,6 +501,6 @@
 
 	</fleets:FleetViewModel.Ships>
 	<fleets:FleetViewModel.QuickStateView>
-		<Livet:ViewModel />
+		<x:Null />
 	</fleets:FleetViewModel.QuickStateView>
 </fleets:FleetViewModel>
