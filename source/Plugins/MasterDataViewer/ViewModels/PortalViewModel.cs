@@ -5,15 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Microsoft.Win32;
 
 namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 {
-	public class PortalViewModel : ObservableObject
+	internal class PortalViewModel : INotifyPropertyChanged
 	{
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 		#region Categories 変更通知プロパティ
 
 		private string[] _Categories;

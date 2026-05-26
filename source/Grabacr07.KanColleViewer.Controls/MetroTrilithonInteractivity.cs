@@ -3,11 +3,19 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shell;
-using Livet.Messaging;
 using Microsoft.Xaml.Behaviors;
 
 namespace MetroTrilithon.UI.Interactivity
 {
+    // Livet.Messaging.InteractionMessage の内製代替
+    public abstract class InteractionMessage : Freezable
+    {
+        public string MessageKey { get; private set; }
+
+        protected InteractionMessage() { }
+        protected InteractionMessage(string messageKey) { this.MessageKey = messageKey; }
+    }
+
     // MetroTrilithon.Desktop Interactivity の内製化 (Phase 1)
 
     public class ScrollBarThresholdBehavior : Behavior<ScrollViewer>

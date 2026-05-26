@@ -5,38 +5,22 @@
 										Id="27"
 										Remaining="8:20:14 AM"
 										Ship="Aaberg, Jesper"
-										State="Unlocked">
-			<contents:BuildingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:BuildingDockViewModel.Messenger>
-		</contents:BuildingDockViewModel>
+										State="Unlocked" />
 		<contents:BuildingDockViewModel CompleteTime="7:06:05 AM"
 										Id="38"
 										Remaining="7:06:05 AM"
 										Ship="Adams, Ellen"
-										State="Building">
-			<contents:BuildingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:BuildingDockViewModel.Messenger>
-		</contents:BuildingDockViewModel>
+										State="Building" />
 		<contents:BuildingDockViewModel CompleteTime="4:26:00 PM"
 										Id="41"
 										Remaining="4:26:00 PM"
 										Ship="Adams, Terry"
-										State="Completed">
-			<contents:BuildingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:BuildingDockViewModel.Messenger>
-		</contents:BuildingDockViewModel>
+										State="Completed" />
 		<contents:BuildingDockViewModel CompleteTime="7:13:04 AM"
 										Id="85"
 										Remaining="7:13:04 AM"
 										Ship="Adams, Terry"
-										State="Locked">
-			<contents:BuildingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:BuildingDockViewModel.Messenger>
-		</contents:BuildingDockViewModel>
+										State="Locked" />
 	</contents:ShipyardViewModel.BuildingDocks>
 
 	<contents:ShipyardViewModel.RepairingDocks>
@@ -44,37 +28,21 @@
 										 Id="41"
 										 Remaining="8:20:14 AM"
 										 Ship="Aaberg, Jesper"
-										 State="Unlocked">
-			<contents:RepairingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:RepairingDockViewModel.Messenger>
-		</contents:RepairingDockViewModel>
+										 State="Unlocked" />
 		<contents:RepairingDockViewModel CompleteTime="December 29, 2006"
 										 Id="10"
 										 Remaining="7:06:05 AM"
 										 Ship="Adams, Ellen"
-										 State="Repairing">
-			<contents:RepairingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:RepairingDockViewModel.Messenger>
-		</contents:RepairingDockViewModel>
+										 State="Repairing" />
 		<contents:RepairingDockViewModel CompleteTime="January 19, 2004"
 										 Id="39"
 										 Remaining="4:26:00 PM"
 										 Ship="Adams, Terry"
-										 State="Unlocked">
-			<contents:RepairingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:RepairingDockViewModel.Messenger>
-		</contents:RepairingDockViewModel>
+										 State="Unlocked" />
 		<contents:RepairingDockViewModel CompleteTime="December 22, 2007"
 										 Id="18"
 										 Remaining="7:13:04 AM"
 										 Ship="Adams, Terry"
-										 State="Locked">
-			<contents:RepairingDockViewModel.Messenger>
-				<Messaging:InteractionMessenger />
-			</contents:RepairingDockViewModel.Messenger>
-		</contents:RepairingDockViewModel>
+										 State="Locked" />
 	</contents:ShipyardViewModel.RepairingDocks>
 </contents:ShipyardViewModel>
