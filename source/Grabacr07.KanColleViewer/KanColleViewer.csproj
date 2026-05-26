@@ -736,15 +736,22 @@
     </None>
   </ItemGroup>
   <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
-  <Target Name="EnsureCefFilescopied" AfterTargets="Build">
-    <ItemGroup>
-      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
-      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\locales\**\*.*" />
-      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy-&gt;'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Message Importance="high" Text="CEF files copied to $(OutDir)" />
-  </Target>
+<Target Name="EnsureCefFilescopied" AfterTargets="Build">
+  <ItemGroup>
+    <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
+
+    <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*"
+                     Exclude="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\locales\**\*.*" />
+    <_CefLocalesToDelete Include="$(OutDir)locales\*.pak"
+                         Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
+  </ItemGroup>
+
+  <Copy SourceFiles="@(_CefFilesToCopy)"
+        DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
+        SkipUnchangedFiles="true" />
+
+  <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
+</Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
