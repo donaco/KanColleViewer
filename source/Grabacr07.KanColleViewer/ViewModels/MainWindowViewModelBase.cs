@@ -109,13 +109,13 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		{
 			var dialog = new DialogViewModel { Title = "終了確認", };
 
-			this.Dialog(dialog, typeof(ExitDialog));
-
-			if (dialog.DialogResult)
+			dialog.Accepted += (s, e) =>
 			{
 				this.CanClose = true;
 				this.InvokeOnUIDispatcher(this.Close);
-			}
+			};
+
+			this.Dialog(dialog, typeof(ExitDialog));
 		}
 	}
 }
