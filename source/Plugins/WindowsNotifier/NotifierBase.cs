@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -31,8 +31,15 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			if (!this.IsSupported) return;
 
-			this.Initialize();
-			this.NotifyCore(notification.Header, notification.Body, notification.Activated, notification.Failed);
+			try
+			{
+				this.Initialize();
+				this.NotifyCore(notification.Header, notification.Body, notification.Activated, notification.Failed);
+			}
+			catch (Exception ex)
+			{
+				notification.Failed?.Invoke(ex);
+			}
 		}
 
 		public virtual void Dispose() { }

@@ -127,13 +127,16 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"</PostBuildEvent>
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)DesktopToast.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(Platform)\$(ConfigurationName)\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
 xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)DesktopToast.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
 mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
+xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
+xcopy /Y "$(TargetDir)DesktopToast.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
