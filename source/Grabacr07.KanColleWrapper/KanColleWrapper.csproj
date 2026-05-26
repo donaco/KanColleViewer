@@ -259,7 +259,6 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>KanColleProxy.Endpoints.cs</LastGenOutput>
     </None>
-    <None Include="KanColleWrapper.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

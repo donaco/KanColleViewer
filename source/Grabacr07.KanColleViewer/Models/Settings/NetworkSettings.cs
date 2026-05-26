@@ -82,8 +82,6 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 					case ProxyType.SystemProxy:
 						// CEF 一本化後はシステムプロキシを CEF 自身に委ねる。
 						// proxy-server に空文字を渡すことで CEF がシステムプロキシ設定を自動適用する。
-						// ※ 旧実装では Nekoxy 経由のローカルプロキシ(127.0.0.1:37564)を指定していたが、
-						//    Nekoxy 削除後はそのポートに何もリスンしていないため接続不能になる不具合があった。
 						return string.Empty;
 
 					case ProxyType.SpecificProxy:

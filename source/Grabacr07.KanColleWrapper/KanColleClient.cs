@@ -848,7 +848,7 @@ namespace Grabacr07.KanColleWrapper
 					var org = this.Homeport?.Organization;
 					if (org != null)
 					{
-						// 連合艦隊（第1+第2艦隊）を結合した Ship 配列を構築（Nekoxy の購読側と同じ方式）
+						// 連合艦隊（第1+第2艦隊）を結合した Ship 配列を構築
 						var combinedShips = org.Fleets.OrderBy(f => f.Key)
 							.Take(2)
 							.SelectMany(f => f.Value.Ships)
