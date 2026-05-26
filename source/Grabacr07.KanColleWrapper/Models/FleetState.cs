@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
-using StatefulModel.EventListeners.WeakEvents;
 
 namespace Grabacr07.KanColleWrapper.Models
 {
@@ -216,12 +217,18 @@ namespace Grabacr07.KanColleWrapper.Models
 
 			this.Condition = new FleetCondition();
 			this.CompositeDisposable.Add(this.Condition);
-			this.CompositeDisposable.Add(new PropertyChangedWeakEventListener(KanColleClient.Current.Settings)
+
+			PropertyChangedEventHandler settingsChanged = (_, args) =>
 			{
-				{ nameof(IKanColleClientSettings.ViewRangeCalcType), (_, __) => this.Calculate() },
-				{ nameof(IKanColleClientSettings.IsViewRangeCalcIncludeFirstFleet), (_, __) => this.Calculate() },
-				{ nameof(IKanColleClientSettings.IsViewRangeCalcIncludeSecondFleet), (_, __) => this.Calculate() },
-			});
+				if (args.PropertyName == nameof(IKanColleClientSettings.ViewRangeCalcType)
+					|| args.PropertyName == nameof(IKanColleClientSettings.IsViewRangeCalcIncludeFirstFleet)
+					|| args.PropertyName == nameof(IKanColleClientSettings.IsViewRangeCalcIncludeSecondFleet))
+				{
+					this.Calculate();
+				}
+			};
+			KanColleClient.Current.Settings.PropertyChanged += settingsChanged;
+			this.CompositeDisposable.Add(Disposable.Create(() => KanColleClient.Current.Settings.PropertyChanged -= settingsChanged));
 		}
 
 

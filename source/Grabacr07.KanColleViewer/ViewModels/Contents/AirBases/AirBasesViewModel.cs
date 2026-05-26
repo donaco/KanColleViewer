@@ -8,7 +8,6 @@ using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 {
@@ -37,7 +36,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#endregion
 
-		private MultipleDisposable airBaseListeners;
+		private CompositeDisposable airBaseListeners;
 
 		public override string Name
 		{
@@ -85,7 +84,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		public AirBasesViewModel()
 		{
-			this.airBaseListeners = new MultipleDisposable();
+			this.airBaseListeners = new CompositeDisposable();
 
 			try
 			{
@@ -142,7 +141,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 				// 既存のリスナを解除してから再接続（Homeport 置換時の二重登録防止）
 				this.airBaseListeners?.Dispose();
-				this.airBaseListeners = new MultipleDisposable();
+				this.airBaseListeners = new CompositeDisposable();
 
 				// AreaGroup プロパティの変更を監視
 				System.ComponentModel.PropertyChangedEventHandler airBasesHandler = (s, e) =>
@@ -163,7 +162,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		private void InitializeAirBases()
 		{
 			this.airBaseListeners?.Dispose();
-			this.airBaseListeners = new MultipleDisposable();
+			this.airBaseListeners = new CompositeDisposable();
 
 			try
 			{

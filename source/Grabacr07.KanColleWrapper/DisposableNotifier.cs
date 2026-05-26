@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using StatefulModel;
+using System;
+using System.Reactive.Disposables;
 
 namespace Grabacr07.KanColleWrapper
 {
 	public class DisposableNotifier : Notifier, IDisposable
 	{
-		protected MultipleDisposable CompositeDisposable { get; }
+		protected CompositeDisposable CompositeDisposable { get; }
 
 		public DisposableNotifier()
 		{
-			this.CompositeDisposable = new MultipleDisposable();
+			this.CompositeDisposable = new CompositeDisposable();
 		}
 
 		public void Dispose()

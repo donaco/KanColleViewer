@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using StatefulModel;
 
 namespace MetroTrilithon.Lifetime
 {
@@ -42,10 +41,10 @@ namespace MetroTrilithon.Lifetime
             return disposable;
         }
 
-        public static T AddTo<T>(this T disposable, MultipleDisposable obj) where T : IDisposable
+        public static T AddTo<T>(this T disposable, ICollection<IDisposable> collection) where T : IDisposable
         {
-            if (obj == null) disposable.Dispose();
-            else obj.Add(disposable);
+            if (collection == null) disposable.Dispose();
+            else collection.Add(disposable);
             return disposable;
         }
     }

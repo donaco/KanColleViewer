@@ -9,13 +9,12 @@ using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
 	public class FleetsViewModel : TabItemViewModel
 	{
-		private MultipleDisposable fleetListeners;
+		private CompositeDisposable fleetListeners;
 
 		// 艦隊詳細ウィンドウのインスタンスを保持
 		private static Window fleetWindowInstance;
@@ -129,7 +128,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			var previousSelectedId = this.SelectedFleet?.Id;
 
 			this.fleetListeners?.Dispose();
-			this.fleetListeners = new MultipleDisposable();
+			this.fleetListeners = new CompositeDisposable();
 
 			this.Fleets = KanColleClient.Current.Homeport.Organization.Fleets
 				.Select(kvp => this.ToViewModel(kvp.Value))

@@ -9,7 +9,6 @@ using Grabacr07.KanColleWrapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.Models
 {
@@ -17,7 +16,7 @@ namespace Grabacr07.KanColleViewer.Models
 	{
 		public static ITaskbarProgress[] Features => PluginService.Current.Get<ITaskbarProgress>();
 
-		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
+		private readonly CompositeDisposable compositDisposable = new CompositeDisposable();
 		private ITaskbarProgress current;
 
 		string ITaskbarProgress.Id

@@ -16,7 +16,6 @@ using MetroTrilithon.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CefSharp.Wpf;
 using CefSharp;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer
 {
@@ -49,7 +48,7 @@ namespace Grabacr07.KanColleViewer
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 		// 各艦隊の Situation 変化購読を管理する
-		private MultipleDisposable fleetStateListeners = new MultipleDisposable();
+		private CompositeDisposable fleetStateListeners = new CompositeDisposable();
 
 		// 大破時のアクセントカラー (Red)
 		private static readonly Color HeavilyDamagedColor = Colors.Red;
@@ -154,7 +153,7 @@ namespace Grabacr07.KanColleViewer
 		private void RefreshFleetStateListeners()
 		{
 			this.fleetStateListeners?.Dispose();
-			this.fleetStateListeners = new MultipleDisposable();
+			this.fleetStateListeners = new CompositeDisposable();
 
 			foreach (var fleet in KanColleClient.Current.Homeport.Organization.Fleets.Values)
 			{

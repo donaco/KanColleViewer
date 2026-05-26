@@ -17,14 +17,13 @@ namespace Grabacr07.KanColleViewer.Models
 		private static readonly Lazy<string> trademarkLazy = new Lazy<string>(() => ((AssemblyTrademarkAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyTrademarkAttribute))).Trademark);
 		private static readonly Lazy<string> versionLazy = new Lazy<string>(() => $"{Version.ToString(3)}{(IsBetaRelease ? " β" : "")}{(Version.Revision == 0 ? "" : " rev." + Version.Revision)}");
 		private static readonly Lazy<IReadOnlyCollection<Library>> librariesLazy = new Lazy<IReadOnlyCollection<Library>>(() => new List<Library>
-	{
-		new Library("Livet", new Uri("http://ugaya40.hateblo.jp/entry/Livet")),
-		new Library("StatefulModel", new Uri("http://ugaya40.hateblo.jp/entry/StatefulModel")),
-		new Library("Nekoxy", new Uri("https://github.com/veigr/Nekoxy")),
-		new Library("Desktop Toast", new Uri("https://github.com/emoacht/DesktopToast")),
-		new Library(".NET Core Audio APIs", new Uri("https://netcoreaudio.codeplex.com/")),
-		new Library("CefSharp.Wpf", new Uri("http://cefsharp.github.io/"))
-	});
+		{
+			new Library("Livet", new Uri("http://ugaya40.hateblo.jp/entry/Livet")),
+			new Library("Nekoxy", new Uri("https://github.com/veigr/Nekoxy")),
+			new Library("Desktop Toast", new Uri("https://github.com/emoacht/DesktopToast")),
+			new Library(".NET Core Audio APIs", new Uri("https://netcoreaudio.codeplex.com/")),
+			new Library("CefSharp.Wpf", new Uri("http://cefsharp.github.io/"))
+		});
 
 
 		public static string Title => titleLazy.Value;

@@ -10,7 +10,6 @@ using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Linq;
 using MetroTrilithon.Mvvm;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
@@ -26,9 +25,9 @@ namespace Grabacr07.KanColleViewer.Plugins
 	{
 		private const string guid = "C8BF00A6-9FD4-4CC4-8FC5-ECCC5675CDEB";
 
-		private readonly MultipleDisposable compositDisposable = new MultipleDisposable();
-		private MultipleDisposable homeportDisposable = new MultipleDisposable();
-		private MultipleDisposable wrapperDisposable = new MultipleDisposable();
+		private readonly CompositeDisposable compositDisposable = new CompositeDisposable();
+		private CompositeDisposable homeportDisposable = new CompositeDisposable();
+		private CompositeDisposable wrapperDisposable = new CompositeDisposable();
 		private ExpeditionWrapper[] wrappers = Array.Empty<ExpeditionWrapper>();
 		private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
 
@@ -79,11 +78,11 @@ namespace Grabacr07.KanColleViewer.Plugins
 			var homeport = KanColleClient.Current.Homeport;
 
 			this.wrapperDisposable.Dispose();
-			this.wrapperDisposable = new MultipleDisposable();
+			this.wrapperDisposable = new CompositeDisposable();
 			this.wrappers = Array.Empty<ExpeditionWrapper>();
 
 			this.homeportDisposable.Dispose();
-			this.homeportDisposable = new MultipleDisposable();
+			this.homeportDisposable = new CompositeDisposable();
 
 			if (homeport == null) return;
 
@@ -97,7 +96,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 			if (KanColleClient.Current.Homeport?.Organization == null) return;
 
 			this.wrapperDisposable.Dispose();
-			this.wrapperDisposable = new MultipleDisposable();
+			this.wrapperDisposable = new CompositeDisposable();
 
 			this.wrappers = KanColleClient.Current.Homeport.Organization.Fleets
 				.Skip(1)

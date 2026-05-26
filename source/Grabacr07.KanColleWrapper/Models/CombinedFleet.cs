@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Internal;
 using MetroTrilithon.Linq;
-using StatefulModel.EventListeners;
-using StatefulModel.EventListeners.WeakEvents;
 
 namespace Grabacr07.KanColleWrapper.Models
 {
@@ -64,22 +64,22 @@ namespace Grabacr07.KanColleWrapper.Models
 
 			foreach (var fleet in fleets)
 			{
-				this.CompositeDisposable.Add(new PropertyChangedEventListener(fleet)
-				{
-					{ nameof(Fleet.Name), (sender, args) => this.UpdateName() },
-				});
-
 				var source = fleet;
-				this.CompositeDisposable.Add(new WeakEventListener<EventHandler, EventArgs>(
-					h => new EventHandler(h),
-					h => source.State.Updated += h,
-					h => source.State.Updated -= h,
-					(sender, args) => this.State.Update()));
-				this.CompositeDisposable.Add(new WeakEventListener<EventHandler, EventArgs>(
-					h => new EventHandler(h),
-					h => source.State.Calculated += h,
-					h => source.State.Calculated -= h,
-					(sender, args) => this.State.Calculate()));
+
+				PropertyChangedEventHandler nameChanged = (sender, args) =>
+				{
+					if (args.PropertyName == nameof(Fleet.Name)) this.UpdateName();
+				};
+				source.PropertyChanged += nameChanged;
+				this.CompositeDisposable.Add(Disposable.Create(() => source.PropertyChanged -= nameChanged));
+
+				EventHandler updated = (sender, args) => this.State.Update();
+				source.State.Updated += updated;
+				this.CompositeDisposable.Add(Disposable.Create(() => source.State.Updated -= updated));
+
+				EventHandler calculated = (sender, args) => this.State.Calculate();
+				source.State.Calculated += calculated;
+				this.CompositeDisposable.Add(Disposable.Create(() => source.State.Calculated -= calculated));
 			}
 
 			this.UpdateName();

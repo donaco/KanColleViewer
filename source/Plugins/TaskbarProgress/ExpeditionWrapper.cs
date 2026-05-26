@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Grabacr07.KanColleWrapper.Models;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
-using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
 	public class ExpeditionWrapper : Notifier, IDisposableHolder
 	{
-		private readonly MultipleDisposable compositeDisposable = new MultipleDisposable();
+		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 		public int Id { get; }
 
