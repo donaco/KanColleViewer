@@ -44,7 +44,7 @@
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="タスク バー設定"
+		<TextBlock Text="タスクバー設定"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<Grid Margin="20,0,0,00">

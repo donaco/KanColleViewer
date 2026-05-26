@@ -74,9 +74,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommunityToolkit.Mvvm, Version=8.4.2.0, Culture=neutral, PublicKeyToken=4aff67a105611170, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CommunityToolkit.Mvvm.8.4.2\lib\netstandard2.0\CommunityToolkit.Mvvm.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\MicrosoftExpressionInteractions.3.0.40218.0\lib\net45\Microsoft.Expression.Interactions.dll</HintPath>
     </Reference>
@@ -198,5 +195,3 @@ xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(Confi
   </Target>
   -->
 </Project>
-
-

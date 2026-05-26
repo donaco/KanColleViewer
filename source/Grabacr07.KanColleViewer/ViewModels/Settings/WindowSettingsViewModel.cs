@@ -17,7 +17,20 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public IReadOnlyCollection<DisplayViewModel<ExitConfirmationType>> ExitConfirmationTypes { get; }
 
-		public IReadOnlyCollection<DisplayViewModel<string>> TaskbarProgressFeatures { get; }
+		private IReadOnlyCollection<DisplayViewModel<string>> _TaskbarProgressFeatures;
+
+		public IReadOnlyCollection<DisplayViewModel<string>> TaskbarProgressFeatures
+		{
+			get { return this._TaskbarProgressFeatures; }
+			private set
+			{
+				if (this._TaskbarProgressFeatures != value)
+				{
+					this._TaskbarProgressFeatures = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
 
 		#region IsSplit 変更通知プロパティ
 
@@ -74,10 +87,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 				DisplayViewModel.Create(ExitConfirmationType.InSortieOnly, "出撃中のみ確認する"),
 				DisplayViewModel.Create(ExitConfirmationType.Always, "常に確認する"),
 			};
-			this.TaskbarProgressFeatures = EnumerableEx
-				.Return(GeneralSettings.TaskbarProgressSource.ToDefaultDisplay("使用しない"))
-				.Concat(TaskbarProgress.Features.ToDisplay(x => x.Id, x => x.DisplayName))
-				.ToList();
+
+			this.ReloadTaskbarProgressFeatures();
+			KanColleViewer.Composition.PluginService.Current.PluginsReloaded += this.ReloadTaskbarProgressFeatures;
 		}
 
 		public void Initialize()
@@ -85,6 +97,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.settings = SettingsHost.Instance<KanColleWindowSettings>();
 			this.settings?.IsSplit.Subscribe(x => this.IsSplit = x).AddTo(this);
 			this.settings?.Dock.Subscribe(x => this.Dock = x).AddTo(this);
+		}
+
+		private void ReloadTaskbarProgressFeatures()
+		{
+			this.TaskbarProgressFeatures = EnumerableEx
+				.Return(GeneralSettings.TaskbarProgressSource.ToDefaultDisplay("使用しない"))
+				.Concat(TaskbarProgress.Features.ToDisplay(x => x.Id, x => x.DisplayName))
+				.ToList();
 		}
 
 		public void SetDockSettings(Dock dock)
