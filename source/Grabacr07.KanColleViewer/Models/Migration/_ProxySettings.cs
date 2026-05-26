@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Grabacr07.KanColleWrapper;
-using Livet;
 
 namespace Grabacr07.KanColleViewer.Models.Migration
 {
@@ -19,7 +18,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 	[XmlRoot("ProxySettings")]
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	// ReSharper disable once InconsistentNaming
-	public class _ProxySettings : NotificationObject
+	public class _ProxySettings 
 	{
 		public _ProxySettings()
 		{
@@ -40,7 +39,6 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 				if (this._SettingType != value)
 				{
 					this._SettingType = value;
-					this.RaisePropertyChanged();
 				}
 			}
 		}
@@ -60,7 +58,6 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 				if (this._Host != value)
 				{
 					this._Host = value;
-					this.RaisePropertyChanged();
 				}
 			}
 		}
@@ -79,7 +76,6 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 				if (this._Port != value)
 				{
 					this._Port = value;
-					this.RaisePropertyChanged();
 				}
 			}
 		}

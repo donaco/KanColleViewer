@@ -10,7 +10,6 @@
 			 xmlns:System="clr-namespace:System;assembly=mscorlib"
 			 xmlns:converters="clr-namespace:Grabacr07.KanColleViewer.Views.Converters"
 			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-			 xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 			 xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 mc:Ignorable="d"
@@ -19,12 +18,6 @@
 			 d:DataContext="{d:DesignInstance airBases:AirBasesViewModel}">
 
 	<i:Interaction.Triggers>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="AirBaseWindow.Show">
-			<livet:TransitionInteractionMessageAction Mode="NewOrActive"
-													  WindowType="views:AirBaseWindow"
-													  IsOwned="False" />
-		</livet:InteractionMessageTrigger>
 	</i:Interaction.Triggers>
 
 	<UserControl.Resources>

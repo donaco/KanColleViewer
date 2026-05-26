@@ -3,7 +3,7 @@ using System.Linq;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents;
 using Grabacr07.KanColleWrapper;
-using Livet.EventListeners;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using MetroTrilithon.Mvvm;
 
 namespace Grabacr07.KanColleViewer.ViewModels
@@ -118,13 +118,15 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				this.Quests = quests.All.Select(x => new QuestViewModel(x)).ToArray();
 				this.Current = quests.Current.Select(x => new QuestViewModel(x)).ToArray();
 
-				this.CompositeDisposable.Add(new PropertyChangedEventListener(quests)
+				System.ComponentModel.PropertyChangedEventHandler handler = (s, e) =>
 				{
-					{ nameof(quests.IsUntaken), (sender, args) => this.IsUntaken = quests.IsUntaken },
-					{ nameof(quests.IsEmpty), (sender, args) => this.IsEmpty = quests.IsEmpty },
-					{ nameof(quests.All), (sender, args) => this.Quests = quests.All.Select(x => new QuestViewModel(x)).ToArray() },
-					{ nameof(quests.Current), (sender, args) => this.Current = quests.Current.Select(x => new QuestViewModel(x)).ToArray() },
-				});
+					if (e.PropertyName == nameof(quests.IsUntaken)) this.IsUntaken = quests.IsUntaken;
+					else if (e.PropertyName == nameof(quests.IsEmpty)) this.IsEmpty = quests.IsEmpty;
+					else if (e.PropertyName == nameof(quests.All)) this.Quests = quests.All.Select(x => new QuestViewModel(x)).ToArray();
+					else if (e.PropertyName == nameof(quests.Current)) this.Current = quests.Current.Select(x => new QuestViewModel(x)).ToArray();
+				};
+				quests.PropertyChanged += handler;
+				this.CompositeDisposable.Add(new DelegateDisposable(() => quests.PropertyChanged -= handler));
 			}
 			catch (Exception ex)
 			{

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.ViewModels.Contents;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 {
-	public class ShipViewModel : ViewModel
+	public class ShipViewModel : ViewModelBase
 	{
 		public int Index { get; }
 

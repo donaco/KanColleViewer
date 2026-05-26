@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
-	public class BuildingDockViewModel : ViewModel
+	public class BuildingDockViewModel : ViewModelBase
 	{
 		private readonly BuildingDock source;
 
@@ -27,7 +26,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 		public BuildingDockViewModel(BuildingDock source)
 		{
 			this.source = source;
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(source, (sender, args) => this.RaisePropertyChanged(args.PropertyName)));
+			System.ComponentModel.PropertyChangedEventHandler handler = (sender, args) => this.RaisePropertyChanged(args.PropertyName);
+			source.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => source.PropertyChanged -= handler));
 		}
 	}
 }

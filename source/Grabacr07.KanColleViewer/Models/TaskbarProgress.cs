@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,14 +6,14 @@ using System.Windows.Shell;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using StatefulModel;
 
 namespace Grabacr07.KanColleViewer.Models
 {
-	public class TaskbarProgress : NotificationObject, ITaskbarProgress, IDisposable
+	public class TaskbarProgress : ObservableObject, ITaskbarProgress, IDisposable
 	{
 		public static ITaskbarProgress[] Features => PluginService.Current.Get<ITaskbarProgress>();
 
@@ -42,7 +42,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this._State != value)
 				{
 					this._State = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -61,7 +61,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (!this._Value.Equals(value))
 				{
 					this._Value = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -118,7 +118,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 
 			this.Updated?.Invoke(this, EventArgs.Empty);
-			this.RaisePropertyChanged(nameof(this.Updated));
+			this.OnPropertyChanged(nameof(this.Updated));
 		}
 
 		private void CurrentOnUpdated(object sender, EventArgs eventArgs)
@@ -129,7 +129,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.Value = progress.Value;
 
 			this.Updated?.Invoke(this, EventArgs.Empty);
-			this.RaisePropertyChanged(nameof(this.Updated));
+			this.OnPropertyChanged(nameof(this.Updated));
 		}
 
 		public void Dispose() => this.compositDisposable.Dispose();

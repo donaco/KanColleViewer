@@ -1,9 +1,7 @@
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
-using Grabacr07.KanColleViewer.ViewModels.Messages;
 using Grabacr07.KanColleWrapper;
-using Livet.Messaging;
 using MetroTrilithon.Mvvm;
 using System;
 using System.Collections.Generic;
@@ -103,13 +101,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		{
 			var format = ScreenshotSettings.Format.Value;
 			var path = Helper.CreateScreenshotFilePath(format);
-
-			var message = new ScreenshotMessage("Window.Screenshot")
-			{
-				Path = path,
-				Format = format,
-			};
-			this.Messenger.Raise(message);
+			this.RaiseScreenshotRequested(path, format);
 		}
 
 

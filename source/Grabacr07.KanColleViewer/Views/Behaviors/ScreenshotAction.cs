@@ -3,34 +3,56 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows;
 using CefSharp.Wpf;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Properties;
-using Grabacr07.KanColleViewer.ViewModels.Messages;
-using Livet.Behaviors.Messaging;
-using Livet.Messaging;
+using MetroTrilithon.Mvvm;
+using Microsoft.Xaml.Behaviors;
 
 namespace Grabacr07.KanColleViewer.Views.Behaviors
 {
 	/// <summary>
 	/// 艦これのゲーム部分を画像として保存する機能を提供します。
 	/// </summary>
-	internal class ScreenshotAction : InteractionMessageAction<ChromiumWebBrowser>
+	internal class ScreenshotAction : Behavior<ChromiumWebBrowser>
 	{
-		protected override async void InvokeAction(InteractionMessage message)
+		#region ViewModel 依存関係プロパティ
+
+		public WindowViewModel ViewModel
 		{
-			if (message is ScreenshotMessage screenshotMessage)
+			get { return (WindowViewModel)this.GetValue(ViewModelProperty); }
+			set { this.SetValue(ViewModelProperty, value); }
+		}
+		public static readonly DependencyProperty ViewModelProperty =
+			DependencyProperty.Register(nameof(ViewModel), typeof(WindowViewModel), typeof(ScreenshotAction), new UIPropertyMetadata(null, OnViewModelChanged));
+
+		private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var action = (ScreenshotAction)d;
+			if (e.OldValue is WindowViewModel old) old.ScreenshotRequested -= action.OnScreenshotRequested;
+			if (e.NewValue is WindowViewModel vm) vm.ScreenshotRequested += action.OnScreenshotRequested;
+		}
+
+		#endregion
+
+		protected override void OnDetaching()
+		{
+			if (this.ViewModel != null) this.ViewModel.ScreenshotRequested -= this.OnScreenshotRequested;
+			base.OnDetaching();
+		}
+
+		private async void OnScreenshotRequested(object sender, ScreenshotRequestedEventArgs e)
+		{
+			try
 			{
-				try
-				{
-					await this.TakeScreenshot(screenshotMessage.Path, screenshotMessage.Format);
-					StatusService.Current.Notify(Resources.Screenshot_Saved + Path.GetFileName(screenshotMessage.Path));
-				}
-				catch (Exception ex)
-				{
-					StatusService.Current.Notify(Resources.Screenshot_Failed + ex.Message);
-				}
+				await this.TakeScreenshot(e.Path, (SupportedImageFormat)e.Format);
+				StatusService.Current.Notify(Resources.Screenshot_Saved + Path.GetFileName(e.Path));
+			}
+			catch (Exception ex)
+			{
+				StatusService.Current.Notify(Resources.Screenshot_Failed + ex.Message);
 			}
 		}
 

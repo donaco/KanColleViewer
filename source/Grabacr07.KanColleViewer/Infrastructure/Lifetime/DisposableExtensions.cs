@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Livet;
 
 namespace MetroTrilithon.Lifetime
 {
@@ -24,9 +23,9 @@ namespace MetroTrilithon.Lifetime
         }
 
         /// <summary>
-        /// <see cref="IDisposable"/> オブジェクトを <see cref="LivetCompositeDisposable"/> に追加します。
+        /// <see cref="IDisposable"/> オブジェクトを <see cref="CompositeDisposable"/> に追加します。
         /// </summary>
-        public static T AddTo<T>(this T disposable, LivetCompositeDisposable compositeDisposable) where T : IDisposable
+        public static T AddTo<T>(this T disposable, CompositeDisposable compositeDisposable) where T : IDisposable
         {
             compositeDisposable?.Add(disposable);
             return disposable;

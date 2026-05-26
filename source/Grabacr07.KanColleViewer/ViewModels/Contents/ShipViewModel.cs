@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
-	public class ShipViewModel : ViewModel
+	public class ShipViewModel : ViewModelBase
 	{
 		public Ship Ship { get; }
 

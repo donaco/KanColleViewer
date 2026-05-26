@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Grabacr07.KanColleViewer.Models.Settings;
-using Livet;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.UI.Controls;
 
@@ -15,7 +14,7 @@ namespace Grabacr07.KanColleViewer.Views
 	{
 		private static readonly Size informationDefaultSize = new Size(566, 358);
 		private readonly KanColleWindowSettings settings;
-		private readonly LivetCompositeDisposable compositeDisposable = new LivetCompositeDisposable();
+		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 		private Size? previousBrowserSize;
 		private Dock? previousDock;
 

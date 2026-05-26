@@ -4,9 +4,8 @@
 				   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-				   xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
-				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				   xmlns:mtti="clr-namespace:MetroTrilithon.UI.Interactivity;assembly=KanColleViewer.Controls"
+				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
 				   xmlns:kcvv="http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters"
@@ -36,42 +35,17 @@
 				   UseLayoutRounding="True">
 
 	<i:Interaction.Behaviors>
-		<livet:WindowCloseCancelBehavior CloseCanceledCallbackMethodTarget="{Binding}"
-										 CloseCanceledCallbackMethodName="CloseCanceledCallback"
-										 CanClose="{Binding CanClose}" />
+		<behaviors:WindowCloseCancelBehavior ViewModel="{Binding}" />
+		<behaviors:WindowActionBehavior ViewModel="{Binding}" />
+		<behaviors:WindowTransitionBehavior ViewModel="{Binding}" />
+		<behaviors:TaskbarBehavior ViewModel="{Binding}" />
 	</i:Interaction.Behaviors>
 
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="ContentRendered">
-			<livet:LivetCallMethodAction MethodTarget="{Binding}"
-										 MethodName="Initialize" />
+			<i:CallMethodAction TargetObject="{Binding}"
+								MethodName="Initialize" />
 		</i:EventTrigger>
-		<i:EventTrigger EventName="Closed">
-			<livet:DataContextDisposeAction />
-		</i:EventTrigger>
-
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.Location">
-			<behaviors:SetWindowLocationAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.WindowAction">
-			<livet:WindowInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.Transition">
-			<livet:TransitionInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False"
-													  IsOwned="False" />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.Transition.Child">
-			<livet:TransitionInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False"
-													  IsOwned="True" />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.UpdateTaskbar">
-			<mtti:TaskbarMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
 	</i:Interaction.Triggers>
 
 	<Grid>
@@ -122,23 +96,15 @@
 									   UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
 									   OwnerSizeChangeRequested="HandleKanColleHostSizeChangeRequested"
 									   Panel.ZIndex="1">
-					<i:Interaction.Triggers>
-						<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-														 MessageKey="WebBrowser.Zoom">
-							<behaviors:ZoomAction />
-						</livet:InteractionMessageTrigger>
-					</i:Interaction.Triggers>
+					<i:Interaction.Behaviors>
+						<behaviors:ZoomAction ViewModel="{Binding}" />
+					</i:Interaction.Behaviors>
 					<cef:ChromiumWebBrowser>
 						<i:Interaction.Behaviors>
 							<behaviors:NavigatorBehavior Navigator="{Binding Navigator}" />
 							<mtti:TaskbarThumbnailBehavior />
+							<behaviors:ScreenshotAction ViewModel="{Binding}" />
 						</i:Interaction.Behaviors>
-						<i:Interaction.Triggers>
-							<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-															 MessageKey="Screenshot.Save">
-								<behaviors:ScreenshotAction />
-							</livet:InteractionMessageTrigger>
-						</i:Interaction.Triggers>
 					</cef:ChromiumWebBrowser>
 				</controls:KanColleHost>
 

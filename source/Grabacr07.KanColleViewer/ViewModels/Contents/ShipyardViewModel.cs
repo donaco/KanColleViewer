@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
-using Livet.EventListeners;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
@@ -60,17 +60,20 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 		{
 			this.CreatedSlotItem = new CreatedSlotItemViewModel();
 
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(KanColleClient.Current.Homeport.Repairyard)
-			{
-				{ nameof(Repairyard.Docks), (sender, args) => this.UpdateRepairingDocks() },
-			});
+			var repairyard = KanColleClient.Current.Homeport.Repairyard;
+			System.ComponentModel.PropertyChangedEventHandler repairHandler = (s, e) => { if (e.PropertyName == nameof(Repairyard.Docks)) this.UpdateRepairingDocks(); };
+			repairyard.PropertyChanged += repairHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => repairyard.PropertyChanged -= repairHandler));
 			this.UpdateRepairingDocks();
 
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(KanColleClient.Current.Homeport.Dockyard)
+			var dockyard = KanColleClient.Current.Homeport.Dockyard;
+			System.ComponentModel.PropertyChangedEventHandler dockyardHandler = (s, e) =>
 			{
-				{ nameof(Dockyard.Docks), (sender, args) => this.UpdateBuildingDocks() },
-				{ nameof(Dockyard.CreatedSlotItem), (sender, args) => this.UpdateSlotItem() },
-			});
+				if (e.PropertyName == nameof(Dockyard.Docks)) this.UpdateBuildingDocks();
+				else if (e.PropertyName == nameof(Dockyard.CreatedSlotItem)) this.UpdateSlotItem();
+			};
+			dockyard.PropertyChanged += dockyardHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => dockyard.PropertyChanged -= dockyardHandler));
 			this.UpdateBuildingDocks();
 		}
 

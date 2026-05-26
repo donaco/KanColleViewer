@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
-using Livet;
 using MetroTrilithon.Linq;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
-	public class WindowSettingsViewModel : ViewModel
+	public class WindowSettingsViewModel : ViewModelBase
 	{
 		private KanColleWindowSettings settings;
 

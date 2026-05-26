@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models.Settings;
-using Livet;
 using MetroTrilithon.Mvvm;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
-	public class UserStyleSheetSettingsViewModel : ViewModel
+	public class UserStyleSheetSettingsViewModel : ViewModelBase
 	{
 		#region UserStyleSheet 変更通知プロパティ
 

@@ -1,4 +1,3 @@
-using Livet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,7 +10,7 @@ using static Counter.SortieAreaCount;
 
 namespace Counter
 {
-	public class CounterViewModel : ViewModel
+	public class CounterViewModel : ObservableObject
 	{
 		/// <summary>
 		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
@@ -30,7 +29,7 @@ namespace Counter
 				if (this._Counters != value)
 				{
 					this._Counters = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -52,7 +51,7 @@ namespace Counter
 				if (this._SortieHistory != value)
 				{
 					this._SortieHistory = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -74,7 +73,7 @@ namespace Counter
 				if (this._IsCounterEnabled != value)
 				{
 					this._IsCounterEnabled = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 
 					// 各カウンターの有効/無効を連動
 					if (this.Counters != null)
@@ -105,7 +104,7 @@ namespace Counter
 				if (this._IsSortieHistoryEnabled != value)
 				{
 					this._IsSortieHistoryEnabled = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 
 					// SortieHistoryCounter の有効/無効を連動
 					if (this.SortieHistory != null)
@@ -133,7 +132,7 @@ namespace Counter
 				if (this._IsTopMost != value)
 				{
 					this._IsTopMost = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -156,7 +155,7 @@ namespace Counter
 				if (this._IsPopupMode != value)
 				{
 					this._IsPopupMode = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -178,7 +177,7 @@ namespace Counter
 				if (this._ShowAirSuperiority != value)
 				{
 					this._ShowAirSuperiority = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}

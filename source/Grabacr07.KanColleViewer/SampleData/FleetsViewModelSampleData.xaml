@@ -1,5 +1,4 @@
-﻿<fleets:FleetsViewModel xmlns:Livet="clr-namespace:Livet;assembly=Livet"
-						xmlns:Messaging="clr-namespace:Livet.Messaging;assembly=Livet"
+<fleets:FleetsViewModel
 						xmlns:ViewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 						xmlns:Models="clr-namespace:Grabacr07.KanColleWrapper.Models;assembly=KanColleWrapper"
 						xmlns:contents="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"

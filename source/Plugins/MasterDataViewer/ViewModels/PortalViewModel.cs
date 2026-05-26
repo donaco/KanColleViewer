@@ -5,15 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 using Microsoft.Win32;
 
 namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 {
-	public class PortalViewModel : ViewModel
+	internal class PortalViewModel : INotifyPropertyChanged
 	{
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 		#region Categories 変更通知プロパティ
 
 		private string[] _Categories;
@@ -26,7 +33,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				if (this._Categories != value)
 				{
 					this._Categories = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -45,7 +52,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				if (this._SelectedCategory != value)
 				{
 					this._SelectedCategory = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 					this.UpdateItems();
 				}
 			}
@@ -65,7 +72,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				if (this._Items != value)
 				{
 					this._Items = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -84,7 +91,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				if (this._IsLoaded != value)
 				{
 					this._IsLoaded = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -106,7 +113,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 				if (this._IsTopMost != value)
 				{
 					this._IsTopMost = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}

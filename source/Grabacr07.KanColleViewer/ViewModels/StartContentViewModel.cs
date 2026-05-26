@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
-using Livet;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
-	public class StartContentViewModel : ViewModel
+	public class StartContentViewModel : ViewModelBase
 	{
 		public NavigatorViewModel Navigator { get; }
 

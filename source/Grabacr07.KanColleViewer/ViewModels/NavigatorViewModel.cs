@@ -5,11 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
-using Livet;
 
 namespace Grabacr07.KanColleViewer.ViewModels
 {
-	public class NavigatorViewModel : ViewModel, INavigator
+	public class NavigatorViewModel : ViewModelBase, INavigator
 	{
 		#region Source 変更通知プロパティ
 

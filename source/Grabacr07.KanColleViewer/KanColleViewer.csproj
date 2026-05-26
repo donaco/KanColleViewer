@@ -106,45 +106,12 @@
     <Reference Include="CefSharp.Wpf, Version=145.0.260.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
       <HintPath>..\packages\CefSharp.Wpf.145.0.260\lib\net462\CefSharp.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Livet, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.4.0.2\lib\net452\Livet.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Behaviors, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Behaviors.4.0.2\lib\net452\Livet.Behaviors.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Collections, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Collections.4.0.2\lib\net452\Livet.Collections.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Converters, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Converters.4.0.2\lib\net452\Livet.Converters.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Core, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Core.4.0.2\lib\net452\Livet.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.EventListeners, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.EventListeners.4.0.2\lib\net452\Livet.EventListeners.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Extensions, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetExtensions.4.0.2\lib\net452\Livet.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Messaging, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Messaging.4.0.2\lib\net452\Livet.Messaging.dll</HintPath>
-    </Reference>
-    <Reference Include="Livet.Mvvm, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b0b1d3f711ef38cb, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetCask.Mvvm.4.0.2\lib\net452\Livet.Mvvm.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\assemblies\Microsoft.Expression.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MicrosoftExpressionInteractions.3.0.40218.0\lib\net45\Microsoft.Expression.Interactions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetExtensions.4.0.2\lib\net452\Microsoft.WindowsAPICodePack.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\LivetExtensions.4.0.2\lib\net452\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.142\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
@@ -221,6 +188,8 @@
     <Compile Include="Composition\PluginMetadata.cs" />
     <Compile Include="Infrastructure\Desktop\SystemEnvironment.cs" />
     <Compile Include="Infrastructure\Interop\Dpi.cs" />
+    <Compile Include="Infrastructure\Lifetime\CompositeDisposable.cs" />
+    <Compile Include="Infrastructure\Lifetime\DelegateDisposable.cs" />
     <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
     <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
     <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
@@ -228,6 +197,7 @@
     <Compile Include="Infrastructure\Mvvm\MetroTrilithonMvvm.cs" />
     <Compile Include="Infrastructure\Mvvm\NotifierAndExtensions.cs" />
     <Compile Include="Infrastructure\Mvvm\RelayCommand.cs" />
+    <Compile Include="Infrastructure\Mvvm\ViewModelBase.cs" />
     <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
     <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
     <Compile Include="Models\AppThemeService.cs" />
@@ -311,10 +281,7 @@
     <Compile Include="ViewModels\InformationViewModel.cs" />
     <Compile Include="Models\INavigator.cs" />
     <Compile Include="ViewModels\Contents\MaterialsViewModel.cs" />
-    <Compile Include="ViewModels\Messages\ScreenshotMessage.cs" />
     <Compile Include="ViewModels\Messages\Response.cs" />
-    <Compile Include="ViewModels\Messages\SetWindowLocationMessage.cs" />
-    <Compile Include="ViewModels\Messages\ZoomMessage.cs" />
     <Compile Include="ViewModels\NavigatorViewModel.cs" />
     <Compile Include="ViewModels\NullViewModel.cs" />
     <Compile Include="ViewModels\Settings\UserStyleSheetSettingsViewModel.cs" />
@@ -337,8 +304,11 @@
     <Compile Include="Views\Behaviors\FocusAction.cs" />
     <Compile Include="Views\Behaviors\NavigatorBehavior.cs" />
     <Compile Include="Views\Behaviors\ScreenshotAction.cs" />
-    <Compile Include="Views\Behaviors\SetWindowLocationAction.cs" />
+    <Compile Include="Views\Behaviors\TaskbarBehavior.cs" />
+    <Compile Include="Views\Behaviors\WindowActionBehavior.cs" />
+    <Compile Include="Views\Behaviors\WindowCloseCancelBehavior.cs" />
     <Compile Include="Views\Behaviors\WindowScreenshotAction.cs" />
+    <Compile Include="Views\Behaviors\WindowTransitionBehavior.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
@@ -768,17 +738,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-    <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
+  <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
   <Target Name="EnsureCefFilescopied" AfterTargets="Build">
     <ItemGroup>
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\locales\**\*.*" />
       <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*" />
     </ItemGroup>
-      <Copy SourceFiles="@(_CefFilesToCopy)" 
-          DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" 
-          SkipUnchangedFiles="true" />
-        <Message Importance="high" Text="CEF files copied to $(OutDir)" />
+    <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="CEF files copied to $(OutDir)" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -1,10 +1,10 @@
 using System;
 using Grabacr07.KanColleViewer.Models.Settings;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels
 {
-	public class VolumeViewModel : ViewModel
+	public class VolumeViewModel : ViewModelBase
 	{
 		#region IsMute 変更通知プロパティ
 

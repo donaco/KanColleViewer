@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Grabacr07.KanColleViewer.Composition;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Composition
 {
-	public class ToolViewModel : ViewModel
+	public class ToolViewModel : ViewModelBase
 	{
 		private readonly ITool tool;
 		private object view;

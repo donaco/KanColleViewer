@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using Livet;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Grabacr07.KanColleViewer.Models
 {
 	/// <summary>
 	/// メイン ウィンドウ下部に表示されるステータス バーへのアクセスを提供します。
 	/// </summary>
-	public class StatusService : NotificationObject
+	public class StatusService : ObservableObject
 	{
 		#region static members
 
@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this.persisitentMessage != value)
 				{
 					this.persisitentMessage = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -72,7 +72,7 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private void RaiseMessagePropertyChanged()
 		{
-			this.RaisePropertyChanged(nameof(this.Message));
+			this.OnPropertyChanged(nameof(this.Message));
 		}
 	}
 }

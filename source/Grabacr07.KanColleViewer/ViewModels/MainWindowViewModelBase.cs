@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
-using Livet;
-using Livet.Messaging;
 using MetroTrilithon.Mvvm;
 
 namespace Grabacr07.KanColleViewer.ViewModels
@@ -24,12 +23,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region Content 変更通知プロパティ
 
-		private ViewModel _Content;
+		private ViewModelBase _Content;
 
 		/// <summary>
-		/// アタッチされたウィンドウに表示するコンテンツを特定するための <see cref="ViewModel"/> オブジェクトを取得または設定します。
+		/// アタッチされたウィンドウに表示するコンテンツを特定するための <see cref="ViewModelBase"/> オブジェクトを取得または設定します。
 		/// </summary>
-		public virtual ViewModel Content
+		public virtual ViewModelBase Content
 		{
 			get { return this._Content; }
 			set
@@ -46,9 +45,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region StatusBar 変更通知プロパティ
 
-		private ViewModel _StatusBar;
+		private ViewModelBase _StatusBar;
 
-		public ViewModel StatusBar
+		public ViewModelBase StatusBar
 		{
 			get { return this._StatusBar; }
 			set
@@ -91,37 +90,32 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 
 		/// <summary>
-		/// 現在のウィンドウから、指定したウィンドウに <see cref="TransitionMode.NewOrActive"/> で遷移します。
+		/// 現在のウィンドウから、指定したウィンドウに遷移します。
 		/// </summary>
-		public void Transition(ViewModel viewModel, Type windowType)
+		public void Transition(ViewModelBase viewModel, Type windowType)
 		{
-			this.Transition(viewModel, windowType, TransitionMode.NewOrActive, false);
+			this.SendTransition(viewModel, windowType, false);
 		}
 
 		/// <summary>
 		/// 現在のウィンドウでダイアログを表示します。
 		/// </summary>
-		public void Dialog(ViewModel viewModel, Type windowType)
+		public void Dialog(ViewModelBase viewModel, Type windowType)
 		{
-			this.Transition(viewModel, windowType, TransitionMode.Modal, true);
+			this.SendTransition(viewModel, windowType, true);
 		}
 
 		protected override void CloseCanceledCallbackCore()
 		{
 			var dialog = new DialogViewModel { Title = "終了確認", };
 
-			this.Dialog(dialog, typeof(ExitDialog));
-
-			if (dialog.DialogResult)
+			dialog.Accepted += (s, e) =>
 			{
 				this.CanClose = true;
 				this.InvokeOnUIDispatcher(this.Close);
-			}
-		}
+			};
 
-		protected void RaiseCanCloseChanged()
-		{
-			this.RaisePropertyChanged(nameof(this.CanClose));
+			this.Dialog(dialog, typeof(ExitDialog));
 		}
 	}
 }

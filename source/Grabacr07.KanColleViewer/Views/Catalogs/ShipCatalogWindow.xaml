@@ -7,7 +7,6 @@
 				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				   xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing"
 				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-				   xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
 				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
 				   xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
@@ -38,22 +37,8 @@
 
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="ContentRendered">
-			<livet:LivetCallMethodAction MethodTarget="{Binding}"
-										 MethodName="Initialize" />
+			<i:CallMethodAction TargetObject="{Binding}" MethodName="Initialize" />
 		</i:EventTrigger>
-
-		<i:EventTrigger EventName="Closed">
-			<livet:DataContextDisposeAction />
-		</i:EventTrigger>
-
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
-										 MessageKey="Window.Location">
-			<behaviors:SetWindowLocationAction />
-		</livet:InteractionMessageTrigger>
-		<livet:InteractionMessageTrigger Messenger="{Binding Messenger, Mode=OneWay}"
-										 MessageKey="Window.Activate">
-			<livet:WindowInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
-		</livet:InteractionMessageTrigger>
 	</i:Interaction.Triggers>
 
 	<Grid>

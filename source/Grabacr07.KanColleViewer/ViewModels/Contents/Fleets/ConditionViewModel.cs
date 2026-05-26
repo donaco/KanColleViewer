@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
-	public class ConditionViewModel : ViewModel
+	public class ConditionViewModel : ViewModelBase
 	{
 		private readonly FleetCondition source;
 
@@ -24,7 +23,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public ConditionViewModel(FleetCondition condition)
 		{
 			this.source = condition;
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(condition, (sender, args) => this.RaisePropertyChanged(args.PropertyName)));
+			System.ComponentModel.PropertyChangedEventHandler handler = (sender, args) => this.RaisePropertyChanged(args.PropertyName);
+			condition.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => condition.PropertyChanged -= handler));
 		}
 	}
 }

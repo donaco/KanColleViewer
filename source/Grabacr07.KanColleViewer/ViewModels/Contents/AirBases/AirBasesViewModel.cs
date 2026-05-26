@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
-using Livet.EventListeners;
-using Livet.Messaging;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using StatefulModel;
@@ -146,17 +144,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				this.airBaseListeners?.Dispose();
 				this.airBaseListeners = new MultipleDisposable();
 
-				// AreaGroup プロパティの変更を監視（元の Subscribe に加え、明示的な PropertyChangedEventListener を追加）
-				homeport.AirBases
-					.Subscribe(nameof(Grabacr07.KanColleWrapper.Models.AirBases.AreaGroup), this.InitializeAirBases)
-					.AddTo(this);
-
-				// 直接 PropertyChangedEventListener でも監視（Subscribe が効かない環境へのフォールバック対策）
-				var listener = new Livet.EventListeners.PropertyChangedEventListener(homeport.AirBases)
-		{
-			{ nameof(Grabacr07.KanColleWrapper.Models.AirBases.AreaGroup), (s, e) => this.InitializeAirBases() },
-		};
-				this.CompositeDisposable.Add(listener);
+				// AreaGroup プロパティの変更を監視
+				System.ComponentModel.PropertyChangedEventHandler airBasesHandler = (s, e) =>
+				{
+					if (e.PropertyName == nameof(Grabacr07.KanColleWrapper.Models.AirBases.AreaGroup)) this.InitializeAirBases();
+				};
+				homeport.AirBases.PropertyChanged += airBasesHandler;
+				this.CompositeDisposable.Add(new DelegateDisposable(() => homeport.AirBases.PropertyChanged -= airBasesHandler));
 
 				// 初期化を試みる
 				this.InitializeAirBases();

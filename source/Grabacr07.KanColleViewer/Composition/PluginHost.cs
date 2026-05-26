@@ -153,7 +153,7 @@ namespace Grabacr07.KanColleViewer.Composition
 				this.container = new CompositionContainer(catalog);
 				this.container.ComposeParts(this);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				this.loadedPlugins = new Dictionary<Guid, Plugin>();
 				return;

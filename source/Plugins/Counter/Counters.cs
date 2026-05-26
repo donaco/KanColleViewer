@@ -3,15 +3,25 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Livet;
 
 namespace Counter
 {
-	public abstract class CounterBase : NotificationObject, IDisposable
+	public abstract class ObservableObject : INotifyPropertyChanged
+	{
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+	}
+
+	public abstract class CounterBase : ObservableObject, IDisposable
 	{
 		// ← サブクラスが登録解除処理をここへ積む
 		private readonly List<Action> _cleanups = new List<Action>();
@@ -31,7 +41,7 @@ namespace Counter
 				if (this._Text != value)
 				{
 					this._Text = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -47,7 +57,7 @@ namespace Counter
 				if (this._Count != value)
 				{
 					this._Count = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -63,7 +73,7 @@ namespace Counter
 				if (this._IsEnabled != value)
 				{
 					this._IsEnabled = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -166,7 +176,7 @@ namespace Counter
 	/// <summary>
 	/// 出撃履歴の1件分を表すモデルです。
 	/// </summary>
-	public class SortieRecord : NotificationObject
+	public class SortieRecord : ObservableObject
 	{
 		/// <summary>
 		/// 表示テキスト（例: "7-4-O [S]"）
@@ -325,7 +335,7 @@ namespace Counter
 	/// <summary>
 	/// 海域-セルごとの出撃数と戦闘結果の集計を表すモデルです。
 	/// </summary>
-	public class SortieAreaCount : NotificationObject
+	public class SortieAreaCount : ObservableObject
 	{
 		/// <summary>
 		/// 海域-セルの内部キー（例: "7-4-C"）。集計・辞書検索用です。
@@ -382,7 +392,7 @@ namespace Counter
 				if (this._Count != value)
 				{
 					this._Count = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -404,7 +414,7 @@ namespace Counter
 				if (this._SCount != value)
 				{
 					this._SCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -426,7 +436,7 @@ namespace Counter
 				if (this._ACount != value)
 				{
 					this._ACount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -448,7 +458,7 @@ namespace Counter
 				if (this._BCount != value)
 				{
 					this._BCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -470,7 +480,7 @@ namespace Counter
 				if (this._AirSupremacyCount != value)
 				{
 					this._AirSupremacyCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -492,7 +502,7 @@ namespace Counter
 				if (this._AirSuperiorCount != value)
 				{
 					this._AirSuperiorCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -555,7 +565,7 @@ namespace Counter
 				if (this._DestructionCount != value)
 				{
 					this._DestructionCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -599,13 +609,13 @@ namespace Counter
 			entry.LdAirbattleCount = data.LdAirbattleCount;
 
 			// 表示テキストの変更通知を発行
-			entry.RaisePropertyChanged(nameof(entry.SText));
-			entry.RaisePropertyChanged(nameof(entry.AText));
-			entry.RaisePropertyChanged(nameof(entry.BText));
-			entry.RaisePropertyChanged(nameof(entry.AirSupremacyText));
-			entry.RaisePropertyChanged(nameof(entry.AirSuperiorText));
-			entry.RaisePropertyChanged(nameof(entry.DestructionText));
-			entry.RaisePropertyChanged(nameof(entry.LdAirbattleText));
+			entry.OnPropertyChanged(nameof(entry.SText));
+			entry.OnPropertyChanged(nameof(entry.AText));
+			entry.OnPropertyChanged(nameof(entry.BText));
+			entry.OnPropertyChanged(nameof(entry.AirSupremacyText));
+			entry.OnPropertyChanged(nameof(entry.AirSuperiorText));
+			entry.OnPropertyChanged(nameof(entry.DestructionText));
+			entry.OnPropertyChanged(nameof(entry.LdAirbattleText));
 
 			return entry;
 		}
@@ -625,7 +635,7 @@ namespace Counter
 				if (this._LdAirbattleCount != value)
 				{
 					this._LdAirbattleCount = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -651,15 +661,15 @@ namespace Counter
 			{
 				case "S":
 					this.SCount++;
-					this.RaisePropertyChanged(nameof(this.SText));
+					this.OnPropertyChanged(nameof(this.SText));
 					break;
 				case "A":
 					this.ACount++;
-					this.RaisePropertyChanged(nameof(this.AText));
+					this.OnPropertyChanged(nameof(this.AText));
 					break;
 				case "B":
 					this.BCount++;
-					this.RaisePropertyChanged(nameof(this.BText));
+					this.OnPropertyChanged(nameof(this.BText));
 					break;
 			}
 
@@ -667,24 +677,24 @@ namespace Counter
 			{
 				case AirSuperiority.AirSupremacy:
 					this.AirSupremacyCount++;
-					this.RaisePropertyChanged(nameof(this.AirSupremacyText));
+					this.OnPropertyChanged(nameof(this.AirSupremacyText));
 					break;
 				case AirSuperiority.AirSuperior:
 					this.AirSuperiorCount++;
-					this.RaisePropertyChanged(nameof(this.AirSuperiorText));
+					this.OnPropertyChanged(nameof(this.AirSuperiorText));
 					break;
 			}
 
 			if (isDestruction)
 			{
 				this.DestructionCount++;
-				this.RaisePropertyChanged(nameof(this.DestructionText));
+				this.OnPropertyChanged(nameof(this.DestructionText));
 			}
 
 			if (isLdAirbattle)
 			{
 				this.LdAirbattleCount++;
-				this.RaisePropertyChanged(nameof(this.LdAirbattleText));
+				this.OnPropertyChanged(nameof(this.LdAirbattleText));
 			}
 		}
 	}
@@ -693,7 +703,7 @@ namespace Counter
 	/// 直近の出撃履歴を保持・表示するカウンターです。
 	/// BossOnly が true の場合、ボスセルでの戦闘結果のみを記録します。
 	/// </summary>
-	public class SortieHistoryCounter : NotificationObject, IDisposable
+	public class SortieHistoryCounter : ObservableObject, IDisposable
 	{
 		private readonly int _maxHistory;
 		private readonly SortieInfo _sortieInfo;
@@ -721,7 +731,7 @@ namespace Counter
 				if (this._IsEnabled != value)
 				{
 					this._IsEnabled = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -743,7 +753,7 @@ namespace Counter
 				if (this._BossOnly != value)
 				{
 					this._BossOnly = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -765,7 +775,7 @@ namespace Counter
 				if (this._History != value)
 				{
 					this._History = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}
@@ -787,7 +797,7 @@ namespace Counter
 				if (this._AreaCounts != value)
 				{
 					this._AreaCounts = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged();
 				}
 			}
 		}

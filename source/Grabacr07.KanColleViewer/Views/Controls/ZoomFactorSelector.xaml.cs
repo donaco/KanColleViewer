@@ -8,10 +8,10 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Grabacr07.KanColleViewer.Models;
-using Livet;
-using Livet.EventListeners;
 using Grabacr07.KanColleViewer.Infrastructure.Interop;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
 {
@@ -21,7 +21,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private List<ZoomFactorSelectorItem> items;
 		private IDisposable zoomFactorNotifyListener;
 
-		internal class ZoomFactorSelectorItem : NotificationObject
+		internal class ZoomFactorSelectorItem : ObservableObject
 		{
 			public Action SelectAction { get; set; }
 			public Size ScreenSize { get; set; }
@@ -39,7 +39,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 					if (this._IsSelected != value)
 					{
 						this._IsSelected = value;
-						this.RaisePropertyChanged();
+						this.OnPropertyChanged(nameof(IsSelected));
 					}
 				}
 			}
@@ -86,20 +86,19 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 
 			var notifySource = newValue as INotifyPropertyChanged;
-			if (notifySource != null)
-			{
-				source.zoomFactorNotifyListener = new PropertyChangedEventListener(notifySource)
+				if (notifySource != null)
 				{
+					PropertyChangedEventHandler handler = (s, args) =>
 					{
-						"Current",
-						(sender, args) =>
+						if (args.PropertyName == "Current")
 						{
 							var target = source.items.FirstOrDefault(x => x.Value == (int)(newValue.Current * 100));
 							if (target != null) target.IsSelected = true;
 						}
-					}
-				};
-			}
+					};
+					notifySource.PropertyChanged += handler;
+					source.zoomFactorNotifyListener = new DelegateDisposable(() => notifySource.PropertyChanged -= handler);
+				}
 		}
 
 		#endregion

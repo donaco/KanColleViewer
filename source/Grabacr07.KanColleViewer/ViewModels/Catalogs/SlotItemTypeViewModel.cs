@@ -1,10 +1,10 @@
 using System;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 {
-	public class SlotItemTypeViewModel : ViewModel
+	public class SlotItemTypeViewModel : ViewModelBase
 	{
 		public Action SelectionChangedAction { get; set; }
 

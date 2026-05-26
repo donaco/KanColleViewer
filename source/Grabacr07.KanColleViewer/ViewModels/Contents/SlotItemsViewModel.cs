@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper;
-using Livet;
-using Livet.EventListeners;
-
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
-	public class SlotItemsViewModel : ViewModel
+	public class SlotItemsViewModel : ViewModelBase
 	{
 		#region Count 変更通知プロパティ
 
@@ -31,10 +30,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public SlotItemsViewModel()
 		{
-			this.CompositeDisposable.Add(new PropertyChangedEventListener(KanColleClient.Current.Homeport.Itemyard)
-			{
-				{ nameof(Itemyard.SlotItemsCount), (sender, args) => this.Update() }
-			});
+			var itemyard = KanColleClient.Current.Homeport.Itemyard;
+			System.ComponentModel.PropertyChangedEventHandler handler = (s, e) => { if (e.PropertyName == nameof(Itemyard.SlotItemsCount)) this.Update(); };
+			itemyard.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => itemyard.PropertyChanged -= handler));
 			this.Update();
 		}
 

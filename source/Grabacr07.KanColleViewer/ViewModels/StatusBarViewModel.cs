@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Livet;
 
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels
 {
-	public class StatusBarViewModel : ViewModel
+	public class StatusBarViewModel : ViewModelBase
 	{
 		#region NotificationMessage 変更通知プロパティ
 

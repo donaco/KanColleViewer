@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
-using Livet;
-
+using CommunityToolkit.Mvvm.ComponentModel;
+using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 {
-	public abstract class ShipCatalogFilter : NotificationObject
+	public abstract class ShipCatalogFilter : ObservableObject
 	{
 		private readonly Action action;
 
@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -60,7 +60,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Level1 != value)
 				{
 					this._Level1 = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -80,7 +80,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Level2OrMore != value)
 				{
 					this._Level2OrMore = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -118,7 +118,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -138,7 +138,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Locked != value)
 				{
 					this._Locked = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -158,7 +158,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Unlocked != value)
 				{
 					this._Unlocked = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -196,7 +196,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Fastest != value)
 				{
 					this._Fastest = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -216,7 +216,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Faster != value)
 				{
 					this._Faster = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -236,7 +236,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Fast != value)
 				{
 					this._Fast = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -256,7 +256,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Slow != value)
 				{
 					this._Slow = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -298,7 +298,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -318,7 +318,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._MaxModernized != value)
 				{
 					this._MaxModernized = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -338,7 +338,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._NotMaxModernized != value)
 				{
 					this._NotMaxModernized = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -376,7 +376,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -396,7 +396,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._AlreadyRemodeling != value)
 				{
 					this._AlreadyRemodeling = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -416,7 +416,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._NotAlreadyRemodeling != value)
 				{
 					this._NotAlreadyRemodeling = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -456,7 +456,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._WithoutExpedition != value)
 				{
 					this._WithoutExpedition = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -496,7 +496,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				{
 					this._IsEnabled = value;
 					this.ColumnWidth = value ? 65.0 : .0;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -515,7 +515,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._SallyAreas != value)
 				{
 					this._SallyAreas = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -534,7 +534,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._ColumnWidth != value)
 				{
 					this._ColumnWidth = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 				}
 			}
 		}
@@ -570,7 +570,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			this.Update();
 		}
 
-		public class SallyAreaFilterChild : ViewModel
+		public class SallyAreaFilterChild : ViewModelBase
 		{
 			private readonly SallyArea model;
 			private readonly ShipSallyAreaFilter owner;
@@ -587,7 +587,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 					if (this._Name != value)
 					{
 						this._Name = value;
-						this.RaisePropertyChanged();
+						this.OnPropertyChanged(string.Empty);
 					}
 				}
 			}
@@ -606,7 +606,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 					if (this._IsChecked != value)
 					{
 						this._IsChecked = value;
-						this.RaisePropertyChanged();
+						this.OnPropertyChanged(string.Empty);
 						this.owner.Update();
 					}
 				}
@@ -642,7 +642,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -662,7 +662,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Damaged != value)
 				{
 					this._Damaged = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -682,7 +682,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Undamaged != value)
 				{
 					this._Undamaged = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -720,7 +720,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Both != value)
 				{
 					this._Both = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -740,7 +740,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Brilliant != value)
 				{
 					this._Brilliant = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
@@ -760,7 +760,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Unbrilliant != value)
 				{
 					this._Unbrilliant = value;
-					this.RaisePropertyChanged();
+					this.OnPropertyChanged(string.Empty);
 					this.Update();
 				}
 			}
