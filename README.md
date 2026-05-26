@@ -64,18 +64,6 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The MIT License (MIT)
 * * **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
 
-#### [Livet](http://ugaya40.hateblo.jp/entry/Livet)
-* **用途 :** MVVM(Model/View/ViewModel)パターン用インフラストラクチャ
-* **ライセンス :** zlib/libpng
-
-#### [StatefulModel](http://ugaya40.hateblo.jp/entry/StatefulModel)
-> The MIT License (MIT)
->
-> Copyright (c) 2015 Masanori Onoue
-* **用途 :** M-V-Whatever の Model 向けインフラストラクチャ
-* **ライセンス :** The MIT License (MIT)
-* **ライセンス全文 :** [licenses/StatefulModel.txt](licenses/StatefulModel.txt)
-
 #### [Desktop Toast](https://github.com/emoacht/DesktopToast)
 > The MIT License (MIT)
 >

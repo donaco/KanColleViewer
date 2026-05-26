@@ -62,16 +62,6 @@ Newtonsoft.Json
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : licenses/Newtonsoft.Json.txt
 
-Livet
-(http://ugaya40.hateblo.jp/entry/Livet)
-    ・用途 : MVVM(Model/View/ViewModel)パターン用インフラストラクチャ
-    ・ライセンス : zlib/libpng
-
-StatefulModel
-(http://ugaya40.hateblo.jp/entry/StatefulModel)
-    ・用途 : M-V-Whatever の Model 向けインフラストラクチャ
-    ・ライセンス : The MIT License (MIT)
-
 Desktop Toast
 (https://github.com/emoacht/DesktopToast)
     The MIT License (MIT)
