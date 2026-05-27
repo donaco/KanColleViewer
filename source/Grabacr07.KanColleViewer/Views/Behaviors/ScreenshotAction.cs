@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using CefSharp;
+using CefSharp.DevTools.Page;
 using CefSharp.Wpf;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
@@ -64,127 +65,76 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 				throw new Exception("ブラウザーが見つかりません。");
 			}
 
-			// ゲームフレーム (kcs2 の iframe) を取得
-			if (!browser.TryGetKanColleCanvas(out var gameFrame))
+			var cefBrowser = browser.GetBrowser();
+			if (cefBrowser == null)
 			{
-				throw new Exception("艦これのゲームフレームが見つかりません。");
+				throw new Exception("ブラウザーが初期化されていません。");
 			}
 
-			var mimeType = format.ToMimeType();
-
-			// WebGL の preserveDrawingBuffer 問題を回避するため、
-			// requestAnimationFrame 内で描画直後にキャプチャする
-			var jsResult = await gameFrame.EvaluateScriptAsync($@"
-new Promise(function(resolve) {{
-	var canvas = document.querySelector('canvas');
-	if (!canvas) {{
-		resolve({{ success: false, error: 'Canvas element not found' }});
-		return;
-	}}
-	if (canvas.width === 0 || canvas.height === 0) {{
-		resolve({{ success: false, error: 'Canvas size is zero' }});
-		return;
-	}}
-
-	var gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-	if (gl) {{
-		requestAnimationFrame(function() {{
-			try {{
-				var w = canvas.width;
-				var h = canvas.height;
-				var pixels = new Uint8Array(w * h * 4);
-				gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-				var tmpCanvas = document.createElement('canvas');
-				tmpCanvas.width = w;
-				tmpCanvas.height = h;
-				var ctx = tmpCanvas.getContext('2d');
-				var imageData = ctx.createImageData(w, h);
-
-				// WebGL の readPixels は左下原点なので上下反転
-				for (var y = 0; y < h; y++) {{
-					var srcOffset = (h - y - 1) * w * 4;
-					var dstOffset = y * w * 4;
-					for (var x = 0; x < w * 4; x++) {{
-						imageData.data[dstOffset + x] = pixels[srcOffset + x];
-					}}
-				}}
-				ctx.putImageData(imageData, 0, 0);
-
-				resolve({{ success: true, data: tmpCanvas.toDataURL('{mimeType}') }});
-			}} catch(e) {{
-				resolve({{ success: false, error: e.message }});
-			}}
-		}});
-	}} else {{
-		requestAnimationFrame(function() {{
-			try {{
-				resolve({{ success: true, data: canvas.toDataURL('{mimeType}') }});
-			}} catch(e) {{
-				resolve({{ success: false, error: e.message }});
-			}}
-		}});
-	}}
-}});
-");
-
-			if (jsResult == null)
+			// ゲームフレーム (kcs2 の iframe) の表示領域をメインフレームの JS から取得してクリップ領域を決定する
+			Viewport clip = null;
+			try
 			{
-				throw new Exception("JavaScript の評価が失敗しました。");
-			}
-
-			if (!jsResult.Success)
-			{
-				throw new Exception($"スクリーンショット取得エラー: {jsResult.Message}");
-			}
-
-			if (jsResult.Result is IDictionary<string, object> resultDict)
-			{
-				if (resultDict.TryGetValue("success", out var successObj) && successObj is bool success)
+				var rectResult = await browser.EvaluateScriptAsync(@"
+(function() {
+	var iframe = document.querySelector('iframe');
+	if (!iframe) return null;
+	var r = iframe.getBoundingClientRect();
+	if (r.width === 0 || r.height === 0) return null;
+	var dpr = window.devicePixelRatio || 1;
+	return { x: r.left, y: r.top, width: r.width, height: r.height, scale: dpr };
+})();");
+				if (rectResult != null && rectResult.Success && rectResult.Result is IDictionary<string, object> rect)
 				{
-					if (success && resultDict.TryGetValue("data", out var dataObj))
+					clip = new Viewport
 					{
-						var dataUrl = dataObj as string;
-						await this.SaveScreenshot(path, dataUrl);
-						return;
-					}
-					else if (resultDict.TryGetValue("error", out var errorObj))
-					{
-						throw new Exception($"スクリーンショット取得エラー: {errorObj}");
-					}
+						X = Convert.ToDouble(rect["x"]),
+						Y = Convert.ToDouble(rect["y"]),
+						Width = Convert.ToDouble(rect["width"]),
+						Height = Convert.ToDouble(rect["height"]),
+						Scale = Convert.ToDouble(rect["scale"]),
+					};
 				}
 			}
+			catch
+			{
+				// クリップ取得に失敗した場合はページ全体をキャプチャする
+			}
 
-			throw new Exception("スクリーンショット取得に失敗しました。");
+			// CDP Page.CaptureScreenshot で GPU レンダリング済みの画面を直接取得する
+			// WebGL の preserveDrawingBuffer: false 問題を回避できる
+			var captureFormat = format == SupportedImageFormat.Jpeg
+				? CaptureScreenshotFormat.Jpeg
+				: CaptureScreenshotFormat.Png;
+
+			CaptureScreenshotResponse screenshotResponse;
+			using (var devTools = cefBrowser.GetDevToolsClient())
+			{
+				var pageClient = devTools.Page;
+				screenshotResponse = await pageClient.CaptureScreenshotAsync(captureFormat, clip: clip);
+			}
+
+			if (screenshotResponse == null || screenshotResponse.Data == null || screenshotResponse.Data.Length == 0)
+			{
+				throw new Exception("スクリーンショットのデータが取得できませんでした。");
+			}
+
+			await this.SaveScreenshot(path, screenshotResponse.Data);
 		}
 
-		private Task SaveScreenshot(string path, string dataUrl)
+		private Task SaveScreenshot(string path, byte[] data)
 		{
 			return Task.Run(() =>
 			{
-				if (string.IsNullOrEmpty(dataUrl))
-				{
-					throw new Exception("dataUrl が空です。");
-				}
-
-				var array = dataUrl.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-				if (array.Length != 2)
-				{
-					throw new Exception("無効な形式です。");
-				}
-
-				var base64 = array[1];
-				var bytes = Convert.FromBase64String(base64);
-
 				var directory = Path.GetDirectoryName(path);
 				if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 				{
 					Directory.CreateDirectory(directory);
 				}
 
-				using (var fs = new FileStream(path, FileMode.CreateNew))
+				using (var fs = new FileStream(path, FileMode.Create))
 				{
-					fs.Write(bytes, 0, bytes.Length);
+					fs.Write(data, 0, data.Length);
 				}
 			});
 		}
