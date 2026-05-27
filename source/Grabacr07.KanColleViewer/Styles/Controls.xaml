@@ -82,6 +82,72 @@
 		</Style.Triggers>
 	</Style>
 
+	<!-- Phase 1: MetroTrilithon.Desktop/Styles/Controls.CircleButton.xaml から内製化 -->
+	<Style x:Key="CircleButtonStyleKey"
+		   TargetType="{x:Type Button}">
+		<Setter Property="Background"
+				Value="Transparent" />
+		<Setter Property="Foreground"
+				Value="{DynamicResource ForegroundBrushKey}" />
+		<Setter Property="BorderBrush"
+				Value="{DynamicResource BorderBrushKey}" />
+		<Setter Property="BorderThickness"
+				Value="2" />
+		<Setter Property="HorizontalContentAlignment"
+				Value="Center" />
+		<Setter Property="VerticalContentAlignment"
+				Value="Center" />
+		<Setter Property="SnapsToDevicePixels"
+				Value="True" />
+		<Setter Property="FocusVisualStyle"
+				Value="{x:Null}" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Border x:Name="border"
+							Background="{TemplateBinding Background}"
+							BorderBrush="{TemplateBinding BorderBrush}"
+							BorderThickness="{TemplateBinding BorderThickness}"
+							CornerRadius="100"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+						<ContentPresenter Margin="{TemplateBinding Padding}"
+										  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+										  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver"
+								 Value="True">
+							<Setter TargetName="border"
+									Property="Background"
+									Value="{DynamicResource ActiveBackgroundBrushKey}" />
+							<Setter TargetName="border"
+									Property="BorderBrush"
+									Value="{DynamicResource ActiveBorderBrushKey}" />
+							<Setter Property="Foreground"
+									Value="{DynamicResource ActiveForegroundBrushKey}" />
+						</Trigger>
+						<Trigger Property="IsPressed"
+								 Value="True">
+							<Setter TargetName="border"
+									Property="Background"
+									Value="{DynamicResource AccentBrushKey}" />
+							<Setter TargetName="border"
+									Property="BorderBrush"
+									Value="{DynamicResource AccentBrushKey}" />
+							<Setter Property="Foreground"
+									Value="{DynamicResource AccentForegroundBrushKey}" />
+						</Trigger>
+						<Trigger Property="IsEnabled"
+								 Value="False">
+							<Setter Property="Opacity"
+									Value="0.6" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
 	<!-- Phase 1: MetroTrilithon.Desktop/Styles/Controls.MetroDialog.xaml から内製化 -->
 	<WindowChrome x:Key="DefaultChrome"
 				  ResizeBorderThickness="0"

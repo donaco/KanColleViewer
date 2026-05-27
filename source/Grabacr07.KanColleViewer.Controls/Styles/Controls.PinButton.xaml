@@ -6,6 +6,8 @@
 		   TargetType="{x:Type metro:CaptionButton}">
 		<Setter Property="Mode"
 				Value="Toggle" />
+		<Setter Property="Foreground"
+				Value="{DynamicResource ForegroundBrushKey}" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type metro:CaptionButton}">
