@@ -19,7 +19,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 	[ExportMetadata("Guid", guid)]
 	[ExportMetadata("Title", "HpProgressIndicator")]
 	[ExportMetadata("Description", "艦隊内の最大損害艦 HP をタスク バー インジケーターに報告します。")]
-	[ExportMetadata("Version", "1.1.2")]
+	[ExportMetadata("Version", "2.0.0")]
 	[ExportMetadata("Author", "@veigr")]
 	public class HpProgress : IPlugin, ITaskbarProgress, IDisposableHolder
 	{

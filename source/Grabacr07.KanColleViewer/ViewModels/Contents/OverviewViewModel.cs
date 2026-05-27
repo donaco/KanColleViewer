@@ -10,6 +10,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
 	public class OverviewViewModel : TabItemViewModel
 	{
+		private ShipCatalogWindowViewModel shipCatalog;
+		private SlotItemCatalogViewModel slotItemCatalog;
 		public override string Name
 		{
 			get { return Resources.IntegratedView; }
@@ -69,14 +71,26 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public void ShowShipCatalog()
 		{
-			var catalog = new ShipCatalogWindowViewModel();
-			WindowService.Current.MainWindow.Transition(catalog, typeof(ShipCatalogWindow));
+           if (this.shipCatalog == null || this.shipCatalog.IsClosed)
+           {
+				this.shipCatalog = new ShipCatalogWindowViewModel();
+				WindowService.Current.MainWindow.Transition(this.shipCatalog, typeof(ShipCatalogWindow));
+			    return;
+			}
+			
+			this.shipCatalog.Activate();
 		}
 
 		public void ShowSlotItemCatalog()
 		{
-			var catalog = new SlotItemCatalogViewModel();
-			WindowService.Current.MainWindow.Transition(catalog, typeof(SlotItemCatalogWindow));
+           if (this.slotItemCatalog == null || this.slotItemCatalog.IsClosed)
+			{
+				this.slotItemCatalog = new SlotItemCatalogViewModel();
+				WindowService.Current.MainWindow.Transition(this.slotItemCatalog, typeof(SlotItemCatalogWindow));
+			    return;
+			}
+			
+			this.slotItemCatalog.Activate();
 		}
 	}
 }

@@ -34,6 +34,11 @@
 				   UseLayoutRounding="True"
 				   TextOptions.TextFormattingMode="Display">
 
+	<i:Interaction.Behaviors>
+	<behaviors:WindowActionBehavior ViewModel="{Binding}" />
+	<behaviors:WindowCloseCancelBehavior ViewModel="{Binding}" />
+	</i:Interaction.Behaviors>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />

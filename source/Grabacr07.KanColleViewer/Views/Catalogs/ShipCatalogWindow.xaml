@@ -35,6 +35,11 @@
 				   SnapsToDevicePixels="True"
 				   TextOptions.TextFormattingMode="Display">
 
+	<i:Interaction.Behaviors>
+		<behaviors:WindowActionBehavior ViewModel="{Binding}" />
+		<behaviors:WindowCloseCancelBehavior ViewModel="{Binding}" />
+	</i:Interaction.Behaviors>
+
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="ContentRendered">
 			<i:CallMethodAction TargetObject="{Binding}" MethodName="Initialize" />
