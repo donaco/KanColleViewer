@@ -101,6 +101,7 @@ System.Reactive (Reactive Extensions for .NET)
 
 
 ■更新履歴
+2026/06/0x - version 4.8.0
 2026/05/19 - version 4.7.3
 2026/05/10 - version 4.7.2
 2026/04/20 - version 4.7.1
