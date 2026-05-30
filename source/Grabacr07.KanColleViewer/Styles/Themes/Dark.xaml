@@ -53,4 +53,146 @@
     <Color x:Key="ChromeForegroundColorKey">#FFC8C8C8</Color>
     <SolidColorBrush x:Key="ChromeForegroundBrushKey" Color="#FFC8C8C8" />
 
+	<!-- ScrollBar スタイル (ダークモード対応、矢印ボタン表示) -->
+	<Style TargetType="{x:Type ScrollBar}">
+		<Setter Property="Background" Value="#FF3F3F46" />
+		<Setter Property="Foreground" Value="#FFC8C8C8" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ScrollBar}">
+					<Grid x:Name="GridRoot" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="{TemplateBinding Background}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+
+						<!-- 上矢印ボタン -->
+						<RepeatButton x:Name="LineUpButton" Grid.Row="0" Command="ScrollBar.LineUpCommand" Focusable="false" Height="18">
+							<RepeatButton.Style>
+								<Style TargetType="{x:Type RepeatButton}">
+									<Setter Property="IsTabStop" Value="false" />
+									<Setter Property="Focusable" Value="false" />
+									<Setter Property="Background" Value="#FF3F3F46" />
+									<Setter Property="Foreground" Value="#FF333337" />
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate TargetType="{x:Type RepeatButton}">
+												<Grid x:Name="border" Background="{TemplateBinding Background}">
+													<Path x:Name="upArrow" Data="M 0 4 L 3.5 0 L 7 4 Z" Fill="{TemplateBinding Foreground}" Stroke="{TemplateBinding Foreground}" StrokeThickness="0.5" Width="7" Height="4" SnapsToDevicePixels="True" HorizontalAlignment="Center" VerticalAlignment="Center" />
+												</Grid>
+												<ControlTemplate.Triggers>
+													<Trigger Property="IsMouseOver" Value="true">
+														<Setter TargetName="border" Property="Background" Value="#FF555555" />
+													</Trigger>
+													<Trigger Property="IsPressed" Value="true">
+														<Setter TargetName="border" Property="Background" Value="#FF707070" />
+													</Trigger>
+												</ControlTemplate.Triggers>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</RepeatButton.Style>
+						</RepeatButton>
+
+						<!-- スクロール領域 -->
+						<Track x:Name="PART_Track" Grid.Row="1" IsDirectionReversed="true" Focusable="false">
+							<Track.DecreaseRepeatButton>
+								<RepeatButton x:Name="PageUp" Command="ScrollBar.PageUpCommand" Focusable="false">
+									<RepeatButton.Style>
+										<Style TargetType="{x:Type RepeatButton}">
+											<Setter Property="IsTabStop" Value="false" />
+											<Setter Property="Focusable" Value="false" />
+											<Setter Property="Template">
+												<Setter.Value>
+													<ControlTemplate TargetType="{x:Type RepeatButton}">
+														<Grid Background="Transparent" />
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</RepeatButton.Style>
+								</RepeatButton>
+							</Track.DecreaseRepeatButton>
+
+							<Track.IncreaseRepeatButton>
+								<RepeatButton x:Name="PageDown" Command="ScrollBar.PageDownCommand" Focusable="false">
+									<RepeatButton.Style>
+										<Style TargetType="{x:Type RepeatButton}">
+											<Setter Property="IsTabStop" Value="false" />
+											<Setter Property="Focusable" Value="false" />
+											<Setter Property="Template">
+												<Setter.Value>
+													<ControlTemplate TargetType="{x:Type RepeatButton}">
+														<Grid Background="Transparent" />
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</RepeatButton.Style>
+								</RepeatButton>
+							</Track.IncreaseRepeatButton>
+
+							<Track.Thumb>
+								<Thumb x:Name="Thumb" Focusable="false">
+									<Thumb.Style>
+										<Style TargetType="{x:Type Thumb}">
+											<Setter Property="IsTabStop" Value="false" />
+											<Setter Property="Focusable" Value="false" />
+											<Setter Property="Template">
+												<Setter.Value>
+													<ControlTemplate TargetType="{x:Type Thumb}">
+														<Border x:Name="ThumbBorder" Background="#FF3F3F46" CornerRadius="2" Margin="2,0,2,0" />
+														<ControlTemplate.Triggers>
+															<Trigger Property="IsMouseOver" Value="true">
+																<Setter TargetName="ThumbBorder" Property="Background" Value="#FF3F3F46" />
+															</Trigger>
+															<Trigger Property="IsDragging" Value="true">
+																<Setter TargetName="ThumbBorder" Property="Background" Value="#FF3F3F46" />
+															</Trigger>
+														</ControlTemplate.Triggers>
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</Thumb.Style>
+								</Thumb>
+							</Track.Thumb>
+						</Track>
+
+						<!-- 下矢印ボタン -->
+						<RepeatButton x:Name="LineDownButton" Grid.Row="2" Command="ScrollBar.LineDownCommand" Focusable="false" Height="18">
+							<RepeatButton.Style>
+								<Style TargetType="{x:Type RepeatButton}">
+									<Setter Property="IsTabStop" Value="false" />
+									<Setter Property="Focusable" Value="false" />
+									<Setter Property="Background" Value="#FF3F3F46" />
+									<Setter Property="Foreground" Value="#FF333337" />
+									<Setter Property="Template">
+										<Setter.Value>
+											<ControlTemplate TargetType="{x:Type RepeatButton}">
+												<Grid x:Name="border" Background="{TemplateBinding Background}">
+													<Path x:Name="downArrow" Data="M 0 0 L 3.5 4 L 7 0 Z" Fill="{TemplateBinding Foreground}" Stroke="{TemplateBinding Foreground}" StrokeThickness="0.5" Width="7" Height="4" SnapsToDevicePixels="True" HorizontalAlignment="Center" VerticalAlignment="Center" />
+												</Grid>
+												<ControlTemplate.Triggers>
+													<Trigger Property="IsMouseOver" Value="true">
+														<Setter TargetName="border" Property="Background" Value="#FF555555" />
+													</Trigger>
+													<Trigger Property="IsPressed" Value="true">
+														<Setter TargetName="border" Property="Background" Value="#FF707070" />
+													</Trigger>
+												</ControlTemplate.Triggers>
+											</ControlTemplate>
+										</Setter.Value>
+									</Setter>
+								</Style>
+							</RepeatButton.Style>
+						</RepeatButton>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
 </ResourceDictionary>
