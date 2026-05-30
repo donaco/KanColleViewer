@@ -62,7 +62,7 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 > created James Newton-King 
 * **用途 :** JSON デシリアライズ
 * **ライセンス :** The MIT License (MIT)
-* * **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
+* **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
 
 #### [Desktop Toast](https://github.com/emoacht/DesktopToast)
 > The MIT License (MIT)
@@ -80,12 +80,12 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/NETCoreAudioAPIs.txt](licenses/NETCoreAudioAPIs.txt)
 
-### [CefSharp.Wpf](http://cefsharp.github.io/)
+#### [CefSharp.Wpf](http://cefsharp.github.io/)
 * **用途 :** 内蔵 Web ブラウザー
 * **ライセンス :** The 3-Clause BSD License
 * **ライセンス全文 :** [licenses/CefSharp.txt](licenses/CefSharp.txt)
 
-### [System.Reactive](https://github.com/dotnet/reactive)
+#### [System.Reactive](https://github.com/dotnet/reactive)
 * **用途 :** 非同期処理
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/System.Reactive.txt](licenses/System.Reactive.txt)
