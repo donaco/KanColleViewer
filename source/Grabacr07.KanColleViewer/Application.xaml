@@ -10,7 +10,7 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<!-- MetroRadiance 依存除去済み: テーマ・スタイルは内製辞書で提供 -->
-				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Dark.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Accents/Dark.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Accents/Purple.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Colors.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Controls.xaml" />
