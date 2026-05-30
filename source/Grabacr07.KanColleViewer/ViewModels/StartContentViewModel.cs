@@ -91,6 +91,11 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		public StartContentViewModel(NavigatorViewModel navigator)
 		{
 			this.Navigator = navigator;
+
+			if (GeneralSettings.IsAutoUpdateCheckEnabled.Value)
+			{
+				this.CheckForUpdate();
+			}
 		}
 
 

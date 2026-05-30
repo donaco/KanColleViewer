@@ -79,6 +79,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> IsMuted { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
 
+		/// <summary>
+		/// アプリケーション起動時にアップデートチェックを自動実行するかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> IsAutoUpdateCheckEnabled { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
+
 		private static string GetKey([CallerMemberName] string propertyName = "")
 		{
 			return nameof(GeneralSettings) + "." + propertyName;

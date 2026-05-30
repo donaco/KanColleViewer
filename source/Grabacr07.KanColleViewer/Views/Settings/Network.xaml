@@ -31,13 +31,13 @@
 		<StackPanel Margin="20,0,0,0">
 			<RadioButton x:Name="CheckDirectAccess"
 						 GroupName="ProxySettings"
-						 Content="プロキシ サーバーを使用しない"
+						 Content="プロキシサーバーを使用しない"
 						 IsChecked="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DirectAccess}" />
 
 			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 					   IsEnabled="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DirectAccess}"
 					   Margin="20,2,0,0">
-				<Run Text="全てのプロトコルでプロキシ サーバーを中継せずに直接サーバーと通信を行います。" />
+				<Run Text="全てのプロトコルでプロキシサーバーを中継せずに直接サーバーと通信を行います。" />
 			</TextBlock>
 
 			<Border Height="8" />
@@ -55,7 +55,7 @@
 			<Border Height="8" />
 			<RadioButton x:Name="CheckUseSpecificProxy"
 						 GroupName="ProxySettings"
-						 Content="プロキシ サーバーを指定する"
+						 Content="プロキシサーバーを指定する"
 						 IsChecked="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SpecificProxy}" />
 
 			<StackPanel IsEnabled="{Binding ProxyType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SpecificProxy}"
@@ -70,7 +70,7 @@
 
 				<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="0,2">
-					<Run Text="指定したプロキシ サーバーを中継して通信を行います。" />
+					<Run Text="指定したプロキシサーバーを中継して通信を行います。" />
 					<LineBreak />
 					<Run Text="サーバーをホスト名で指定した場合、動作が遅くなることがあるため、IP アドレスでの指定を推奨します。" />
 				</TextBlock>

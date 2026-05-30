@@ -280,8 +280,8 @@
     <value>ウィークリー任務</value>
   </data>
   <data name="Quests_Monthly" xml:space="preserve">
-  <value>マンスリー任務</value>
-</data>
+    <value>マンスリー任務</value>
+  </data>
   <data name="Repairyard" xml:space="preserve">
     <value>入渠ドック</value>
   </data>
@@ -470,5 +470,11 @@
   </data>
   <data name="AirBases_Untaken" xml:space="preserve">
     <value>ゲーム内で [海域選択] 画面を開いて、基地航空隊を取得してください。</value>
+  </data>
+  <data name="UpdateCheck_off" xml:space="preserve">
+    <value>手動で確認する</value>
+  </data>
+  <data name="UpdateCheck_on" xml:space="preserve">
+    <value>自動で確認する</value>
   </data>
 </root>

@@ -376,6 +376,7 @@
                                            Style="{DynamicResource HeaderTextStyleKey}" />
                                 <CheckBox Margin="8,6"
                                           Content="{Binding Resources.Dockyard_Display_Reveal, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+                                          Foreground="{DynamicResource ForegroundBrushKey}"
                                           IsChecked="{Binding Source={x:Static settings:KanColleSettings.CanDisplayBuildingShipName}, Path=Value, Mode=TwoWay}" />
                             </StackPanel>
 

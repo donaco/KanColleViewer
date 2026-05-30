@@ -165,5 +165,22 @@
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+
+		<TextBlock Text="アップデートチェック"
+				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
+		<StackPanel Orientation="Horizontal"
+					Margin="20,0,0,0">
+			<TextBlock Text="アプリケーション起動時のアップデートチェック"
+					   Margin="0,0,10,0" />
+			<controls:PromptComboBox ItemsSource="{Binding UpdateCheckModes}"
+							  DisplayMemberPath="Display"
+							  SelectedValuePath="Value"
+							  SelectedValue="{Binding Source={x:Static ms:GeneralSettings.IsAutoUpdateCheckEnabled}, Path=Value, Mode=TwoWay}"
+							  Prompt=""
+							  IsReadOnly="True"
+							  MinWidth="110" />
+		</StackPanel>
+		
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 	</StackPanel>
 </UserControl>

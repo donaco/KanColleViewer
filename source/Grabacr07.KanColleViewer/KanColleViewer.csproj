@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props')" />
   <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props')" />
@@ -435,17 +435,16 @@
     <Page Include="Styles\Themes\Accents\Blue.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Styles\Themes\Accents\Dark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Styles\Themes\Accents\Orange.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\Themes\Accents\Purple.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Styles\Themes\Dark.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\Accents\Red.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Styles\Themes\Accents\Red.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.InternalControls.xaml">
@@ -691,18 +690,6 @@
       <Project>{0bc8cf79-76d9-46ad-867f-fec6c6ad4594}</Project>
       <Name>KanColleWrapper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MetroRadiance\source\MetroRadiance.Chrome\MetroRadiance.Chrome.csproj">
-      <Project>{21b4ad15-d9fa-4873-bfad-1eeefbc6c264}</Project>
-      <Name>MetroRadiance.Chrome</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MetroRadiance\source\MetroRadiance.Core\MetroRadiance.Core.csproj">
-      <Project>{a6b0a741-5be0-479d-b813-e65672350057}</Project>
-      <Name>MetroRadiance.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MetroRadiance\source\MetroRadiance\MetroRadiance.csproj">
-      <Project>{0af0b9ff-d981-4d0f-a41f-c3ab6fe2f16d}</Project>
-      <Name>MetroRadiance</Name>
-    </ProjectReference>
     <!-- MetroTrilithon 参照削除済み (Phase 1): Infrastructure/ に内製化 -->
   </ItemGroup>
   <ItemGroup>
@@ -736,22 +723,18 @@
     </None>
   </ItemGroup>
   <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
-<Target Name="EnsureCefFilescopied" AfterTargets="Build">
   <ItemGroup>
-    <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
-
-    <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*"
-                     Exclude="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\locales\**\*.*" />
-    <_CefLocalesToDelete Include="$(OutDir)locales\*.pak"
-                         Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
+    <Folder Include="Themes\Accents\" />
   </ItemGroup>
-
-  <Copy SourceFiles="@(_CefFilesToCopy)"
-        DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')"
-        SkipUnchangedFiles="true" />
-
-  <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
-</Target>
+  <Target Name="EnsureCefFilescopied" AfterTargets="Build">
+    <ItemGroup>
+      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
+      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*" Exclude="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\locales\**\*.*" />
+      <_CefLocalesToDelete Include="$(OutDir)locales\*.pak" Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
