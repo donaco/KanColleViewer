@@ -13,7 +13,7 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<!-- MetroRadiance 依存除去: 既存見た目を保つため KanColleViewer 側の辞書を明示読み込み -->
-				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Dark.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Accents/Dark.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Accents/Purple.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Colors.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Controls.xaml" />
