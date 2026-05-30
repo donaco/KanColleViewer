@@ -261,9 +261,6 @@
   <data name="MessageBar_ReSortie_Separator" xml:space="preserve">
     <value>, </value>
   </data>
-  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
-    <value>are heavily damaged</value>
-  </data>
   <data name="Quests" xml:space="preserve">
     <value>Quests</value>
   </data>
@@ -418,16 +415,10 @@
     <value>Browser cache cleared</value>
   </data>
   <data name="StartContent_Introduction1" xml:space="preserve">
-    <value>「提督業も忙しい！」は、艦これを遊びやすくするためのツールです。</value>
+    <value>KanColleViewer is a tool to make playing Kantai Collection easier.</value>
   </data>
   <data name="StartContent_Welcom" xml:space="preserve">
     <value>Welcome</value>
-  </data>
-  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
-    <value>Air Superiority Potential:</value>
-  </data>
-  <data name="StatusBar_AverageLevel" xml:space="preserve">
-    <value>Average Level:</value>
   </data>
   <data name="StatusBar_NotStarted" xml:space="preserve">
     <value>Waiting for KanColle to start</value>
@@ -435,22 +426,43 @@
   <data name="StatusBar_Ready" xml:space="preserve">
     <value>Ready</value>
   </data>
-  <data name="StatusBar_Speed_Fast" xml:space="preserve">
-    <value>Fast Fleet</value>
-  </data>
-  <data name="StatusBar_Speed_Slow" xml:space="preserve">
-    <value>Slow Fleet</value>
-  </data>
   <data name="ZoomAction_OutOfRange" xml:space="preserve">
     <value>{0}% zoom is not supported.</value>
   </data>
   <data name="ZoomAction_ZoomFailed" xml:space="preserve">
     <value>Zoom Failed: {0}</value>
   </data>
+  <data name="ZoomFactorSelector" xml:space="preserve">
+    <value>Game screen display size</value>
+  </data>
+  <data name="ZoomFactorSelector_Tooltip" xml:space="preserve">
+    <value>Adjust the display size of the game screen.</value>
+  </data>
   <data name="Settings_Logging" xml:space="preserve">
     <value>Logging</value>
   </data>
   <data name="Settings_Logging_Enable" xml:space="preserve">
     <value>Log drops and crafting results to file</value>
+  </data>
+  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
+    <value>are heavily damaged</value>
+  </data>
+  <data name="UpdateCheck_off" xml:space="preserve">
+    <value>Auto Update Check OFF</value>
+  </data>
+  <data name="UpdateCheck_on" xml:space="preserve">
+    <value>Auto Update Check ON</value>
+  </data>
+  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
+    <value>Air Superiority Potential:</value>
+  </data>
+  <data name="StatusBar_AverageLevel" xml:space="preserve">
+    <value>Average Level:</value>
+  </data>
+  <data name="StatusBar_Speed_Fast" xml:space="preserve">
+    <value>Fast Fleet</value>
+  </data>
+  <data name="StatusBar_Speed_Slow" xml:space="preserve">
+    <value>Slow Fleet</value>
   </data>
 </root>

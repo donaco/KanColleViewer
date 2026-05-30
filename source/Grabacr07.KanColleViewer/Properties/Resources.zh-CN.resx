@@ -59,7 +59,7 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -261,9 +261,6 @@
   <data name="MessageBar_ReSortie_Separator" xml:space="preserve">
     <value>・</value>
   </data>
-  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
-    <value>中破以上の艦娘</value>
-  </data>
   <data name="Quests" xml:space="preserve">
     <value>任务</value>
   </data>
@@ -415,10 +412,37 @@
     <value>キャッシュを削除しました</value>
   </data>
   <data name="StartContent_Introduction1" xml:space="preserve">
-    <value>「提督業も忙しい！」は、艦これを遊びやすくするためのツールです。</value>
+    <value>“当海军上将真忙！”是一款让玩《舰队收藏》更轻松的工具</value>
   </data>
   <data name="StartContent_Welcom" xml:space="preserve">
     <value>ようこそ</value>
+  </data>
+  <data name="StatusBar_NotStarted" xml:space="preserve">
+    <value>我在等《舰队Collection》上线。</value>
+  </data>
+  <data name="StatusBar_Ready" xml:space="preserve">
+    <value>准备完毕</value>
+  </data>
+  <data name="ZoomAction_OutOfRange" xml:space="preserve">
+    <value>无法在 {0} %范围内缩放</value>
+  </data>
+  <data name="ZoomAction_ZoomFailed" xml:space="preserve">
+    <value>缩放失败: {0}</value>
+  </data>
+  <data name="ZoomFactorSelector" xml:space="preserve">
+    <value>游戏屏幕显示尺寸</value>
+  </data>
+  <data name="ZoomFactorSelector_Tooltip" xml:space="preserve">
+    <value>调整游戏屏幕的显示尺寸</value>
+  </data>
+  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
+    <value>中破以上の艦娘</value>
+  </data>
+  <data name="UpdateCheck_off" xml:space="preserve">
+    <value>手动检查</value>
+  </data>
+  <data name="UpdateCheck_on" xml:space="preserve">
+    <value>自动检查</value>
   </data>
   <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
     <value>对空战斗力:</value>
@@ -426,22 +450,10 @@
   <data name="StatusBar_AverageLevel" xml:space="preserve">
     <value>平均等级:</value>
   </data>
-  <data name="StatusBar_NotStarted" xml:space="preserve">
-    <value>等待舰これ载入</value>
-  </data>
-  <data name="StatusBar_Ready" xml:space="preserve">
-    <value>准备完毕</value>
-  </data>
   <data name="StatusBar_Speed_Fast" xml:space="preserve">
     <value>高速舰队</value>
   </data>
   <data name="StatusBar_Speed_Slow" xml:space="preserve">
     <value>低速舰队</value>
-  </data>
-  <data name="ZoomAction_OutOfRange" xml:space="preserve">
-    <value>无法在 {0} %范围内缩放</value>
-  </data>
-  <data name="ZoomAction_ZoomFailed" xml:space="preserve">
-    <value>缩放失败: {0}</value>
   </data>
 </root>

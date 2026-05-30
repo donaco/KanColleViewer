@@ -42,6 +42,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public IReadOnlyCollection<BindableTextViewModel> Libraries { get; }
 
+		public IReadOnlyCollection<UpdateCheckModeItemViewModel> UpdateCheckModes { get; }
+
 		public List<PluginViewModel> LoadedPlugins => new List<PluginViewModel>(
 			PluginService.Current.Plugins.Select(x => new PluginViewModel(x)));
 
@@ -188,6 +190,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 					return list;
 				});
 
+			this.UpdateCheckModes = new[]
+			{
+				new UpdateCheckModeItemViewModel { Display = "手動で確認する", Value = false },
+				new UpdateCheckModeItemViewModel { Display = "自動で確認する", Value = true },
+			};
+
 			this.ViewRangeSettingsCollection = ViewRangeCalcLogic.Logics.ToList();
 			this.SelectedViewRangeCalcType = this.ViewRangeSettingsCollection
 				.FirstOrDefault(x => x.Id == KanColleSettings.ViewRangeCalcType)
@@ -235,5 +243,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 				this.UpdateStatusText = "確認に失敗しました";
 			}
 		}
+	}
+
+	public class UpdateCheckModeItemViewModel : ItemViewModel
+	{
+		public string Display { get; set; }
+
+		public bool Value { get; set; }
 	}
 }

@@ -59,7 +59,7 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -261,9 +261,6 @@
   <data name="MessageBar_ReSortie_Separator" xml:space="preserve">
     <value>, </value>
   </data>
-  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
-    <value>중파이상인 칸무스</value>
-  </data>
   <data name="Quests" xml:space="preserve">
     <value>임무</value>
   </data>
@@ -415,16 +412,10 @@
     <value>캐시를 삭제했습니다</value>
   </data>
   <data name="StartContent_Introduction1" xml:space="preserve">
-    <value>「提督業も忙しい！」は、艦これを遊びやすくするためのツールです。</value>
+    <value>「제독업도 바쁘다!」는, 함 이것을 놀기 쉽게 하기 위한 툴입니다</value>
   </data>
   <data name="StartContent_Welcom" xml:space="preserve">
     <value>ようこそ</value>
-  </data>
-  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
-    <value>제공전력:</value>
-  </data>
-  <data name="StatusBar_AverageLevel" xml:space="preserve">
-    <value>평균레벨: </value>
   </data>
   <data name="StatusBar_NotStarted" xml:space="preserve">
     <value>칸코레의 기동을 기다리고 있습니다</value>
@@ -432,16 +423,37 @@
   <data name="StatusBar_Ready" xml:space="preserve">
     <value>준비 완료</value>
   </data>
-  <data name="StatusBar_Speed_Fast" xml:space="preserve">
-    <value>고속함대</value>
-  </data>
-  <data name="StatusBar_Speed_Slow" xml:space="preserve">
-    <value>저속함대</value>
-  </data>
   <data name="ZoomAction_OutOfRange" xml:space="preserve">
     <value>줌 {0} % 은 지원되지 않습니다</value>
   </data>
   <data name="ZoomAction_ZoomFailed" xml:space="preserve">
     <value>줌에 실패했습니다: {0}</value>
+  </data>
+  <data name="ZoomFactorSelector" xml:space="preserve">
+    <value>게임 화면 표시 크기</value>
+  </data>
+  <data name="ZoomFactorSelector_Tooltip" xml:space="preserve">
+    <value>게임 화면의 표시 크기 조정</value>
+  </data>
+  <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
+    <value>중파이상인 칸무스</value>
+  </data>
+  <data name="UpdateCheck_off" xml:space="preserve">
+    <value>수동으로 확인</value>
+  </data>
+  <data name="UpdateCheck_on" xml:space="preserve">
+    <value>자동으로 확인</value>
+  </data>
+  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
+    <value>제공전력:</value>
+  </data>
+  <data name="StatusBar_AverageLevel" xml:space="preserve">
+    <value>평균레벨: </value>
+  </data>
+  <data name="StatusBar_Speed_Fast" xml:space="preserve">
+    <value>고속함대</value>
+  </data>
+  <data name="StatusBar_Speed_Slow" xml:space="preserve">
+    <value>저속함대</value>
   </data>
 </root>
