@@ -7,14 +7,16 @@
 			 xmlns:root="clr-namespace:Grabacr07.KanColleViewer"
 			 xmlns:vm="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 			 mc:Ignorable="d"
-			 d:DataContext="{d:DesignInstance vm:KanColleWindowViewModel}"
-			 Height="48">
+			 d:DataContext="{d:DesignInstance vm:KanColleWindowViewModel}">
 
 	<StackPanel Orientation="Horizontal">
 		<metro2:CallMethodButton DataContext="{Binding Volume}"
 								 MethodName="ToggleMute"
 								 Style="{DynamicResource CircleButtonStyleKey}"
-								 Padding="6">
+								 Width="42"
+								 Height="42"
+								 Margin="6"
+								 Padding="-0.75">
 			<Viewbox Margin="8">
 				<Path Stretch="Uniform"
 					  Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}, Path=Foreground}"
@@ -40,7 +42,10 @@
 		<metro2:CallMethodButton MethodTarget="{Binding}"
 								 MethodName="TakeScreenshot"
 								 Style="{DynamicResource CircleButtonStyleKey}"
-								 Padding="6">
+								 Width="42"
+								 Height="42"
+								 Margin="6"
+								 Padding="0">
 			<Viewbox Margin="6"
 					  Height="26"
 					  Width="26">
