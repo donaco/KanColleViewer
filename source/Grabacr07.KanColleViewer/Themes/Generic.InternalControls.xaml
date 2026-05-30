@@ -94,6 +94,11 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource InactiveForegroundBrushKey}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ══════════════════════════════════════════════════════
