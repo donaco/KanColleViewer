@@ -13,11 +13,13 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		public string Name { get; }
 		public bool IsBoss { get; }
+		public bool IsKiko { get; }
 
-		public CellInfo(string name, bool isBoss)
+		public CellInfo(string name, bool isBoss, bool isKiko)
 		{
 			this.Name = name;
 			this.IsBoss = isBoss;
+			this.IsKiko = isKiko;
 		}
 	}
 
@@ -127,7 +129,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 指定したセルがボスセルかどうかを判定します。
-		/// MapCellNames.json の boss フラグに基づいて判定します。
+		/// MapCellNames.json の boss または kiko フラグに基づいて判定します。
 		/// </summary>
 		/// <param name="mapAreaId">海域ID（例: 7）</param>
 		/// <param name="mapInfoNo">マップ番号（例: 4）</param>
@@ -136,7 +138,17 @@ namespace Grabacr07.KanColleWrapper.Models
 		public static bool IsBossCell(int mapAreaId, int mapInfoNo, int cellNo)
 		{
 			var info = GetCellInfo(mapAreaId, mapInfoNo, cellNo);
-			return info != null && info.IsBoss;
+			return info != null && (info.IsBoss || info.IsKiko);
+		}
+
+		/// <summary>
+		/// 指定したセルが帰港セルかどうかを判定します。
+		/// MapCellNames.json の kiko フラグに基づいて判定します。
+		/// </summary>
+		public static bool IsKikoCell(int mapAreaId, int mapInfoNo, int cellNo)
+		{
+			var info = GetCellInfo(mapAreaId, mapInfoNo, cellNo);
+			return info != null && info.IsKiko;
 		}
 
 		/// <summary>
@@ -164,8 +176,8 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// JSON ファイルからセル名と海域ラベルを読み込みます。
-		/// 文字列値 → CellInfo(name, boss: false)
-		/// オブジェクト値 → CellInfo(name, boss) として読み込みます。
+		/// 文字列値 → CellInfo(name, boss: false, kiko: false)
+		/// オブジェクト値 → CellInfo(name, boss, kiko) として読み込みます。
 		/// </summary>
 		private static Dictionary<string, Dictionary<int, CellInfo>> LoadCellNames()
 		{
@@ -218,17 +230,18 @@ namespace Grabacr07.KanColleWrapper.Models
 
 									if (cellProp.Value.Type == JTokenType.Object)
 									{
-										// オブジェクト形式: { "name": "C", "boss": true }
+										// オブジェクト形式: { "name": "C", "boss": true, "kiko": true }
 										var obj = cellProp.Value as JObject;
 										var name = obj?["name"]?.Value<string>() ?? "";
 										var boss = obj?["boss"]?.Value<bool>() ?? false;
-										info = new CellInfo(name, boss);
+										var kiko = obj?["kiko"]?.Value<bool>() ?? false;
+										info = new CellInfo(name, boss, kiko);
 									}
 									else
 									{
 										// 文字列形式（従来互換）: "A"
 										var name = cellProp.Value?.Value<string>() ?? "";
-										info = new CellInfo(name, false);
+										info = new CellInfo(name, false, false);
 									}
 
 									cellInfos[cellNo] = info;

@@ -233,10 +233,18 @@ namespace Grabacr07.KanColleWrapper.Models
 					var cellName = MapCellNameProvider.GetCellName(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
 					baseText += $"-{cellName} ";
 
-					// ボス判定を追加
-					if (MapCellNameProvider.IsBossCell(this.MapAreaId, this.MapInfoNo, this.CellNo.Value))
+					// ボス/帰港判定を追加
+					var cellInfo = MapCellNameProvider.GetCellInfo(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
+					if (cellInfo != null)
 					{
-						baseText += "[ボス]";
+						if (cellInfo.IsKiko)
+						{
+							baseText += "[帰港]";
+						}
+						else if (cellInfo.IsBoss)
+						{
+							baseText += "[ボス]";
+						}
 					}
 				}
 

@@ -251,16 +251,36 @@ namespace Counter
 		}
 
 		/// <summary>
-		/// ボス表示テキスト（ボスセルなら "[ボス]"、そうでなければ空文字）。
+		/// ボス表示テキスト（boss セルなら "[ボス]"、そうでなければ空文字）。
 		/// </summary>
 		public string BossText
 		{
 			get
 			{
-				if (this.CellNo.HasValue
-					&& MapCellNameProvider.IsBossCell(this.MapAreaId, this.MapInfoNo, this.CellNo.Value))
+				if (this.CellNo.HasValue)
 				{
-					return "[ボス]";
+					var info = MapCellNameProvider.GetCellInfo(this.MapAreaId, this.MapInfoNo, this.CellNo.Value);
+					if (info != null && info.IsBoss)
+					{
+						return "[ボス]";
+					}
+				}
+				return string.Empty;
+			}
+		}
+
+
+		/// <summary>
+		/// 帰港表示テキスト（帰港セルなら "[帰港]"、そうでなければ空文字）。
+		/// </summary>
+		public string KikoText
+		{
+			get
+			{
+				if (this.CellNo.HasValue
+					&& MapCellNameProvider.IsKikoCell(this.MapAreaId, this.MapInfoNo, this.CellNo.Value))
+				{
+					return "[帰港]";
 				}
 				return string.Empty;
 			}
@@ -541,10 +561,29 @@ namespace Counter
 		{
 			get
 			{
-				if (this.MapAreaId.HasValue && this.MapInfoNo.HasValue && this.CellNo.HasValue
-					&& MapCellNameProvider.IsBossCell(this.MapAreaId.Value, this.MapInfoNo.Value, this.CellNo.Value))
+				if (this.MapAreaId.HasValue && this.MapInfoNo.HasValue && this.CellNo.HasValue)
 				{
-					return "[ボス]";
+					var info = MapCellNameProvider.GetCellInfo(this.MapAreaId.Value, this.MapInfoNo.Value, this.CellNo.Value);
+					if (info != null && info.IsBoss)
+					{
+						return "[ボス]";
+					}
+				}
+				return string.Empty;
+			}
+		}
+
+		/// <summary>
+		/// 帰港表示テキスト（帰港セルなら "[帰港]"、そうでなければ空文字）
+		/// </summary>
+		public string KikoText
+		{
+			get
+			{
+				if (this.MapAreaId.HasValue && this.MapInfoNo.HasValue && this.CellNo.HasValue
+					&& MapCellNameProvider.IsKikoCell(this.MapAreaId.Value, this.MapInfoNo.Value, this.CellNo.Value))
+				{
+					return "[帰港]";
 				}
 				return string.Empty;
 			}
@@ -867,7 +906,7 @@ namespace Counter
 							cellNo = liveCellNo;
 						}
 
-						// BossOnly フィルター: MapCellNames.json のセル名に "[ボス]" が含まれないかで判定
+						// BossOnly フィルター: boss または kiko セルのみ記録
 						if (this.BossOnly)
 						{
 							if (!cellNo.HasValue

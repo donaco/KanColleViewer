@@ -129,7 +129,7 @@
 									  IsEnabled="{Binding IsSortieHistoryEnabled}"
 									  Foreground="{DynamicResource ForegroundBrushKey}"
 									  Margin="16,2,0,2">
-								<TextBlock Text="ボスマスのみを記録する"
+								<TextBlock Text="ボス/帰港マスのみを記録する"
 										   Style="{DynamicResource DefaultTextStyleKey}" />
 							</CheckBox>
 							<CheckBox IsChecked="{Binding ShowAirSuperiority, Mode=TwoWay}"
@@ -263,6 +263,14 @@
 												<Run Text="{Binding BossText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
+											<!-- 帰港表示（例: [帰港]）-->
+											<TextBlock Grid.Column="2"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding KikoText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding KikoText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
 											<!-- 防空戦は WinRank が無いので同じ列に重ねて表示 -->
 											<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
@@ -362,6 +370,14 @@
 													   Margin="0,0,0,0"
 													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
 												<Run Text="{Binding BossText, Mode=OneWay}"
+													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+											</TextBlock>
+											<!-- 帰港表示（例: [帰港]） -->
+											<TextBlock Grid.Column="1"
+													   Style="{DynamicResource DefaultTextStyleKey}"
+													   Margin="0,0,0,0"
+													   Visibility="{Binding KikoText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding KikoText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 											</TextBlock>
 											<!-- 防空戦表示（例: [防空]）ボスと同じ列に重ねる -->
