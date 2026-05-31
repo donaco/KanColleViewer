@@ -263,7 +263,11 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 			if (e.Frame != null && e.Frame.IsMain)
 			{
-				this.Dispatcher.Invoke(() => this.ApplySize());
+				this.Dispatcher.Invoke(() =>
+				{
+					this.ApplySize();
+					this.ApplyMuteIfReady(this.WebBrowser);
+				});
 			}
 
 			if (!string.IsNullOrEmpty(e.Url) && e.Url.Contains("/kcs2/index.php"))
