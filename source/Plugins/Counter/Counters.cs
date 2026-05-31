@@ -884,6 +884,21 @@ namespace Counter
 					if (sortieInfo.CellNo.HasValue)
 					{
 						this._currentCellNo = sortieInfo.CellNo;
+
+						// 帰港マス(kiko)は戦闘結果(WinRank)が発生しないため、到達時点で記録する
+						if (this.IsEnabled
+							&& this._currentMapAreaId > 0
+							&& this._currentMapInfoNo > 0
+							&& MapCellNameProvider.IsKikoCell(this._currentMapAreaId, this._currentMapInfoNo, sortieInfo.CellNo.Value))
+						{
+							this.AddRecord(
+								this._currentMapAreaId,
+								this._currentMapInfoNo,
+								sortieInfo.CellNo,
+								null,
+								AirSuperiority.None
+							);
+						}
 					}
 					break;
 
