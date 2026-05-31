@@ -83,7 +83,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// アプリケーション起動時にアップデートチェックを自動実行するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> IsAutoUpdateCheckEnabled { get; }
-			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
+			= new SerializableProperty<bool>(GetKey(), Providers.Local, true) { AutoSave = true };
 
 		private static string GetKey([CallerMemberName] string propertyName = "")
 		{
