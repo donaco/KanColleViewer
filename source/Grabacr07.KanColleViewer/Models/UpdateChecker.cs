@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Grabacr07.KanColleViewer.Models
 {
@@ -21,9 +21,10 @@ namespace Grabacr07.KanColleViewer.Models
 				client.Timeout = TimeSpan.FromSeconds(15);
 
 				var json = await client.GetStringAsync(GitHubApiUrl).ConfigureAwait(false);
+				var release = JObject.Parse(json);
 
-				var tagName = ExtractJsonStringValue(json, "tag_name") ?? "";
-				var htmlUrl = ExtractJsonStringValue(json, "html_url") ?? "";
+				var tagName = release.Value<string>("tag_name") ?? "";
+				var htmlUrl = release.Value<string>("html_url") ?? "";
 
 				var versionText = tagName.TrimStart('v', 'V');
 				var latestVersion = Version.TryParse(versionText, out var parsed)
@@ -43,12 +44,6 @@ namespace Grabacr07.KanColleViewer.Models
 					ReleaseUrl = htmlUrl,
 				};
 			}
-		}
-
-		private static string ExtractJsonStringValue(string json, string propertyName)
-		{
-			var match = Regex.Match(json, $"\"{Regex.Escape(propertyName)}\"\\s*:\\s*\"([^\"]*?)\"");
-			return match.Success ? match.Groups[1].Value : null;
 		}
 	}
 
