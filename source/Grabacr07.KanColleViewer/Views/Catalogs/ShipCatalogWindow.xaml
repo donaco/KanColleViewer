@@ -35,6 +35,14 @@
 				   SnapsToDevicePixels="True"
 				   TextOptions.TextFormattingMode="Display">
 
+	<metro:MetroWindow.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="../Settings/Common.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</metro:MetroWindow.Resources>
+
 	<i:Interaction.Behaviors>
 		<behaviors:WindowActionBehavior ViewModel="{Binding}" />
 		<behaviors:WindowCloseCancelBehavior ViewModel="{Binding}" />
