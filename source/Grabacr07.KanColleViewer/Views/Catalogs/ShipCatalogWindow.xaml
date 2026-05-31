@@ -5,7 +5,6 @@
 				   xmlns:s="clr-namespace:System;assembly=mscorlib"
 				   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-				   xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing"
 				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				   xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
@@ -508,16 +507,16 @@
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
 									<DockPanel Margin="0,4">
-										<ed:RegularPolygon DockPanel.Dock="Right"
-														   PointCount="3"
-														   Fill="{DynamicResource BorderBrushKey}"
-														   Width="40"
-														   Height="20"
-														   RenderTransformOrigin="0.5,0.5">
-											<ed:RegularPolygon.RenderTransform>
+										<Polygon DockPanel.Dock="Right"
+												 Points="0,10 40,0 40,20"
+												 Fill="{DynamicResource BorderBrushKey}"
+												 Width="40"
+												 Height="20"
+												 RenderTransformOrigin="0.5,0.5">
+											<Polygon.RenderTransform>
 												<RotateTransform Angle="90" />
-											</ed:RegularPolygon.RenderTransform>
-										</ed:RegularPolygon>
+											</Polygon.RenderTransform>
+										</Polygon>
 										<controls:PromptComboBox DockPanel.Dock="Bottom"
 															  ItemsSource="{Binding SelectableColumns}"
 															  SelectedItem="{Binding Current, Mode=TwoWay}"
