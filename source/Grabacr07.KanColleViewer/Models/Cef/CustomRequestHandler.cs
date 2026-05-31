@@ -75,6 +75,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 	public class CustomResourceRequestHandler : ResourceRequestHandler
 	{
+		private const int MaxCapturedResponseBytes = 4 * 1024 * 1024;
 		private readonly Action<CapturedHttp> onCaptured;
 
 		public CustomResourceRequestHandler(Action<CapturedHttp> onCaptured)
@@ -114,41 +115,18 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						string responseBodyText = null;
 						try { responseBodyText = ResponseFilter.TryDecode(copy); } catch { responseBodyText = null; }
 
-						// gzip 判定: ヘッダー × バイト先頭マジックを組み合わせつつ、
-						// バイナリ内に gzip マジックが埋まっている場合はそのオフセットから展開を試す
 						string normalized = null;
 						try
 						{
-							// バイト列内で gzip マジック (0x1F 0x8B) を探す
-							int gzipOffset = -1;
-							if (copy != null && copy.Length >= 2)
+							if (ShouldDecompressGzip(snapshotResponseHeaders, copy))
 							{
-								for (int i = 0; i < copy.Length - 1; i++)
+								var decompressed = TryDecompressGzip(copy);
+								if (!string.IsNullOrEmpty(decompressed))
 								{
-									if (copy[i] == 0x1F && copy[i + 1] == 0x8B) { gzipOffset = i; break; }
+									normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
 								}
 							}
 
-							if (gzipOffset >= 0)
-							{
-								// 見つかったオフセットから展開を試みる
-								try
-								{
-									using (var ms = new MemoryStream(copy, gzipOffset, copy.Length - gzipOffset))
-									using (var gz = new GZipStream(ms, CompressionMode.Decompress))
-									using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
-									{
-										var decompressed = sr.ReadToEnd();
-										normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
-									}
-								}
-								catch
-								{
-									normalized = null;
-								}
-							}
-
-							// フォールバック: 文字列化済みテキストから正規化を試す（すでに展開済み／非圧縮のケース）
 							if (string.IsNullOrEmpty(normalized))
 							{
 								normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
@@ -197,6 +175,56 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				dict[key] = response.Headers[key];
 			}
 			return dict;
+		}
+
+		private static bool ShouldDecompressGzip(IDictionary<string, string> headers, byte[] bytes)
+		{
+			if (bytes == null || bytes.Length < 2 || bytes.Length > MaxCapturedResponseBytes)
+			{
+				return false;
+			}
+
+			if (bytes[0] != 0x1F || bytes[1] != 0x8B)
+			{
+				return false;
+			}
+
+			if (headers == null)
+			{
+				return false;
+			}
+
+			string contentEncoding;
+			if (!headers.TryGetValue("Content-Encoding", out contentEncoding))
+			{
+				var header = headers.FirstOrDefault(x => string.Equals(x.Key, "Content-Encoding", StringComparison.OrdinalIgnoreCase));
+				contentEncoding = header.Value;
+			}
+
+			return !string.IsNullOrWhiteSpace(contentEncoding)
+				&& contentEncoding.IndexOf("gzip", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		private static string TryDecompressGzip(byte[] bytes)
+		{
+			if (bytes == null || bytes.Length == 0 || bytes.Length > MaxCapturedResponseBytes)
+			{
+				return null;
+			}
+
+			try
+			{
+				using (var ms = new MemoryStream(bytes, writable: false))
+				using (var gz = new GZipStream(ms, CompressionMode.Decompress))
+				using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+				{
+					return sr.ReadToEnd();
+				}
+			}
+			catch
+			{
+				return null;
+			}
 		}
 
 		private static string ExtractRequestBody(IRequest request)
