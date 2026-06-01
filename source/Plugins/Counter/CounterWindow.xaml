@@ -50,11 +50,18 @@
 							Orientation="Horizontal"
 							VerticalAlignment="Top"
 							WindowChrome.IsHitTestVisibleInChrome="True">
+					<metro:CaptionButton Click="ScreenshotButton_Click"
+									 ToolTip="ウィンドウのスクリーンショットを保存">
+						<Path Data="M4,4 L4,2 C4,0.9 4.9,0 6,0 L10,0 C11.1,0 12,0.9 12,2 L12,4 L14,4 C15.1,4 16,4.9 16,6 L16,14 C16,15.1 15.1,16 14,16 L2,16 C0.9,16 0,15.1 0,14 L0,6 C0,4.9 0.9,4 2,4 z M8,13 C9.93,13 11.5,11.43 11.5,9.5 C11.5,7.57 9.93,6 8,6 C6.07,6 4.5,7.57 4.5,9.5 C4.5,11.43 6.07,13 8,13 z M8,11.5 C6.9,11.5 6,10.6 6,9.5 C6,8.4 6.9,7.5 8,7.5 C9.1,7.5 10,8.4 10,9.5 C10,10.6 9.1,11.5 8,11.5 z"
+							  Width="14"
+							  Stretch="Uniform"
+							  Fill="{DynamicResource ForegroundBrushKey}" />
+					</metro:CaptionButton>
 					<metro:CaptionButton IsChecked="{Binding IsTopMost, Mode=TwoWay}"
-										 ToolTip="常に最前面に表示"
-										 Style="{DynamicResource PinButtonStyleKey}" />
+									 ToolTip="常に最前面に表示"
+									 Style="{DynamicResource PinButtonStyleKey}" />
 					<metro:SystemButtons HorizontalAlignment="Right"
-										 VerticalAlignment="Top" />
+									 VerticalAlignment="Top" />
 				</StackPanel>
 			</Grid>
 		</Border>
