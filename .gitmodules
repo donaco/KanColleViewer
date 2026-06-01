@@ -4,3 +4,6 @@
 [submodule "source/Plugins/MaterialChartPlugin"]
 	path = source/Plugins/MaterialChartPlugin
 	url = https://github.com/donaco/MaterialChartPlugin
+[submodule "source/Plugins/EventMapHpViewer"]
+	path = source/Plugins/EventMapHpViewer
+	url = C:/Users/dnc/source/repos/donaco/EventMapHpViewer
