@@ -115,6 +115,7 @@
     <Compile Include="Annotations\ElementalAttribute.cs" />
     <Compile Include="Annotations\LightAttribute.cs" />
     <Compile Include="ApiDataDeserializer.cs" />
+    <Compile Include="ApiSession.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />

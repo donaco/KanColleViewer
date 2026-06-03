@@ -246,8 +246,19 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				this.capturedProcessor.Process(url, responseBody);
-			}
-			catch (Exception ex) { LogError("ProcessCaptured/capturedProcessor", ex); }
+				}
+				catch (Exception ex) { LogError("ProcessCaptured/capturedProcessor", ex); }
+
+				// api_start2/getData は CapturedProcessor が処理するのでここで PublishSession のみ発行
+				try
+				{
+					if (url.Contains("/kcsapi/api_start2/getData") && !string.IsNullOrEmpty(responseBody))
+					{
+						var normalized0 = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
+						this.Proxy.PublishSession("/kcsapi/api_start2/getData", string.IsNullOrEmpty(normalized0) ? responseBody : normalized0);
+					}
+				}
+				catch (Exception ex) { LogError("ProcessCaptured/start2Publish", ex); }
 
 			try
 			{
@@ -266,13 +277,14 @@ namespace Grabacr07.KanColleWrapper
 				catch (Newtonsoft.Json.JsonException) { /* JSON としてパース不能なレスポンスは想定内：無視してスキップ */ }
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
-				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
-				if (TryHandleMapStart(url, requestBody, normalized)) return;
-				if (TryHandleBattle(url, normalized)) return;
-				if (TryHandleMapNext(url, normalized)) return;
-				if (TryHandleMapInfo(url, normalized)) return;
+					// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
+					if (TryHandleMapStart(url, requestBody, normalized)) return;
+					if (TryHandleBattle(url, normalized)) return;
+					if (TryHandleMapNext(url, normalized)) return;
+					if (TryHandleMapInfo(url, normalized)) return;
+					if (TryHandleSelectEventmapRank(url, requestBody, normalized)) return;
 
-				// 小さな処理に分割して判定（早期 return ）
+					// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
 				if (TryHandleBasic(url, normalized)) return;
 
@@ -337,6 +349,22 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		#region ProcessCaptured helpers (refactor)
+
+		/// <summary>
+		/// URL エンコードされたリクエスト Body を辞書にパースします。
+		/// </summary>
+		private static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody)
+		{
+			var dict = new Dictionary<string, string>();
+			if (string.IsNullOrEmpty(requestBody)) return dict;
+			foreach (var p in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+			{
+				var kv = p.Split(new[] { '=' }, 2);
+				if (kv.Length == 2)
+					dict[Uri.UnescapeDataString(kv[0])] = Uri.UnescapeDataString(kv[1]);
+			}
+			return dict;
+		}
 
 		/// <summary>
 		/// 例外をログに記録します。アプリを落とさないよう、再スローはしません。
@@ -486,6 +514,7 @@ namespace Grabacr07.KanColleWrapper
 			catch (Exception)
 			{
 			}
+			this.Proxy.PublishSession("/kcsapi/api_req_map/start", normalized, ParseRequestBody(requestBody));
 			return true;
 		}
 
@@ -571,12 +600,13 @@ namespace Grabacr07.KanColleWrapper
 			}
 			catch (Exception ex) { LogError("TryHandleMapNext", ex); }
 
-			return true;
-		}
+				this.Proxy.PublishSession("/kcsapi/api_req_map/next", normalized);
+				return true;
+			}
 
-		/// <summary>
-		/// 戦闘開始（各種 battle API）
-		/// </summary>
+			/// <summary>
+			/// 戦闘開始（各種 battle API）
+			/// </summary>
 		private bool TryHandleBattle(string url, string normalized)
 		{
 			// battle 系 API をまとめて判定
@@ -976,15 +1006,26 @@ namespace Grabacr07.KanColleWrapper
 			{
 			}
 
-			return true;
-		}
+			this.Proxy.PublishSession("/kcsapi/api_get_member/mapinfo", normalized);
+				return true;
+			}
 
-		/// <summary>
-		/// 母港
-		/// </summary>
-		private bool TryHandlePort(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_port/port")) return false;
+			/// <summary>
+			/// イベントマップ難度選択 (api_req_map/select_eventmap_rank)
+			/// </summary>
+			private bool TryHandleSelectEventmapRank(string url, string requestBody, string normalized)
+			{
+				if (!url.Contains("/kcsapi/api_req_map/select_eventmap_rank")) return false;
+				this.Proxy.PublishSession("/kcsapi/api_req_map/select_eventmap_rank", normalized, ParseRequestBody(requestBody));
+				return true;
+			}
+
+			/// <summary>
+			/// 母港
+			/// </summary>
+			private bool TryHandlePort(string url, string normalized)
+			{
+				if (!url.Contains("/kcsapi/api_port/port")) return false;
 
 			try
 			{
@@ -1130,15 +1171,16 @@ namespace Grabacr07.KanColleWrapper
 				}
 			}
 			catch (Exception)
-			{
+				{
+				}
+
+				this.Proxy.PublishSession("/kcsapi/api_port/port", normalized);
+				return true;
 			}
 
-			return true;
-		}
-
-		/// <summary>
-		/// 提督情報 (api_get_member/basic)
-		/// </summary>
+			/// <summary>
+			/// 提督情報 (api_get_member/basic)
+			/// </summary>
 		private bool TryHandleBasic(string url, string normalized)
 		{
 			if (!url.Contains("/kcsapi/api_get_member/basic")) return false;
