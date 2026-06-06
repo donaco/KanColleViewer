@@ -124,6 +124,12 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
+		/// <summary>
+		/// 戦闘結果受信時に発生します。
+		/// 引数: mapId (エリアID*10+マップ番号), normalized JSON 文字列
+		/// </summary>
+		public event Action<int, string> BattleResultReceived;
+
 		// Captured 処理を委譲するコンポーネント
 		private readonly CapturedProcessor capturedProcessor;
 
@@ -220,6 +226,9 @@ namespace Grabacr07.KanColleWrapper
 
 		// start/next で取得した cellNo をキャッシュ（battle で使用）
 		private int cachedCellNo = 0;
+
+		// start/next で取得した mapId (areaId*10+mapInfoNo) をキャッシュ（battleresult で使用）
+		private int cachedMapId = 0;
 
 		// 直近に受信した battle 系 API の種別を保持 ("battle" / "ld_airbattle" / null)
 		private string lastBattleApiType = null;
@@ -472,6 +481,10 @@ namespace Grabacr07.KanColleWrapper
 							// cellNo をキャッシュ（battle 時に使用）
 							this.cachedCellNo = cellNo;
 
+							// mapId をキャッシュ（battleresult 時に使用）
+							if (mapAreaId > 0 && mapInfoNo > 0)
+								this.cachedMapId = mapAreaId * 10 + mapInfoNo;
+
 							if (mapAreaId > 0 && mapInfoNo > 0)
 							{
 								RunOnUi(() =>
@@ -534,6 +547,12 @@ namespace Grabacr07.KanColleWrapper
 					if (data != null)
 					{
 						int cellNo = data["api_no"]?.Value<int>() ?? 0;
+
+						// mapId をキャッシュ（battleresult 時に使用）
+						int mapAreaId = data["api_maparea_id"]?.Value<int>() ?? 0;
+						int mapInfoNo = data["api_mapinfo_no"]?.Value<int>() ?? 0;
+						if (mapAreaId > 0 && mapInfoNo > 0)
+							this.cachedMapId = mapAreaId * 10 + mapInfoNo;
 
 						if (cellNo > 0)
 						{
@@ -956,6 +975,14 @@ namespace Grabacr07.KanColleWrapper
 				}
 				catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 			});
+
+			// EventMapHpViewer 等のプラグインへ battleresult を通知
+			try
+			{
+				if (this.cachedMapId > 0)
+					this.BattleResultReceived?.Invoke(this.cachedMapId, normalized);
+			}
+			catch (Exception ex) { LogError("TryHandleBattleResult/BattleResultReceived", ex); }
 
 			return true;
 		}
