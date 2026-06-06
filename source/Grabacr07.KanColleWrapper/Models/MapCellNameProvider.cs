@@ -44,11 +44,12 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		static MapCellNameProvider()
 		{
-			// exe と同じディレクトリの MapCellNames.json を指定
+			// exe と同じディレクトリ配下の json\MapCellNames.json を指定
 			var executablePath = Assembly.GetEntryAssembly()?.Location
 				?? Assembly.GetExecutingAssembly().Location;
-			var executableDir = Path.GetDirectoryName(executablePath);
-			_jsonFilePath = Path.Combine(executableDir, "MapCellNames.json");
+			var executableDir = Path.GetDirectoryName(executablePath)
+				?? AppDomain.CurrentDomain.BaseDirectory;
+			_jsonFilePath = Path.Combine(executableDir, "json", "MapCellNames.json");
 
 			_cellInfoByMap = LoadCellNames();
 		}

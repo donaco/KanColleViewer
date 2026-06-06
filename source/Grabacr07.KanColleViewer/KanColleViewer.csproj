@@ -652,8 +652,12 @@
     <EmbeddedResource Include="Properties\Resources.zh-CN.resx">
       <DependentUpon>Resources.resx</DependentUpon>
     </EmbeddedResource>
+    <None Include="TP_Ship_SlotItem.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="MapCellNames.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\MapCellNames.json</TargetPath>
     </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -721,17 +725,13 @@
       <_CefLocalesToDelete Include="$(OutDir)locales\*.pak" Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
     </ItemGroup>
     <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(OutDir)json" />
+    <Delete Files="$(OutDir)json\vk_swiftshader_icd.json" TreatErrorsAsWarnings="true" />
+    <Move SourceFiles="$(OutDir)vk_swiftshader_icd.json" DestinationFiles="$(OutDir)json\vk_swiftshader_icd.json" Condition="Exists('$(OutDir)vk_swiftshader_icd.json')" />
     <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>

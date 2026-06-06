@@ -1,0 +1,39 @@
+{
+  "shipTypeTp": {
+    "2": { "shipTypeTp": "5", "comment": "駆逐艦" },
+    "3": { "shipTypeTp": "2", "comment": "軽巡洋艦" },
+    "10": { "shipTypeTp": "7", "comment": "航空戦艦" },
+    "16": { "shipTypeTp": "9", "comment": "水上機母艦" },
+    "14": { "shipTypeTp": "1", "comment": "潜水空母" },
+    "21": { "shipTypeTp": "6", "comment": "練習巡洋艦" },
+    "6": { "shipTypeTp": "4", "comment": "航空巡洋艦" },
+    "22": { "shipTypeTp": "15", "comment": "補給艦" },
+    "17": { "shipTypeTp": "12", "comment": "揚陸艦" },
+    "20": { "shipTypeTp": "7", "comment": "潜水母艦" }
+  },
+  "shipTp": {
+    "487": { "shipTp": "8", "comment": "鬼怒改二" }
+  },
+  "slotItemTp": {
+    "75": { "ItemTp": "5", "comment": "ドラム缶(輸送用)" },
+    "68": { "ItemTp": "8", "comment": "大発動艇" },
+    "193": { "ItemTp": "8", "comment": "特大発動艇" },
+    "166": { "ItemTp": "8", "comment": "大発動艇(八九式中戦車＆陸戦隊)" },
+    "230": { "ItemTp": "8", "comment": "特大発動艇＋戦車第11連隊" },
+    "449": { "ItemTp": "8", "comment": "特大発動艇+一式砲戦車" },
+    "355": { "ItemTp": "8", "comment": "M4A1 DD" },
+    "436": { "ItemTp": "8", "comment": "大発動艇(II号戦車/北アフリカ仕様)" },
+    "482": { "ItemTp": "8", "comment": "特大発動艇+Ⅲ号戦車(北アフリカ仕様)" },
+    "408": { "ItemTp": "8", "comment": "装甲艇(AB艇)" },
+    "409": { "ItemTp": "8", "comment": "武装大発" },
+    "494": { "ItemTp": "8", "comment": "特大発動艇+チハ" },
+    "495": { "ItemTp": "8", "comment": "特大発動艇+チハ改" },
+    "514": { "ItemTp": "8", "comment": "特大発動艇+Ⅲ号戦車J型" },
+    "167": { "ItemTp": "2", "comment": "特二式内火艇" },
+    "525": { "ItemTp": "2", "comment": "特四式内火艇" },
+    "526": { "ItemTp": "2", "comment": "特四式内火艇改" },
+    "145": { "ItemTp": "1", "comment": "戦闘糧食" },
+    "150": { "ItemTp": "1", "comment": "秋刀魚の缶詰" },
+    "241": { "ItemTp": "1", "comment": "戦闘糧食(特別なおにぎり)" }
+  }
+}
