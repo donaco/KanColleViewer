@@ -175,6 +175,7 @@
     <Compile Include="Models\SlotItemEquipType.cs" />
     <Compile Include="Models\SlotItemType.cs" />
     <Compile Include="Models\SortieInfo.cs" />
+    <Compile Include="Models\TransportPointCalculator.cs" />
     <Compile Include="Models\ViewRange.cs" />
     <Compile Include="Notifier.cs" />
     <Compile Include="Organization.cs" />

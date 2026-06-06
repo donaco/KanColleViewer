@@ -105,6 +105,28 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
+		#region TransportPoint 変更通知プロパティ
+
+		private decimal _TransportPoint;
+
+		/// <summary>
+		/// 艦隊の輸送能力(TP / S勝利時基準)を取得します。
+		/// </summary>
+		public decimal TransportPoint
+		{
+			get { return this._TransportPoint; }
+			private set
+			{
+				if (this._TransportPoint != value)
+				{
+					this._TransportPoint = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		#region ViewRange 変更通知プロパティ
 
 		private double _ViewRange;
@@ -244,6 +266,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.AverageLevel = ships.HasItems() ? (double)this.TotalLevel / ships.Length : 0.0;
 			this.MinAirSuperiorityPotential = firstFleetShips.Sum(x => x.GetAirSuperiorityPotential(AirSuperiorityCalculationOptions.Minimum));
 			this.MaxAirSuperiorityPotential = firstFleetShips.Sum(x => x.GetAirSuperiorityPotential(AirSuperiorityCalculationOptions.Maximum));
+			this.TransportPoint = TransportPointCalculator.Calculate(ships);
 			this.Speed = new FleetSpeed(Array.ConvertAll(ships, x => x.Speed));
 
 			var logic = ViewRangeCalcLogic.Get(KanColleClient.Current.Settings.ViewRangeCalcType);

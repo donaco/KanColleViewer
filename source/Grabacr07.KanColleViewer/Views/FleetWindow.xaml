@@ -334,7 +334,7 @@
 										  Grid.Row="0"
 										  Grid.RowSpan="3"
 										  ItemsSource="{Binding Slots}"
-										  Margin="20,0">
+										  Margin="20,0,0,0">
 								<ItemsControl.ItemTemplate>
 									<DataTemplate>
 										<Grid x:Name="SlotItem">
@@ -597,6 +597,7 @@
 							<RowDefinition Height="Auto" />
 							<RowDefinition Height="Auto" />
 							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
 							<RowDefinition Height="4" />
 							<RowDefinition Height="Auto" />
 							<RowDefinition Height="Auto" />
@@ -701,8 +702,25 @@
 							<Run Text="※"
 								 Style="{DynamicResource DefaultTextElementStyleKey}" />
 						</TextBlock>
-
-						<TextBlock Grid.Row="7"
+						<TextBlock Grid.Row="6"
+								   Grid.Column="0"
+								   Style="{DynamicResource DefaultTextStyleKey}"
+								   HorizontalAlignment="Right"
+								   VerticalAlignment="Bottom"
+								   Margin="1,2">
+							<Run Text="輸送量" />
+							<Run Text="(ＴＰ)"
+								 Style="{DynamicResource DetailTextElementStyleKey}" />
+							<Run Text=":" />
+						</TextBlock>
+						<TextBlock Grid.Row="6"
+									Grid.Column="1"
+								    Text="{Binding State.TransportPoint}"
+								    Style="{DynamicResource EmphaticTextStyleKey}"
+								    VerticalAlignment="Bottom"
+								    Margin="4,2" />
+						
+						<TextBlock Grid.Row="8"
 								   Grid.Column="0"
 								   Grid.ColumnSpan="2"
 								   Text="{Binding State.Speed}"
@@ -711,7 +729,7 @@
 								   VerticalAlignment="Bottom"
 								   Margin="4,2" />
 
-						<TextBlock Grid.Row="8"
+						<TextBlock Grid.Row="9"
 								   Grid.Column="0"
 								   Style="{DynamicResource DefaultTextStyleKey}"
 								   HorizontalAlignment="Right"
@@ -721,7 +739,7 @@
 							<Run Text="ステータス" />
 							<Run Text=":" />
 						</TextBlock>
-						<TextBlock Grid.Row="8"
+						<TextBlock Grid.Row="9"
 								   Grid.Column="1"
 								   Text="9999"
 								   Style="{DynamicResource EmphaticTextStyleKey}"

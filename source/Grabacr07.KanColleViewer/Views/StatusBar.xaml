@@ -65,6 +65,9 @@
 						<TextBlock MinWidth="80">
 							<Run Text="{Binding State.MinAirSuperiorityPotential, Mode=OneWay}"/><Run Text="-"/><Run Text="{Binding State.MaxAirSuperiorityPotential, Mode=OneWay}"/>
 						</TextBlock>
+						<TextBlock Text="輸送能力: " />
+						<TextBlock Text="{Binding State.TransportPoint}"
+								   MinWidth="40" />
 						<TextBlock Text="{Binding State.Speed}"
 								   MinWidth="85" />
 					</StackPanel>
