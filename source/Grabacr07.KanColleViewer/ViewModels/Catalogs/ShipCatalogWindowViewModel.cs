@@ -221,6 +221,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			this.Update();
 		}
+		private static readonly HashSet<int> NaikExcludedShipIds = new HashSet<int>
+			//除外する艦娘の shipid を指定。現状は大発と同じ艦娘を除外している。
+			{
+			163,402,
+			};
 
 		private IObservable<Unit> UpdateAsync(SallyArea[] areas)
 		{
@@ -241,10 +246,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 								return this.selectedDaiNaiShipIds.Contains(x.Info.Id);
 
 							case DaiNaiFilterMode.ShipTypeOrShipId:
-								// 内火艇: shiptype OR shipid
-								return (hasSelectedShipTypes && this.selectedShipTypeIds.Contains(x.Info.ShipType.Id))
-									|| (hasSelectedDaiNaiShips && this.selectedDaiNaiShipIds.Contains(x.Info.Id));
-
+								// 内火艇: shiptype OR shipid。ただし特定 shipid は除外
+								return !NaikExcludedShipIds.Contains(x.Info.Id)
+									&& (
+										(hasSelectedShipTypes && this.selectedShipTypeIds.Contains(x.Info.ShipType.Id))
+										|| (hasSelectedDaiNaiShips && this.selectedDaiNaiShipIds.Contains(x.Info.Id))
+									);
 							default:
 								// 通常ボタン: shiptype のみ
 								return !hasSelectedShipTypes || this.selectedShipTypeIds.Contains(x.Info.ShipType.Id);
