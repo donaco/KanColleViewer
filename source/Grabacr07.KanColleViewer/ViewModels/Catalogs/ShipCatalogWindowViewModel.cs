@@ -246,15 +246,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 								return this.selectedDaiNaiShipIds.Contains(x.Info.Id);
 
 							case DaiNaiFilterMode.ShipTypeOrShipId:
-								// 内火艇: shiptype OR shipid。ただし特定 shipid は除外
+								// 内火艇: shiptype OR shipid
 								return !NaikExcludedShipIds.Contains(x.Info.Id)
 									&& (
 										(hasSelectedShipTypes && this.selectedShipTypeIds.Contains(x.Info.ShipType.Id))
 										|| (hasSelectedDaiNaiShips && this.selectedDaiNaiShipIds.Contains(x.Info.Id))
 									);
+
 							default:
 								// 通常ボタン: shiptype のみ
-								return !hasSelectedShipTypes || this.selectedShipTypeIds.Contains(x.Info.ShipType.Id);
+								return hasSelectedShipTypes && this.selectedShipTypeIds.Contains(x.Info.ShipType.Id);
 						}
 					})
 					.Where(this.ShipLevelFilter.Predicate)
