@@ -196,6 +196,7 @@
     <Compile Include="Models\Cef\CustomRequestHandler.cs" />
     <Compile Include="Models\Cef\ResponseFilter.cs" />
     <Compile Include="Models\Cef\ScreenshotRequest.cs" />
+    <Compile Include="Models\DaiNaiShipEntry.cs" />
     <Compile Include="Models\ExitConfirmationType.cs" />
     <Compile Include="Models\IZoomFactor.cs" />
     <Compile Include="Models\NotifierHost.cs" />
@@ -219,6 +220,7 @@
     <Compile Include="Models\TaskbarProgress.cs" />
     <Compile Include="Models\UpdateChecker.cs" />
     <Compile Include="Models\Volume.cs" />
+    <Compile Include="Models\DaiNaiShipProvider.cs" />
     <Compile Include="Models\Migration\_KanColleClientSettings.cs" />
     <Compile Include="ViewModels\AirBaseWindowViewModel.cs" />
     <Compile Include="ViewModels\Catalogs\SlotItemTypeViewModel.cs" />
@@ -652,9 +654,17 @@
     <EmbeddedResource Include="Properties\Resources.zh-CN.resx">
       <DependentUpon>Resources.resx</DependentUpon>
     </EmbeddedResource>
-    <None Include="TP_Ship_SlotItem.json">
+    <Content Include="ShipID.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+<None Include="DaiNai_Ship.json">
+  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  <TargetPath>json\DaiNai_Ship.json</TargetPath>
+</None>
+<None Include="TP_Ship_SlotItem.json">
+  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  <TargetPath>json\TP_Ship_SlotItem.json</TargetPath>
+</None>
     <None Include="MapCellNames.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>json\MapCellNames.json</TargetPath>

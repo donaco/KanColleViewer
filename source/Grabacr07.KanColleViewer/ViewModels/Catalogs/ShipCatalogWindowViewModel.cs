@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -17,6 +17,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 		private readonly Subject<Unit> updateSource = new Subject<Unit>();
 		private readonly Homeport homeport = KanColleClient.Current.Homeport;
 		private SallyArea[] sallyAreas;
+
+		private IReadOnlyCollection<int> selectedShipTypeIds = Array.Empty<int>();
+		private IReadOnlyCollection<int> selectedDaiNaiShipIds = Array.Empty<int>();
+		private bool useDaiNaiShipIdFilter;
 
 		public ShipCatalogWindowSettings Settings { get; }
 
@@ -167,13 +171,60 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			this.updateSource.OnNext(Unit.Default);
 		}
 
+		private enum DaiNaiFilterMode
+		{
+			None,
+			ShipIdOnly,
+			ShipTypeOrShipId,
+		}
+
+		private DaiNaiFilterMode daiNaiFilterMode = DaiNaiFilterMode.None;
+
+		private void UpdateSelection(int[] shipTypeIds, Func<DaiNaiShipEntry, bool> predicate, DaiNaiFilterMode mode)
+		{
+			this.selectedShipTypeIds = shipTypeIds ?? Array.Empty<int>();
+			this.selectedDaiNaiShipIds = predicate == null
+				? Array.Empty<int>()
+				: DaiNaiShipProvider.GetShipIds(predicate).Distinct().ToArray();
+
+			this.daiNaiFilterMode = mode;
+
+			foreach (var type in this.ShipTypes)
+			{
+				type.Set(this.selectedShipTypeIds.Contains(type.Id));
+			}
+
+			this.Update();
+		}
+
 		private IObservable<Unit> UpdateAsync(SallyArea[] areas)
 		{
 			return Observable.Start(() =>
 			{
+				var hasSelectedShipTypes = this.selectedShipTypeIds.Any();
+				var hasSelectedDaiNaiShips = this.selectedDaiNaiShipIds.Any();
+
 				var list = this.homeport.Organization.Ships
 					.Select(kvp => kvp.Value)
-					.Where(x => this.ShipTypes.Where(t => t.IsSelected).Any(t => x.Info.ShipType.Id == t.Id))
+					.Where(x => x != null)
+					.Where(x =>
+					{
+						switch (this.daiNaiFilterMode)
+						{
+							case DaiNaiFilterMode.ShipIdOnly:
+								// 大発: shipid のみ
+								return this.selectedDaiNaiShipIds.Contains(x.Info.Id);
+
+							case DaiNaiFilterMode.ShipTypeOrShipId:
+								// 内火艇: shiptype OR shipid
+								return (hasSelectedShipTypes && this.selectedShipTypeIds.Contains(x.Info.ShipType.Id))
+									|| (hasSelectedDaiNaiShips && this.selectedDaiNaiShipIds.Contains(x.Info.Id));
+
+							default:
+								// 通常ボタン: shiptype のみ
+								return !hasSelectedShipTypes || this.selectedShipTypeIds.Contains(x.Info.ShipType.Id);
+						}
+					})
 					.Where(this.ShipLevelFilter.Predicate)
 					.Where(this.ShipLockFilter.Predicate)
 					.Where(this.ShipSpeedFilter.Predicate)
@@ -206,14 +257,28 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		public void SetShipType(int[] ids)
 		{
-			foreach (var type in this.ShipTypes) type.Set(ids.Any(id => type.Id == id));
+			this.selectedShipTypeIds = ids ?? Array.Empty<int>();
+			this.daiNaiFilterMode = DaiNaiFilterMode.None;
+			this.selectedDaiNaiShipIds = Array.Empty<int>();
+
+			foreach (var type in this.ShipTypes)
+			{
+				type.Set(this.selectedShipTypeIds.Contains(type.Id));
+			}
+
 			this.Update();
 		}
 
-		public void Sort(SortableColumn column)
+		public void SetDaih()
 		{
-			this.SortWorker.SetFirst(column);
-			this.Update();
+			// 大発は shipid のみ
+			this.UpdateSelection(null, x => x.Daih, DaiNaiFilterMode.ShipIdOnly);
+		}
+
+		public void SetNaik(int[] shipTypeIds)
+		{
+			// 内火艇は shiptype OR shipid
+			this.UpdateSelection(shipTypeIds, x => x.Naik, DaiNaiFilterMode.ShipTypeOrShipId);
 		}
 	}
 }

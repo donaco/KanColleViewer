@@ -220,6 +220,17 @@
 										</x:Array>
 									</metro2:CallMethodButton.MethodParameter>
 								</metro2:CallMethodButton>
+								<metro2:CallMethodButton Content="大発"
+								                         MethodName="SetDaih" />
+								<metro2:CallMethodButton Content="内火艇"
+									                     MethodName="SetNaik">
+									<metro2:CallMethodButton.MethodParameter>
+										<x:Array Type="s:Int32">
+											<s:Int32>13</s:Int32>
+											<s:Int32>14</s:Int32>
+										</x:Array>
+									</metro2:CallMethodButton.MethodParameter>
+								</metro2:CallMethodButton>
 							</WrapPanel>
 						</Grid>
 					</Border>
