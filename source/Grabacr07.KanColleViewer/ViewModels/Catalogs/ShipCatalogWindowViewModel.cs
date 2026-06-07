@@ -167,8 +167,33 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 		{
 			this.ShipExpeditionFilter.SetFleets(this.homeport.Organization.Fleets);
 
+			// 通常のチェックボックス操作では ShipType の現在状態を反映する
+			// DaiNai ボタン操作中は、そのボタン条件を優先する
+			if (this.daiNaiFilterMode == DaiNaiFilterMode.None)
+			{
+				this.selectedShipTypeIds = this.ShipTypes
+					.Where(x => x.IsSelected)
+					.Select(x => x.Id)
+					.ToArray();
+			}
+
 			this.RaisePropertyChanged(nameof(this.CheckAllShipTypes));
 			this.updateSource.OnNext(Unit.Default);
+		}
+
+		public void ResetDaiNaiFilter()
+		{
+			this.selectedShipTypeIds = Array.Empty<int>();
+			this.selectedDaiNaiShipIds = Array.Empty<int>();
+			this.useDaiNaiShipIdFilter = false;
+			this.daiNaiFilterMode = DaiNaiFilterMode.None;
+
+			foreach (var type in this.ShipTypes)
+			{
+				type.Set(false);
+			}
+
+			this.Update();
 		}
 
 		private enum DaiNaiFilterMode

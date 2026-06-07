@@ -231,6 +231,8 @@
 										</x:Array>
 									</metro2:CallMethodButton.MethodParameter>
 								</metro2:CallMethodButton>
+								<metro2:CallMethodButton Content="リセット"
+									                     MethodName="ResetDaiNaiFilter" />
 							</WrapPanel>
 						</Grid>
 					</Border>
