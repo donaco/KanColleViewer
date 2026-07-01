@@ -20,6 +20,35 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			this.onCaptured = onCaptured;
 		}
 
+		/// <summary>
+		/// DevToolsのNetworkタブでダブルクリックした際の
+		/// kcsapi URLへのメインフレームナビゲーションをブロックする
+		/// </summary>
+		protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
+		{
+			try
+			{
+				if (frame?.IsMain == true)
+				{
+					var url = request?.Url ?? string.Empty;
+
+					// kcsapi URL はゲーム内 API のレスポンスであり、
+					// メインフレームのナビゲーション先としては不正（DevToolsからのWクリック）
+					if (url.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						System.Diagnostics.Debug.WriteLine($"[DevTools] blocked navigation to: {url}");
+						return true; // ナビゲーションをキャンセル
+					}
+				}
+			}
+			catch
+			{
+				// swallow
+			}
+
+			return false; // 通常のナビゲーションを許可
+		}
+
 		protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
 		{
 			// メンテナンス時、埋め込みブラウザで画像だけ表示
@@ -28,11 +57,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				var url = request?.Url;
 				if (!string.IsNullOrEmpty(url) && url.IndexOf("maintenance.png", StringComparison.OrdinalIgnoreCase) >= 0)
 				{
-					// スキームを http / https に限定（file://, javascript: 等を排除）
 					if (Uri.TryCreate(url, UriKind.Absolute, out var parsedUri)
 						&& (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
 					{
-						// ChromiumWebBrowser インスタンスにキャストできれば UI スレッドでナビゲート
 						try
 						{
 							var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
@@ -42,7 +69,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 								{
 									try
 									{
-										// 繰り返しナビゲートを避けるため簡易フラグを Tag に記録
 										const string flag = "maintenance_shown";
 										if (cb.Tag as string != flag)
 										{
@@ -50,26 +76,24 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 											cb.Load(url);
 										}
 									}
-									catch
-									{
-										// swallow
-									}
+									catch { }
 								}));
 							}
 						}
-						catch
-						{
-							// swallow
-						}
+						catch { }
 					}
 				}
 			}
-			catch
-			{
-				// swallow
-			}
+			catch { }
 
-			return new CustomResourceRequestHandler(onCaptured);
+			return new CustomResourceRequestHandler(onCaptured, frame?.IsMain ?? false);
+		}
+
+		private static bool IsDevToolsNavigation(string url)
+		{
+			if (string.IsNullOrEmpty(url)) return false;
+			return url.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ||
+			       url.StartsWith("blob:", StringComparison.OrdinalIgnoreCase);
 		}
 	}
 
@@ -77,10 +101,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 	{
 		private const int MaxCapturedResponseBytes = 4 * 1024 * 1024;
 		private readonly Action<CapturedHttp> onCaptured;
+		private readonly bool isMainFrame;
 
-		public CustomResourceRequestHandler(Action<CapturedHttp> onCaptured)
+		public CustomResourceRequestHandler(Action<CapturedHttp> onCaptured, bool isMainFrame)
 		{
 			this.onCaptured = onCaptured;
+			this.isMainFrame = isMainFrame;
 		}
 
 		protected override IResponseFilter GetResourceResponseFilter(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response)
