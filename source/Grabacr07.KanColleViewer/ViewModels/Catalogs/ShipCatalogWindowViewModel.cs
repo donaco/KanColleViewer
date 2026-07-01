@@ -20,7 +20,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		private IReadOnlyCollection<int> selectedShipTypeIds = Array.Empty<int>();
 		private IReadOnlyCollection<int> selectedDaiNaiShipIds = Array.Empty<int>();
-		private bool useDaiNaiShipIdFilter;
 
 		public ShipCatalogWindowSettings Settings { get; }
 
@@ -185,7 +184,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 		{
 			this.selectedShipTypeIds = Array.Empty<int>();
 			this.selectedDaiNaiShipIds = Array.Empty<int>();
-			this.useDaiNaiShipIdFilter = false;
 			this.daiNaiFilterMode = DaiNaiFilterMode.None;
 
 			foreach (var type in this.ShipTypes)
