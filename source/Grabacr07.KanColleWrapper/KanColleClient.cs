@@ -770,9 +770,14 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		private bool TryHandleBattleResult(string url, string normalized)
 		{
-			if (!(url.Contains("/kcsapi/api_req_sortie/battleresult")
-				|| url.Contains("/kcsapi/api_req_combined_battle/battleresult")
-				|| url.Contains("/kcsapi/api_req_battle_midnight/battleresult")))
+			// battleresult系を広く拾う（判定漏れ対策）
+			var isBattleResultApi =
+				url.Contains("battleresult")
+				&& (url.Contains("/kcsapi/api_req_sortie/")
+					|| url.Contains("/kcsapi/api_req_combined_battle/")
+					|| url.Contains("/kcsapi/api_req_battle_midnight/"));
+
+			if (!isBattleResultApi)
 				return false;
 
 			Models.Raw.kcsapi_battleresult brLocal = null;
@@ -977,6 +982,14 @@ namespace Grabacr07.KanColleWrapper
 			});
 
 			// EventMapHpViewer 等のプラグインへ battleresult を通知
+			try
+			{
+				if (this.cachedMapId > 0)
+					this.BattleResultReceived?.Invoke(this.cachedMapId, normalized);
+			}
+			catch (Exception) { }
+
+			// EventMapHpViewer 等のプラグインへ battleresult を通知（1回だけ）
 			try
 			{
 				if (this.cachedMapId > 0)
