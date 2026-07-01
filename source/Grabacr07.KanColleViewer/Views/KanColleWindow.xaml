@@ -90,15 +90,16 @@
 		<DockPanel Grid.Row="1">
 			<DockPanel DockPanel.Dock="{Binding BrowserDock}">
 				<controls:KanColleHost x:Name="kanColleHost"
-									   x:FieldModifier="private"
-									   DockPanel.Dock="{Binding BrowserDock2}"
-									   ZoomFactor="{Binding ZoomFactor.Current}"
-									   UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
-									   OwnerSizeChangeRequested="HandleKanColleHostSizeChangeRequested"
-									   Panel.ZIndex="1">
+                       x:FieldModifier="private"
+                       DockPanel.Dock="{Binding BrowserDock2}"
+                       ZoomFactor="{Binding ZoomFactor.Current}"
+                       UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
+                       OwnerSizeChangeRequested="HandleKanColleHostSizeChangeRequested"
+                       Panel.ZIndex="1">
 					<i:Interaction.Behaviors>
 						<behaviors:ZoomAction ViewModel="{Binding}" />
 					</i:Interaction.Behaviors>
+
 					<cef:ChromiumWebBrowser>
 						<i:Interaction.Behaviors>
 							<behaviors:NavigatorBehavior Navigator="{Binding Navigator}" />

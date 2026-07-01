@@ -59,14 +59,22 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				oldBrowser.FrameLoadEnd -= instance.HandleLoadEnd;
 				oldBrowser.IsBrowserInitializedChanged -= instance.HandleBrowserInitializedChanged;
 			}
+
 			if (newBrowser != null)
 			{
+				// 既存 BrowserSettings を再利用しない（Disposed 済みを掴むケース回避）
+				newBrowser.BrowserSettings = new BrowserSettings
+				{
+					WindowlessFrameRate = 60,
+				};
+
 				newBrowser.FrameLoadEnd += instance.HandleLoadEnd;
 				newBrowser.IsBrowserInitializedChanged += instance.HandleBrowserInitializedChanged;
 				newBrowser.MenuHandler = new ContextMenuHandler();
 				newBrowser.WpfKeyboardHandler = new InhibitTabKeyHandler(newBrowser);
 				instance.ApplyMuteIfReady(newBrowser);
 			}
+
 			if (instance.scrollViewer != null)
 			{
 				instance.scrollViewer.Content = newBrowser;
