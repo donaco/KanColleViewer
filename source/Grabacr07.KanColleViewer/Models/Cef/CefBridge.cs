@@ -10,10 +10,8 @@ using CefSharp;
 using CefSharp.Wpf;
 using Grabacr07.KanColleViewer.Models.Settings;
 
-namespace Grabacr07.KanColleViewer.Models.Cef
-{
-	public static class CefBridge
-	{
+namespace Grabacr07.KanColleViewer.Models.Cef {
+	public static class CefBridge {
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		private static extern bool SetDllDirectory(string lpPathName);
 
@@ -42,58 +40,47 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// ビルド構成が x64 の場合、出力ルート直下に配置されるため、
 		/// サブフォルダー (x64/x86) → 出力ルート直下の順にフォールバックします。
 		/// </summary>
-		private static string ResolveCefDirectory()
-		{
+		private static string ResolveCefDirectory() {
 			var archSubDir = Path.Combine(assemblyDirectory, Environment.Is64BitProcess ? "x64" : "x86");
-			if (File.Exists(Path.Combine(archSubDir, "libcef.dll")))
-			{
+			if (File.Exists(Path.Combine(archSubDir, "libcef.dll"))) {
 				return archSubDir;
 			}
 
 			// x64 ビルド構成では DLL がルート直下に配置される
-			if (File.Exists(Path.Combine(assemblyDirectory, "libcef.dll")))
-			{
+			if (File.Exists(Path.Combine(assemblyDirectory, "libcef.dll"))) {
 				return assemblyDirectory;
 			}
 
 			return archSubDir;
 		}
 
-		private static bool PrepareForInitializeRetry()
-		{
+		private static bool PrepareForInitializeRetry() {
 			if (!File.Exists(CefInitFailedMarkerPath)) return false;
 
-			try
-			{
+			try {
 				DeleteCefTransientState();
-			}
-			catch
-			{
+			} catch {
 				// リトライ用のクリーンアップ失敗は初期化本体で再評価する
 			}
 
 			return true;
 		}
 
-		private static string ResolveBrowserSubprocessPath()
-		{
+		private static string ResolveBrowserSubprocessPath() {
 			var mainProcessPath = Path.Combine(assemblyDirectory, MainProcessFileName);
-			if (File.Exists(mainProcessPath))
-			{
+			if (File.Exists(mainProcessPath)) {
 				return mainProcessPath;
 			}
 
 			var customPath = Path.Combine(assemblyDirectory, CustomBrowserSubprocessFileName);
-			if (File.Exists(customPath))
-			{
+			if (File.Exists(customPath)) {
 				return customPath;
 			}
 
 			return Path.Combine(assemblyDirectory, DefaultBrowserSubprocessFileName);
 		}
 
-		private static void EnsureCefRuntimeFilesAvailable(string browserSubprocessPath)
-		{
+		private static void EnsureCefRuntimeFilesAvailable(string browserSubprocessPath) {
 			var requiredFiles = new[]
 			{
 				Path.Combine(cefDirectory, "libcef.dll"),
@@ -115,75 +102,55 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				missingFiles[0]);
 		}
 
-		private static void DeleteCefTransientState()
-		{
+		private static void DeleteCefTransientState() {
 			TryDeleteDirectory(CachePath);
 		}
 
-		private static void DeleteDebugTransientState()
-		{
+		private static void DeleteDebugTransientState() {
 			DeleteCefTransientState();
 			TryDeleteFile(CefInitFailedMarkerPath);
 		}
 
-		private static void MarkInitializeFailure()
-		{
-			try
-			{
+		private static void MarkInitializeFailure() {
+			try {
 				Directory.CreateDirectory(CachePath);
 				File.WriteAllText(CefInitFailedMarkerPath, DateTimeOffset.Now.ToString("O"));
-			}
-			catch
-			{
+			} catch {
 				// マーカー作成失敗は本体の失敗要因ではないため握りつぶす
 			}
 		}
 
-		private static void ClearInitializeFailureMarker()
-		{
-			try
-			{
-				if (File.Exists(CefInitFailedMarkerPath))
-				{
+		private static void ClearInitializeFailureMarker() {
+			try {
+				if (File.Exists(CefInitFailedMarkerPath)) {
 					File.Delete(CefInitFailedMarkerPath);
 				}
-			}
-			catch
-			{
+			} catch {
 				// 成功時の後処理失敗は次回起動で吸収する
 			}
 		}
 
-		private static void TryDeleteDirectory(string path)
-		{
+		private static void TryDeleteDirectory(string path) {
 			if (!Directory.Exists(path)) return;
 
-			try
-			{
+			try {
 				Directory.Delete(path, true);
-			}
-			catch
-			{
+			} catch {
 				// 他プロセスがロックしている場合は削除できなくても継続
 			}
 		}
 
-		private static void TryDeleteFile(string path)
-		{
+		private static void TryDeleteFile(string path) {
 			if (!File.Exists(path)) return;
 
-			try
-			{
+			try {
 				File.Delete(path);
-			}
-			catch
-			{
+			} catch {
 				// 他プロセスがロックしている場合は削除できなくても継続
 			}
 		}
 
-		private static void AppendInitializeTrace(string message)
-		{
+		private static void AppendInitializeTrace(string message) {
 			// initialize-trace.log 出力を停止
 		}
 
@@ -192,16 +159,17 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// Cef.Initialize() は内部で using(settings) を実行して settings を Dispose するため、
 		/// 同一インスタンスを再利用すると settings.settings が null になり NullReferenceException が発生します。
 		/// </summary>
-		private static CefSettings CreateCefSettings(string browserSubprocessPath)
-		{
-			var settings = new CefSettings
-			{
+		private static CefSettings CreateCefSettings(string browserSubprocessPath) {
+			var settings = new CefSettings {
 				BrowserSubprocessPath = browserSubprocessPath,
 				RootCachePath = CachePath,
 				ResourcesDirPath = cefDirectory,
 				LocalesDirPath = Path.Combine(assemblyDirectory, "locales"),
 				LogSeverity = LogSeverity.Disable,
 			};
+			settings.CefCommandLineArgs.Add("disable-frame-rate-limit", "1"); // 内部のフレーム制限を緩める(基本これでディプレイのレートに合う)
+			settings.CefCommandLineArgs.Add("off-screen-frame-rate", "60"); // 念のため
+			settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1"); // 念のため
 #if DEBUG
 			settings.LogFile = LogFilePath;
 #else
@@ -210,12 +178,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return settings;
 		}
 
-		public static void Initialize()
-		{
-			lock (cefInitLock)
-			{
-				try
-				{
+		public static void Initialize() {
+			lock (cefInitLock) {
+				try {
 					AppendInitializeTrace("Initialize start");
 					EnsureVCRuntimeAvailable();
 					AppendInitializeTrace("VC runtime check completed");
@@ -225,18 +190,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					var dllDirectoryApplied = SetDllDirectory(cefDirectory);
 					AppendInitializeTrace($"SetDllDirectory applied: {dllDirectoryApplied}");
 
-					if (initialized || (CefSharp.Cef.IsInitialized ?? false))
-					{
+					if (initialized || (CefSharp.Cef.IsInitialized ?? false)) {
 						AppendInitializeTrace("Initialize skipped: already initialized");
 						return;
 					}
 
-					if (!Debugger.IsAttached)
-					{
+					if (!Debugger.IsAttached) {
 						PrepareForInitializeRetry();
-					}
-					else
-					{
+					} else {
 						AppendInitializeTrace("Debugger attached: preserving CEF transient state");
 					}
 
@@ -254,8 +215,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					var initializeResult = CefSharp.Cef.Initialize(CreateCefSettings(browserSubprocessPath), performDependencyCheck: false, browserProcessHandler: null);
 					AppendInitializeTrace($"Cef.Initialize returned: {initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}");
 
-					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false))
-					{
+					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false)) {
 						ClearInitializeFailureMarker();
 						initialized = true;
 						AppendInitializeTrace("Initialize completed successfully");
@@ -271,9 +231,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						$"CachePath='{CachePath}', Is64BitProcess={Environment.Is64BitProcess}, " +
 						$"libcef.Exists={libcefExists}('{Path.Combine(cefDirectory, "libcef.dll")}'), " +
 						$"Subprocess.Exists={File.Exists(browserSubprocessPath)}('{browserSubprocessPath}').");
-				}
-				catch (Exception ex)
-				{
+				} catch (Exception ex) {
 					AppendInitializeTrace($"Initialize exception: {ex.GetType().FullName}: {ex.Message}");
 					throw;
 				}
@@ -283,17 +241,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// <summary>
 		/// CefSharp が必要とする Visual C++ ランタイム (vcruntime140.dll) の存在を確認します。
 		/// </summary>
-		private static void EnsureVCRuntimeAvailable()
-		{
+		private static void EnsureVCRuntimeAvailable() {
 			// CefSharp.Core.Runtime.dll は vcruntime140.dll に依存する
 			// 不足時は FileNotFoundException になるが、メッセージが不親切なため事前チェックする
 			var runtimeNames = new[] { "vcruntime140.dll", "msvcp140.dll" };
 
-			foreach (var name in runtimeNames)
-			{
+			foreach (var name in runtimeNames) {
 				var handle = LoadLibrary(name);
-				if (handle == IntPtr.Zero)
-				{
+				if (handle == IntPtr.Zero) {
 					throw new DllNotFoundException(
 						$"Microsoft Visual C++ 再頒布可能パッケージが見つかりません ({name})。\n\n" +
 						"以下の URL からインストールしてください:\n" +
@@ -311,8 +266,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool FreeLibrary(IntPtr hModule);
 
-		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured)
-		{
+		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured) {
 			webBrowser.RequestHandler = new CustomRequestHandler(onCaptured);
 			webBrowser.DownloadHandler = new BlockDownloadHandler();
 		}
@@ -323,24 +277,19 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// IBrowser.GetFrameNames() を使用してフレーム名一覧を取得し、
 		/// kcs2/index.php を含む URL のフレームを探します。
 		/// </summary>
-		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame canvas)
-		{
-			try
-			{
+		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame canvas) {
+			try {
 				var browser = webBrowser.GetBrowser();
-				if (browser == null)
-				{
+				if (browser == null) {
 					canvas = null;
 					return false;
 				}
 
 				// フレーム名一覧からゲームフレームを探す
 				var frameNames = browser.GetFrameNames();
-				foreach (var name in frameNames)
-				{
+				foreach (var name in frameNames) {
 					var frame = browser.GetFrameByName(name);
-					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
-					{
+					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/")) {
 						canvas = frame;
 						return true;
 					}
@@ -348,11 +297,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 				// フレーム名で見つからない場合、フレーム識別子で探す
 				var frameIds = browser.GetFrameIdentifiers();
-				foreach (var frameId in frameIds)
-				{
+				foreach (var frameId in frameIds) {
 					var frame = browser.GetFrameByIdentifier(frameId);
-					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/"))
-					{
+					if (frame != null && !string.IsNullOrEmpty(frame.Url) && frame.Url.Contains("/kcs2/")) {
 						canvas = frame;
 						return true;
 					}
@@ -360,9 +307,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 				canvas = null;
 				return false;
-			}
-			catch
-			{
+			} catch {
 				canvas = null;
 				return false;
 			}
@@ -375,8 +320,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// C++/CLI アセンブリ (CefSharp.Core.Runtime.dll) がロードされる前に
 		/// ネイティブ依存関係を確立します。
 		/// </summary>
-		public static void PrepareNativePaths()
-		{
+		public static void PrepareNativePaths() {
 			Environment.CurrentDirectory = assemblyDirectory;
 			SetDllDirectory(cefDirectory);
 
@@ -397,8 +341,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		/// NoInlining により、OnStartup の JIT コンパイル時に CefSharp がロードされるのを防ぎます。
 		/// </summary>
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-		public static int ExecuteSubprocess()
-		{
+		public static int ExecuteSubprocess() {
 			return CefSharp.Cef.ExecuteProcess();
 		}
 	}
