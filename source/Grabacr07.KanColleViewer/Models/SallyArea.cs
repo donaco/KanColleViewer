@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using Newtonsoft.Json.Linq;
@@ -30,20 +32,14 @@ namespace Grabacr07.KanColleViewer.Models
 			var source = Properties.Settings.Default.SallyAreaSource;
 			if (string.IsNullOrWhiteSpace(source))
 			{
-				return new SallyArea[0];
+				Debug.WriteLine("SallyArea.GetAsync: SallyAreaSource が空のためローカルを使用します。");
+				return LoadFromLocalFile();
 			}
 
-			if (!Uri.TryCreate(source, UriKind.Absolute, out var uri))
+			if (!Uri.TryCreate(source, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
 			{
-				Debug.WriteLine("SallyArea.GetAsync: 無効な URI: " + source);
-				return new SallyArea[0];
-			}
-
-			// https のみ許可
-			if (uri.Scheme != Uri.UriSchemeHttps)
-			{
-				Debug.WriteLine("SallyArea.GetAsync: https 以外のスキームは許可されていません: " + source);
-				return new SallyArea[0];
+				Debug.WriteLine("SallyArea.GetAsync: URI が無効のためローカルを使用します。 source=" + source);
+				return LoadFromLocalFile();
 			}
 
 			using (var client = new HttpClient(Helper.GetProxyConfiguredHandler()))
@@ -57,50 +53,110 @@ namespace Grabacr07.KanColleViewer.Models
 					if (response.IsSuccessStatusCode)
 					{
 						var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+						var parsed = ParseAreas(content);
+						if (parsed.Length > 0) return parsed;
 
-						// Newtonsoft.Json によるパースへ変更
-						JArray array;
-						try
-						{
-							array = JArray.Parse(content);
-						}
-						catch (Exception)
-						{
-							return new SallyArea[0];
-						}
-
-						var result = array
-							.OfType<JToken>()
-							.Select(x =>
-								new SallyArea
-								{
-									Area = (int?)(x["area"]) ?? 0,
-									Name = (string)(x["name"]),
-									Color = Helper.StringToColor((string)(x["color"]))
-								})
-							.ToArray();
-
-						return result;
+						Debug.WriteLine("SallyArea.GetAsync: サーバーJSON解析失敗。ローカルを使用します。");
+						return LoadFromLocalFile();
 					}
+
+					Debug.WriteLine("SallyArea.GetAsync: HTTP失敗 " + (int)response.StatusCode + " " + response.ReasonPhrase);
+					return LoadFromLocalFile();
 				}
-				catch (HttpRequestException hrex)
+				catch (HttpRequestException ex)
 				{
-					Debug.WriteLine("SallyArea.GetAsync: HttpRequestException: " + hrex);
-					StatusService.Current.Notify("出撃海域の取得に失敗しました（ネットワークエラー）。");
+					Debug.WriteLine("SallyArea.GetAsync: HttpRequestException: " + ex);
+					return LoadFromLocalFile();
 				}
-				catch (TaskCanceledException)
+				catch (TaskCanceledException ex)
 				{
-					Debug.WriteLine("SallyArea.GetAsync: タイムアウト");
-					StatusService.Current.Notify("出撃海域の取得がタイムアウトしました。");
+					Debug.WriteLine("SallyArea.GetAsync: Timeout: " + ex);
+					return LoadFromLocalFile();
 				}
 				catch (Exception ex)
 				{
-					Debug.WriteLine(ex);
-					StatusService.Current.Notify("出撃海域の取得に失敗しました: " + ex.Message);
+					Debug.WriteLine("SallyArea.GetAsync: Unexpected: " + ex);
+					return LoadFromLocalFile();
 				}
 			}
+		}
 
-			return new SallyArea[0];
+		private static SallyArea[] LoadFromLocalFile()
+		{
+			try
+			{
+				var exePath = Assembly.GetEntryAssembly()?.Location ?? Assembly.GetExecutingAssembly().Location;
+				var exeDir = Path.GetDirectoryName(exePath) ?? AppDomain.CurrentDomain.BaseDirectory;
+				var localPath = Path.Combine(exeDir, "json", "EventMap.json");
+
+				if (!File.Exists(localPath))
+				{
+					Debug.WriteLine("SallyArea.LoadFromLocalFile: ファイルなし: " + localPath);
+					return new SallyArea[0];
+				}
+
+				var json = File.ReadAllText(localPath);
+				var parsed = ParseAreas(json);
+				Debug.WriteLine("SallyArea.LoadFromLocalFile: ローカル読込件数=" + parsed.Length);
+				return parsed;
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("SallyArea.LoadFromLocalFile: 失敗: " + ex);
+				return new SallyArea[0];
+			}
+		}
+
+		private static SallyArea[] ParseAreas(string content)
+		{
+			try
+			{
+				var trimmed = (content ?? string.Empty).TrimStart();
+				JToken listToken = null;
+
+				if (trimmed.StartsWith("["))
+				{
+					listToken = JArray.Parse(content);
+				}
+				else if (trimmed.StartsWith("{"))
+				{
+					var root = JObject.Parse(content);
+					listToken = root["EventMap"];
+				}
+
+				var array = listToken as JArray;
+				if (array == null) return new SallyArea[0];
+
+				return array
+					.OfType<JToken>()
+					.Select(x => new SallyArea
+					{
+						Area = ParseArea(x["area"]),
+						Name = (string)x["name"] ?? string.Empty,
+						Color = Helper.StringToColor((string)x["color"])
+					})
+					.ToArray();
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("SallyArea.ParseAreas: 解析失敗: " + ex);
+				return new SallyArea[0];
+			}
+		}
+
+		private static int ParseArea(JToken token)
+		{
+			var s = token?.Value<string>();
+			if (!string.IsNullOrWhiteSpace(s))
+			{
+				var i = s.IndexOf('-');
+				if (i > 0) s = s.Substring(0, i);
+
+				int n;
+				if (int.TryParse(s, out n)) return n;
+			}
+
+			return token?.Value<int?>() ?? 0;
 		}
 	}
 }

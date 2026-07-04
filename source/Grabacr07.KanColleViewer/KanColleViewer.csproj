@@ -659,6 +659,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>json\DaiNai_Ship.json</TargetPath>
     </None>
+    <None Include="EventMap.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\EventMap.json</TargetPath>
+    </None>    
     <None Include="TP_Ship_SlotItem.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>json\TP_Ship_SlotItem.json</TargetPath>
