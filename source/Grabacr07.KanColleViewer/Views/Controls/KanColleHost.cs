@@ -62,10 +62,18 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 			if (newBrowser != null)
 			{
-				// 既存 BrowserSettings を再利用しない（Disposed 済みを掴むケース回避）
+				// フレームレート モードに応じた WindowlessFrameRate を設定する
+				int fps;
+				if (GeneralSettings.FrameRateMode.Value == BrowserFrameRateMode.Low)
+					fps = 30;
+				else if (GeneralSettings.FrameRateMode.Value == BrowserFrameRateMode.High)
+					fps = MonitorHelper.PrimaryRefreshRate; // モニタのリフレッシュレートを自動取得
+				else
+					fps = 60; // Medium
+
 				newBrowser.BrowserSettings = new BrowserSettings
 				{
-					WindowlessFrameRate = 60,
+					WindowlessFrameRate = fps,
 				};
 
 				newBrowser.FrameLoadEnd += instance.HandleLoadEnd;

@@ -103,6 +103,31 @@
 		</DockPanel>
 
 
+		<!-- フレームレート設定 -->
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+		<DockPanel Margin="0,5,0,5">
+			<ComboBox DockPanel.Dock="Right"
+					  SelectedValue="{Binding Source={x:Static settings:GeneralSettings.FrameRateMode}, Path=Value, Mode=TwoWay}"
+					  SelectedValuePath="Tag"
+					  Width="196"
+					  VerticalAlignment="Center">
+				<ComboBoxItem Content="低：30FPS"
+							  Tag="{x:Static models:BrowserFrameRateMode.Low}" />
+				<ComboBoxItem Content="中：60FPS"
+							  Tag="{x:Static models:BrowserFrameRateMode.Medium}" />
+				<ComboBoxItem Content="{x:Static models:MonitorHelper.HighModeDisplayText}"
+						  Tag="{x:Static models:BrowserFrameRateMode.High}" />
+			</ComboBox>
+			<StackPanel Margin="24,0,0,0">
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+						   Text="表示フレームレートを選択する" />
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   FontSize="11"
+						   Text="描画品質と GPU 負荷のバランスを選択します。変更後はアプリの再起動が必要です。" />
+			</StackPanel>
+		</DockPanel>
+
 		<!-- 開発者向けオプション 有効/無効チェックボックス -->
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 		<DockPanel Margin="0,5,0,5">
@@ -148,7 +173,6 @@
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 						   Text="次回起動時にブラウザのキャッシュを削除する" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-						   FontSize="11"
 						   Text="アプリの各設定は保持されます。ブラウザキャッシュの削除は再起動が必要です。" />
 			</StackPanel>
 		</DockPanel>

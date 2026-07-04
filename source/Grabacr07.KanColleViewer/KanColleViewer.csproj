@@ -186,6 +186,7 @@
     <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
     <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
     <Compile Include="Models\AppThemeService.cs" />
+    <Compile Include="Models\BrowserFrameRateMode.cs" />
     <Compile Include="Models\BrowserZoomFactor.cs" />
     <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
     <Compile Include="Models\Cef\CapturedHttp.cs" />
@@ -198,6 +199,7 @@
     <Compile Include="Models\Cef\ScreenshotRequest.cs" />
     <Compile Include="Models\ExitConfirmationType.cs" />
     <Compile Include="Models\IZoomFactor.cs" />
+    <Compile Include="Models\MonitorHelper.cs" />
     <Compile Include="Models\NotifierHost.cs" />
     <Compile Include="Models\ProductInfo.cs" />
     <Compile Include="Models\Migration\_XmlFileReader.cs" />

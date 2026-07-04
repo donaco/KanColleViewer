@@ -159,17 +159,25 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// Cef.Initialize() は内部で using(settings) を実行して settings を Dispose するため、
 		/// 同一インスタンスを再利用すると settings.settings が null になり NullReferenceException が発生します。
 		/// </summary>
-		private static CefSettings CreateCefSettings(string browserSubprocessPath) {
-			var settings = new CefSettings {
+		private static CefSettings CreateCefSettings(string browserSubprocessPath)
+		{
+			var settings = new CefSettings
+			{
 				BrowserSubprocessPath = browserSubprocessPath,
 				RootCachePath = CachePath,
 				ResourcesDirPath = cefDirectory,
 				LocalesDirPath = Path.Combine(assemblyDirectory, "locales"),
 				LogSeverity = LogSeverity.Disable,
 			};
-			settings.CefCommandLineArgs.Add("disable-frame-rate-limit", "1"); // 内部のフレーム制限を緩める(基本これでディプレイのレートに合う)
-			settings.CefCommandLineArgs.Add("off-screen-frame-rate", "60"); // 念のため
-			settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1"); // 念のため
+
+			// High (モニタの FPS に合わせる) の場合のみ Chromium フレームレート制限を解除する
+			// Low / Medium は BrowserSettings.WindowlessFrameRate のみで制御する
+			if (GeneralSettings.FrameRateMode.Value == BrowserFrameRateMode.High)
+			{
+				settings.CefCommandLineArgs.Add("disable-frame-rate-limit", "1");
+				settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
+			}
+
 #if DEBUG
 			settings.LogFile = LogFilePath;
 #else

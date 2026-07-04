@@ -85,6 +85,13 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> IsAutoUpdateCheckEnabled { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Local, true) { AutoSave = true };
 
+		/// <summary>
+		/// ブラウザーのフレームレート モードを示す設定値を取得します。
+		/// 変更後はアプリケーションの再起動が必要です。
+		/// </summary>
+		public static SerializableProperty<BrowserFrameRateMode> FrameRateMode { get; }
+			= new SerializableProperty<BrowserFrameRateMode>(GetKey(), Providers.Local, BrowserFrameRateMode.Medium) { AutoSave = true };
+
 		private static string GetKey([CallerMemberName] string propertyName = "")
 		{
 			return nameof(GeneralSettings) + "." + propertyName;
