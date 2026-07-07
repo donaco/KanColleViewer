@@ -15,7 +15,7 @@ namespace Counter
 	[ExportMetadata("Guid", "65BE3E80-8EC1-41BD-85E0-78AEFD45A757")]
 	[ExportMetadata("Title", "KanColleCounter")]
 	[ExportMetadata("Description", "回数カウント機能や出撃履歴を提供します。")]
-	[ExportMetadata("Version", "2.2.1")]
+	[ExportMetadata("Version", "2.2.2")]
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
@@ -40,9 +40,9 @@ namespace Counter
 						new MissionCounter(),
 						new SortieCounter(),
 					},
-					// --- 直近12件を表示(表示数を指定) ---
-					SortieHistory = new SortieHistoryCounter(12),
-				};
+				// --- 直近12件を表示(表示数を指定) ---
+				SortieHistory = new SortieHistoryCounter(int.MaxValue),
+			};
 
 				// --- 保存データを復元 ---
 				this.RestoreSavedData();

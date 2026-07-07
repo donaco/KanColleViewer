@@ -219,106 +219,112 @@
 									Margin="0,8,0,0"
 									Visibility="{Binding SortieHistory, Converter={StaticResource NullToCollapsedConverter}}">
 							<metro2:CallMethodButton Content="リセット"
+													 Padding="10,6"
 													 MethodName="ResetHistory"
 													 DataContext="{Binding SortieHistory}" />
 						</StackPanel>
 
 						<!-- 戦闘履歴リスト -->
-						<ItemsControl ItemsSource="{Binding SortieHistory.History}"
-									  Grid.IsSharedSizeScope="True">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate DataType="{x:Type counter:SortieRecord}">
-									<Border Margin="2,1"
-											Padding="2,1">
-										<Grid>
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="39"   SharedSizeGroup="ColTime" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="ColArea" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="ColRank" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="ColAir" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="ColBoss" />
-											</Grid.ColumnDefinitions>
+						<ScrollViewer VerticalScrollBarVisibility="Auto"
+									  HorizontalScrollBarVisibility="Disabled"
+									  CanContentScroll="True"
+									  MaxHeight="277">
+							<ItemsControl ItemsSource="{Binding SortieHistory.History}"
+										  Grid.IsSharedSizeScope="True">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate DataType="{x:Type counter:SortieRecord}">
+										<Border Margin="2,1"
+												Padding="2,1">
+											<Grid>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="39"   SharedSizeGroup="ColTime" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="ColArea" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="ColRank" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="ColAir" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="ColBoss" />
+												</Grid.ColumnDefinitions>
 
-											<!-- 時刻 -->
-											<TextBlock Grid.Column="0"
+												<!-- 時刻 -->
+												<TextBlock Grid.Column="0"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,6,0">
-												<Run Text="{Binding Timestamp, StringFormat=HH:mm, Mode=OneWay}"
-													 Foreground="{DynamicResource ForegroundBrushKey}" />
-											</TextBlock>
+													<Run Text="{Binding Timestamp, StringFormat=HH:mm, Mode=OneWay}"
+														 Foreground="{DynamicResource ForegroundBrushKey}" />
+												</TextBlock>
 
-											<!-- 海域（例: 5-5-K）-->
-											<TextBlock Grid.Column="1"
+												<!-- 海域（例: 5-5-K）-->
+												<TextBlock Grid.Column="1"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,4,0">
-												<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+													<Run Text="{Binding CleanAreaCellKey, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
 
-											<!-- ボス表示（例: [ボス]）-->
-											<TextBlock Grid.Column="2"
+												<!-- ボス表示（例: [ボス]）-->
+												<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding BossText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 帰港表示（例: [帰港]）-->
-											<TextBlock Grid.Column="2"
+													<Run Text="{Binding BossText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 帰港表示（例: [帰港]）-->
+												<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding KikoText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding KikoText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 防空戦は WinRank が無いので同じ列に重ねて表示 -->
-											<TextBlock Grid.Column="2"
+													<Run Text="{Binding KikoText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 防空戦は WinRank が無いので同じ列に重ねて表示 -->
+												<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding DestructionText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 航空マス表示（例: [航空]）空なら非表示 -->
-											<TextBlock Grid.Column="2"
+													<Run Text="{Binding DestructionText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 航空マス表示（例: [航空]）空なら非表示 -->
+												<TextBlock Grid.Column="2"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding LdAirbattleText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+													<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
 
-											<!-- 戦闘結果（例: [S]）-->
-											<TextBlock Grid.Column="3"
+												<!-- 戦闘結果（例: [S]）-->
+												<TextBlock Grid.Column="3"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding WinRank, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding WinRank, Mode=OneWay, StringFormat=[{0}]}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+													<Run Text="{Binding WinRank, Mode=OneWay, StringFormat=[{0}]}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
 
-											<!-- 制空状態（例: [確保]）-->
-											<TextBlock Grid.Column="4"
+												<!-- 制空状態（例: [確保]）-->
+												<TextBlock Grid.Column="4"
 													   Margin="0,0,0,0"
 													   Visibility="{Binding DataContext.ShowAirSuperiority, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Converter={StaticResource BoolToVisibilityConverter}}">
-												<TextBlock.Style>
-													<Style TargetType="{x:Type TextBlock}">
-														<Setter Property="Foreground" Value="{DynamicResource ForegroundBrushKey}" />
-														<Style.Triggers>
-															<DataTrigger Binding="{Binding AirSuperiorityText}" Value="">
-																<Setter Property="Visibility" Value="Collapsed" />
-															</DataTrigger>
-														</Style.Triggers>
-													</Style>
-												</TextBlock.Style>
-												<Run Text="{Binding AirSuperiorityText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-										</Grid>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
+													<TextBlock.Style>
+														<Style TargetType="{x:Type TextBlock}">
+															<Setter Property="Foreground" Value="{DynamicResource ForegroundBrushKey}" />
+															<Style.Triggers>
+																<DataTrigger Binding="{Binding AirSuperiorityText}" Value="">
+																	<Setter Property="Visibility" Value="Collapsed" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+													</TextBlock.Style>
+													<Run Text="{Binding AirSuperiorityText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+											</Grid>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</ScrollViewer>
 					</DockPanel>
 				</GroupBox>
 
@@ -336,28 +342,33 @@
 									Margin="0,8,0,0"
 									Visibility="{Binding SortieHistory, Converter={StaticResource NullToCollapsedConverter}}">
 							<metro2:CallMethodButton Content="リセット"
+													 Padding="10,6"
 													 MethodName="ResetAreaCounts"
 													 DataContext="{Binding SortieHistory}" />
 						</StackPanel>
 
 						<!-- 出撃数リスト -->
-						<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
-									  Grid.IsSharedSizeScope="True">
-							<ItemsControl.ItemTemplate>
-								<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
-									<Border Margin="2,1"
-											Padding="2,1">
-										<Grid>
-											<Grid.ColumnDefinitions>
-												<ColumnDefinition Width="Auto" SharedSizeGroup="AcArea" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="AcBoss" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="AcCount" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="AcRank" />
-												<ColumnDefinition Width="Auto" SharedSizeGroup="AcAir" />
-											</Grid.ColumnDefinitions>
+						<ScrollViewer VerticalScrollBarVisibility="Auto"
+									  HorizontalScrollBarVisibility="Disabled"
+									  CanContentScroll="True"
+									  MaxHeight="277">
+							<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
+										  Grid.IsSharedSizeScope="True">
+								<ItemsControl.ItemTemplate>
+									<DataTemplate DataType="{x:Type counter:SortieAreaCount}">
+										<Border Margin="2,1"
+												Padding="2,1">
+											<Grid>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="Auto" SharedSizeGroup="AcArea" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="AcBoss" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="AcCount" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="AcRank" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="AcAir" />
+												</Grid.ColumnDefinitions>
 
-											<!-- 海域（例: E1-1-3 や 6-5-E）-->
-											<TextBlock Grid.Column="0"
+												<!-- 海域（例: E1-1-3 や 6-5-E）-->
+												<TextBlock Grid.Column="0"
 												   Style="{DynamicResource DefaultTextStyleKey}"
 												   Margin="0,0,4,0">
 											<Run Text="{Binding DisplayAreaCellKey, Mode=OneWay}"
@@ -441,8 +452,9 @@
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
 						</ItemsControl>
-					</DockPanel>
-				</GroupBox>
+					</ScrollViewer>
+				</DockPanel>
+			</GroupBox>
 			</UniformGrid>
 		</DockPanel>
 	</ScrollViewer>
