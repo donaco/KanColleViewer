@@ -180,7 +180,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 				this.AirBases = areaGroup
 					.Select(kvp => new AirBaseViewModel(kvp.Value))
-					.OrderBy(x => x.AreaId)
+					.OrderBy(x => GetAreaSortOrder(x.AreaId))
+					.ThenBy(x => x.AreaId)
 					.ToArray();
 
 				this.IsEmpty = this.AirBases.Length == 0;
@@ -208,6 +209,21 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				this.SelectedAirBase = null;
 				this.IsEmpty = true;
 			}
+		}
+
+		/// <summary>
+		/// 海域IDから表示順序の優先度を取得（小さいほど先に表示）
+		/// </summary>
+		private static int GetAreaSortOrder(int areaId)
+		{
+			// 期間限定海域（areaId >= 60）を最初に表示
+			if (areaId >= 60)
+			{
+				return 0;
+			}
+
+			// その他の海域は AreaId の順序で表示
+			return 1;
 		}
 
 		protected override void Dispose(bool disposing)

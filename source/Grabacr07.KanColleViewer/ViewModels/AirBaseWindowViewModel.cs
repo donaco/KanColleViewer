@@ -67,7 +67,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.Settings = new AirBaseWindowSettings();
 
 			// AirBases と SelectedAirBase をバインド（配列をObservableCollectionに変換）
-			this.AirBases = new ObservableCollection<AirBaseViewModel>(airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>());
+			// 期間限定海域（areaId >= 60）を最初に表示するようソート
+			var sortedAirBases = (airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>())
+				.OrderBy(x => GetAreaSortOrder(x.AreaId))
+				.ThenBy(x => x.AreaId)
+				.ToList();
+			this.AirBases = new ObservableCollection<AirBaseViewModel>(sortedAirBases);
 
 			// 初期選択: ウィンドウを開いた時点の選択状態をコピー（以後は連動しない）
 			this.SelectedAirBase = airBasesVM.SelectedAirBase;
@@ -116,6 +121,21 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			var format = ScreenshotSettings.Format.Value;
 			var path = Helper.CreateScreenshotFilePath(format);
 			this.RaiseScreenshotRequested(path, format);
+		}
+
+		/// <summary>
+		/// 海域IDから表示順序の優先度を取得（小さいほど先に表示）
+		/// </summary>
+		private static int GetAreaSortOrder(int areaId)
+		{
+			// 期間限定海域（areaId >= 60）を最初に表示
+			if (areaId >= 60)
+			{
+				return 0;
+			}
+
+			// その他の海域は AreaId の順序で表示
+			return 1;
 		}
 	}
 }

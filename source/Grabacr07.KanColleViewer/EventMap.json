@@ -1,4 +1,8 @@
 [
-  { "area": "62", "name": "イベント用", "color": "#FF69B4" },
-  { "area": "63", "name": "イベント用", "color": "#FF69B4" }
+  { "area": "1", "name": "第三十一戦隊", "color": "#DDDDDD" },
+  { "area": "2", "name": "増強第三十一戦隊", "color": "#FF69B4" },
+  { "area": "3", "name": "3", "color": "#FF69B4" },
+  { "area": "4", "name": "4", "color": "#FF69B4" }
+
+
 ]
