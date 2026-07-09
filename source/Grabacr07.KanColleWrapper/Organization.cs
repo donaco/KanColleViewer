@@ -486,13 +486,31 @@ namespace Grabacr07.KanColleWrapper
 
 		/// <summary>
 		/// CEF 経由で受信した goback_port 時に、脱出艦・曳航艦を記録します。
+		/// Ship.Situation への Evacuation/Tow フラグも即時反映します。
 		/// </summary>
-		internal void AddEvacuatedShips(int evacuatedShipId, int towShipId)
+		internal void AddEvacuatedShips(int evacuatedShipId, int towShipId = -1)
 		{
 			lock (this._evacuationLock)
 			{
 				this.evacuatedShipsIds.Add(evacuatedShipId);
-				this.towShipIds.Add(towShipId);
+				if (towShipId >= 0) this.towShipIds.Add(towShipId);
+			}
+
+			// Ship.Situation を即時反映（FleetState.Update() での大破誤判定を防ぐ）
+			var escShip = this.Ships[evacuatedShipId];
+			if (escShip != null) escShip.Situation |= ShipSituation.Evacuation;
+
+			if (towShipId >= 0)
+			{
+				var towShip = this.Ships[towShipId];
+				if (towShip != null) towShip.Situation |= ShipSituation.Tow;
+			}
+
+			// 全艦隊の大破アラート等を再計算
+			foreach (var fleet in this.Fleets.Values)
+			{
+				try { fleet.State.Update(); fleet.RaiseShipsUpdated(); }
+				catch { }
 			}
 		}
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,6 +54,10 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
     {
         public int[] api_escape_idx { get; set; }
         public int[] api_tow_idx { get; set; }
+        /// <summary>
+        /// 退避種別: 1=単艦退避（曳航艦なし）、0 or 不在=連合艦隊退避（曳航艦あり）
+        /// </summary>
+        public int api_escape_type { get; set; }
     }
 
     // ReSharper restore InconsistentNaming

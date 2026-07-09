@@ -255,23 +255,31 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				this.capturedProcessor.Process(url, responseBody);
-				}
-				catch (Exception ex) { LogError("ProcessCaptured/capturedProcessor", ex); }
+			}
+			catch (Exception ex) { LogError("ProcessCaptured/capturedProcessor", ex); }
 
-				// api_start2/getData は CapturedProcessor が処理するのでここで PublishSession のみ発行
-				try
+			// api_start2/getData は CapturedProcessor が処理するのでここで PublishSession のみ発行
+			try
+			{
+				if (url.Contains("/kcsapi/api_start2/getData") && !string.IsNullOrEmpty(responseBody))
 				{
-					if (url.Contains("/kcsapi/api_start2/getData") && !string.IsNullOrEmpty(responseBody))
-					{
-						var normalized0 = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
-						this.Proxy.PublishSession("/kcsapi/api_start2/getData", string.IsNullOrEmpty(normalized0) ? responseBody : normalized0);
-					}
+					var normalized0 = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
+					this.Proxy.PublishSession("/kcsapi/api_start2/getData", string.IsNullOrEmpty(normalized0) ? responseBody : normalized0);
 				}
-				catch (Exception ex) { LogError("ProcessCaptured/start2Publish", ex); }
+			}
+			catch (Exception ex) { LogError("ProcessCaptured/start2Publish", ex); }
 
 			try
 			{
 				if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(responseBody)) return;
+
+				// goback_port は api_data を持たない成功レスポンスのため、
+				// NormalizeSvDataString が空を返してもハンドルできるよう、先に URL 判定する
+				// 通常艦隊 (api_req_sortie) と 連合艦隊 (api_req_combined_battle) 両方に対応
+				if (url.Contains("goback_port"))
+				{
+					if (TryHandleGobackPort(url)) return;
+				}
 
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
@@ -286,14 +294,14 @@ namespace Grabacr07.KanColleWrapper
 				catch (Newtonsoft.Json.JsonException) { /* JSON としてパース不能なレスポンスは想定内：無視してスキップ */ }
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
-					// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
-					if (TryHandleMapStart(url, requestBody, normalized)) return;
-					if (TryHandleBattle(url, normalized)) return;
-					if (TryHandleMapNext(url, normalized)) return;
-					if (TryHandleMapInfo(url, normalized)) return;
-					if (TryHandleSelectEventmapRank(url, requestBody, normalized)) return;
+				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
+				if (TryHandleMapStart(url, requestBody, normalized)) return;
+				if (TryHandleBattle(url, normalized)) return;
+				if (TryHandleMapNext(url, normalized)) return;
+				if (TryHandleMapInfo(url, normalized)) return;
+				if (TryHandleSelectEventmapRank(url, requestBody, normalized)) return;
 
-					// 小さな処理に分割して判定（早期 return ）
+				// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
 				if (TryHandleBasic(url, normalized)) return;
 
@@ -338,7 +346,7 @@ namespace Grabacr07.KanColleWrapper
 
 				if (TryHandleRemodelSlot(url, normalized, requestBody)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
-				if (TryHandleGobackPort(url)) return;
+				// goback_port はここでは呼ばない（正規化前に処理済み）
 
 				// 入渠系
 				if (TryHandleNyukyoStart(url, normalized, requestBody)) return;
@@ -351,8 +359,8 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
 
 				if (TryHandleMissionResult(url, normalized)) return;
-					if (TryHandleUpdateComment(url, normalized, requestBody)) return;
-					// 将来的なフォールバック追加箇所はここに追加
+				if (TryHandleUpdateComment(url, normalized, requestBody)) return;
+				// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch (Exception ex) { LogError("ProcessCaptured", ex); }
 		}
@@ -623,9 +631,9 @@ namespace Grabacr07.KanColleWrapper
 				return true;
 			}
 
-			/// <summary>
-			/// 戦闘開始（各種 battle API）
-			/// </summary>
+		/// <summary>
+		/// 戦闘開始（各種 battle API）
+		/// </summary>
 		private bool TryHandleBattle(string url, string normalized)
 		{
 			// battle 系 API をまとめて判定
@@ -636,8 +644,9 @@ namespace Grabacr07.KanColleWrapper
 				|| url.Contains("/kcsapi/api_req_combined_battle/")))
 				return false;
 
-			// battleresult は別ハンドラで処理するため除外
+			// battleresult・goback_port は別ハンドラで処理するため除外
 			if (url.Contains("battleresult")) return false;
+			if (url.Contains("goback_port")) return false;
 
 			// 航空戦マス（ld_airbattle）かどうかを判定
 			bool isLdAirbattle =
@@ -892,35 +901,93 @@ namespace Grabacr07.KanColleWrapper
 			}
 			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
 
-			// goback_port のために連合艦隊脱出情報を記録（combined_battle_battleresult のみ）
+			// goback_port のために脱出情報を記録
+			// DataContractJsonSerializer のネスト型サイレント null 問題を回避するため JToken から直接パース
 			try
 			{
-				var escape = cbrLocal?.api_escape;
-				if (escape != null && escape.api_escape_idx != null && escape.api_tow_idx != null)
-				{
-					// 脱出艦・曳航艦のインデックスを艦船IDに変換してキャッシュ
-					var org = this.Homeport?.Organization;
-					if (org != null)
-					{
-						// 連合艦隊（第1+第2艦隊）を結合した Ship 配列を構築
-						var combinedShips = org.Fleets.OrderBy(f => f.Key)
-							.Take(2)
-							.SelectMany(f => f.Value.Ships)
-							.ToArray();
+				var jroot = JToken.Parse(normalized);
+				var jdata = jroot["api_data"] ?? jroot;
 
-						this.pendingEscapeShipIds = escape.api_escape_idx
-							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
-							.Select(idx => combinedShips[idx - 1].Id)
-							.ToArray();
-						this.pendingTowShipIds = escape.api_tow_idx
-							.Where(idx => idx >= 1 && idx <= combinedShips.Length)
-							.Select(idx => combinedShips[idx - 1].Id)
-							.ToArray();
+				int escapeFlag = jdata?["api_escape_flag"]?.Value<int>() ?? 0;
+
+				if (escapeFlag == 1)
+				{
+					int[] escapeIdxArr = null;
+					int[] towIdxArr = null;
+
+					try
+					{
+						var escapeIdxTok = jdata?["api_escape"]?["api_escape_idx"];
+						if (escapeIdxTok != null && escapeIdxTok.Type == JTokenType.Array)
+							escapeIdxArr = escapeIdxTok.ToObject<int[]>();
+					}
+					catch (Exception ex) { LogError("TryHandleBattleResult/escape_idx", ex); }
+
+					try
+					{
+						var towIdxTok = jdata?["api_escape"]?["api_tow_idx"];
+						if (towIdxTok != null && towIdxTok.Type == JTokenType.Array)
+							towIdxArr = towIdxTok.ToObject<int[]>();
+					}
+					catch (Exception ex) { LogError("TryHandleBattleResult/tow_idx", ex); }
+
+					if (escapeIdxArr != null && escapeIdxArr.Length > 0)
+					{
+						var org = this.Homeport?.Organization;
+						if (org != null)
+						{
+							// 出撃艦隊の Ship 配列を特定
+							// 連合艦隊（sortieDeckIds >= 2）: デッキ1+2 を結合
+							// 単一艦隊（sortieDeckIds == 1）: 実際の出撃デッキを使用
+							Ship[] shipArray;
+							if (this.sortieDeckIds.Count >= 2)
+							{
+								shipArray = org.Fleets.OrderBy(f => f.Key)
+									.Take(2)
+									.SelectMany(f => f.Value.Ships)
+									.ToArray();
+							}
+							else if (this.sortieDeckIds.Count == 1)
+							{
+								var deckId = this.sortieDeckIds.First();
+								shipArray = org.Fleets.ContainsKey(deckId)
+									? org.Fleets[deckId].Ships
+									: new Ship[0];
+							}
+							else
+							{
+								shipArray = org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships : new Ship[0];
+							}
+
+							this.pendingEscapeShipIds = escapeIdxArr
+								.Where(idx => idx >= 1 && idx <= shipArray.Length)
+								.Select(idx => shipArray[idx - 1].Id)
+								.ToArray();
+
+							// 単艦退避（api_escape_type==1）は api_tow_idx が存在しない → empty
+							this.pendingTowShipIds = (towIdxArr != null && towIdxArr.Length > 0)
+								? towIdxArr
+									.Where(idx => idx >= 1 && idx <= shipArray.Length)
+									.Select(idx => shipArray[idx - 1].Id)
+									.ToArray()
+								: new int[0];
+
+							System.Diagnostics.Debug.WriteLine(
+								$"[TryHandleBattleResult] escape: idx=[{string.Join(",", escapeIdxArr)}] " +
+								$"escapeIds=[{string.Join(",", this.pendingEscapeShipIds)}] " +
+								$"towIds=[{string.Join(",", this.pendingTowShipIds)}] " +
+								$"sortieDeckIds=[{string.Join(",", this.sortieDeckIds)}] " +
+								$"shipArrayLen={shipArray.Length}");
+						}
+					}
+					else
+					{
+						this.pendingEscapeShipIds = null;
+						this.pendingTowShipIds = null;
 					}
 				}
 				else
 				{
-					// 脱出なし or 単艦戦の場合はクリア
 					this.pendingEscapeShipIds = null;
 					this.pendingTowShipIds = null;
 				}
@@ -1050,20 +1117,20 @@ namespace Grabacr07.KanColleWrapper
 				return true;
 			}
 
-			/// <summary>
+		/// <summary>
 			/// イベントマップ難度選択 (api_req_map/select_eventmap_rank)
 			/// </summary>
-			private bool TryHandleSelectEventmapRank(string url, string requestBody, string normalized)
+		private bool TryHandleSelectEventmapRank(string url, string requestBody, string normalized)
 			{
 				if (!url.Contains("/kcsapi/api_req_map/select_eventmap_rank")) return false;
 				this.Proxy.PublishSession("/kcsapi/api_req_map/select_eventmap_rank", normalized, ParseRequestBody(requestBody));
 				return true;
 			}
 
-			/// <summary>
+		/// <summary>
 			/// 母港
 			/// </summary>
-			private bool TryHandlePort(string url, string normalized)
+		private bool TryHandlePort(string url, string normalized)
 			{
 				if (!url.Contains("/kcsapi/api_port/port")) return false;
 
@@ -1218,7 +1285,7 @@ namespace Grabacr07.KanColleWrapper
 				return true;
 			}
 
-			/// <summary>
+		/// <summary>
 			/// 提督情報 (api_get_member/basic)
 			/// </summary>
 		private bool TryHandleBasic(string url, string normalized)
@@ -4906,20 +4973,22 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
-		/// 連合艦隊 goback_port：脱出艦・曳航艦の退避フラグを Organization に反映します。
+		/// goback_port：脱出艦の退避フラグを Organization に反映します。
+		/// 通常艦隊 (api_req_sortie/goback_port) と
+		/// 連合艦隊 (api_req_combined_battle/goback_port) 両方に対応します。
 		/// 脱出情報は TryHandleBattleResult でキャッシュ済みのものを使用します。
 		/// </summary>
 		private bool TryHandleGobackPort(string url)
 		{
-			if (!url.Contains("/kcsapi/api_req_combined_battle/goback_port")) return false;
+			if (!url.Contains("goback_port")) return false;
 
 			try
 			{
 				var escapeIds = this.pendingEscapeShipIds;
 				var towIds = this.pendingTowShipIds;
 
-				// キャッシュがなければ何もしない（goback_port は脱出がない場合でも来ることがある）
-				if (escapeIds == null || escapeIds.Length == 0 || towIds == null || towIds.Length == 0)
+				// 脱出艦がなければ何もしない
+				if (escapeIds == null || escapeIds.Length == 0)
 				{
 					this.pendingEscapeShipIds = null;
 					this.pendingTowShipIds = null;
@@ -4933,10 +5002,9 @@ namespace Grabacr07.KanColleWrapper
 						var org = this.Homeport?.Organization;
 						if (org == null) return;
 
-						if (this.IsInSortie && escapeIds.Length >= 1 && towIds.Length >= 1)
-						{
-							org.AddEvacuatedShips(escapeIds[0], towIds[0]);
-						}
+						// 曳航艦がない場合（単艦退避）は -1 を渡す
+						int towId = (towIds != null && towIds.Length >= 1) ? towIds[0] : -1;
+						org.AddEvacuatedShips(escapeIds[0], towId);
 					}
 					catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
 					finally
