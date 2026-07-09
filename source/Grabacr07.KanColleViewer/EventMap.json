@@ -1,8 +1,10 @@
 [
-  { "area": "1", "name": "第三十一戦隊", "color": "#DDDDDD" },
-  { "area": "2", "name": "増強第三十一戦隊", "color": "#FF69B4" },
-  { "area": "3", "name": "3", "color": "#FF69B4" },
-  { "area": "4", "name": "4", "color": "#FF69B4" }
+  { "area": "1", "name": "第三十一戦隊", "color": "#868686" },
+  { "area": "2", "name": "増強第三十一戦隊", "color": "#646464" },
+  { "area": "3", "name": "多号作戦部隊", "color": "#FFCC33" },
+  { "area": "4", "name": "連合艦隊", "color": "#66CC33" },
+  { "area": "5", "name": "第六艦隊", "color": "#3366FF" },
+  { "area": "6", "name": "ウルシー攻撃部隊", "color": "#66CCFF" }
 
 
 ]
