@@ -85,7 +85,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		public IEnumerable<Ship> Sort(IEnumerable<Ship> ships)
 		{
-			var selectors = this.Selectors.Where(x => x.Current.KeySelector != null).ToArray();
+			var selectors = this.Selectors
+				.Where(x => x.Current?.KeySelector != null)
+				.ToArray();
+
 			if (selectors.Length == 0) return ships;
 
 			var selector = selectors[0].Current.KeySelector;
@@ -199,8 +202,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._Current != value)
 				{
 					this._Current = value;
-					this.SafeUpdate(!value.DefaultIsDescending);
-					this.Updated(this);
+
+					// value が null の場合に落ちないようにする
+					if (value != null)
+					{
+						this.SafeUpdate(!value.DefaultIsDescending);
+					}
+
+					this.Updated?.Invoke(this);
 					this.RaisePropertyChanged();
 				}
 			}
@@ -239,7 +248,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (this._IsAscending != value)
 				{
 					this._IsAscending = value;
-					this.Updated(this);
+					this.Updated?.Invoke(this);
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.IsDescending));
 				}
