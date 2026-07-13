@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 
 namespace Grabacr07.KanColleWrapper.Models
 {
@@ -32,21 +33,22 @@ namespace Grabacr07.KanColleWrapper.Models
 	public static class MapCellNameProvider
 	{
 		private const int MaxResponseSizeBytes = 1 * 1024 * 1024; // 1 MB
-		private const int RequestTimeoutMs = 2000; // 2 seconds
+		private const int RequestTimeoutMs = 15000; // 15 seconds
 		private const string RemoteMapCellNamesUrl = "https://dona-co.art/kcv/MapCellNames.json";
 
 		/// <summary>
 		/// マップID（海域-マップ番号）をキーとした、セル番号→CellInfo のマッピング
 		/// </summary>
-		private static Dictionary<string, Dictionary<int, CellInfo>> _cellInfoByMap;
+		private static Dictionary<string, Dictionary<int, CellInfo>> _cellInfoByMap = new Dictionary<string, Dictionary<int, CellInfo>>();
 
 		/// <summary>
 		/// 海域ID → 表示用ラベル（例: 62 → "E1"）
 		/// </summary>
-		private static Dictionary<int, string> _areaLabels;
+		private static Dictionary<int, string> _areaLabels = new Dictionary<int, string>();
 
 		private static string _jsonFilePath;
 		private static DateTime _lastLoadTime = DateTime.MinValue;
+		private static object _lockObj = new object();
 
 		static MapCellNameProvider()
 		{
@@ -57,14 +59,25 @@ namespace Grabacr07.KanColleWrapper.Models
 				?? AppDomain.CurrentDomain.BaseDirectory;
 			_jsonFilePath = Path.Combine(executableDir, "json", "MapCellNames.json");
 
-			// リモートから取得を試みて、失敗時はローカルを使用
-			var content = TryLoadFromRemote();
-			if (string.IsNullOrEmpty(content))
-			{
-				content = LoadFromLocalFile();
-			}
+			// ① まずローカルで即時初期化（ブロックなし）
+			var localContent = LoadFromLocalFile();
+			if (!string.IsNullOrEmpty(localContent))
+				ParseCellNames(localContent);
 
-			_cellInfoByMap = ParseCellNames(content);
+			// ② バックグラウンドでリモート取得して差し替え
+			ThreadPool.QueueUserWorkItem(_ =>
+			{
+				try
+				{
+					var remoteContent = TryLoadFromRemote();
+					if (!string.IsNullOrEmpty(remoteContent))
+						ParseCellNames(remoteContent);
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine("MapCellNameProvider: バックグラウンドリモート取得エラー: " + ex.Message);
+				}
+			});
 		}
 
 		/// <summary>
@@ -74,21 +87,24 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public static string FormatDisplayKey(int mapAreaId, int mapInfoNo, string cellName = null)
 		{
-			TryReloadIfModified();
-
-			// areaLabels に定義がある場合は特殊フォーマット（例: "E1-C"）
-			if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+			lock (_lockObj)
 			{
-				var prefix = $"{label}{mapInfoNo}";
-				return string.IsNullOrEmpty(cellName)
-					? prefix
-					: $"{prefix}-{cellName}";
-			}
+				TryReloadIfModified();
 
-			// 通常海域（例: "7-4-C"）
-			return string.IsNullOrEmpty(cellName)
-				? $"{mapAreaId}-{mapInfoNo}"
-				: $"{mapAreaId}-{mapInfoNo}-{cellName}";
+				// areaLabels に定義がある場合は特殊フォーマット（例: "E1-C"）
+				if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+				{
+					var prefix = $"{label}{mapInfoNo}";
+					return string.IsNullOrEmpty(cellName)
+						? prefix
+						: $"{prefix}-{cellName}";
+				}
+
+				// 通常海域（例: "7-4-C"）
+				return string.IsNullOrEmpty(cellName)
+					? $"{mapAreaId}-{mapInfoNo}"
+					: $"{mapAreaId}-{mapInfoNo}-{cellName}";
+			}
 		}
 
 		/// <summary>
@@ -97,12 +113,15 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public static string GetAreaLabel(int mapAreaId, int mapInfoNo)
 		{
-			TryReloadIfModified();
-			if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+			lock (_lockObj)
 			{
-				return $"{label}{mapInfoNo}";
+				TryReloadIfModified();
+				if (_areaLabels != null && _areaLabels.TryGetValue(mapAreaId, out var label))
+				{
+					return $"{label}{mapInfoNo}";
+				}
+				return $"{mapAreaId}-{mapInfoNo}";
 			}
-			return $"{mapAreaId}-{mapInfoNo}";
 		}
 
 		/// <summary>
@@ -126,19 +145,28 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public static CellInfo GetCellInfo(int mapAreaId, int mapInfoNo, int cellNo)
 		{
-			TryReloadIfModified();
-
-			var mapKey = $"{mapAreaId}-{mapInfoNo}";
-
-			if (_cellInfoByMap.TryGetValue(mapKey, out var cellInfos))
+			lock (_lockObj)
 			{
-				if (cellInfos.TryGetValue(cellNo, out var info))
-				{
-					return info;
-				}
-			}
+				TryReloadIfModified();
 
-			return null;
+				if (_cellInfoByMap == null)
+				{
+					Debug.WriteLine("MapCellNameProvider.GetCellInfo: _cellInfoByMap が null です");
+					return null;
+				}
+
+				var mapKey = $"{mapAreaId}-{mapInfoNo}";
+
+				if (_cellInfoByMap.TryGetValue(mapKey, out var cellInfos))
+				{
+					if (cellInfos != null && cellInfos.TryGetValue(cellNo, out var info))
+					{
+						return info;
+					}
+				}
+
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -167,6 +195,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// JSON ファイルが変更されていれば再読み込みします。
+		/// ※呼び出し側で lock(_lockObj) を使用していることを前提とします。
 		/// </summary>
 		private static void TryReloadIfModified()
 		{
@@ -181,11 +210,15 @@ namespace Grabacr07.KanColleWrapper.Models
 				if (lastWriteTime > _lastLoadTime)
 				{
 					var content = LoadFromLocalFile();
-					_cellInfoByMap = ParseCellNames(content);
+					if (!string.IsNullOrEmpty(content))
+					{
+						ParseCellNames(content);
+					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
+				Debug.WriteLine("MapCellNameProvider.TryReloadIfModified: エラー: " + ex);
 			}
 		}
 
@@ -307,147 +340,152 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// 文字列値 → CellInfo(name, boss: false, kiko: false)
 		/// オブジェクト値 → CellInfo(name, boss, kiko) として読み込みます。
 		/// </summary>
-		private static Dictionary<string, Dictionary<int, CellInfo>> ParseCellNames(string content)
+		private static void ParseCellNames(string content)
 		{
-			var result = new Dictionary<string, Dictionary<int, CellInfo>>();
-			_areaLabels = new Dictionary<int, string>();
-			_lastLoadTime = DateTime.Now;
-
-			try
+			lock (_lockObj)
 			{
-				if (string.IsNullOrEmpty(content))
-				{
-					Debug.WriteLine("MapCellNameProvider.ParseCellNames: コンテンツが空です");
-					return result;
-				}
+				var result = new Dictionary<string, Dictionary<int, CellInfo>>();
+				var labels = new Dictionary<int, string>();
 
-				JObject root;
 				try
 				{
-					root = JObject.Parse(content);
-				}
-				catch (Exception parseEx)
-				{
-					Debug.WriteLine("MapCellNameProvider.ParseCellNames: JSON解析エラー: " + parseEx.Message);
-					return result;
-				}
-
-				if (root == null)
-				{
-					Debug.WriteLine("MapCellNameProvider.ParseCellNames: パースされたrootが null です");
-					return result;
-				}
-
-				// areaLabels の読み込み（例: "62" → "E1"）
-				var labels = root["areaLabels"] as JObject;
-				if (labels != null)
-				{
-					foreach (var p in labels.Properties())
+					if (string.IsNullOrEmpty(content))
 					{
-						try
-						{
-							if (int.TryParse(p.Name, out var id))
-							{
-								if (p.Value != null)
-								{
-									var value = p.Value.Value<string>();
-									if (value != null)
-									{
-										_areaLabels[id] = value;
-									}
-								}
-							}
-						}
-						catch (Exception labelEx)
-						{
-							Debug.WriteLine("MapCellNameProvider.ParseCellNames: areaLabel解析エラー (key=" + p.Name + "): " + labelEx.Message);
-						}
+						Debug.WriteLine("MapCellNameProvider.ParseCellNames: コンテンツが空です");
+						return;
 					}
-				}
 
-				// maps の読み込み
-				var maps = root["maps"] as JObject;
-				if (maps != null)
-				{
-					foreach (var mapProp in maps.Properties())
+					JObject root;
+					try
 					{
-						try
+						root = JObject.Parse(content);
+					}
+					catch (Exception parseEx)
+					{
+						Debug.WriteLine("MapCellNameProvider.ParseCellNames: JSON解析エラー: " + parseEx.Message);
+						return;
+					}
+
+					if (root == null)
+					{
+						Debug.WriteLine("MapCellNameProvider.ParseCellNames: パースされたrootが null です");
+						return;
+					}
+
+					// areaLabels の読み込み（例: "62" → "E"）
+					var labelsObj = root["areaLabels"] as JObject;
+					if (labelsObj != null)
+					{
+						foreach (var p in labelsObj.Properties())
 						{
-							var mapKey = mapProp.Name;
-							var cellNamesObj = mapProp.Value as JObject;
-
-							if (cellNamesObj != null)
+							try
 							{
-								var cellInfos = new Dictionary<int, CellInfo>();
-
-								foreach (var cellProp in cellNamesObj.Properties())
+								if (int.TryParse(p.Name, out var id))
 								{
-									try
+									if (p.Value != null)
 									{
-										if (int.TryParse(cellProp.Name, out var cellNo))
+										var value = p.Value.Value<string>();
+										if (value != null)
 										{
-											if (cellProp.Value == null)
-											{
-												Debug.WriteLine("MapCellNameProvider.ParseCellNames: cellValue が null (map=" + mapKey + ", cellNo=" + cellNo + ")");
-												continue;
-											}
-
-											CellInfo info;
-
-											if (cellProp.Value.Type == JTokenType.Object)
-											{
-												// オブジェクト形式: { "name": "C", "boss": true, "kiko": true }
-												var obj = cellProp.Value as JObject;
-												var name = obj?["name"]?.Value<string>() ?? "";
-												var boss = obj?["boss"]?.Value<bool>() ?? false;
-												var kiko = obj?["kiko"]?.Value<bool>() ?? false;
-												info = new CellInfo(name, boss, kiko);
-											}
-											else if (cellProp.Value.Type == JTokenType.String)
-											{
-												// 文字列形式（従来互換）: "A"
-												var name = cellProp.Value.Value<string>();
-												if (name == null)
-												{
-													Debug.WriteLine("MapCellNameProvider.ParseCellNames: 文字列値が null (map=" + mapKey + ", cellNo=" + cellNo + ")");
-													continue;
-												}
-												info = new CellInfo(name, false, false);
-											}
-											else
-											{
-												// その他の型
-												Debug.WriteLine("MapCellNameProvider.ParseCellNames: 予期しない型 (map=" + mapKey + ", cellNo=" + cellNo + ", type=" + cellProp.Value.Type + ")");
-												continue;
-											}
-
-											cellInfos[cellNo] = info;
+											labels[id] = value;
 										}
 									}
-									catch (Exception cellEx)
-									{
-										Debug.WriteLine("MapCellNameProvider.ParseCellNames: セルデータ解析エラー (map=" + mapKey + ", cell=" + cellProp.Name + "): " + cellEx.Message);
-									}
 								}
-
-								result[mapKey] = cellInfos;
+							}
+							catch (Exception labelEx)
+							{
+								Debug.WriteLine("MapCellNameProvider.ParseCellNames: areaLabel解析エラー (key=" + p.Name + "): " + labelEx.Message);
 							}
 						}
-						catch (Exception mapEx)
+					}
+
+					// maps の読み込み
+					var maps = root["maps"] as JObject;
+					if (maps != null)
+					{
+						foreach (var mapProp in maps.Properties())
 						{
-							Debug.WriteLine("MapCellNameProvider.ParseCellNames: マップ解析エラー (mapKey=" + mapProp.Name + "): " + mapEx.Message);
+							try
+							{
+								var mapKey = mapProp.Name;
+								var cellNamesObj = mapProp.Value as JObject;
+
+								if (cellNamesObj != null)
+								{
+									var cellInfos = new Dictionary<int, CellInfo>();
+
+									foreach (var cellProp in cellNamesObj.Properties())
+									{
+										try
+										{
+											if (int.TryParse(cellProp.Name, out var cellNo))
+											{
+												if (cellProp.Value == null)
+												{
+													Debug.WriteLine("MapCellNameProvider.ParseCellNames: cellValue が null (map=" + mapKey + ", cellNo=" + cellNo + ")");
+													continue;
+												}
+
+												CellInfo info;
+
+												if (cellProp.Value.Type == JTokenType.Object)
+												{
+													// オブジェクト形式: { "name": "C", "boss": true, "kiko": true }
+													var obj = cellProp.Value as JObject;
+													var name = obj?["name"]?.Value<string>() ?? "";
+													var boss = obj?["boss"]?.Value<bool>() ?? false;
+													var kiko = obj?["kiko"]?.Value<bool>() ?? false;
+													info = new CellInfo(name, boss, kiko);
+												}
+												else if (cellProp.Value.Type == JTokenType.String)
+												{
+													// 文字列形式（従来互換）: "A"
+													var name = cellProp.Value.Value<string>();
+													if (name == null)
+													{
+														Debug.WriteLine("MapCellNameProvider.ParseCellNames: 文字列値が null (map=" + mapKey + ", cellNo=" + cellNo + ")");
+														continue;
+													}
+													info = new CellInfo(name, false, false);
+												}
+												else
+												{
+													// その他の型
+													Debug.WriteLine("MapCellNameProvider.ParseCellNames: 予期しない型 (map=" + mapKey + ", cellNo=" + cellNo + ", type=" + cellProp.Value.Type + ")");
+													continue;
+												}
+
+												cellInfos[cellNo] = info;
+											}
+										}
+										catch (Exception cellEx)
+										{
+											Debug.WriteLine("MapCellNameProvider.ParseCellNames: セルデータ解析エラー (map=" + mapKey + ", cell=" + cellProp.Name + "): " + cellEx.Message);
+										}
+									}
+
+									result[mapKey] = cellInfos;
+								}
+							}
+							catch (Exception mapEx)
+							{
+								Debug.WriteLine("MapCellNameProvider.ParseCellNames: マップ解析エラー (mapKey=" + mapProp.Name + "): " + mapEx.Message);
+							}
 						}
 					}
+
+					// 成功時に静的フィールドを更新
+					_cellInfoByMap = result;
+					_areaLabels = labels;
+					_lastLoadTime = DateTime.Now;
+
+					Debug.WriteLine("MapCellNameProvider.ParseCellNames: 読込完了 (areaLabels=" + _areaLabels.Count + ", maps=" + result.Count + ")");
 				}
-
-				Debug.WriteLine("MapCellNameProvider.ParseCellNames: 読込完了 (areaLabels=" + _areaLabels.Count + ", maps=" + result.Count + ")");
+				catch (Exception ex)
+				{
+					Debug.WriteLine("MapCellNameProvider.ParseCellNames: 予期しないエラー: " + ex);
+				}
 			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine("MapCellNameProvider.ParseCellNames: 予期しないエラー: " + ex);
-			}
-
-			return result;
 		}
 	}
 }

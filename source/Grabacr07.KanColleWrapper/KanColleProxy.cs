@@ -60,9 +60,18 @@ namespace Grabacr07.KanColleWrapper
 			{
 				try
 				{
-					var body = session.Response.Body;
+					var body = session?.Response?.Body;
+					if (string.IsNullOrEmpty(body))
+						return Enumerable.Empty<SvData<T>>();
+
 					var root = JToken.Parse(body);
+					if (root == null)
+						return Enumerable.Empty<SvData<T>>();
+
 					var dataTok = root["api_data"] ?? root;
+					if (dataTok == null || dataTok.Type == JTokenType.Null)
+						return Enumerable.Empty<SvData<T>>();
+
 					var data = dataTok.ToObject<T>();
 					if (data == null) return Enumerable.Empty<SvData<T>>();
 					return new[] { new SvData<T>(session.Request, data) };
