@@ -48,6 +48,11 @@ namespace Grabacr07.KanColleWrapper
 
 				// _tolerantSerializer を使用して内部 ArgumentNullException を抑制
 				result = apiDataToken.ToObject<T>(_tolerantSerializer);
+				if (result != null)
+				{
+					System.Diagnostics.Debug.WriteLine($"TryDeserializeApiData: Successfully deserialized {typeof(T).Name}");
+					System.Diagnostics.Debug.WriteLine($"API Data: {JsonConvert.SerializeObject(result)}");
+				}
 				return result != null;
 			}
 			catch (Exception ex)
