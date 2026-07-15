@@ -170,11 +170,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 				LogSeverity = LogSeverity.Disable,
 			};
 
-			// DMM 購入フロー互換用:
-			// Chromium 側の 3rd-party cookie/partitioning の段階的制限を緩和
-			settings.CefCommandLineArgs.Add("disable-features",
-				"ThirdPartyStoragePartitioning,ThirdPartyCookieDeprecationLabel,TrackingProtection3pcd");
-
+			// High (モニタの FPS に合わせる) の場合のみ Chromium フレームレート制限を解除する
+			// Low / Medium は BrowserSettings.WindowlessFrameRate のみで制御する
 			if (GeneralSettings.FrameRateMode.Value == BrowserFrameRateMode.High)
 			{
 				settings.CefCommandLineArgs.Add("disable-frame-rate-limit", "1");
@@ -226,10 +223,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 					var initializeResult = CefSharp.Cef.Initialize(CreateCefSettings(browserSubprocessPath), performDependencyCheck: false, browserProcessHandler: null);
 					AppendInitializeTrace($"Cef.Initialize returned: {initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}");
 
-					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false))
-					{
-						global::CefSharp.Cef.UIThreadTaskFactory.StartNew(ApplyCookieCompatibilityPreferences);
-
+					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false)) {
 						ClearInitializeFailureMarker();
 						initialized = true;
 						AppendInitializeTrace("Initialize completed successfully");
@@ -283,12 +277,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		public static void AttachRequestHandler(ChromiumWebBrowser webBrowser, Action<CapturedHttp> onCaptured) {
 			webBrowser.RequestHandler = new CustomRequestHandler(onCaptured);
 			webBrowser.DownloadHandler = new BlockDownloadHandler();
-
-			// DMM アイテム購入フローのポップアップを許可するため LifeSpanHandler を設定
-			if (webBrowser.LifeSpanHandler == null)
-			{
-				webBrowser.LifeSpanHandler = new DmmPopupLifeSpanHandler();
-			}
 		}
 
 
@@ -363,27 +351,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
 		public static int ExecuteSubprocess() {
 			return CefSharp.Cef.ExecuteProcess();
-		}
-
-		private static void ApplyCookieCompatibilityPreferences()
-		{
-			try
-			{
-				var ctx = CefSharp.Cef.GetGlobalRequestContext();
-				if (ctx == null) return;
-
-				string error;
-
-				// 3rd-party cookie ブロックを無効化
-				ctx.SetPreference("profile.block_third_party_cookies", false, out error);
-
-				// Cookie controls: 0 = allow all
-				ctx.SetPreference("profile.cookie_controls_mode", 0, out error);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine("[CefBridge] ApplyCookieCompatibilityPreferences failed: " + ex.Message);
-			}
 		}
 	}
 }

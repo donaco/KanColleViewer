@@ -10,6 +10,7 @@ using CefSharp.Handler;
 
 namespace Grabacr07.KanColleViewer.Models.Cef
 {
+	// RequestHandler / ResourceRequestHandler 実装
 	public class CustomRequestHandler : RequestHandler
 	{
 		private readonly Action<CapturedHttp> onCaptured;
@@ -19,23 +20,38 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			this.onCaptured = onCaptured;
 		}
 
-		// 購入フロー調査中は kcsapi ナビゲーションブロックを無効化
-		// （DevTools誤操作対策より、正規フロー阻害回避を優先）
+		/// <summary>
+		/// DevToolsのNetworkタブでダブルクリックした際の
+		/// kcsapi URLへのメインフレームナビゲーションをブロックする
+		/// </summary>
 		protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
 		{
-			return false;
+			try
+			{
+				if (frame?.IsMain == true)
+				{
+					var url = request?.Url ?? string.Empty;
+
+					// kcsapi URL はゲーム内 API のレスポンスであり、
+					// メインフレームのナビゲーション先としては不正（DevToolsからのWクリック）
+					if (url.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						System.Diagnostics.Debug.WriteLine($"[DevTools] blocked navigation to: {url}");
+						return true; // ナビゲーションをキャンセル
+					}
+				}
+			}
+			catch
+			{
+				// swallow
+			}
+
+			return false; // 通常のナビゲーションを許可
 		}
 
-		protected override IResourceRequestHandler GetResourceRequestHandler(
-			IWebBrowser chromiumWebBrowser,
-			IBrowser browser,
-			IFrame frame,
-			IRequest request,
-			bool isNavigation,
-			bool isDownload,
-			string requestInitiator,
-			ref bool disableDefaultHandling)
+		protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
 		{
+			// メンテナンス時、埋め込みブラウザで画像だけ表示
 			try
 			{
 				var url = request?.Url;
@@ -44,116 +60,41 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					if (Uri.TryCreate(url, UriKind.Absolute, out var parsedUri)
 						&& (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
 					{
-						var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
-						if (cb != null)
+						try
 						{
-							cb.Dispatcher.BeginInvoke(new Action(() =>
+							var cb = chromiumWebBrowser as CefSharp.Wpf.ChromiumWebBrowser;
+							if (cb != null)
 							{
-								try
+								cb.Dispatcher.BeginInvoke(new Action(() =>
 								{
-									const string flag = "maintenance_shown";
-									if (cb.Tag as string != flag)
+									try
 									{
-										cb.Tag = flag;
-										cb.Load(url);
+										const string flag = "maintenance_shown";
+										if (cb.Tag as string != flag)
+										{
+											cb.Tag = flag;
+											cb.Load(url);
+										}
 									}
-								}
-								catch { }
-							}));
+									catch { }
+								}));
+							}
 						}
+						catch { }
 					}
-				}
-
-				// 艦これ API の応答だけをキャプチャする。
-				if (!string.IsNullOrEmpty(url)
-					&& Grabacr07.KanColleWrapper.KanColleServerOrigin.IsValid(url)
-					&& CustomResourceRequestHandler.IsCapturableApiPath(url))
-				{
-					return new CustomResourceRequestHandler(onCaptured, frame?.IsMain ?? false);
 				}
 			}
 			catch { }
 
-			// DMM 購入画面、認証、CDN を含む非 API 通信は CEF 標準処理に委譲する。
-			return null;
-		}
-	}
-
-	public class DmmPopupLifeSpanHandler : ILifeSpanHandler
-	{
-		// popup を許可するのは「認証ページ」系のみ
-		private static readonly string[] PopupDocumentHosts = new[]
-		{
-			"dmm.com",
-			"www.dmm.com",
-			"accounts.dmm.com",
-			"sp.dmm.com",
-			"artemis.games.dmm.com",
-		};
-
-		public bool OnBeforePopup(
-			IWebBrowser chromiumWebBrowser,
-			IBrowser browser,
-			IFrame frame,
-			string targetUrl,
-			string targetFrameName,
-			WindowOpenDisposition targetDisposition,
-			bool userGesture,
-			IPopupFeatures popupFeatures,
-			IWindowInfo windowInfo,
-			IBrowserSettings browserSettings,
-			ref bool noJavascriptAccess,
-			out IWebBrowser newBrowser)
-		{
-			newBrowser = null;
-
-			if (string.IsNullOrWhiteSpace(targetUrl))
-				return true;
-
-			if (!Uri.TryCreate(targetUrl, UriKind.Absolute, out var uri))
-				return true;
-
-			// js/css/json 等のリソース URL を popup 許可対象にしない
-			var path = (uri.AbsolutePath ?? string.Empty).ToLowerInvariant();
-			if (path.EndsWith(".js") || path.EndsWith(".css") || path.EndsWith(".map") || path.EndsWith(".json"))
-			{
-				System.Diagnostics.Debug.WriteLine($"[DmmPopup] blocked resource-like popup: {targetUrl}");
-				return true;
-			}
-
-			var host = uri.Host.TrimStart('.').ToLowerInvariant();
-			var allowedHost = PopupDocumentHosts.Any(h =>
-				host.Equals(h, StringComparison.OrdinalIgnoreCase) ||
-				host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase));
-
-			if (!allowedHost)
-			{
-				System.Diagnostics.Debug.WriteLine($"[DmmPopup] blocked non-auth popup host: {targetUrl}");
-				return true;
-			}
-
-			// 認証フローに必要な経路のみ許可
-			// （accounts の login/token 系 + DMM 支払い確認ページ）
-			var lowerUrl = targetUrl.ToLowerInvariant();
-			var looksLikeAuthDocument =
-				lowerUrl.Contains("/service/login/token/") ||
-				lowerUrl.Contains("/service/login/") ||
-				lowerUrl.Contains("/payment/") ||
-				lowerUrl.Contains("/purchase");
-
-			if (!looksLikeAuthDocument)
-			{
-				System.Diagnostics.Debug.WriteLine($"[DmmPopup] blocked popup (not auth document): {targetUrl}");
-				return true;
-			}
-
-			System.Diagnostics.Debug.WriteLine($"[DmmPopup] allowing popup: {targetUrl}");
-			return false; // ネイティブ popup 許可
+			return new CustomResourceRequestHandler(onCaptured, frame?.IsMain ?? false);
 		}
 
-		public void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser) { }
-		public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser) => false;
-		public void OnBeforeClose(IWebBrowser chromiumWebBrowser, IBrowser browser) { }
+		private static bool IsDevToolsNavigation(string url)
+		{
+			if (string.IsNullOrEmpty(url)) return false;
+			return url.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ||
+			       url.StartsWith("blob:", StringComparison.OrdinalIgnoreCase);
+		}
 	}
 
 	public class CustomResourceRequestHandler : ResourceRequestHandler
@@ -172,13 +113,15 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		{
 			if (request?.Url == null) return null;
 
-			// ① オリジン検証：艦これ正規サーバー以外は処理しない
+			// ① オリジン検証：艦これ正規サーバー以外からのレスポンスは処理しない
 			if (!Grabacr07.KanColleWrapper.KanColleServerOrigin.IsValid(request.Url))
 				return null;
 
-			// ② パス検証：ゲーム API エンドポイントのみキャプチャ対象
-			if (!IsCapturableApiPath(request.Url))
+			// ② パス検証：kcsapi 等のゲーム API エンドポイントのみ対象とする（既存ロジック）
+			if (!(request.Url.Contains("kcsapi") || request.Url.Contains("/api/") || request.Url.Contains("/kcs2/index.php")))
+			{
 				return null;
+			}
 
 			var snapshotUrl = request.Url;
 			var snapshotMethod = request.Method;
@@ -186,8 +129,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			var snapshotRequestBody = ExtractRequestBody(request);
 			var snapshotResponseHeaders = BuildHeadersDictionary(response);
 
+			// ResponseFilter のコールバックは短くして、重い処理は Task.Run にオフロードする
 			return new ResponseFilter(bytes =>
 			{
+				// 受け取った bytes をそのまま Task に渡して非同期で処理する
 				try
 				{
 					var copy = bytes != null ? (byte[])bytes.Clone() : new byte[0];
@@ -203,14 +148,22 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 							{
 								var decompressed = TryDecompressGzip(copy);
 								if (!string.IsNullOrEmpty(decompressed))
+								{
 									normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
+								}
 							}
 
 							if (string.IsNullOrEmpty(normalized))
+							{
 								normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
+							}
 						}
-						catch { normalized = null; }
+						catch
+						{
+							normalized = null;
+						}
 
+						// 正常に正規化できたらアプリへ渡す（onCaptured は別スレッドで安全に呼ぶ)
 						if (!string.IsNullOrEmpty(normalized))
 						{
 							var captured = new CapturedHttp
@@ -222,19 +175,21 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 								ResponseBody = normalized,
 								ResponseHeaders = snapshotResponseHeaders
 							};
-							try { Task.Run(() => { try { onCaptured?.Invoke(captured); } catch { } }); } catch { }
+
+							try
+							{
+								// onCaptured は軽量にする想定だが念のためも別スレッドで
+								Task.Run(() => { try { onCaptured?.Invoke(captured); } catch { } });
+							}
+							catch { }
 						}
 					});
 				}
-				catch { }
+				catch
+				{
+					// swallow
+				}
 			});
-		}
-
-		internal static bool IsCapturableApiPath(string url)
-		{
-			return url.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0
-				|| url.IndexOf("/api/", StringComparison.OrdinalIgnoreCase) >= 0
-				|| url.IndexOf("/kcs2/index.php", StringComparison.OrdinalIgnoreCase) >= 0;
 		}
 
 		private static IDictionary<string, string> BuildHeadersDictionary(IResponse response)
@@ -242,15 +197,28 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			if (response?.Headers == null) return null;
 			var dict = new Dictionary<string, string>();
 			foreach (var key in response.Headers.AllKeys)
+			{
 				dict[key] = response.Headers[key];
+			}
 			return dict;
 		}
 
 		private static bool ShouldDecompressGzip(IDictionary<string, string> headers, byte[] bytes)
 		{
-			if (bytes == null || bytes.Length < 2 || bytes.Length > MaxCapturedResponseBytes) return false;
-			if (bytes[0] != 0x1F || bytes[1] != 0x8B) return false;
-			if (headers == null) return false;
+			if (bytes == null || bytes.Length < 2 || bytes.Length > MaxCapturedResponseBytes)
+			{
+				return false;
+			}
+
+			if (bytes[0] != 0x1F || bytes[1] != 0x8B)
+			{
+				return false;
+			}
+
+			if (headers == null)
+			{
+				return false;
+			}
 
 			string contentEncoding;
 			if (!headers.TryGetValue("Content-Encoding", out contentEncoding))
@@ -265,15 +233,24 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private static string TryDecompressGzip(byte[] bytes)
 		{
-			if (bytes == null || bytes.Length == 0 || bytes.Length > MaxCapturedResponseBytes) return null;
+			if (bytes == null || bytes.Length == 0 || bytes.Length > MaxCapturedResponseBytes)
+			{
+				return null;
+			}
+
 			try
 			{
 				using (var ms = new MemoryStream(bytes, writable: false))
 				using (var gz = new GZipStream(ms, CompressionMode.Decompress))
 				using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+				{
 					return sr.ReadToEnd();
+				}
 			}
-			catch { return null; }
+			catch
+			{
+				return null;
+			}
 		}
 
 		private static string ExtractRequestBody(IRequest request)
@@ -282,6 +259,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			{
 				var postData = request?.PostData;
 				if (postData == null) return null;
+
 				var elements = postData.Elements;
 				if (elements == null || elements.Count == 0) return null;
 
@@ -290,17 +268,24 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				{
 					try
 					{
+						// ゲーム API の POST は Bytes のみ。File タイプは艦これでは使用しないため無視する。
 						if (element.Type == PostDataElementType.Bytes)
 						{
 							var bytes = element.Bytes;
 							if (bytes != null && bytes.Length > 0) bytesList.AddRange(bytes);
 						}
 					}
-					catch { }
+					catch
+					{
+						// swallow
+					}
 				}
 				return ResponseFilter.TryDecode(bytesList.ToArray());
 			}
-			catch { return null; }
+			catch
+			{
+				return null;
+			}
 		}
 	}
 }

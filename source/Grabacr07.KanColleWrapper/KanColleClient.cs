@@ -288,7 +288,7 @@ namespace Grabacr07.KanColleWrapper
 				// api_result が存在しない場合は後方互換性のため続行する
 				try
 				{
-					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int?>();
+					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int>();
 					if (apiResult.HasValue && apiResult.Value != 1) return;
 				}
 				catch (Newtonsoft.Json.JsonException) { /* JSON としてパース不能なレスポンスは想定内：無視してスキップ */ }

@@ -51,18 +51,6 @@ namespace Grabacr07.KanColleWrapper
 	/// </summary>
 	public static class ApiSessionExtensions
 	{
-		private static readonly JsonSerializer _tolerantSerializer;
-
-		static ApiSessionExtensions()
-		{
-			_tolerantSerializer = new JsonSerializer
-			{
-				NullValueHandling = NullValueHandling.Ignore,
-				MissingMemberHandling = MissingMemberHandling.Ignore,
-			};
-			_tolerantSerializer.Error += (sender, args) => { args.ErrorContext.Handled = true; };
-		}
-
 		/// <summary>
 		/// レスポンス Body を <typeparamref name="T"/> に変換します。失敗した要素はスキップします。
 		/// </summary>
@@ -72,20 +60,10 @@ namespace Grabacr07.KanColleWrapper
 			{
 				try
 				{
-					var body = session?.Response?.Body;
-					if (string.IsNullOrEmpty(body))
-						return Enumerable.Empty<SvData<T>>();
-
+					var body = session.Response.Body;
 					var root = JToken.Parse(body);
-					if (root == null)
-						return Enumerable.Empty<SvData<T>>();
-
 					var dataTok = root["api_data"] ?? root;
-					if (dataTok == null || dataTok.Type == JTokenType.Null)
-						return Enumerable.Empty<SvData<T>>();
-
-					// _tolerantSerializer を使用して内部 ArgumentNullException を抑制
-					var data = dataTok.ToObject<T>(_tolerantSerializer);
+					var data = dataTok.ToObject<T>();
 					if (data == null) return Enumerable.Empty<SvData<T>>();
 					return new[] { new SvData<T>(session.Request, data) };
 				}
