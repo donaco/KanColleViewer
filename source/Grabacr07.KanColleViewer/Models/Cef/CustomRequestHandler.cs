@@ -84,11 +84,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		// popup を許可するのは「認証ページ」系のみ
 		private static readonly string[] PopupDocumentHosts = new[]
 		{
-			"accounts.dmm.com",
+			"dmm.com",
 			"www.dmm.com",
+			"accounts.dmm.com",
 			"sp.dmm.com",
 			"artemis.games.dmm.com",
-			"dmm.com",
 		};
 
 		public bool OnBeforePopup(
