@@ -111,6 +111,10 @@ namespace Grabacr07.KanColleViewer
 				// ゲーム中の SallyArea.GetAsync() はローカルファイルのみを参照します。
 				_ = SallyArea.UpdateLocalFileAsync();
 
+				// MapCellNames.json も起動時だけ更新します。
+				// MapCellNameProvider はゲーム中にローカルファイルのみを参照します。
+				_ = MapCellNameUpdater.UpdateLocalFileAsync();
+
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
 
