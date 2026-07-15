@@ -107,6 +107,10 @@ namespace Grabacr07.KanColleViewer
 				SettingsHost.Load();
 				this.compositeDisposable.Add(new DelegateDisposable(SettingsHost.Save));
 
+				// EventMap.json は起動時だけ更新します。
+				// ゲーム中の SallyArea.GetAsync() はローカルファイルのみを参照します。
+				_ = SallyArea.UpdateLocalFileAsync();
+
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
 
