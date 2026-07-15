@@ -226,8 +226,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 					var initializeResult = CefSharp.Cef.Initialize(CreateCefSettings(browserSubprocessPath), performDependencyCheck: false, browserProcessHandler: null);
 					AppendInitializeTrace($"Cef.Initialize returned: {initializeResult}, IsInitialized={CefSharp.Cef.IsInitialized}");
 
-					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false)) {
-						ApplyCookieCompatibilityPreferences(); // 追加
+					if (initializeResult && (CefSharp.Cef.IsInitialized ?? false))
+					{
+						global::CefSharp.Cef.UIThreadTaskFactory.StartNew(ApplyCookieCompatibilityPreferences);
+
 						ClearInitializeFailureMarker();
 						initialized = true;
 						AppendInitializeTrace("Initialize completed successfully");

@@ -26,7 +26,15 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return false;
 		}
 
-		protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
+		protected override IResourceRequestHandler GetResourceRequestHandler(
+			IWebBrowser chromiumWebBrowser,
+			IBrowser browser,
+			IFrame frame,
+			IRequest request,
+			bool isNavigation,
+			bool isDownload,
+			string requestInitiator,
+			ref bool disableDefaultHandling)
 		{
 			try
 			{
@@ -55,10 +63,19 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						}
 					}
 				}
+
+				// 艦これ API の応答だけをキャプチャする。
+				if (!string.IsNullOrEmpty(url)
+					&& Grabacr07.KanColleWrapper.KanColleServerOrigin.IsValid(url)
+					&& CustomResourceRequestHandler.IsCapturableApiPath(url))
+				{
+					return new CustomResourceRequestHandler(onCaptured, frame?.IsMain ?? false);
+				}
 			}
 			catch { }
 
-			return new CustomResourceRequestHandler(onCaptured, frame?.IsMain ?? false);
+			// DMM 購入画面、認証、CDN を含む非 API 通信は CEF 標準処理に委譲する。
+			return null;
 		}
 	}
 
@@ -70,6 +87,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			"accounts.dmm.com",
 			"www.dmm.com",
 			"sp.dmm.com",
+			"artemis.games.dmm.com",
 			"dmm.com",
 		};
 
@@ -212,7 +230,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			});
 		}
 
-		private static bool IsCapturableApiPath(string url)
+		internal static bool IsCapturableApiPath(string url)
 		{
 			return url.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0
 				|| url.IndexOf("/api/", StringComparison.OrdinalIgnoreCase) >= 0
