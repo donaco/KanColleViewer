@@ -469,19 +469,20 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		private static string GetAreaNameFromId(int areaId)
 		{
-			switch (areaId)
+			// マスターデータ(api_mst_maparea)から海域名を取得
+			var areaName = KanColleClient.Current?.Master?.MapAreas?[areaId]?.Name;
+			if (!string.IsNullOrWhiteSpace(areaName))
 			{
-				case 6:
-					return "中部海域";
-				case 7:
-					return "南西海域";
-				default:
-					if (areaId >= 60)
-					{
-						return "期間限定海域";
-					}
-					return $"海域 {areaId}";
+				return areaName;
 			}
+
+			// マスター未取得時や未知ID向けのフォールバック
+			if (areaId >= 60)
+			{
+				return "期間限定海域";
+			}
+
+			return $"海域 {areaId}";
 		}
 		#endregion
 
