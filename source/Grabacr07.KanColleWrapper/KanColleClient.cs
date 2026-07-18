@@ -288,10 +288,26 @@ namespace Grabacr07.KanColleWrapper
 				// api_result が存在しない場合は後方互換性のため続行する
 				try
 				{
-					var apiResult = Newtonsoft.Json.Linq.JToken.Parse(normalized)["api_result"]?.Value<int>();
-					if (apiResult.HasValue && apiResult.Value != 1) return;
+					// JSON でない応答（HTML/JS 等）で JToken.Parse が例外を投げるのを防ぐため、
+					// 先頭文字と "api_result" の有無を先に文字列で確認してからパースする。
+					var trimmed = normalized.TrimStart();
+					if (trimmed.Length > 0
+						&& trimmed[0] == '{'
+						&& trimmed.Contains("\"api_result\""))
+					{
+						if (Newtonsoft.Json.Linq.JToken.Parse(trimmed) is Newtonsoft.Json.Linq.JObject root
+							&& root["api_result"] is Newtonsoft.Json.Linq.JToken apiResultToken
+							&& apiResultToken.Type == Newtonsoft.Json.Linq.JTokenType.Integer)
+						{
+							var apiResult = apiResultToken.Value<int>();
+							if (apiResult != 1) return;
+						}
+					}
 				}
-				catch (Newtonsoft.Json.JsonException) { /* JSON としてパース不能なレスポンスは想定内：無視してスキップ */ }
+				catch (Exception)
+				{
+					// JSON としてパース不能・想定外構造のレスポンスは無視してスキップ
+				}
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
