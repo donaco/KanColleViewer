@@ -298,5 +298,10 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// 噴式戦闘爆撃機
 		/// </summary>
 		JetPowerededBomber3 = 59,
+
+		/// <summary>
+		/// 噴式艦上戦闘機
+		/// </summary>
+		JetPowerededFighter = 60,
 	}
 }

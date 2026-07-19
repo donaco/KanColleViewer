@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,6 +60,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			{
 				case SlotItemType.艦上戦闘機:
 				case SlotItemType.水上戦闘機:
+				case SlotItemType.噴式戦闘機:
 					return new FighterCalculator();
 
 				case SlotItemType.艦上攻撃機:
