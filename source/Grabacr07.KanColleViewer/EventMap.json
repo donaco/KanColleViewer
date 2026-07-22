@@ -1,12 +1,17 @@
 {
-  "version": 2026071905,
+  "version": 2026071915,
   "EventMap": [
     { "area": "1", "name": "第三十一戦隊", "color": "#868686" },
     { "area": "2", "name": "増強第三十一戦隊", "color": "#646464" },
     { "area": "3", "name": "多号作戦部隊", "color": "#FF9900" },
-    { "area": "4", "name": "連合艦隊", "color": "#00CC66" },
+    { "area": "4", "name": "連合艦隊", "color": "#669966" },
     { "area": "5", "name": "第六艦隊", "color": "#3366FF" },
-    { "area": "6", "name": "仏第3艦隊", "color": "#cc9999" },
-    { "area": "7", "name": "仏地中海艦隊", "color": "#ff6600" }
+    { "area": "6", "name": "仏第3艦隊", "color": "#CC9999" },
+    { "area": "7", "name": "仏地中海艦隊", "color": "#ff6600" },
+    { "area": "8", "name": "2-eme Escadre Leoele", "color": "#3399CC" },
+    { "area": "9", "name": "イギリス救援艦隊", "color": "#66CC33" },
+    { "area": "10", "name": "forth De Raid", "color": "#CC0000" },
+    { "area": "11", "name": "forth H", "color": "#CC3399" },
+    { "area": "12", "name": "欧州連合艦隊", "color": "#33CC99" }
   ]
 }
