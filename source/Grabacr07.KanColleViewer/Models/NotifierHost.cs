@@ -33,6 +33,7 @@ namespace Grabacr07.KanColleViewer.Models
 		private CompositeDisposable dockyardDisposables;
 		private CompositeDisposable repairyardDisposables;
 		private CompositeDisposable organizationDisposables;
+		private readonly Dictionary<int, string> fleetCompositionSignatures = new Dictionary<int, string>();
 		private readonly object nosakiTimerSync = new object();
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
 		private DateTimeOffset? nosakiSharedNextNotifyAt;
@@ -175,8 +176,16 @@ namespace Grabacr07.KanColleViewer.Models
 			this.organizationDisposables?.Dispose();
 			this.organizationDisposables = new CompositeDisposable();
 
+			var aliveFleetIds = new HashSet<int>();
+
 			foreach (var fleet in organization.Fleets.Values)
 			{
+				if (fleet == null) continue;
+				aliveFleetIds.Add(fleet.Id);
+
+				// 現在の編成シグネチャを初期化（初回イベントで誤リセットしない）
+				this.UpdateFleetCompositionSignature(fleet);
+
 				fleet.Expedition.Returned += this.HandleExpeditionReturned;
 				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.Expedition.Returned -= this.HandleExpeditionReturned));
 
@@ -188,12 +197,42 @@ namespace Grabacr07.KanColleViewer.Models
 				{
 					if (e.PropertyName == nameof(Fleet.ShipsUpdated))
 					{
-						this.ResetNosakiTimerByFleetChange();
+						// ShipsUpdated が来ても、編成実体が変わらない（api_port等）ならリセットしない
+						if (this.UpdateFleetCompositionSignature(fleet))
+						{
+							this.ResetNosakiTimerByFleetChange();
+						}
 					}
 				};
 				fleet.PropertyChanged += fleetChanged;
 				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.PropertyChanged -= fleetChanged));
 			}
+
+			// 消えた艦隊IDのシグネチャを掃除
+			var stale = this.fleetCompositionSignatures.Keys.Where(id => !aliveFleetIds.Contains(id)).ToArray();
+			foreach (var id in stale)
+			{
+				this.fleetCompositionSignatures.Remove(id);
+			}
+		}
+
+		private bool UpdateFleetCompositionSignature(Fleet fleet)
+		{
+			if (fleet == null) return false;
+
+			// 並び順込みで編成をシグネチャ化
+			var signature = fleet.Ships == null
+				? string.Empty
+				: string.Join(",", fleet.Ships.Where(s => s != null).Select(s => s.Id));
+
+			if (this.fleetCompositionSignatures.TryGetValue(fleet.Id, out var current)
+				&& string.Equals(current, signature, StringComparison.Ordinal))
+			{
+				return false;
+			}
+
+			this.fleetCompositionSignatures[fleet.Id] = signature;
+			return true;
 		}
 
 		private void ResetNosakiTimerByFleetChange()
