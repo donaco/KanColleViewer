@@ -14,13 +14,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 	public class HomeportViewModel : QuickStateViewViewModel
 	{
 		private readonly Fleet fleet;
+		private static readonly int[] NosakiShipIds = { 996, 1002 };
 
 		// QuickStateView は ContentControl に対し型ごとの DataTemplate を適用する形で実現するので
 		// 状況に応じた型がそれぞれ必要。これはその 1 つ。
 
 		public ConditionViewModel Condition { get; }
 		public string NosakiTimerRemaining => this.GetNosakiTimerRemaining()?.ToString(@"mm\:ss") ?? "--:--";
-		public bool IsNosakiTimerActive => this.GetNosakiTimerRemaining().HasValue;
+		public bool IsNosakiTimerActive => this.HasNonNosakiShipInFleet() && this.GetNosakiTimerRemaining().HasValue;
 
 		public HomeportViewModel(FleetState state, Fleet fleet = null)
 			: base(state)
@@ -42,6 +43,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		{
 			if (this.fleet == null) return null;
 			return NotifyService.Current.GetNosakiTimerRemaining(this.fleet);
+		}
+
+		private bool HasNonNosakiShipInFleet()
+		{
+			if (this.fleet?.Ships == null) return false;
+			return this.fleet.Ships
+				.Where(s => s != null)
+				.Any(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1));
 		}
 	}
 }
