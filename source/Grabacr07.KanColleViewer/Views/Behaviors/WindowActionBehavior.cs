@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Threading;
 using MetroTrilithon.Mvvm;
 using Microsoft.Xaml.Behaviors;
 
@@ -49,11 +50,23 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 
 		private void OnCloseRequested(object sender, EventArgs e)
 		{
+			if (!Application.Current.Dispatcher.CheckAccess())
+			{
+				Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => this.OnCloseRequested(sender, e)));
+				return;
+			}
+
 			this.AssociatedObject?.Close();
 		}
 
 		private void OnActivateRequested(object sender, EventArgs e)
 		{
+			if (!Application.Current.Dispatcher.CheckAccess())
+			{
+				Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => this.OnActivateRequested(sender, e)));
+				return;
+			}
+
 			var w = this.AssociatedObject;
 			if (w == null) return;
 			if (w.WindowState == WindowState.Minimized) w.WindowState = WindowState.Normal;

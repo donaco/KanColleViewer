@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Disposables;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -70,6 +70,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// 艦隊のコンディション値が出撃可能となったときに通知するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> NotifyFleetRejuvenated { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+
+		/// <summary>
+		/// 母港給糧艦システム動作時 (野崎タイマー) に通知するかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> NotifyNosakiTimer { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 
 		/// <summary>

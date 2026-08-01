@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Properties;
@@ -32,6 +33,12 @@ namespace Grabacr07.KanColleViewer.Models
 		private CompositeDisposable dockyardDisposables;
 		private CompositeDisposable repairyardDisposables;
 		private CompositeDisposable organizationDisposables;
+		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
+		private IDisposable nosakiTimerSubscription;
+
+		// ﾉｻｷﾁｬﾝのID
+		private static readonly int[] NosakiShipIds = { 996, 1002 };
+		private static readonly TimeSpan NosakiNotifyInterval = TimeSpan.FromMinutes(15);
 
 		private NotifyService() { }
 
@@ -88,6 +95,8 @@ namespace Grabacr07.KanColleViewer.Models
 			client.Homeport.Organization
 				.Subscribe(nameof(Organization.Fleets), () => this.UpdateFleets(client.Homeport.Organization))
 				.AddTo(this);
+
+			this.StartNosakiTimer(client.Homeport.Organization, client.Homeport.Repairyard);
 
 			this.isRegistered = true;
 		}
@@ -197,6 +206,97 @@ namespace Grabacr07.KanColleViewer.Models
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
+		}
+
+		private void StartNosakiTimer(Organization organization, Repairyard repairyard)
+		{
+			this.nosakiTimerSubscription?.Dispose();
+			this.nosakiNextNotifyAt.Clear();
+
+			this.nosakiTimerSubscription = Observable
+				.Interval(TimeSpan.FromSeconds(30))
+				.StartWith(0L)
+				.Subscribe(_ => this.CheckNosakiTimer(organization));
+
+
+			this.nosakiTimerSubscription.AddTo(this);
+		}
+
+		private void CheckNosakiTimer(Organization organization)
+		{
+			if (!Settings.KanColleSettings.NotifyNosakiTimer)
+			{
+				this.nosakiNextNotifyAt.Clear();
+				return;
+			}
+
+ 			if (organization?.Fleets?.Values == null) return;
+			var now = DateTimeOffset.Now;
+			var validShipIds = new HashSet<int>();
+
+			foreach (var fleet in organization.Fleets.Values.Where(f => f != null))
+			{
+				if (fleet.IsInSortie) continue;
+				if (fleet.Expedition?.IsInExecution == true) continue;
+
+				foreach (var ship in fleet.Ships.Take(2).Where(s => s != null))
+				{
+					var shipMasterId = ship.Info?.Id ?? -1;
+					if (!NosakiShipIds.Contains(shipMasterId)) continue;
+
+					if (!this.IsNosakiConditionSatisfied(ship))
+					{
+						this.nosakiNextNotifyAt.Remove(ship.Id);
+						continue;
+					}
+
+					validShipIds.Add(ship.Id);
+
+					if (!this.nosakiNextNotifyAt.TryGetValue(ship.Id, out var nextNotifyAt))
+					{
+						// 条件成立から15分後に初回通知
+						this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
+						continue;
+					}
+
+					if (now < nextNotifyAt) continue;
+
+					var notification = Notification.Create(
+						Notification.Types.FleetRejuvenated,
+						"野崎タイマー",
+						$"「{ship.Info.Name}」（{fleet.Name}）は条件を15分継続中です。",
+						() => WindowService.Current.MainWindow.Activate());
+
+					this.Notify(notification);
+					this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
+				}
+			}
+
+			var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
+			foreach (var shipId in staleIds)
+			{
+				this.nosakiNextNotifyAt.Remove(shipId);
+			}
+		}
+
+		private bool IsNosakiConditionSatisfied(Ship ship)
+		{
+			if (ship?.Info == null) return false;
+
+			var isSupplied = ship.Fuel.Current >= ship.Fuel.Maximum
+				&& ship.Bull.Current >= ship.Bull.Maximum;
+
+			var hpRate = ship.HP.Maximum <= 0 ? 0.0 : ship.HP.Current / (double)ship.HP.Maximum;
+			var isHpAtLeast75Percent = hpRate >= 0.75; // 小破判定: HP75%以上
+
+			var isConditionEnough = ship.Condition >= 30;
+
+			var isNotRepairing = ship.TimeToRepair == TimeSpan.Zero; // 入渠判定
+
+			return isSupplied
+				&& isHpAtLeast75Percent
+				&& isConditionEnough
+				&& isNotRepairing;
 		}
 
 		#endregion
