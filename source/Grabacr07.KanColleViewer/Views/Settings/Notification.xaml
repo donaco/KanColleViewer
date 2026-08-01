@@ -101,7 +101,7 @@
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.NotifyNosakiTimer}, Path=Value}" />
 			<StackPanel Margin="20,0,0,0">
 				<Border Height="8" />
-				<TextBlock Text="タイマー起動後、15分毎に通知します。全員のコンディション値が54以上になったら通知を停止します。"
+				<TextBlock Text="タイマー起動後、15分毎に通知します。タイマー終了時、通知を停止します。"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   FontSize="10.5" />
 			</StackPanel>

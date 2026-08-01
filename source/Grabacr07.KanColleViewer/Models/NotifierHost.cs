@@ -33,6 +33,7 @@ namespace Grabacr07.KanColleViewer.Models
 		private CompositeDisposable dockyardDisposables;
 		private CompositeDisposable repairyardDisposables;
 		private CompositeDisposable organizationDisposables;
+		private readonly object nosakiTimerSync = new object();
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
 		private DateTimeOffset? nosakiSharedNextNotifyAt;
 		private IDisposable nosakiTimerSubscription;
@@ -197,17 +198,22 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private void ResetNosakiTimerByFleetChange()
 		{
-			if (this.nosakiNextNotifyAt.Count == 0)
+			lock (this.nosakiTimerSync)
 			{
-				this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
-				return;
-			}
+				if (this.nosakiNextNotifyAt.Count == 0)
+				{
+					this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
+					return;
+				}
 
-			var next = DateTimeOffset.Now.Add(NosakiNotifyInterval);
-			var keys = this.nosakiNextNotifyAt.Keys.ToArray();
-			foreach (var key in keys)
-			{
-				this.nosakiNextNotifyAt[key] = next;
+				var next = DateTimeOffset.Now.Add(NosakiNotifyInterval);
+				var keys = this.nosakiNextNotifyAt.Keys.ToArray();
+				foreach (var key in keys)
+				{
+					this.nosakiNextNotifyAt[key] = next;
+				}
+
+				this.nosakiSharedNextNotifyAt = next;
 			}
 
 			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
@@ -255,8 +261,11 @@ namespace Grabacr07.KanColleViewer.Models
 		private void StartNosakiTimer(Organization organization, Repairyard repairyard)
 		{
 			this.nosakiTimerSubscription?.Dispose();
-			this.nosakiNextNotifyAt.Clear();
-			this.nosakiSharedNextNotifyAt = null;
+			lock (this.nosakiTimerSync)
+			{
+				this.nosakiNextNotifyAt.Clear();
+				this.nosakiSharedNextNotifyAt = null;
+			}
 
 			this.nosakiTimerSubscription = Observable
 				.Interval(TimeSpan.FromSeconds(1))
@@ -271,88 +280,84 @@ namespace Grabacr07.KanColleViewer.Models
 		{
 			if (organization?.Fleets?.Values == null) return;
  			var now = DateTimeOffset.Now;
- 			var validShipIds = new HashSet<int>();
+			var shouldNotify = false;
 
-			foreach (var fleet in organization.Fleets.Values.Where(f => f != null))
+			lock (this.nosakiTimerSync)
 			{
-				if (fleet.IsInSortie) continue;
-				if (fleet.Expedition?.IsInExecution == true) continue;
-				
-				var nosakiInTop2 = fleet.Ships
-					.Take(2)
-					.Where(s => s != null)
-					.Where(s => NosakiShipIds.Contains(s.Info?.Id ?? -1))
-					.ToArray();
+				var validShipIds = new HashSet<int>();
 
-				// 対象の野崎がいない艦隊は対象外
-				if (!nosakiInTop2.Any())
+				foreach (var fleet in organization.Fleets.Values.Where(f => f != null))
 				{
-					continue;
+					if (fleet.IsInSortie) continue;
+					if (fleet.Expedition?.IsInExecution == true) continue;
+				
+					var nosakiInTop2 = fleet.Ships
+						.Take(2)
+						.Where(s => s != null)
+						.Where(s => NosakiShipIds.Contains(s.Info?.Id ?? -1))
+						.ToArray();
+
+					if (!nosakiInTop2.Any()) continue;
+
+					if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
+					{
+						foreach (var nosaki in nosakiInTop2)
+						{
+							this.nosakiNextNotifyAt.Remove(nosaki.Id);
+						}
+						continue;
+					}
+
+					foreach (var ship in nosakiInTop2)
+					{
+						if (!this.IsNosakiConditionSatisfied(ship))
+						{
+							this.nosakiNextNotifyAt.Remove(ship.Id);
+							continue;
+						}
+
+						validShipIds.Add(ship.Id);
+
+						if (!this.nosakiNextNotifyAt.TryGetValue(ship.Id, out var nextNotifyAt))
+						{
+							this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
+							continue;
+						}
+					}
 				}
- 
-				// 同じ艦隊で停止条件成立ならタイマー停止（通知はしない）
- 				if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
- 				{
- 					foreach (var nosaki in nosakiInTop2)
- 					{
- 						this.nosakiNextNotifyAt.Remove(nosaki.Id);
- 					}
- 
- 					continue;
- 				}
- 
- 				foreach (var ship in nosakiInTop2)
-  				{
- 					if (!this.IsNosakiConditionSatisfied(ship))
- 					{
- 						this.nosakiNextNotifyAt.Remove(ship.Id);
- 						continue;
- 					}
- 
- 					validShipIds.Add(ship.Id);
- 
- 					if (!this.nosakiNextNotifyAt.TryGetValue(ship.Id, out var nextNotifyAt))
- 					{
- 						// 条件成立から15分後に初回通知
- 						this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
- 						continue;
- 					}
- 				}
+
+				var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
+				foreach (var shipId in staleIds)
+				{
+					this.nosakiNextNotifyAt.Remove(shipId);
+				}
+
+				this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0
+					? this.nosakiNextNotifyAt.Values.Max()
+					: (DateTimeOffset?)null;
+
+				if (this.nosakiSharedNextNotifyAt.HasValue && now >= this.nosakiSharedNextNotifyAt.Value)
+				{
+					shouldNotify = Settings.KanColleSettings.NotifyNosakiTimer;
+
+					var next = now.Add(NosakiNotifyInterval);
+					var keys = this.nosakiNextNotifyAt.Keys.ToArray();
+					foreach (var key in keys)
+					{
+						this.nosakiNextNotifyAt[key] = next;
+					}
+					this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0 ? next : (DateTimeOffset?)null;
+				}
  			}
 
- 			var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
-			foreach (var shipId in staleIds)
+			if (shouldNotify)
 			{
-				this.nosakiNextNotifyAt.Remove(shipId);
-			}
-
-			// 共有タイマー: 「一番最近の更新」に合わせる（= 最大の next）
-			this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0
-				? this.nosakiNextNotifyAt.Values.Max()
-				: (DateTimeOffset?)null;
-
-			// 共有タイマー満了時に1回だけ通知（設定ON時）
-			if (this.nosakiSharedNextNotifyAt.HasValue && now >= this.nosakiSharedNextNotifyAt.Value)
-			{
-				if (Settings.KanColleSettings.NotifyNosakiTimer)
-				{
-					var notification = Notification.Create(
-						Notification.Types.FleetRejuvenated,
-						"野崎タイマー",
-						"母港給糧艦タイマーが15分経過しました。",
-						() => WindowService.Current.MainWindow.Activate());
-
-					this.Notify(notification);
-				}
-
-				// 次の共有時刻へそろえる
-				var next = now.Add(NosakiNotifyInterval);
-				var keys = this.nosakiNextNotifyAt.Keys.ToArray();
-				foreach (var key in keys)
-				{
-					this.nosakiNextNotifyAt[key] = next;
-				}
-				this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0 ? next : (DateTimeOffset?)null;
+				var notification = Notification.Create(
+					Notification.Types.FleetRejuvenated,
+					"野崎タイマー",
+					"15分経過しました。",
+					() => WindowService.Current.MainWindow.Activate());
+				this.Notify(notification);
 			}
 
 			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
@@ -360,10 +365,13 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public TimeSpan? GetNosakiTimerRemaining(Fleet fleet)
 		{
-			if (!this.nosakiSharedNextNotifyAt.HasValue) return null;
-			var remain = this.nosakiSharedNextNotifyAt.Value - DateTimeOffset.Now;
-			return remain < TimeSpan.Zero ? TimeSpan.Zero : remain;
-		}
+			lock (this.nosakiTimerSync)
+			{
+				if (!this.nosakiSharedNextNotifyAt.HasValue) return null;
+				var remain = this.nosakiSharedNextNotifyAt.Value - DateTimeOffset.Now;
+				return remain < TimeSpan.Zero ? TimeSpan.Zero : remain;
+			}
+ 		}
 
 		private bool IsNosakiConditionSatisfied(Ship ship)
 		{
