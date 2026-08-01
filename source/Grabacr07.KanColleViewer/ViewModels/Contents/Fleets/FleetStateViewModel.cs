@@ -31,7 +31,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public SortieViewModel Sortie { get; }
 
 
-		public FleetStateViewModel(FleetState source)
+		public FleetStateViewModel(FleetState source, Fleet fleet = null)
 		{
 			this.Source = source;
 			System.ComponentModel.PropertyChangedEventHandler stateHandler = (s, e) => this.RaisePropertyChanged(e.PropertyName);
@@ -41,7 +41,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			this.Sortie = new SortieViewModel(source);
 			this.CompositeDisposable.Add(this.Sortie);
 
-			this.Homeport = new HomeportViewModel(source);
+			this.Homeport = new HomeportViewModel(source, fleet);
 			this.CompositeDisposable.Add(this.Homeport);
 		}
 	}

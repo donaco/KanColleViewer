@@ -65,7 +65,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			fleet.State.PropertyChanged += stateHandler;
 			this.CompositeDisposable.Add(new Grabacr07.KanColleViewer.Infrastructure.Lifetime.DelegateDisposable(() => fleet.State.PropertyChanged -= stateHandler));
 
-			this.State = new FleetStateViewModel(fleet.State);
+			this.State = new FleetStateViewModel(fleet.State, fleet);
 			this.CompositeDisposable.Add(this.State);
 
 			this.Expedition = new ExpeditionViewModel(fleet.Expedition);

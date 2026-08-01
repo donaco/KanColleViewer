@@ -36,6 +36,7 @@ namespace Grabacr07.KanColleViewer.Models
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
 		private readonly HashSet<int> nosakiStopNotifiedFleetIds = new HashSet<int>();
 		private IDisposable nosakiTimerSubscription;
+		public event EventHandler NosakiTimerUpdated;
 
 		// ﾉｻｷﾁｬﾝのID
 		private static readonly int[] NosakiShipIds = { 996, 1002 };
@@ -228,7 +229,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.nosakiNextNotifyAt.Clear();
 
 			this.nosakiTimerSubscription = Observable
-				.Interval(TimeSpan.FromSeconds(30))
+				.Interval(TimeSpan.FromSeconds(1))
 				.StartWith(0L)
 				.Subscribe(_ => this.CheckNosakiTimer(organization));
 
@@ -242,6 +243,7 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 				this.nosakiNextNotifyAt.Clear();
 				this.nosakiStopNotifiedFleetIds.Clear();
+				this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
 				return;
 			}
 
@@ -281,7 +283,7 @@ namespace Grabacr07.KanColleViewer.Models
 						var stopNotification = Notification.Create(
 							Notification.Types.FleetRejuvenated,
 							"野崎タイマー停止",
-							$"「{fleet.Name}」で野崎タイマーを停止しました。",
+							$"「{fleet.Name}」はタイマーを停止しました。",
 							() => WindowService.Current.MainWindow.Activate());
 
 						this.Notify(stopNotification);
@@ -316,7 +318,7 @@ namespace Grabacr07.KanColleViewer.Models
 					var notification = Notification.Create(
 						Notification.Types.FleetRejuvenated,
 						"野崎タイマー",
-						$"「{ship.Info.Name}」（{fleet.Name}）は条件を15分継続中です。",
+						$"「{fleet.Name}」はタイマーを継続中です。",
 						() => WindowService.Current.MainWindow.Activate());
 
 					this.Notify(notification);
@@ -329,6 +331,32 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 				this.nosakiNextNotifyAt.Remove(shipId);
 			}
+
+			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
+		}
+
+		public TimeSpan? GetNosakiTimerRemaining(Fleet fleet)
+		{
+			if (!Settings.KanColleSettings.NotifyNosakiTimer) return null;
+			if (fleet?.Ships == null) return null;
+
+			var now = DateTimeOffset.Now;
+			var remains = fleet.Ships
+				.Take(2)
+				.Where(s => s != null)
+				.Where(s => NosakiShipIds.Contains(s.Info?.Id ?? -1))
+				.Select(s =>
+				{
+					if (!this.nosakiNextNotifyAt.TryGetValue(s.Id, out var next)) return (TimeSpan?)null;
+					var r = next - now;
+					return r < TimeSpan.Zero ? TimeSpan.Zero : r;
+				})
+				.Where(x => x.HasValue)
+				.Select(x => x.Value)
+				.ToArray();
+
+			if (remains.Length == 0) return null;
+			return remains.Min();
 		}
 
 		private bool IsNosakiConditionSatisfied(Ship ship)
