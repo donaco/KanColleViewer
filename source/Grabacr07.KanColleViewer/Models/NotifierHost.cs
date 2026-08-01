@@ -99,7 +99,7 @@ namespace Grabacr07.KanColleViewer.Models
 				.Subscribe(nameof(Organization.Fleets), () => this.UpdateFleets(client.Homeport.Organization))
 				.AddTo(this);
 
-			this.StartNosakiTimer(client.Homeport.Organization, client.Homeport.Repairyard);
+			this.StartNosakiTimer(client.Homeport.Organization);
 
 			this.isRegistered = true;
 		}
@@ -198,25 +198,34 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private void ResetNosakiTimerByFleetChange()
 		{
+			var shouldRaise = false;
+
 			lock (this.nosakiTimerSync)
 			{
 				if (this.nosakiNextNotifyAt.Count == 0)
 				{
-					this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
-					return;
+					this.nosakiSharedNextNotifyAt = null;
+					shouldRaise = true;
 				}
-
-				var next = DateTimeOffset.Now.Add(NosakiNotifyInterval);
-				var keys = this.nosakiNextNotifyAt.Keys.ToArray();
-				foreach (var key in keys)
+				else
 				{
-					this.nosakiNextNotifyAt[key] = next;
-				}
+					var next = DateTimeOffset.Now.Add(NosakiNotifyInterval);
+					var keys = this.nosakiNextNotifyAt.Keys.ToArray();
+					foreach (var key in keys)
+					{
+						this.nosakiNextNotifyAt[key] = next;
+					}
 
-				this.nosakiSharedNextNotifyAt = next;
+					// 共有タイマー時刻を即時更新
+					this.nosakiSharedNextNotifyAt = next;
+					shouldRaise = true;
+				}
 			}
 
-			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
+			if (shouldRaise)
+			{
+				this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
+			}
 		}
 
 		private void HandleExpeditionReturned(object sender, ExpeditionReturnedEventArgs args)
@@ -258,7 +267,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.Notify(notification);
 		}
 
-		private void StartNosakiTimer(Organization organization, Repairyard repairyard)
+		private void StartNosakiTimer(Organization organization)
 		{
 			this.nosakiTimerSubscription?.Dispose();
 			lock (this.nosakiTimerSync)
