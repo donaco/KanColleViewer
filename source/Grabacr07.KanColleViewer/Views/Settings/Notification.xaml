@@ -97,7 +97,7 @@
 
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}"
 					   Margin="0,8" />
-			<CheckBox Content="母港給糧艦システム動作時に通知する"
+			<CheckBox Content="母港給糧艦システムが動作時に通知する"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.NotifyNosakiTimer}, Path=Value}" />
 			<StackPanel Margin="20,0,0,0">
 				<Border Height="8" />

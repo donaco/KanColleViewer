@@ -34,7 +34,6 @@ namespace Grabacr07.KanColleViewer.Models
 		private CompositeDisposable repairyardDisposables;
 		private CompositeDisposable organizationDisposables;
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
-		private readonly HashSet<int> nosakiStopNotifiedFleetIds = new HashSet<int>();
 		private IDisposable nosakiTimerSubscription;
 		public event EventHandler NosakiTimerUpdated;
 
@@ -239,17 +238,9 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private void CheckNosakiTimer(Organization organization)
 		{
-			if (!Settings.KanColleSettings.NotifyNosakiTimer)
-			{
-				this.nosakiNextNotifyAt.Clear();
-				this.nosakiStopNotifiedFleetIds.Clear();
-				this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
-				return;
-			}
-
- 			if (organization?.Fleets?.Values == null) return;
-			var now = DateTimeOffset.Now;
-			var validShipIds = new HashSet<int>();
+			if (organization?.Fleets?.Values == null) return;
+ 			var now = DateTimeOffset.Now;
+ 			var validShipIds = new HashSet<int>();
 
 			foreach (var fleet in organization.Fleets.Values.Where(f => f != null))
 			{
@@ -265,39 +256,22 @@ namespace Grabacr07.KanColleViewer.Models
 				// 対象の野崎がいない艦隊は対象外
 				if (!nosakiInTop2.Any())
 				{
-					this.nosakiStopNotifiedFleetIds.Remove(fleet.Id);
 					continue;
 				}
-
-				// 同じ艦隊で、野崎以外の cond 54 以上ならタイマー停止
-				if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
-				{
-					foreach (var nosaki in nosakiInTop2)
-					{
-						this.nosakiNextNotifyAt.Remove(nosaki.Id);
-					}
-
-					// 停止通知は連続表示しない（状態遷移時のみ）
-					if (this.nosakiStopNotifiedFleetIds.Add(fleet.Id))
-					{
-						var stopNotification = Notification.Create(
-							Notification.Types.FleetRejuvenated,
-							"野崎タイマー停止",
-							$"「{fleet.Name}」はタイマーを停止しました。",
-							() => WindowService.Current.MainWindow.Activate());
-
-						this.Notify(stopNotification);
-					}
-
-					continue;
-				}
-				else
-				{
-					this.nosakiStopNotifiedFleetIds.Remove(fleet.Id);
-				}
-
-				foreach (var ship in nosakiInTop2)
+ 
+				// 同じ艦隊で停止条件成立ならタイマー停止（通知はしない）
+ 				if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
  				{
+ 					foreach (var nosaki in nosakiInTop2)
+ 					{
+ 						this.nosakiNextNotifyAt.Remove(nosaki.Id);
+ 					}
+ 
+ 					continue;
+ 				}
+ 
+ 				foreach (var ship in nosakiInTop2)
+  				{
  					if (!this.IsNosakiConditionSatisfied(ship))
  					{
  						this.nosakiNextNotifyAt.Remove(ship.Id);
@@ -321,7 +295,10 @@ namespace Grabacr07.KanColleViewer.Models
 						$"「{fleet.Name}」はタイマーを継続中です。",
 						() => WindowService.Current.MainWindow.Activate());
 
-					this.Notify(notification);
+					if (Settings.KanColleSettings.NotifyNosakiTimer)
+					{
+						this.Notify(notification);
+					}
 					this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
 				}
 			}
@@ -337,7 +314,6 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public TimeSpan? GetNosakiTimerRemaining(Fleet fleet)
 		{
-			if (!Settings.KanColleSettings.NotifyNosakiTimer) return null;
 			if (fleet?.Ships == null) return null;
 
 			var now = DateTimeOffset.Now;

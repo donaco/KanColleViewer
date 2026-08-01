@@ -40,7 +40,7 @@
 							</TextBlock>
 							<TextBlock x:Name="NosakiTimerText"
 									   Margin="8,0,0,0"
-									   Visibility="Collapsed"
+									   Visibility="Visible"
 									   Style="{DynamicResource DefaultTextStyleKey}"
 									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 									   TextWrapping="NoWrap"
@@ -64,12 +64,6 @@
 						<Setter TargetName="Text"
 								Property="Text"
 								Value="出撃可能！" />
-					</DataTrigger>
-					<DataTrigger Binding="{Binding IsNosakiTimerActive}"
-								 Value="True">
-						<Setter TargetName="NosakiTimerText"
-								Property="Visibility"
-								Value="Visible" />
 					</DataTrigger>
 				</DataTemplate.Triggers>
 			</DataTemplate>
