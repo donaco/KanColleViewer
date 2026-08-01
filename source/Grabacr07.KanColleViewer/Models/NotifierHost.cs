@@ -181,7 +181,36 @@ namespace Grabacr07.KanColleViewer.Models
 
 				fleet.State.Condition.Rejuvenated += this.HandleConditionRejuvenated;
 				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.State.Condition.Rejuvenated -= this.HandleConditionRejuvenated));
+
+				// api_req_hensei/change などの編成変更を検知してタイマーをリセット
+				System.ComponentModel.PropertyChangedEventHandler fleetChanged = (s, e) =>
+				{
+					if (e.PropertyName == nameof(Fleet.ShipsUpdated))
+					{
+						this.ResetNosakiTimerByFleetChange();
+					}
+				};
+				fleet.PropertyChanged += fleetChanged;
+				this.organizationDisposables.Add(new DelegateDisposable(() => fleet.PropertyChanged -= fleetChanged));
 			}
+		}
+
+		private void ResetNosakiTimerByFleetChange()
+		{
+			if (this.nosakiNextNotifyAt.Count == 0)
+			{
+				this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
+				return;
+			}
+
+			var next = DateTimeOffset.Now.Add(NosakiNotifyInterval);
+			var keys = this.nosakiNextNotifyAt.Keys.ToArray();
+			foreach (var key in keys)
+			{
+				this.nosakiNextNotifyAt[key] = next;
+			}
+
+			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void HandleExpeditionReturned(object sender, ExpeditionReturnedEventArgs args)
