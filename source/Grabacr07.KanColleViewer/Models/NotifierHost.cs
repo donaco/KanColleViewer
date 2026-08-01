@@ -209,31 +209,38 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 
 			// 消えた艦隊IDのシグネチャを掃除
-			var stale = this.fleetCompositionSignatures.Keys.Where(id => !aliveFleetIds.Contains(id)).ToArray();
-			foreach (var id in stale)
+			int[] stale;
+			lock (this.nosakiTimerSync)
 			{
-				this.fleetCompositionSignatures.Remove(id);
+				stale = this.fleetCompositionSignatures.Keys.Where(id => !aliveFleetIds.Contains(id)).ToArray();
+				foreach (var id in stale)
+				{
+					this.fleetCompositionSignatures.Remove(id);
+				}
 			}
-		}
+ 		}
 
-		private bool UpdateFleetCompositionSignature(Fleet fleet)
-		{
-			if (fleet == null) return false;
+ 		private bool UpdateFleetCompositionSignature(Fleet fleet)
+ 		{
+ 			if (fleet == null) return false;
 
 			// 並び順込みで編成をシグネチャ化
 			var signature = fleet.Ships == null
 				? string.Empty
 				: string.Join(",", fleet.Ships.Where(s => s != null).Select(s => s.Id));
 
-			if (this.fleetCompositionSignatures.TryGetValue(fleet.Id, out var current)
-				&& string.Equals(current, signature, StringComparison.Ordinal))
+			lock (this.nosakiTimerSync)
 			{
-				return false;
-			}
+				if (this.fleetCompositionSignatures.TryGetValue(fleet.Id, out var current)
+					&& string.Equals(current, signature, StringComparison.Ordinal))
+				{
+					return false;
+				}
 
-			this.fleetCompositionSignatures[fleet.Id] = signature;
-			return true;
-		}
+				this.fleetCompositionSignatures[fleet.Id] = signature;
+				return true;
+			}
+ 		}
 
 		private void ResetNosakiTimerByFleetChange()
 		{
