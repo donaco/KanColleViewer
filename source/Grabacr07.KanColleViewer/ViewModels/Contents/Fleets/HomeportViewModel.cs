@@ -21,7 +21,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 
 		public ConditionViewModel Condition { get; }
 		public string NosakiTimerRemaining => this.GetNosakiTimerRemaining()?.ToString(@"mm\:ss") ?? "--:--";
-		public bool IsNosakiTimerActive => this.HasNonNosakiShipInFleet() && this.GetNosakiTimerRemaining().HasValue;
+		public bool IsNosakiTimerActive
+			=> this.HasNosakiShipInFleet()
+			&& this.HasNonNosakiShipInFleet()
+			&& this.GetNosakiTimerRemaining().HasValue;
 
 		public HomeportViewModel(FleetState state, Fleet fleet = null)
 			: base(state)
@@ -43,6 +46,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		{
 			if (this.fleet == null) return null;
 			return NotifyService.Current.GetNosakiTimerRemaining(this.fleet);
+		}
+
+		private bool HasNosakiShipInFleet()
+		{
+			if (this.fleet?.Ships == null) return false;
+			return this.fleet.Ships
+				.Where(s => s != null)
+				.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
 		}
 
 		private bool HasNonNosakiShipInFleet()
