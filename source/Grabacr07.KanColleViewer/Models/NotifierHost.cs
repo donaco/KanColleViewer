@@ -530,5 +530,20 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 			}
  		}
+
+		public bool IsNosakiTimerDisplayActive(Fleet fleet)
+		{
+			if (fleet?.Ships == null) return false;
+			if (!this.HasNosakiInTop2(fleet)) return false;
+
+			var hasNonNosakiShip = fleet.Ships
+				.Where(s => s != null)
+				.Any(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1));
+			if (!hasNonNosakiShip) return false;
+
+			if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet)) return false;
+
+			return this.GetNosakiTimerRemaining(fleet).HasValue;
+		}
 	}
 }

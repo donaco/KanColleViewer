@@ -18,14 +18,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 
 		// QuickStateView は ContentControl に対し型ごとの DataTemplate を適用する形で実現するので
 		// 状況に応じた型がそれぞれ必要。これはその 1 つ。
-
+	
 		public ConditionViewModel Condition { get; }
 		public string NosakiTimerRemaining => this.GetNosakiTimerRemaining()?.ToString(@"mm\:ss") ?? "--:--";
 		public bool IsNosakiTimerActive
-			=> this.HasNosakiShipInFleet()
-			&& this.HasNonNosakiShipInFleet()
-			&& this.GetNosakiTimerRemaining().HasValue
-			&& !this.AreAllOtherShipsCondition54OrMore();
+			=> this.fleet != null
+			&& NotifyService.Current.IsNosakiTimerDisplayActive(this.fleet);
 
 		public HomeportViewModel(FleetState state, Fleet fleet = null)
 			: base(state)
@@ -47,37 +45,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		{
 			if (this.fleet == null) return null;
 			return NotifyService.Current.GetNosakiTimerRemaining(this.fleet);
-		}
-
-		private bool HasNosakiShipInFleet()
-		{
-			if (this.fleet?.Ships == null) return false;
-			return this.fleet.Ships
-				.Take(2)
-				.Where(s => s != null)
-				.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
-		}
-
-		private bool HasNonNosakiShipInFleet()
-		{
-			if (this.fleet?.Ships == null) return false;
-			return this.fleet.Ships
-				.Where(s => s != null)
-				.Any(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1));
-		}
-
-		private bool AreAllOtherShipsCondition54OrMore()
-		{
-			if (this.fleet?.Ships == null) return false;
-
-			var others = this.fleet.Ships
-				.Where(s => s != null)
-				.Where(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1))
-				// 野崎以外の入渠中艦は除外
-				.Where(s => s.TimeToRepair == TimeSpan.Zero)
-				.ToArray();
-
-			return others.Length > 0 && others.All(s => s.Condition >= 54);
 		}
 	}
 }
