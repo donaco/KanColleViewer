@@ -361,7 +361,7 @@ namespace Grabacr07.KanColleViewer.Models
 		private void CheckNosakiTimer(Organization organization)
 		{
 			if (organization?.Fleets?.Values == null) return;
- 			var now = DateTimeOffset.Now;
+			var now = DateTimeOffset.Now;
 			var shouldNotify = false;
 
 			lock (this.nosakiTimerSync)
@@ -372,7 +372,7 @@ namespace Grabacr07.KanColleViewer.Models
 				{
 					if (fleet.IsInSortie) continue;
 					if (fleet.Expedition?.IsInExecution == true) continue;
-				
+
 					var nosakiInTop2 = fleet.Ships
 						.Take(2)
 						.Where(s => s != null)
@@ -381,14 +381,8 @@ namespace Grabacr07.KanColleViewer.Models
 
 					if (!nosakiInTop2.Any()) continue;
 
-					if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
-					{
-						foreach (var nosaki in nosakiInTop2)
-						{
-							this.nosakiNextNotifyAt.Remove(nosaki.Id);
-						}
-						continue;
-					}
+					// cond 54 以上で「停止」= 通知は抑止するが、カウントダウン表示は維持する
+					var blocked = this.IsNosakiTimerBlockedByOtherHighCondition(fleet);
 
 					foreach (var ship in nosakiInTop2)
 					{
@@ -407,10 +401,21 @@ namespace Grabacr07.KanColleViewer.Models
 								? this.nosakiSharedNextNotifyAt.Value
 								: now.Add(NosakiNotifyInterval);
 							this.nosakiNextNotifyAt[ship.Id] = seed;
- 							continue;
- 						}
- 					}
- 				}
+							continue;
+						}
+
+						// 期限到達: 通知して次の 15 分をセット（リセットして継続）
+						if (nextNotifyAt <= now)
+						{
+							if (!blocked && Settings.KanColleSettings.NotifyNosakiTimer)
+							{
+								shouldNotify = true;
+							}
+
+							this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
+						}
+					}
+				}
 
 				var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
 				foreach (var shipId in staleIds)
@@ -424,18 +429,17 @@ namespace Grabacr07.KanColleViewer.Models
 				}
 				else if (this.nosakiSharedNextNotifyAt.HasValue && this.nosakiSharedNextNotifyAt.Value <= now)
 				{
-					// 復元値が期限切れになった場合のみクリア（起動直後の未ロード状態では保持）
 					this.nosakiSharedNextNotifyAt = null;
 				}
-
+				// 復元値が期限切れになった場合のみクリア（起動直後の未ロード状態では保持）
 				this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
- 			}
+			}
 
 			if (shouldNotify)
 			{
 				var notification = Notification.Create(
 					Notification.Types.FleetRejuvenated,
-					"野崎タイマー",
+					"母港給糧艦システム",
 					"15分経過しました。",
 					() => WindowService.Current.MainWindow.Activate());
 				this.Notify(notification);

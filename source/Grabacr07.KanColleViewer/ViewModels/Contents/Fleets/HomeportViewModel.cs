@@ -24,7 +24,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public bool IsNosakiTimerActive
 			=> this.HasNosakiShipInFleet()
 			&& this.HasNonNosakiShipInFleet()
-			&& this.GetNosakiTimerRemaining().HasValue;
+			&& this.GetNosakiTimerRemaining().HasValue
+			&& !this.AreAllOtherShipsCondition54OrMore();
 
 		public HomeportViewModel(FleetState state, Fleet fleet = null)
 			: base(state)
@@ -62,6 +63,20 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			return this.fleet.Ships
 				.Where(s => s != null)
 				.Any(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1));
+		}
+
+		private bool AreAllOtherShipsCondition54OrMore()
+		{
+			if (this.fleet?.Ships == null) return false;
+
+			var others = this.fleet.Ships
+				.Where(s => s != null)
+				.Where(s => !NosakiShipIds.Contains(s.Info?.Id ?? -1))
+				// 野崎以外の入渠中艦は除外
+				.Where(s => s.TimeToRepair == TimeSpan.Zero)
+				.ToArray();
+
+			return others.Length > 0 && others.All(s => s.Condition >= 54);
 		}
 	}
 }
