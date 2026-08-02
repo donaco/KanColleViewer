@@ -53,6 +53,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		{
 			if (this.fleet?.Ships == null) return false;
 			return this.fleet.Ships
+				.Take(2)
 				.Where(s => s != null)
 				.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
 		}
