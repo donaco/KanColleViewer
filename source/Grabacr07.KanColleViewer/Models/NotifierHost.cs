@@ -200,7 +200,11 @@ namespace Grabacr07.KanColleViewer.Models
 						// ShipsUpdated が来ても、編成実体が変わらない（api_port等）ならリセットしない
 						if (this.UpdateFleetCompositionSignature(fleet))
 						{
-							this.ResetNosakiTimerByFleetChange();
+							// 野崎が関係する編成変更のときだけタイマーをリセット
+							if (this.HasNosakiInTop2(fleet))
+							{
+								this.ResetNosakiTimerByFleetChange();
+							}
 						}
 					}
 				};
@@ -240,7 +244,17 @@ namespace Grabacr07.KanColleViewer.Models
 				this.fleetCompositionSignatures[fleet.Id] = signature;
 				return true;
 			}
- 		}
+   		}
+
+		private bool HasNosakiInTop2(Fleet fleet)
+		{
+			if (fleet?.Ships == null) return false;
+
+			return fleet.Ships
+				.Take(2)
+				.Where(s => s != null)
+				.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
+		}
 
 		private void ResetNosakiTimerByFleetChange()
 		{
