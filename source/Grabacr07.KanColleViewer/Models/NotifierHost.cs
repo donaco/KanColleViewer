@@ -37,6 +37,7 @@ namespace Grabacr07.KanColleViewer.Models
 		private readonly object nosakiTimerSync = new object();
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
 		private DateTimeOffset? nosakiSharedNextNotifyAt;
+		private long lastSavedNosakiUnixMs = -1;
 		private IDisposable nosakiTimerSubscription;
 		public event EventHandler NosakiTimerUpdated;
 
@@ -265,6 +266,7 @@ namespace Grabacr07.KanColleViewer.Models
 				if (this.nosakiNextNotifyAt.Count == 0)
 				{
 					this.nosakiSharedNextNotifyAt = null;
+					this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
 					shouldRaise = true;
 				}
 				else
@@ -278,6 +280,7 @@ namespace Grabacr07.KanColleViewer.Models
 
 					// 共有タイマー時刻を即時更新
 					this.nosakiSharedNextNotifyAt = next;
+					this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
 					shouldRaise = true;
 				}
 			}
@@ -333,8 +336,18 @@ namespace Grabacr07.KanColleViewer.Models
 			lock (this.nosakiTimerSync)
 			{
 				this.nosakiNextNotifyAt.Clear();
-				this.nosakiSharedNextNotifyAt = null;
-			}
+				// 前回終了時の共有タイマー終了時刻を復元
+				var cachedMs = Settings.KanColleSettings.NosakiSharedNextNotifyAtUnixTimeMs.Value;
+				if (cachedMs > 0)
+				{
+					var cached = DateTimeOffset.FromUnixTimeMilliseconds(cachedMs);
+					this.nosakiSharedNextNotifyAt = cached > DateTimeOffset.Now ? cached : (DateTimeOffset?)null;
+				}
+				else
+				{
+					this.nosakiSharedNextNotifyAt = null;
+				}
+ 			}
 
 			this.nosakiTimerSubscription = Observable
 				.Interval(TimeSpan.FromSeconds(1))
@@ -389,11 +402,15 @@ namespace Grabacr07.KanColleViewer.Models
 
 						if (!this.nosakiNextNotifyAt.TryGetValue(ship.Id, out var nextNotifyAt))
 						{
-							this.nosakiNextNotifyAt[ship.Id] = now.Add(NosakiNotifyInterval);
-							continue;
-						}
-					}
-				}
+							// 起動時復元値が有効ならそれに合わせる
+							var seed = this.nosakiSharedNextNotifyAt.HasValue && this.nosakiSharedNextNotifyAt.Value > now
+								? this.nosakiSharedNextNotifyAt.Value
+								: now.Add(NosakiNotifyInterval);
+							this.nosakiNextNotifyAt[ship.Id] = seed;
+ 							continue;
+ 						}
+ 					}
+ 				}
 
 				var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
 				foreach (var shipId in staleIds)
@@ -401,22 +418,17 @@ namespace Grabacr07.KanColleViewer.Models
 					this.nosakiNextNotifyAt.Remove(shipId);
 				}
 
-				this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0
-					? this.nosakiNextNotifyAt.Values.Max()
-					: (DateTimeOffset?)null;
-
-				if (this.nosakiSharedNextNotifyAt.HasValue && now >= this.nosakiSharedNextNotifyAt.Value)
+				if (this.nosakiNextNotifyAt.Count > 0)
 				{
-					shouldNotify = Settings.KanColleSettings.NotifyNosakiTimer;
-
-					var next = now.Add(NosakiNotifyInterval);
-					var keys = this.nosakiNextNotifyAt.Keys.ToArray();
-					foreach (var key in keys)
-					{
-						this.nosakiNextNotifyAt[key] = next;
-					}
-					this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Count > 0 ? next : (DateTimeOffset?)null;
+					this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Values.Max();
 				}
+				else if (this.nosakiSharedNextNotifyAt.HasValue && this.nosakiSharedNextNotifyAt.Value <= now)
+				{
+					// 復元値が期限切れになった場合のみクリア（起動直後の未ロード状態では保持）
+					this.nosakiSharedNextNotifyAt = null;
+				}
+
+				this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
  			}
 
 			if (shouldNotify)
@@ -486,12 +498,33 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public void Dispose()
 		{
-			this.compositeDisposable.Dispose();
-			this.dockyardDisposables?.Dispose();
-			this.repairyardDisposables?.Dispose();
-			this.organizationDisposables?.Dispose();
-		}
+			lock (this.nosakiTimerSync)
+			{
+				this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
+			}
 
+ 			this.compositeDisposable.Dispose();
+ 			this.dockyardDisposables?.Dispose();
+ 			this.repairyardDisposables?.Dispose();
+ 			this.organizationDisposables?.Dispose();
+ 		}
 		#endregion
+		private void SaveNosakiTimerCache(DateTimeOffset? nextNotifyAt)
+		{
+			var value = nextNotifyAt.HasValue ? nextNotifyAt.Value.ToUnixTimeMilliseconds() : 0L;
+			if (this.lastSavedNosakiUnixMs == value) return;
+
+			this.lastSavedNosakiUnixMs = value;
+			Settings.KanColleSettings.NosakiSharedNextNotifyAtUnixTimeMs.Value = value;
+
+			try
+			{
+				// 設定ファイルへ即時永続化（アプリ強制終了でも引き継げるようにする）
+				Settings.Providers.Local.Save();
+			}
+			catch
+			{
+			}
+ 		}
 	}
 }

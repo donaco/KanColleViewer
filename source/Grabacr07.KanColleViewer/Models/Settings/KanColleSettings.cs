@@ -79,6 +79,13 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 
 		/// <summary>
+		/// 野崎共有タイマーの次回通知時刻 (UnixTimeMilliseconds) を保持します。
+		/// 0 の場合は未設定。
+		/// </summary>
+		public static SerializableProperty<long> NosakiSharedNextNotifyAtUnixTimeMs { get; }
+			= new SerializableProperty<long>(GetKey(), Providers.Local, 0L) { AutoSave = true };
+
+		/// <summary>
 		/// 艦隊が再出撃可能と判断する基準となるコンディション値を表す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<int> ReSortieCondition { get; }
