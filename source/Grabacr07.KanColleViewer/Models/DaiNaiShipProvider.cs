@@ -70,24 +70,25 @@ namespace Grabacr07.KanColleViewer.Models
 							return;
 						}
 
-						var localPath = GetSaveFilePath();
-						var localJson = ReadLocalFile(localPath);
-						var remoteVersion = GetVersion(remoteJson);
-						var localVersion = GetVersion(localJson);
+						var savePath = GetSaveFilePath();
+			var existingLocalPath = GetExistingLocalFilePath();
+			var localJson = ReadLocalFile(existingLocalPath);
+			var remoteVersion = GetVersion(remoteJson);
+			var localVersion = GetVersion(localJson);
 
-						if (File.Exists(localPath) && remoteVersion <= localVersion)
-						{
-							Debug.WriteLine(
-								"DaiNaiShipProvider.UpdateLocalFileAsync: 更新不要です。"
-								+ " local=" + localVersion
-								+ ", remote=" + remoteVersion);
-							return;
-						}
+			if (existingLocalPath != null && remoteVersion <= localVersion)
+			{
+				Debug.WriteLine(
+					"DaiNaiShipProvider.UpdateLocalFileAsync: 更新不要です。"
+					+ " local=" + localVersion
+					+ ", remote=" + remoteVersion);
+				return;
+			}
 
-						WriteLocalFileAtomically(localPath, remoteJson);
-						_entries = null;
+			WriteLocalFileAtomically(savePath, remoteJson);
+			_entries = null;
 
-						Debug.WriteLine(
+			Debug.WriteLine(
 							"DaiNaiShipProvider.UpdateLocalFileAsync: DaiNai_Ship.json を更新しました。"
 							+ " version=" + remoteVersion);
 					}
@@ -121,18 +122,7 @@ namespace Grabacr07.KanColleViewer.Models
 		{
 			try
 			{
-				var dir = Path.GetDirectoryName(
-					Assembly.GetEntryAssembly()?.Location
-					?? Assembly.GetExecutingAssembly().Location)
-					?? AppDomain.CurrentDomain.BaseDirectory;
-
-				var paths = new[]
-				{
-					Path.Combine(dir, "json", "DaiNai_Ship.json"),
-					Path.Combine(dir, "DaiNai_Ship.json"),
-				};
-
-				var path = paths.FirstOrDefault(File.Exists);
+				var path = GetLoadFilePaths().FirstOrDefault(File.Exists);
 				if (path == null)
 					return new Dictionary<int, DaiNaiShipEntry>();
 
@@ -158,20 +148,41 @@ namespace Grabacr07.KanColleViewer.Models
 				}
 				return result;
 			}
-			catch
+			catch (Exception ex)
 			{
+				Debug.WriteLine("DaiNaiShipProvider.Load: 読込失敗: " + ex);
 				return new Dictionary<int, DaiNaiShipEntry>();
 			}
 		}
 
-		private static string GetSaveFilePath()
+		private static string GetExecutableDirectory()
 		{
 			var executablePath = Assembly.GetEntryAssembly()?.Location
 				?? Assembly.GetExecutingAssembly().Location;
-			var executableDirectory = Path.GetDirectoryName(executablePath)
-				?? AppDomain.CurrentDomain.BaseDirectory;
 
-			return Path.Combine(executableDirectory, "json", "DaiNai_Ship.json");
+			return Path.GetDirectoryName(executablePath)
+				?? AppDomain.CurrentDomain.BaseDirectory;
+		}
+
+		private static string[] GetLoadFilePaths()
+		{
+			var dir = GetExecutableDirectory();
+
+			return new[]
+			{
+				Path.Combine(dir, "json", "DaiNai_Ship.json"),
+				Path.Combine(dir, "DaiNai_Ship.json"),
+			};
+		}
+
+		private static string GetExistingLocalFilePath()
+		{
+			return GetLoadFilePaths().FirstOrDefault(File.Exists);
+		}
+
+		private static string GetSaveFilePath()
+		{
+			return Path.Combine(GetExecutableDirectory(), "json", "DaiNai_Ship.json");
 		}
 
 		private static string ReadLocalFile(string localPath)
