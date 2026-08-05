@@ -37,5 +37,8 @@
     <Setting Name="MapCellNameSource" Type="System.String" Scope="Application">
       <Value Profile="(Default)">https://dona-co.art/kcv/MapCellNames.json</Value>
     </Setting>
+    <Setting Name="DaiNaiShipSource" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://dona-co.art/kcv/DaiNai_Ship.json</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

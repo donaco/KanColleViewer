@@ -78,5 +78,14 @@ namespace Grabacr07.KanColleViewer.Properties {
                 return ((string)(this["MapCellNameSource"]));
             }
         }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://dona-co.art/kcv/DaiNai_Ship.json")]
+        public string DaiNaiShipSource {
+            get {
+                return ((string)(this["DaiNaiShipSource"]));
+            }
+        }
     }
 }

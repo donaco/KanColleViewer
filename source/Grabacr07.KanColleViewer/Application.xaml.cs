@@ -115,6 +115,10 @@ namespace Grabacr07.KanColleViewer
 				// MapCellNameProvider はゲーム中にローカルファイルのみを参照します。
 				_ = MapCellNameUpdater.UpdateLocalFileAsync();
 
+				// DaiNai_Ship.json も起動時だけ更新します。
+				// DaiNaiShipProvider はゲーム中にローカルファイルのみを参照します。
+				_ = DaiNaiShipProvider.UpdateLocalFileAsync();
+
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
 
