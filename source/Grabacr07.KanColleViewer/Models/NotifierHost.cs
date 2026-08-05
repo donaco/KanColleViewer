@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleWrapper;
@@ -526,8 +526,9 @@ namespace Grabacr07.KanColleViewer.Models
 				// 設定ファイルへ即時永続化（アプリ強制終了でも引き継げるようにする）
 				Settings.Providers.Local.Save();
 			}
-			catch
+			catch (Exception ex)
 			{
+				Debug.WriteLine($"[NosakiTimer] Failed to save local settings. Value={value}, Error={ex}");
 			}
  		}
 
