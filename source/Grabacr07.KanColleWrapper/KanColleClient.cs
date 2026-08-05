@@ -399,6 +399,61 @@ namespace Grabacr07.KanColleWrapper
 			return dict;
 		}
 
+		#region 制空共通処理
+		/// <summary>
+		/// レスポンス JSON から制空状態を解析します。
+		/// 制空情報が取得できた場合のみ true を返します。
+		/// </summary>
+		private static bool TryParseAirSuperiority(string normalized, out AirSuperiority airResult, string contextForLog)
+		{
+			airResult = AirSuperiority.None;
+			if (string.IsNullOrEmpty(normalized)) return false;
+
+			try
+			{
+				var root = JToken.Parse(normalized);
+				var data = root["api_data"] ?? root;
+				return TryParseAirSuperiorityFromApiData(data, out airResult);
+			}
+			catch (Exception ex)
+			{
+				LogError(contextForLog, ex);
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// api_data トークンから制空状態を解析します。
+		/// </summary>
+		private static bool TryParseAirSuperiorityFromApiData(JToken data, out AirSuperiority airResult)
+		{
+			airResult = AirSuperiority.None;
+			if (data == null) return false;
+
+			var kouku = data.SelectToken("api_kouku");
+			var planeFrom = kouku?["api_plane_from"];
+
+			// 制空戦が発生していない場合
+			if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
+			{
+				return false;
+			}
+
+			var stage1 = data.SelectToken("api_kouku.api_stage1");
+			var dispSeiku = stage1?["api_disp_seiku"];
+			if (dispSeiku == null) return false;
+
+			int val;
+			if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
+			{
+				airResult = (AirSuperiority)val;
+				return true;
+			}
+
+			return false;
+		}
+		#endregion
+
 		/// <summary>
 		/// 例外をログに記録します。アプリを落とさないよう、再スローはしません。
 		/// </summary>
@@ -707,43 +762,10 @@ namespace Grabacr07.KanColleWrapper
 				shouldParseAir = false;
 			}
 
-			if (!string.IsNullOrEmpty(normalized) && (shouldParseAir || !shouldParseAir /* still try to parse to cache if possible */))
+			if (!string.IsNullOrEmpty(normalized))
 			{
-				try
-				{
-					var root = JToken.Parse(normalized);
-					var data = root["api_data"] ?? root;
-					if (data != null)
-					{
-
-						var kouku = data?.SelectToken("api_kouku");
-						var planeFrom = kouku?["api_plane_from"];
-						if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
-						{
-							// 制空戦が発生していない場合 → 制空情報のみスキップ（メソッドは続行）
-							airResult = AirSuperiority.None;
-							parsedBattleAir = false;
-						}
-						else
-						{
-							var stage1 = data.SelectToken("api_kouku.api_stage1");
-							if (stage1 != null)
-							{
-								var dispSeiku = stage1["api_disp_seiku"];
-								if (dispSeiku != null)
-								{
-									int val;
-									if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
-									{
-										airResult = (AirSuperiority)val;
-										parsedBattleAir = true;
-									}
-								}
-							}
-						}
-					}
-				}
-				catch (Exception ex) { LogError("TryHandleBattle", ex); }
+				// 解析は常に試行（showOnArrival=false 時は「表示せずキャッシュ」の既存挙動を維持）
+				parsedBattleAir = TryParseAirSuperiority(normalized, out airResult, "TryHandleBattle");
 			}
 
 			RunOnUi(() =>
@@ -864,38 +886,7 @@ namespace Grabacr07.KanColleWrapper
 			bool parsedAir = false; // JSON に制空情報が含まれているか
 			if (showAirResult)
 			{
-				try
-				{
-					var root = JToken.Parse(normalized);
-					var data = root["api_data"] ?? root;
-
-					var kouku = data?.SelectToken("api_kouku");
-					var planeFrom = kouku?["api_plane_from"];
-					if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
-					{
-						// 制空戦が発生していない場合 → 制空情報のみスキップ（WinRank 処理は続行）
-						airResult = AirSuperiority.None;
-						parsedAir = false;
-					}
-					else
-					{
-						var stage1 = data?.SelectToken("api_kouku.api_stage1");
-						if (stage1 != null)
-						{
-							var dispSeiku = stage1["api_disp_seiku"];
-							if (dispSeiku != null)
-							{
-								int val;
-								if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
-								{
-									airResult = (AirSuperiority)val;
-									parsedAir = true;
-								}
-							}
-						}
-					}
-				}
-				catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
+				parsedAir = TryParseAirSuperiority(normalized, out airResult, "TryHandleBattleResult");
 			}
 
 			// WinRank 取得（既存ロジック）
