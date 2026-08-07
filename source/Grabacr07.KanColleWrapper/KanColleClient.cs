@@ -138,6 +138,14 @@ namespace Grabacr07.KanColleWrapper
 			this.BattleResultReceived?.Invoke(mapId, normalized);
 		}
 
+		/// <summary>
+		/// Homeport が未初期化の場合に生成します。UI スレッドから呼び出してください。
+		/// </summary>
+		internal void EnsureHomeport()
+		{
+			if (this.Homeport == null) this.Homeport = new Homeport();
+		}
+
 		// Captured 処理を委譲するコンポーネント
 		private readonly CapturedProcessor capturedProcessor;
 
@@ -466,54 +474,10 @@ namespace Grabacr07.KanColleWrapper
 			=> this.battleHandler.TryHandleBattleResult(url, normalized);
 
 		/// <summary>
-		/// 基地航空隊
+		/// マップ情報応答に含まれる基地航空隊情報の更新
 		/// </summary>
 		private bool TryHandleMapInfo(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/mapinfo")) return false;
-
-			try
-			{
-				JToken root = null;
-				try { root = JToken.Parse(normalized); } catch { root = null; }
-				var data = root?["api_data"] ?? root;
-				if (data == null) return true;
-
-				var airBaseTok = data["api_air_base"] ?? data.SelectToken("api_air_base");
-				if (airBaseTok == null) return true;
-
-				var expandedTok = data["api_air_base_expanded_info"] ?? data.SelectToken("api_air_base_expanded_info");
-
-				kcsapi_air_base[] ab = null;
-				kcsapi_air_base_expanded_info[] abi = null;
-
-				try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
-				try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
-
-				if (ab != null)
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							// Homeport が未初期化の可能性があるので安全に作成してから反映
-							if (this.Homeport == null) this.Homeport = new Homeport();
-							this.Homeport?.AirBases?.Update(ab, abi);
-
-						}
-						catch (Exception)
-						{
-						}
-					});
-				}
-			}
-			catch (Exception)
-			{
-			}
-
-			this.Proxy.PublishSession("/kcsapi/api_get_member/mapinfo", normalized);
-				return true;
-			}
+			=> this.airBaseHandler.TryHandleMapInfo(url, normalized);
 
 		/// <summary>
 			/// イベントマップ難度選択 (api_req_map/select_eventmap_rank)

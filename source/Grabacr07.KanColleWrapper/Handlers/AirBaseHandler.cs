@@ -339,5 +339,59 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			return true;
 		}
+
+		/// <summary>
+		/// マップ情報応答に含まれる基地航空隊情報の更新 (api_get_member/mapinfo)
+		/// </summary>
+		internal bool TryHandleMapInfo(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_get_member/mapinfo")) return false;
+
+			try
+			{
+				JToken root = null;
+				try { root = JToken.Parse(normalized); } catch { root = null; }
+				var data = root?["api_data"] ?? root;
+				if (data == null) return true;
+
+				var airBaseTok = data["api_air_base"] ?? data.SelectToken("api_air_base");
+				if (airBaseTok == null) return true;
+
+				var expandedTok = data["api_air_base_expanded_info"] ?? data.SelectToken("api_air_base_expanded_info");
+
+				kcsapi_air_base[] ab = null;
+				kcsapi_air_base_expanded_info[] abi = null;
+
+				try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
+				try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
+
+				if (ab != null)
+				{
+					RunOnUi(() =>
+					{
+						lock (this.client.AirBaseStateLock)
+						{
+							try
+							{
+								// Homeport が未初期化の可能性があるので安全に作成してから反映
+								this.client.EnsureHomeport();
+								this.client.Homeport?.AirBases?.Update(ab, abi);
+							}
+							catch (Exception ex)
+							{
+								LogError("TryHandleMapInfo", ex);
+							}
+						}
+					});
+				}
+			}
+			catch (Exception ex)
+			{
+				LogError("TryHandleMapInfo", ex);
+			}
+
+			this.client.Proxy.PublishSession("/kcsapi/api_get_member/mapinfo", normalized);
+			return true;
+		}
 	}
 }
