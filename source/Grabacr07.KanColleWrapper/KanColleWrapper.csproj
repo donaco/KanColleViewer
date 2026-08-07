@@ -118,6 +118,7 @@
     <Compile Include="ApiSession.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
+    <Compile Include="Handlers\AirBaseHandler.cs" />
     <Compile Include="Handlers\BattleHandler.cs" />
     <Compile Include="Handlers\HandlerHelper.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
