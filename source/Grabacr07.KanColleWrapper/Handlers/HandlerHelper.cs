@@ -104,6 +104,36 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		}
 
 		/// <summary>
+		/// 資源の消費分（燃料・弾薬・鋼材・ボーキサイト）を現在値から差し引いて反映します。
+		/// 負の値にならないよう 0 でガードします。
+		/// 消費がすべて 0 以下の場合や資材が未取得の場合は何もしません。
+		/// </summary>
+		/// <param name="materials">更新対象の資材</param>
+		/// <param name="consume">消費分の配列（4 要素未満でも不足分は 0 として扱います）</param>
+		/// <param name="contextForLog">失敗時にログへ記録する処理名</param>
+		internal static void ApplyMaterialConsumption(Materials materials, int[] consume, string contextForLog)
+		{
+			try
+			{
+				if (materials == null || consume == null) return;
+
+				var c0 = consume.Length > 0 ? consume[0] : 0;
+				var c1 = consume.Length > 1 ? consume[1] : 0;
+				var c2 = consume.Length > 2 ? consume[2] : 0;
+				var c3 = consume.Length > 3 ? consume[3] : 0;
+				if (c0 <= 0 && c1 <= 0 && c2 <= 0 && c3 <= 0) return;
+
+				var newMat = new int[4];
+				newMat[0] = Math.Max(0, materials.Fuel - c0);
+				newMat[1] = Math.Max(0, materials.Ammunition - c1);
+				newMat[2] = Math.Max(0, materials.Steel - c2);
+				newMat[3] = Math.Max(0, materials.Bauxite - c3);
+				materials.Update(newMat);
+			}
+			catch (Exception ex) { LogError(contextForLog, ex); }
+		}
+
+		/// <summary>
 		/// 全艦隊の状態を再計算し、UI へ更新を通知します。
 		/// 個々の艦隊で例外が発生しても後続の艦隊の処理は継続します。
 		/// </summary>

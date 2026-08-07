@@ -123,19 +123,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									}
 
 									// 集計した消費を Materials に適用（増分として現在値から差し引く）
-									try
-									{
-										if (materials != null && (totalConsume[0] > 0 || totalConsume[1] > 0 || totalConsume[2] > 0 || totalConsume[3] > 0))
-										{
-											var newMat = new int[4];
-											newMat[0] = Math.Max(0, materials.Fuel - totalConsume[0]);
-											newMat[1] = Math.Max(0, materials.Ammunition - totalConsume[1]);
-											newMat[2] = Math.Max(0, materials.Steel - totalConsume[2]);
-											newMat[3] = Math.Max(0, materials.Bauxite - totalConsume[3]);
-											materials.Update(newMat);
-										}
-									}
-									catch (Exception ex) { LogError("TryHandleNdockList", ex); }
+									HandlerHelper.ApplyMaterialConsumption(materials, totalConsume, "TryHandleNdockList");
 								}
 							}
 							catch (Exception)
