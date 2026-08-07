@@ -1,17 +1,8 @@
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Xml.Linq;
 
 namespace Grabacr07.KanColleWrapper
 {
@@ -210,70 +201,69 @@ namespace Grabacr07.KanColleWrapper
 		internal readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
 
 		private KanColleClient()
-			{
-				// BattleHandler を初期化
-				this.battleHandler = new Handlers.BattleHandler(this);
+		{
+			// BattleHandler を初期化
+			this.battleHandler = new Handlers.BattleHandler(this);
 
-				// AirBaseHandler を初期化
-				this.airBaseHandler = new Handlers.AirBaseHandler(this);
+			// AirBaseHandler を初期化
+			this.airBaseHandler = new Handlers.AirBaseHandler(this);
 
-				// NyukyoHandler を初期化
-				this.nyukyoHandler = new Handlers.NyukyoHandler(this);
+			// NyukyoHandler を初期化
+			this.nyukyoHandler = new Handlers.NyukyoHandler(this);
 
-				// KenzoHandler を初期化
-				this.kenzoHandler = new Handlers.KenzoHandler(this);
+			// KenzoHandler を初期化
+			this.kenzoHandler = new Handlers.KenzoHandler(this);
 
-				// HenseiHandler を初期化
-				this.henseiHandler = new Handlers.HenseiHandler(this);
+			// HenseiHandler を初期化
+			this.henseiHandler = new Handlers.HenseiHandler(this);
 
-				// SlotItemHandler を初期化
-				this.slotItemHandler = new Handlers.SlotItemHandler(this);
+			// SlotItemHandler を初期化
+			this.slotItemHandler = new Handlers.SlotItemHandler(this);
 
-				// KaisouHandler を初期化
-				this.kaisouHandler = new Handlers.KaisouHandler(this);
+			// KaisouHandler を初期化
+			this.kaisouHandler = new Handlers.KaisouHandler(this);
 
-				// BasicHandler を初期化
-				this.basicHandler = new Handlers.BasicHandler(this);
+			// BasicHandler を初期化
+			this.basicHandler = new Handlers.BasicHandler(this);
 
-				// ShipHandler を初期化
-				this.shipHandler = new Handlers.ShipHandler(this);
+			// ShipHandler を初期化
+			this.shipHandler = new Handlers.ShipHandler(this);
 
-				// PortHandler を初期化
-				this.portHandler = new Handlers.PortHandler(this);
+			// PortHandler を初期化
+			this.portHandler = new Handlers.PortHandler(this);
 
-				// CapturedProcessor を初期化
-				this.capturedProcessor = new CapturedProcessor(
-					// isStartedProvider
-					() => this.IsStarted,
-					// onInitialized
-					(start2, requireInfo) =>
+			// CapturedProcessor を初期化
+			this.capturedProcessor = new CapturedProcessor(
+				// isStartedProvider
+				() => this.IsStarted,
+				// onInitialized
+				(start2, requireInfo) =>
+				{
+					try
 					{
-						try
+						// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
+						if (Application.Current != null)
 						{
-							// UI スレッドで Master/Homeport/SetRequireInfo/IsStarted を設定する
-							if (Application.Current != null)
+							Application.Current.Dispatcher.Invoke(() =>
 							{
-								Application.Current.Dispatcher.Invoke(() =>
-								{
-									this.Master = new Master(start2);
-									this.Homeport = new Homeport();
-									this.SetRequireInfo(requireInfo);
-									this.IsStarted = true;
-								});
-							}
-							else
-							{
-								// UI が存在しない（テスト等）の場合は通常実行
 								this.Master = new Master(start2);
 								this.Homeport = new Homeport();
 								this.SetRequireInfo(requireInfo);
 								this.IsStarted = true;
-							}
+							});
 						}
-						catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
-					});
-
-			}
+						else
+						{
+							// UI が存在しない（テスト等）の場合は通常実行
+							this.Master = new Master(start2);
+							this.Homeport = new Homeport();
+							this.SetRequireInfo(requireInfo);
+							this.IsStarted = true;
+						}
+					}
+					catch (Exception ex) { LogError("KanColleClient.onInitialized", ex); }
+				});
+		}
 
 		public void Initialize()
 		{
@@ -407,12 +397,11 @@ namespace Grabacr07.KanColleWrapper
 						&& trimmed[0] == '{'
 						&& trimmed.Contains("\"api_result\""))
 					{
-						if (Newtonsoft.Json.Linq.JToken.Parse(trimmed) is Newtonsoft.Json.Linq.JObject root
-							&& root["api_result"] is Newtonsoft.Json.Linq.JToken apiResultToken
-							&& apiResultToken.Type == Newtonsoft.Json.Linq.JTokenType.Integer)
+						var token = Newtonsoft.Json.Linq.JToken.Parse(trimmed).SelectToken("api_result");
+						if (token != null)
 						{
-							var apiResult = apiResultToken.Value<int>();
-							if (apiResult != 1) return;
+							int apiResult;
+							if (int.TryParse(token.ToString(), out apiResult) && apiResult != 1) return;
 						}
 					}
 				}
@@ -496,36 +485,12 @@ namespace Grabacr07.KanColleWrapper
 		#region ProcessCaptured helpers (refactor)
 
 		/// <summary>
-		/// URL エンコードされたリクエスト Body を辞書にパースします。
-		/// </summary>
-		private static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody)
-			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.ParseRequestBody(requestBody);
-
-		#region 制空共通処理
-		/// <summary>
-		/// レスポンス JSON から制空状態を解析します。
-		/// 制空情報が取得できた場合のみ true を返します。
-		/// </summary>
-		private static bool TryParseAirSuperiority(string normalized, out AirSuperiority airResult, string contextForLog)
-			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.TryParseAirSuperiority(normalized, out airResult, contextForLog);
-
-		/// <summary>
-		/// api_data トークンから制空状態を解析します。
-		/// </summary>
-		private static bool TryParseAirSuperiorityFromApiData(JToken data, out AirSuperiority airResult)
-			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.TryParseAirSuperiorityFromApiData(data, out airResult);
-		#endregion
-
-		/// <summary>
 		/// 例外をログに記録します。アプリを落とさないよう、再スローはしません。
 		/// </summary>
 		/// <param name="context">どの処理で発生したかを示す文字列（例: メソッド名や API パス）</param>
 		/// <param name="ex">発生した例外</param>
 		private static void LogError(string context, Exception ex)
 			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.LogError(context, ex);
-
-		internal void RunOnUi(Action action)
-			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.RunOnUi(action);
 
 		/// <summary>
 		/// 出撃開始 (api_req_map/start)
@@ -727,8 +692,8 @@ namespace Grabacr07.KanColleWrapper
 			=> this.slotItemHandler.TryHandleRemodelSlot(url, normalized, requestBody);
 
 		/// <summary>
-	/// 入渠系1 ドック一覧（NyukyoHandler へ委譲）
-	/// </summary>
+		/// 入渠系1 ドック一覧（NyukyoHandler へ委譲）
+		/// </summary>
 		private bool TryHandleNdockList(string url, string normalized)
 			=> this.nyukyoHandler.TryHandleNdockList(url, normalized);
 
