@@ -581,7 +581,6 @@ namespace Grabacr07.KanColleWrapper
 		private bool TryHandleClearItemGet(string url, string normalized)
 			=> this.basicHandler.TryHandleClearItemGet(url, normalized);
 
-
 		/// <summary>
 		/// 資源（BasicHandler へ委譲）
 		/// </summary>
@@ -603,8 +602,8 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 解体
 		/// </summary>
-private bool TryHandleDestroyShip(string url, string normalized, string requestBody)
-=> this.shipHandler.TryHandleDestroyShip(url, normalized, requestBody);
+		private bool TryHandleDestroyShip(string url, string normalized, string requestBody)
+			=> this.shipHandler.TryHandleDestroyShip(url, normalized, requestBody);
 
 		/// <summary>
 		/// 近代化改装（KaisouHandler へ委譲）
@@ -621,8 +620,8 @@ private bool TryHandleDestroyShip(string url, string normalized, string requestB
 		/// <summary>
 		/// 艦娘の情報更新
 		/// </summary>
-private bool TryHandleShipArray(string url, string normalized)
-=> this.shipHandler.TryHandleShipArray(url, normalized);
+		private bool TryHandleShipArray(string url, string normalized)
+			=> this.shipHandler.TryHandleShipArray(url, normalized);
 
 		/// <summary>
 		/// 改装系1（KaisouHandler へ委譲）
@@ -748,8 +747,8 @@ private bool TryHandleShipArray(string url, string normalized)
 		/// <summary>
 		/// 補給処理
 		/// </summary>
-private bool TryHandleCharge(string url, string normalized)
-=> this.shipHandler.TryHandleCharge(url, normalized);
+		private bool TryHandleCharge(string url, string normalized)
+			=> this.shipHandler.TryHandleCharge(url, normalized);
 
 		/// <summary>
 		/// 基地航空隊のスロット変更
