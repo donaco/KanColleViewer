@@ -207,5 +207,29 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		}
 
 		#endregion
+
+		/// <summary>
+		/// 装備アイテムを Itemyard へ追加、または既存の装備を改修情報で更新します。
+		/// 既に同一 ID の装備が存在する場合は Remodel、存在しなければ Add します。
+		/// </summary>
+		internal static void UpsertSlotItem(Itemyard itemyard, Models.Raw.kcsapi_slotitem raw, string contextForLog)
+		{
+			if (itemyard == null || raw == null) return;
+
+			try
+			{
+				if (itemyard.SlotItems.ContainsKey(raw.api_id))
+				{
+					try { itemyard.SlotItems[raw.api_id].Remodel(raw.api_level, raw.api_slotitem_id); }
+					catch (Exception ex) { LogError(contextForLog, ex); }
+				}
+				else
+				{
+					try { itemyard.SlotItems.Add(new SlotItem(raw)); }
+					catch (Exception ex) { LogError(contextForLog, ex); }
+				}
+			}
+			catch (Exception ex) { LogError(contextForLog, ex); }
+		}
 	}
 }
