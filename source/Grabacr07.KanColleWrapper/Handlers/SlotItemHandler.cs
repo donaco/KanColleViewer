@@ -92,14 +92,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 											}
 
 											// Itemyard の内部通知を呼び出す（private メソッドをリフレクションで呼ぶ）
-											try
-											{
-												try { this.client.Homeport?.Itemyard?.RaiseSlotItemsChanged(); }
-												catch (Exception ex) { LogError("TryHandleDestroyItem2", ex); }
-											}
-											catch (Exception)
-											{
-											}
+											try { this.client.Homeport?.Itemyard?.RaiseSlotItemsChanged(); }
+											catch (Exception ex) { LogError("TryHandleDestroyItem2", ex); }
 										}
 									}
 									catch (Exception)
@@ -287,28 +281,24 @@ namespace Grabacr07.KanColleWrapper.Handlers
 						catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 
 						// 4) Dockyard / CreatedSlotItem 更新（Dockyard.CreateSlotItem と同等の反映）
+						// kcsapi_createitem の api_slot_item が root 下にある場合、それを使って Dockyard.CreatedSlotItem と Dockyard の更新を促す
 						try
 						{
-							// kcsapi_createitem の api_slot_item が root 下にある場合、それを使って Dockyard.CreatedSlotItem と Dockyard の更新を促す
-							try
+							var createTok = data.ToObject<kcsapi_createitem>();
+							if (createTok != null)
 							{
-								var createTok = data.ToObject<kcsapi_createitem>();
-								if (createTok != null)
+								// Dockyard 側で CreatedSlotItem 更新は proxy 経由で行われるが、CEF 経路ではここで生成情報を反映しておく
+								var dockyard = this.client.Homeport?.Dockyard;
+								if (dockyard != null)
 								{
-									// Dockyard 側で CreatedSlotItem 更新は proxy 経由で行われるが、CEF 経路ではここで生成情報を反映しておく
-									var dockyard = this.client.Homeport?.Dockyard;
-									if (dockyard != null)
+									try
 									{
-										try
-										{
-											// Dockyard.CreateSlotItem に相当する処理は内部 private のため簡易に CreatedSlotItem を作る
-											dockyard.CreatedSlotItem = new CreatedSlotItem(createTok);
-										}
-										catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
+										// Dockyard.CreateSlotItem に相当する処理は内部 private のため簡易に CreatedSlotItem を作る
+										dockyard.CreatedSlotItem = new CreatedSlotItem(createTok);
 									}
+									catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 								}
 							}
-							catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 						}
 						catch (Exception ex) { LogError("TryHandleCreateItem", ex); }
 
