@@ -121,6 +121,7 @@
     <Compile Include="Handlers\AirBaseHandler.cs" />
     <Compile Include="Handlers\BattleHandler.cs" />
     <Compile Include="Handlers\HandlerHelper.cs" />
+    <Compile Include="Handlers\NyukyoHandler.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
     <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />

@@ -155,6 +155,9 @@ namespace Grabacr07.KanColleWrapper
 		// 基地航空隊ハンドラー
 		private readonly Handlers.AirBaseHandler airBaseHandler;
 
+		// 入渠ハンドラー
+		private readonly Handlers.NyukyoHandler nyukyoHandler;
+
 		// 出撃中の艦隊ID記録
 		internal readonly HashSet<int> sortieDeckIds = new HashSet<int>();
 
@@ -165,7 +168,7 @@ namespace Grabacr07.KanColleWrapper
 		private readonly HashSet<int> appliedBuildKdock = new HashSet<int>();
 
 		// 入渠
-		private readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
+		internal readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
 
 		private KanColleClient()
 			{
@@ -174,6 +177,9 @@ namespace Grabacr07.KanColleWrapper
 
 				// AirBaseHandler を初期化
 				this.airBaseHandler = new Handlers.AirBaseHandler(this);
+
+				// NyukyoHandler を初期化
+				this.nyukyoHandler = new Handlers.NyukyoHandler(this);
 
 				// CapturedProcessor を初期化
 				this.capturedProcessor = new CapturedProcessor(
@@ -257,6 +263,9 @@ namespace Grabacr07.KanColleWrapper
 
 		/// <summary>基地航空隊関連の共有状態（AirBases）を保護するロックオブジェクト。</summary>
 		internal readonly object AirBaseStateLock = new object();
+
+		/// <summary>入渠関連の共有状態（appliedRepairNdock）を保護するロックオブジェクト。</summary>
+		internal readonly object NyukyoStateLock = new object();
 
 		// start/next で取得した cellNo をキャッシュ（battle で使用）
 		internal int cachedCellNo = 0;
@@ -3627,327 +3636,23 @@ namespace Grabacr07.KanColleWrapper
 			return true;
 		}
 
-		/// <summary>
-		/// 入渠系1 ドック一覧
-		/// </summary>
-		private bool TryHandleNdockList(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/ndock")) return false;
+	/// <summary>
+	/// 入渠系1 ドック一覧（NyukyoHandler へ委譲）
+	/// </summary>
+	private bool TryHandleNdockList(string url, string normalized)
+		=> this.nyukyoHandler.TryHandleNdockList(url, normalized);
 
-			try
-			{
-				// 型デシリアライズを優先
-				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_ndock[]>(normalized, out var ndocks))
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							// Repairyard 側はそのまま更新
-							this.Homeport?.Repairyard?.Update(ndocks);
+	/// <summary>
+	/// 入渠系2 入渠開始（NyukyoHandler へ委譲）
+	/// </summary>
+	private bool TryHandleNyukyoStart(string url, string normalized, string requestBody)
+		=> this.nyukyoHandler.TryHandleNyukyoStart(url, normalized, requestBody);
 
-							// JSON 側をパースして api_item1..4 を集計し、まだ適用していない ndock に対して一度だけ減算する
-							try
-							{
-								JToken root = null;
-								try { root = JToken.Parse(normalized); } catch { root = null; }
-								var dataTok = root?["api_data"] ?? root;
-
-								if (dataTok != null && dataTok.Type == JTokenType.Array)
-								{
-									var arr = (JArray)dataTok;
-									var totalConsume = new int[4];
-									var materials = this.Homeport?.Materials;
-
-									lock (this.appliedRepairNdock)
-									{
-										for (int i = 0; i < arr.Count && i < ndocks.Length; i++)
-										{
-											var token = arr[i];
-											if (token == null) continue;
-
-											// ndock id を得る（raw オブジェクト / JSON 両対応）
-											int ndockId = 0;
-											try { ndockId = ndocks[i]?.api_id ?? token["api_id"]?.Value<int>() ?? 0; } catch { ndockId = token["api_id"]?.Value<int>() ?? 0; }
-											if (ndockId == 0) continue;
-
-											// state を確認（0: 空, 1: 修復中 など）
-											int state = token["api_state"]?.Value<int>() ?? (ndocks[i]?.api_state ?? 0);
-
-											// ndock が空 (state == 0) なら適用済みフラグをリセット（将来の再利用に備える）
-											if (state == 0)
-											{
-												if (this.appliedRepairNdock.Contains(ndockId)) this.appliedRepairNdock.Remove(ndockId);
-												continue;
-											}
-
-											// 修復中で、まだ消費を適用していなければ集計してフラグを立てる
-											if (state == 1 && !this.appliedRepairNdock.Contains(ndockId))
-											{
-												int it1 = token["api_item1"]?.Value<int>() ?? 0;
-												int it2 = token["api_item2"]?.Value<int>() ?? 0;
-												int it3 = token["api_item3"]?.Value<int>() ?? 0;
-												int it4 = token["api_item4"]?.Value<int>() ?? 0;
-
-												// 少なくとも1つ消費がある場合に集計
-												if (it1 != 0 || it2 != 0 || it3 != 0 || it4 != 0)
-												{
-													totalConsume[0] += it1;
-													totalConsume[1] += it2;
-													totalConsume[2] += it3;
-													totalConsume[3] += it4;
-
-													this.appliedRepairNdock.Add(ndockId);
-												}
-											}
-										}
-									}
-
-									// 集計した消費を Materials に適用（増分として現在値から差し引く）
-									try
-									{
-										if (materials != null && (totalConsume[0] > 0 || totalConsume[1] > 0 || totalConsume[2] > 0 || totalConsume[3] > 0))
-										{
-											var newMat = new int[4];
-											newMat[0] = Math.Max(0, materials.Fuel - totalConsume[0]);
-											newMat[1] = Math.Max(0, materials.Ammunition - totalConsume[1]);
-											newMat[2] = Math.Max(0, materials.Steel - totalConsume[2]);
-											newMat[3] = Math.Max(0, materials.Bauxite - totalConsume[3]);
-											materials.Update(newMat);
-										}
-									}
-									catch (Exception ex) { LogError("TryHandleNdockList", ex); }
-								}
-							}
-							catch (Exception)
-							{
-							}
-
-							// UI 側の更新呼び出し（既存の挙動を維持）
-							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-							var org = this.Homeport?.Organization;
-							if (org != null)
-							{
-								foreach (var f in org.Fleets.Values)
-								{
-									try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
-								}
-							}
-						}
-						catch (Exception)
-						{
-						}
-					});
-
-					return true;
-				}
-
-				// フォールバック: JSON をパースして api_data を探す（既存のフォールバックは維持）
-				JToken rootTok;
-				try { rootTok = JToken.Parse(normalized); } catch { rootTok = null; }
-				var data = rootTok?["api_data"] ?? rootTok;
-				if (data == null) return true;
-				var ndockTok = data.Type == JTokenType.Array ? data : data["api_ndock"] ?? data.SelectToken("api_ndock");
-				if (ndockTok == null) return true;
-
-				var parsed = ndockTok.ToObject<kcsapi_ndock[]>();
-				if (parsed != null)
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							this.Homeport?.Repairyard?.Update(parsed);
-							try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-							var org = this.Homeport?.Organization;
-							if (org != null)
-							{
-								foreach (var f in org.Fleets.Values)
-								{
-									try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
-								}
-							}
-						}
-						catch (Exception ex) { LogError("TryHandleNdockList", ex); }
-					});
-				}
-			}
-			catch (Exception)
-			{
-			}
-			return true;
-		}
-
-		/// <summary>
-		/// 入渠系2 入渠開始
-		/// </summary>
-		private bool TryHandleNyukyoStart(string url, string normalized, string requestBody)
-		{
-			if (!url.Contains("/kcsapi/api_req_nyukyo/start")) return false;
-
-			// リクエスト body から api_ship_id / api_highspeed を参照する既存処理を継承
-			var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-			if (!string.IsNullOrEmpty(requestBody))
-			{
-				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
-				{
-					var kv = pair.Split(new[] { '=' }, 2);
-					if (kv.Length == 2)
-					{
-						try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
-					}
-				}
-			}
-
-			int shipId;
-			if (!dict.ContainsKey("api_ship_id") || !int.TryParse(dict["api_ship_id"], out shipId)) return true;
-
-			bool highspeedRequested = dict.ContainsKey("api_highspeed") && dict["api_highspeed"] == "1";
-
-			// レスポンス側の資源情報を先に解析（増分扱い api_get_material 等）
-			int[] addMaterials = null;
-			try
-			{
-				JToken root = null;
-				try { root = JToken.Parse(normalized); } catch { root = null; }
-				var data = root?["api_data"] ?? root;
-				var matTok = data?["api_get_material"] ?? data?["api_get_materials"] ?? data?["api_get"];
-				if (matTok != null && matTok.Type == JTokenType.Array)
-				{
-					addMaterials = matTok.Select(t => (int?)t ?? 0).ToArray();
-				}
-			}
-			catch (Exception ex) { addMaterials = null; LogError("TryHandleNyukyoStart", ex); }
-
-			RunOnUi(() =>
-			{
-				try
-				{
-					var ship = this.Homeport?.Organization?.Ships?[shipId];
-					if (ship == null) return;
-
-					// 既存の動作: 高速修復なら即時修復反映
-					if (highspeedRequested)
-					{
-						try { ship.Repair(); } catch { }
-					}
-
-					// 資源の増分反映（api_get_material 相当を増分として扱う）
-					try
-					{
-						if (addMaterials != null && addMaterials.Length >= 4)
-						{
-							var materials = this.Homeport?.Materials;
-							if (materials != null)
-							{
-								var abs = new int[4];
-								abs[0] = materials.Fuel + (addMaterials.Length > 0 ? addMaterials[0] : 0);
-								abs[1] = materials.Ammunition + (addMaterials.Length > 1 ? addMaterials[1] : 0);
-								abs[2] = materials.Steel + (addMaterials.Length > 2 ? addMaterials[2] : 0);
-								abs[3] = materials.Bauxite + (addMaterials.Length > 3 ? addMaterials[3] : 0);
-								materials.Update(abs);
-							}
-						}
-					}
-					catch (Exception ex) { LogError("TryHandleNyukyoStart", ex); }
-
-					// 高速修復材の即時減算（UI に即時反映）
-					if (highspeedRequested)
-					{
-						try { this.Homeport?.Materials?.DecrementInstantRepairMaterials(); } catch { }
-					}
-
-					// 所属艦隊の状態を更新
-					try { this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update(); } catch { }
-
-					// 全体 UI の再評価
-					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-				}
-				catch (Exception ex) { LogError("TryHandleNyukyoStart", ex); }
-			});
-
-			return true;
-		}
-
-		/// <summary>
-		/// 入渠系3 高速修復
-		/// </summary>
-		private bool TryHandleNyukyoSpeedChange(string url, string normalized, string requestBody)
-		{
-			if (!url.Contains("/kcsapi/api_req_nyukyo/speedchange")) return false;
-
-			// requestBody から api_ndock_id を取得する既存処理
-			if (string.IsNullOrEmpty(requestBody)) return true;
-			var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-			foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
-			{
-				var kv = pair.Split(new[] { '=' }, 2);
-				if (kv.Length == 2)
-				{
-					try { dict[kv[0]] = Uri.UnescapeDataString(kv[1]); } catch { dict[kv[0]] = kv[1]; }
-				}
-			}
-			if (!dict.ContainsKey("api_ndock_id")) return false;
-			if (!int.TryParse(dict["api_ndock_id"], out var ndockId)) return false;
-
-			// レスポンスの資源増分を解析
-			int[] addMaterials = null;
-			try
-			{
-				JToken root = null;
-				try { root = JToken.Parse(normalized); } catch { root = null; }
-				var data = root?["api_data"] ?? root;
-				var matTok = data?["api_get_material"] ?? data?["api_get_materials"];
-				if (matTok != null && matTok.Type == JTokenType.Array)
-				{
-					addMaterials = matTok.Select(t => (int?)t ?? 0).ToArray();
-				}
-			}
-			catch (Exception ex) { addMaterials = null; LogError("TryHandleNyukyoSpeedChange", ex); }
-
-			RunOnUi(() =>
-			{
-				try
-				{
-					var dock = this.Homeport?.Repairyard?.Docks?[ndockId];
-					var ship = dock?.Ship;
-					if (dock != null) dock.Finish();
-					if (ship != null)
-					{
-						ship.Repair();
-						this.Homeport?.Organization?.GetFleet(ship.Id)?.State.Update();
-					}
-
-					// 資源の増分反映（増分 api_get_material）
-					try
-					{
-						if (addMaterials != null && addMaterials.Length >= 4)
-						{
-							var materials = this.Homeport?.Materials;
-							if (materials != null)
-							{
-								var abs = new int[4];
-								abs[0] = materials.Fuel + (addMaterials.Length > 0 ? addMaterials[0] : 0);
-								abs[1] = materials.Ammunition + (addMaterials.Length > 1 ? addMaterials[1] : 0);
-								abs[2] = materials.Steel + (addMaterials.Length > 2 ? addMaterials[2] : 0);
-								abs[3] = materials.Bauxite + (addMaterials.Length > 3 ? addMaterials[3] : 0);
-								materials.Update(abs);
-							}
-						}
-					}
-					catch (Exception ex) { LogError("TryHandleNyukyoSpeedChange", ex); }
-
-					// 高速修復材（speedchange は高速修復の結果なので -1 すると安全）
-					try { this.Homeport?.Materials?.DecrementInstantRepairMaterials(); } catch { }
-
-					// UI 更新
-					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-				}
-				catch (Exception ex) { LogError("TryHandleNyukyoSpeedChange", ex); }
-			});
-
-			return true;
-		}
+	/// <summary>
+	/// 入渠系3 高速修復（NyukyoHandler へ委譲）
+	/// </summary>
+	private bool TryHandleNyukyoSpeedChange(string url, string normalized, string requestBody)
+		=> this.nyukyoHandler.TryHandleNyukyoSpeedChange(url, normalized, requestBody);
 
 		/// <summary>
 		/// 補給処理

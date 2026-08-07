@@ -55,7 +55,20 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// </summary>
 		internal static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody)
 		{
-			var dict = new Dictionary<string, string>();
+			return ParseRequestBody(requestBody, null);
+		}
+
+		/// <summary>
+		/// URL エンコードされたリクエスト Body を辞書にパースします。
+		/// キーの比較方法を指定できます（例: <see cref="StringComparer.OrdinalIgnoreCase"/>）。
+		/// </summary>
+		/// <param name="requestBody">パース対象のリクエスト Body</param>
+		/// <param name="keyComparer">キーの比較子。null の場合は既定の比較（大文字小文字を区別）</param>
+		internal static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody, IEqualityComparer<string> keyComparer)
+		{
+			var dict = keyComparer == null
+				? new Dictionary<string, string>()
+				: new Dictionary<string, string>(keyComparer);
 			if (string.IsNullOrEmpty(requestBody)) return dict;
 			foreach (var p in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
 			{
@@ -64,6 +77,48 @@ namespace Grabacr07.KanColleWrapper.Handlers
 					dict[Uri.UnescapeDataString(kv[0])] = Uri.UnescapeDataString(kv[1]);
 			}
 			return dict;
+		}
+
+		/// <summary>
+		/// 資源の増分（燃料・弾薬・鋼材・ボーキサイト）を現在値に加算して反映します。
+		/// 増分がすべて 0 の場合や資材が未取得の場合は何もしません。
+		/// </summary>
+		/// <param name="materials">更新対象の資材</param>
+		/// <param name="addMaterials">4 要素の増分配列（負値を指定すれば減算になります）</param>
+		/// <param name="contextForLog">失敗時にログへ記録する処理名</param>
+		internal static void ApplyMaterialDelta(Materials materials, int[] addMaterials, string contextForLog)
+		{
+			try
+			{
+				if (materials == null || addMaterials == null || addMaterials.Length < 4) return;
+				if (addMaterials[0] == 0 && addMaterials[1] == 0 && addMaterials[2] == 0 && addMaterials[3] == 0) return;
+
+				var abs = new int[4];
+				abs[0] = materials.Fuel + addMaterials[0];
+				abs[1] = materials.Ammunition + addMaterials[1];
+				abs[2] = materials.Steel + addMaterials[2];
+				abs[3] = materials.Bauxite + addMaterials[3];
+				materials.Update(abs);
+			}
+			catch (Exception ex) { LogError(contextForLog, ex); }
+		}
+
+		/// <summary>
+		/// 全艦隊の状態を再計算し、UI へ更新を通知します。
+		/// 個々の艦隊で例外が発生しても後続の艦隊の処理は継続します。
+		/// </summary>
+		/// <param name="homeport">対象の母港</param>
+		internal static void RefreshAllFleets(Homeport homeport)
+		{
+			try { homeport?.Organization?.NotifyUpdated(); } catch { }
+
+			var org = homeport?.Organization;
+			if (org == null) return;
+
+			foreach (var f in org.Fleets.Values)
+			{
+				try { f.State.Calculate(); f.State.Update(); f.RaiseShipsUpdated(); } catch { }
+			}
 		}
 
 		#region 制空共通処理
