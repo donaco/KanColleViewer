@@ -119,6 +119,7 @@
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
     <Compile Include="Handlers\AirBaseHandler.cs" />
+    <Compile Include="Handlers\BasicHandler.cs" />
     <Compile Include="Handlers\BattleHandler.cs" />
     <Compile Include="Handlers\HandlerHelper.cs" />
     <Compile Include="Handlers\HenseiHandler.cs" />

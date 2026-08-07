@@ -178,6 +178,9 @@ namespace Grabacr07.KanColleWrapper
 		// 艦娘装備（改装系）ハンドラー
 		private readonly Handlers.KaisouHandler kaisouHandler;
 
+		// 提督・任務・アイテム系ハンドラー
+		private readonly Handlers.BasicHandler basicHandler;
+
 		// 出撃中の艦隊ID記録
 		internal readonly HashSet<int> sortieDeckIds = new HashSet<int>();
 
@@ -206,6 +209,9 @@ namespace Grabacr07.KanColleWrapper
 
 				// KaisouHandler を初期化
 				this.kaisouHandler = new Handlers.KaisouHandler(this);
+
+				// BasicHandler を初期化
+				this.basicHandler = new Handlers.BasicHandler(this);
 
 				// CapturedProcessor を初期化
 				this.capturedProcessor = new CapturedProcessor(
@@ -704,231 +710,29 @@ namespace Grabacr07.KanColleWrapper
 			}
 
 		/// <summary>
-			/// 提督情報 (api_get_member/basic)
-			/// </summary>
+		/// 提督情報 (api_get_member/basic)（BasicHandler へ委譲）
+		/// </summary>
 		private bool TryHandleBasic(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/basic")) return false;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_basic>(normalized, out var basic))
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							this.Homeport?.UpdateAdmiral(basic);
-						}
-						catch (Exception ex) { LogError("TryHandleBasic", ex); }
-					});
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleBasic", ex); }
-
-			return true;
-		}
+			=> this.basicHandler.TryHandleBasic(url, normalized);
 
 		/// <summary>
-		/// 任務完了 + 資源・アイテム更新
+		/// 任務完了 + 資源・アイテム更新（BasicHandler へ委譲）
 		/// </summary>
 		private bool TryHandleClearItemGet(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_req_quest/clearitemget")) return false;
+			=> this.basicHandler.TryHandleClearItemGet(url, normalized);
 
-			try
-			{
-				JToken root;
-				try { root = JToken.Parse(normalized); } catch { return true; }
-				var data = root["api_data"] ?? root;
-				if (data == null) return true;
-
-				// api_material: int[] または api_get_material など、安定的に取得できる場合は Materials を更新
-				int[] apiMaterialArray = null;
-				var matTok = data["api_material"] ?? data["api_get_material"];
-				if (matTok != null && matTok.Type == JTokenType.Array)
-				{
-					try
-					{
-						apiMaterialArray = matTok.Select(t => (int?)t ?? 0).ToArray();
-					}
-					catch (Exception ex) { apiMaterialArray = null; LogError("TryHandleClearItemGet", ex); }
-				}
-
-				// 装備枠の増加を推測して即時反映
-				try
-				{
-					var bonusTok = data["api_bounus"] ?? data["api_bonus"];
-					if (bonusTok != null && bonusTok.Type == JTokenType.Array)
-					{
-						int deltaCapacity = 0;
-						foreach (var b in bonusTok.Children())
-						{
-							try
-							{
-								// 安全にフィールドを抽出（api_count / api_type / api_item.api_id 等）
-								var typeTok = b["api_type"];
-								var countTok = b["api_count"];
-								var itemTok = b["api_item"] ?? b["api_item_id"];
-
-								int type = typeTok?.Value<int>() ?? -1;
-								int count = countTok?.Value<int>() ?? 0;
-								int itemId = 0;
-								if (itemTok != null)
-								{
-									// api_item がオブジェクトの場合と単純値の場合の両対応
-									if (itemTok.Type == JTokenType.Object)
-										itemId = itemTok["api_id"]?.Value<int>() ?? 0;
-									else if (itemTok.Type == JTokenType.Integer)
-										itemId = itemTok.Value<int>();
-								}
-
-								// api_id: 901〜940 の場合、下2桁が装備枠増加数を表すと推測
-								// 例: 901 → +1, 902 → +2, 912 → +12, 920 → +20 など
-								if (itemId >= 901 && itemId <= 940)
-								{
-									int slotIncrease = itemId - 900;
-									deltaCapacity += slotIncrease;
-								}
-							}
-							catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-						}
-
-						if (deltaCapacity > 0)
-						{
-							// Admiral.api_max_slotitem を安全に増加させて UI に即時反映する
-							RunOnUi(() =>
-							{
-								try
-								{
-									var adm = this.Homeport?.Admiral;
-									if (adm == null) return;
-
-									// kcsapi_basic をクローンして api_max_slotitem を増加させ、Homeport.UpdateAdmiral で置換する。
-									// 直接 RawData を書き換えるより安定して通知が飛ぶ。
-									try
-									{
-										var json = JsonConvert.SerializeObject(adm.RawData);
-										var cloned = JsonConvert.DeserializeObject<Models.Raw.kcsapi_basic>(json);
-										if (cloned != null)
-										{
-											cloned.api_max_slotitem = (cloned.api_max_slotitem) + deltaCapacity;
-											this.Homeport.UpdateAdmiral(cloned);
-										}
-									}
-									catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-								}
-								catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-							});
-						}
-					}
-				}
-				catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-
-				// UI スレッドで安全に反映
-				if (apiMaterialArray != null)
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							var materials = this.Homeport?.Materials;
-							if (materials != null)
-							{
-								// clearitemget の api_material は「増分」で来ることがあるため、
-								// 現在値に加算してから Materials.Update(int[]) の private メソッドを呼ぶ。
-								// (元実装は増分をそのまま渡していたため「145061 -> 200 -> 145261」のように一時的に増分だけが表示されてしまっていた)
-								int[] abs;
-								// 安全に index を扱う（api が長さ4でない場合はフォールバック）
-								if (apiMaterialArray.Length >= 4)
-								{
-									abs = new int[4];
-									abs[0] = materials.Fuel + apiMaterialArray[0];
-									abs[1] = materials.Ammunition + apiMaterialArray[1];
-									abs[2] = materials.Steel + apiMaterialArray[2];
-									abs[3] = materials.Bauxite + apiMaterialArray[3];
-								}
-								else
-								{
-									// 長さが不正なら既存の Update を呼ばず、表示更新だけ行う（安全側）
-									abs = null;
-								}
-
-								if (abs != null)
-									materials.Update(abs);
-							}
-						}
-						catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-					});
-				}
-
-				// ボーナスアイテム(api_bounus) は後続の /api_get_member/slot_item 等で反映されることが多い。
-				// 複雑なパターンは別ハンドラに任せるためここでは UI 更新を促すだけにとどめる。
-				RunOnUi(() =>
-				{
-					try
-					{
-						this.Homeport?.Organization?.NotifyUpdated();
-					}
-					catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-				});
-			}
-			catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }
-
-			return true;
-		}
 
 		/// <summary>
-		/// 資源
+		/// 資源（BasicHandler へ委譲）
 		/// </summary>
 		private bool TryHandleMaterial(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/material")) return false;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_material[]>(normalized, out var mats))
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							this.Homeport?.Materials.Update(mats);
-						}
-						catch (Exception ex) { LogError("TryHandleMaterial", ex); }
-					});
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleMaterial", ex); }
-
-			return true;
-		}
+			=> this.basicHandler.TryHandleMaterial(url, normalized);
 
 		/// <summary>
-		/// アイテム使用
+		/// アイテム使用（BasicHandler へ委譲）
 		/// </summary>
 		private bool TryHandleUseItem(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/useitem")) return false;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_useitem[]>(normalized, out var useitems))
-				{
-					RunOnUi(() =>
-					{
-						try
-						{
-							this.Homeport?.Itemyard.Update(useitems);
-						}
-						catch (Exception ex) { LogError("TryHandleUseItem", ex); }
-					});
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleUseItem", ex); }
-
-			return true;
-		}
+			=> this.basicHandler.TryHandleUseItem(url, normalized);
 
 		/// <summary>
 		/// 装備廃棄（SlotItemHandler へ委譲）
@@ -1082,34 +886,10 @@ namespace Grabacr07.KanColleWrapper
 			=> this.kaisouHandler.TryHandlePowerup(url, normalized, requestBody);
 
 		/// <summary>
-		/// 任務一覧
+		/// 任務一覧（BasicHandler へ委譲）
 		/// </summary>
 		private bool TryHandleQuestList(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_get_member/questlist")) return false;
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_questlist>(normalized, out var questlist))
-				{
-					RunOnUi(() => {
-						try
-						{
-							this.Homeport.Quests.Update(questlist);
-						}
-						catch (Exception)
-						{
-						}
-					});
-				}
-				else
-				{
-				}
-			}
-			catch (Exception)
-			{
-			}
-			return true;
-		}
+			=> this.basicHandler.TryHandleQuestList(url, normalized);
 
 		/// <summary>
 		/// 艦娘の情報更新
@@ -1452,32 +1232,9 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 		/// <summary>
-		/// コメント更新 (api_req_member/updatecomment)
+		/// コメント更新 (api_req_member/updatecomment)（BasicHandler へ委譲）
 		/// </summary>
 		private bool TryHandleUpdateComment(string url, string normalized, string requestBody)
-		{
-			if (!url.Contains("/kcsapi/api_req_member/updatecomment")) return false;
-			try
-			{
-				if (string.IsNullOrEmpty(requestBody)) return true;
-				var comment = "";
-				foreach (var pair in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
-				{
-					var kv = pair.Split(new[] { '=' }, 2);
-					if (kv.Length == 2 && kv[0] == "api_cmt")
-					{
-						comment = Uri.UnescapeDataString(kv[1]);
-						break;
-					}
-				}
-				RunOnUi(() =>
-				{
-					try { this.Homeport?.UpdateComment(comment); }
-					catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
-				});
-			}
-			catch (Exception ex) { LogError("TryHandleUpdateComment", ex); }
-			return true;
-		}
+			=> this.basicHandler.TryHandleUpdateComment(url, normalized, requestBody);
 	}
 }
