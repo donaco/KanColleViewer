@@ -155,6 +155,14 @@ namespace Grabacr07.KanColleWrapper
 		}
 
 		/// <summary>
+		/// <see cref="MissionSucceeded"/> イベントを発火します。ハンドラークラスから利用します。
+		/// </summary>
+		internal void RaiseMissionSucceeded()
+		{
+			this.MissionSucceeded?.Invoke(this, EventArgs.Empty);
+		}
+
+		/// <summary>
 		/// Homeport が未初期化の場合に生成します。UI スレッドから呼び出してください。
 		/// </summary>
 		internal void EnsureHomeport()
@@ -192,6 +200,9 @@ namespace Grabacr07.KanColleWrapper
 		// 艦娘一覧・解体・補給系ハンドラー
 		private readonly Handlers.ShipHandler shipHandler;
 
+		// 母港・遠征系ハンドラー
+		private readonly Handlers.PortHandler portHandler;
+
 		// 出撃中の艦隊ID記録
 		internal readonly HashSet<int> sortieDeckIds = new HashSet<int>();
 
@@ -226,6 +237,9 @@ namespace Grabacr07.KanColleWrapper
 
 				// ShipHandler を初期化
 				this.shipHandler = new Handlers.ShipHandler(this);
+
+				// PortHandler を初期化
+				this.portHandler = new Handlers.PortHandler(this);
 
 				// CapturedProcessor を初期化
 				this.capturedProcessor = new CapturedProcessor(
@@ -544,187 +558,16 @@ namespace Grabacr07.KanColleWrapper
 			=> this.airBaseHandler.TryHandleMapInfo(url, normalized);
 
 		/// <summary>
-			/// イベントマップ難度選択 (api_req_map/select_eventmap_rank)
-			/// </summary>
+		/// イベントマップ難易度選択 (api_req_map/select_eventmap_rank)（PortHandler へ委譲）
+		/// </summary>
 		private bool TryHandleSelectEventmapRank(string url, string requestBody, string normalized)
-			{
-				if (!url.Contains("/kcsapi/api_req_map/select_eventmap_rank")) return false;
-				this.Proxy.PublishSession("/kcsapi/api_req_map/select_eventmap_rank", normalized, ParseRequestBody(requestBody));
-				return true;
-			}
+			=> this.portHandler.TryHandleSelectEventmapRank(url, requestBody, normalized);
 
 		/// <summary>
-			/// 母港
-			/// </summary>
+		/// 母港 (api_port/port)（PortHandler へ委譲）
+		/// </summary>
 		private bool TryHandlePort(string url, string normalized)
-			{
-				if (!url.Contains("/kcsapi/api_port/port")) return false;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_port>(normalized, out var port))
-				{
-					// JSON 側も柔軟にパースして api_slot_item 等を探すためのトークンを準備
-					JToken root = null;
-					JToken dataTok = null;
-					try { root = JToken.Parse(normalized); dataTok = root["api_data"] ?? root; } catch { root = null; dataTok = null; }
-
-					RunOnUi(() =>
-					{
-						try
-						{
-							// Homeport が未初期化の場合は安全に作成する
-							if (this.Homeport == null)
-							{
-								try
-								{
-									this.Homeport = new Homeport();
-								}
-								catch (Exception)
-								{
-									// 初期化に失敗したら以降の処理をスキップ
-									return;
-								}
-							}
-
-							if (port.api_basic != null) this.Homeport.UpdateAdmiral(port.api_basic);
-							if (port.api_ship != null) this.Homeport.Organization.Update(port.api_ship);
-							if (port.api_ndock != null) this.Homeport.Repairyard.Update(port.api_ndock);
-							if (port.api_deck_port != null) this.Homeport.Organization.Update(port.api_deck_port);
-
-							this.Homeport.Organization.Combined = port.api_combined_flag != 0;
-
-							if (port.api_material != null) this.Homeport.Materials.Update(port.api_material);
-
-							// 追加: JSON に api_slot_item が含まれている場合は Itemyard を更新する（kcsapi_port に未定義のため JToken 経由）
-							try
-							{
-								JToken slotTok = null;
-								if (dataTok != null)
-								{
-									slotTok = dataTok["api_slot_item"] ?? dataTok.SelectToken("api_slot_item");
-								}
-								// さらに root 直下を試す（念のためのフォールバック）
-								if (slotTok == null && root != null)
-								{
-									slotTok = root["api_slot_item"] ?? root.SelectToken("api_slot_item");
-								}
-
-								if (slotTok != null && slotTok.Type == JTokenType.Array)
-								{
-									try
-									{
-										var slotItems = slotTok.ToObject<kcsapi_slotitem[]>();
-										if (slotItems != null)
-										{
-											this.Homeport.Itemyard.Update(slotItems);
-											try { this.Homeport?.Itemyard?.RaiseSlotItemsChanged(); } catch { }
-										}
-									}
-									catch (Exception ex) { LogError("TryHandlePort", ex); }
-								}
-							}
-							catch (Exception ex) { LogError("TryHandlePort", ex); }
-
-							// UI バインディングが更新されないケースに備え、明示的に通知を出す
-							try
-							{
-								this.Homeport?.Organization?.NotifyUpdated();
-							}
-							catch (Exception)
-							{
-							}
-
-							// 各艦隊を明示的に再計算・再通知して UI を確実に更新
-							try
-							{
-								var org = this.Homeport?.Organization;
-								if (org != null)
-								{
-									foreach (var f in org.Fleets.Values)
-									{
-										try
-										{
-											f.State.Calculate();
-											f.State.Update();
-											f.RaiseShipsUpdated();
-										}
-										catch (Exception ex) { LogError("TryHandlePort", ex); }
-									}
-								}
-							}
-							catch (Exception)
-							{
-							}
-						}
-						catch (Exception)
-						{
-						}
-
-						// 出撃していたデッキを復帰させる処理とグローバル出撃フラグ更新
-						try
-						{
-							var org = this.Homeport?.Organization;
-							if (org != null)
-							{
-								// lock 内で sortieDeckIds を読み取り、returning をローカルにコピー
-								int[] returning;
-								lock (BattleStateLock)
-									returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
-
-								if (returning.Length > 0)
-								{
-									try
-									{
-										// 脱出フラグのクリアや全艦 Situation のリセットも含めて一括処理
-										// (Homing は lock 外で実行してデッドロックを避ける)
-										org.Homing();
-									}
-									catch (Exception ex) { LogError("TryHandlePort", ex); }
-
-									lock (BattleStateLock)
-									{
-										foreach (var returningDeckId in returning)
-											this.sortieDeckIds.Remove(returningDeckId);
-									}
-								}
-
-								bool isInSortie;
-								lock (BattleStateLock)
-									isInSortie = this.sortieDeckIds.Count > 0;
-								this.IsInSortie = isInSortie;
-							}
-						}
-						catch (Exception)
-						{
-						}
-
-						// SortieInfo をリセット
-						try
-						{
-							this.SortieInfo.Reset();
-							// 母港に戻ったら pending は破棄
-							lock (BattleStateLock)
-							{
-								this.hasPendingAirResult = false;
-								this.pendingAirResult = AirSuperiority.None;
-							}
-						}
-						catch (Exception ex) { LogError("TryHandlePort", ex); }
-					});
-				}
-				else
-				{
-					// 解析失敗でも true を返してハンドリング済みとする（既存ハンドラと同様の挙動）
-				}
-			}
-			catch (Exception)
-				{
-				}
-
-				this.Proxy.PublishSession("/kcsapi/api_port/port", normalized);
-				return true;
-			}
+			=> this.portHandler.TryHandlePort(url, normalized);
 
 		/// <summary>
 		/// 提督情報 (api_get_member/basic)（BasicHandler へ委譲）
@@ -927,30 +770,10 @@ private bool TryHandleCharge(string url, string normalized)
 			=> this.airBaseHandler.TryHandleAirCorpsSupply(url, normalized);
 
 		/// <summary>
-		/// 遠征結果 (api_req_mission/result)
+		/// 遠征結果 (api_req_mission/result)（PortHandler へ委譲）
 		/// </summary>
 		private bool TryHandleMissionResult(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_req_mission/result")) return false;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_mission_result>(normalized, out var result))
-				{
-					// api_clear_result: 0=失敗, 1=成功, 2=大成功
-					if (result.api_clear_result == 1 || result.api_clear_result == 2)
-					{
-						RunOnUi(() =>
-						{
-							try { this.MissionSucceeded?.Invoke(this, EventArgs.Empty); } catch { }
-						});
-					}
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleMissionResult", ex); }
-
-			return true;
-		}
+			=> this.portHandler.TryHandleMissionResult(url, normalized);
 
 		/// <summary>
 		/// goback_port：脱出艦の退避フラグを Organization に反映します。
