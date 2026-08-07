@@ -151,6 +151,38 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			}
 		}
 
+		/// <summary>
+		/// 指定した艦娘が所属する艦隊を取得し、状態の再計算と再通知を行います。
+		/// 呼び出し順序は既存実装の挙動を維持するため <paramref name="calculateFirst"/> で指定します。
+		/// </summary>
+		/// <param name="org">対象の艦隊組織</param>
+		/// <param name="shipId">対象艦娘の ID</param>
+		/// <param name="calculateFirst">true の場合 Calculate → Update、false の場合 Update → Calculate の順で呼び出す</param>
+		/// <param name="caller">失敗時にログへ記録する処理名</param>
+		internal static void RefreshFleetByShipId(Organization org, int shipId, bool calculateFirst, string caller)
+		{
+			if (org == null) return;
+
+			Fleet fleet;
+			try { fleet = org.GetFleet(shipId); }
+			catch (Exception ex) { LogError(caller, ex); return; }
+
+			if (fleet == null) return;
+
+			if (calculateFirst)
+			{
+				try { fleet.State.Calculate(); } catch (Exception ex) { LogError(caller, ex); }
+				try { fleet.State.Update(); } catch (Exception ex) { LogError(caller, ex); }
+			}
+			else
+			{
+				try { fleet.State.Update(); } catch (Exception ex) { LogError(caller, ex); }
+				try { fleet.State.Calculate(); } catch (Exception ex) { LogError(caller, ex); }
+			}
+
+			try { fleet.RaiseShipsUpdated(); } catch (Exception ex) { LogError(caller, ex); }
+		}
+
 		#region 制空共通処理
 
 		/// <summary>

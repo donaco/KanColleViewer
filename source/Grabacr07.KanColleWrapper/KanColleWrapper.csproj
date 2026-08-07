@@ -122,6 +122,7 @@
     <Compile Include="Handlers\BattleHandler.cs" />
     <Compile Include="Handlers\HandlerHelper.cs" />
     <Compile Include="Handlers\HenseiHandler.cs" />
+    <Compile Include="Handlers\KaisouHandler.cs" />
     <Compile Include="Handlers\KenzoHandler.cs" />
     <Compile Include="Handlers\NyukyoHandler.cs" />
     <Compile Include="Handlers\SlotItemHandler.cs" />
