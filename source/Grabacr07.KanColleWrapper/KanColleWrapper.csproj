@@ -126,6 +126,7 @@
     <Compile Include="Handlers\KaisouHandler.cs" />
     <Compile Include="Handlers\KenzoHandler.cs" />
     <Compile Include="Handlers\NyukyoHandler.cs" />
+    <Compile Include="Handlers\ShipHandler.cs" />
     <Compile Include="Handlers\SlotItemHandler.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
     <Compile Include="KanColleServerOrigin.cs" />
