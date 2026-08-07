@@ -118,6 +118,8 @@
     <Compile Include="ApiSession.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
+    <Compile Include="Handlers\BattleHandler.cs" />
+    <Compile Include="Handlers\HandlerHelper.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
     <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />

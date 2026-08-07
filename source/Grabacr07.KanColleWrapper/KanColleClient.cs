@@ -1,4 +1,4 @@
-using Grabacr07.KanColleWrapper.Models;
+﻿using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleWrapper.Models.Raw;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -84,7 +84,7 @@ namespace Grabacr07.KanColleWrapper
 		public bool IsInSortie
 		{
 			get { return this._IsInSortie; }
-			private set
+			internal set
 			{
 				if (this._IsInSortie != value)
 				{
@@ -130,11 +130,22 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public event Action<int, string> BattleResultReceived;
 
+		/// <summary>
+		/// <see cref="BattleResultReceived"/> イベントを発火します。ハンドラークラスから利用します。
+		/// </summary>
+		internal void RaiseBattleResultReceived(int mapId, string normalized)
+		{
+			this.BattleResultReceived?.Invoke(mapId, normalized);
+		}
+
 		// Captured 処理を委譲するコンポーネント
 		private readonly CapturedProcessor capturedProcessor;
 
+		// 戦闘ハンドラー
+		private readonly Handlers.BattleHandler battleHandler;
+
 		// 出撃中の艦隊ID記録
-		private readonly HashSet<int> sortieDeckIds = new HashSet<int>();
+		internal readonly HashSet<int> sortieDeckIds = new HashSet<int>();
 
 		// 建造でキャッシュする消費資源
 		private readonly Dictionary<int, int[]> pendingCreateMaterials = new Dictionary<int, int[]>();
@@ -147,6 +158,9 @@ namespace Grabacr07.KanColleWrapper
 
 		private KanColleClient()
 			{
+				// BattleHandler を初期化
+				this.battleHandler = new Handlers.BattleHandler(this);
+
 				// CapturedProcessor を初期化
 				this.capturedProcessor = new CapturedProcessor(
 					// isStartedProvider
@@ -224,22 +238,25 @@ namespace Grabacr07.KanColleWrapper
 		// 直近に処理した建造ドック ID を保持（createship の requestBody が届く時用）
 		private int lastCreateKdockId = -1;
 
+		/// <summary>戦闘関連の共有状態を保護するロックオブジェクト。</summary>
+		internal readonly object BattleStateLock = new object();
+
 		// start/next で取得した cellNo をキャッシュ（battle で使用）
-		private int cachedCellNo = 0;
+		internal int cachedCellNo = 0;
 
 		// start/next で取得した mapId (areaId*10+mapInfoNo) をキャッシュ（battleresult で使用）
-		private int cachedMapId = 0;
+		internal int cachedMapId = 0;
 
 		// 直近に受信した battle 系 API の種別を保持 ("battle" / "ld_airbattle" / null)
-		private string lastBattleApiType = null;
+		internal string lastBattleApiType = null;
 
 		// battle で解析したが表示を保留した制空情報を一時保持する
-		private AirSuperiority pendingAirResult = AirSuperiority.None;
-		private bool hasPendingAirResult = false;
+		internal AirSuperiority pendingAirResult = AirSuperiority.None;
+		internal bool hasPendingAirResult = false;
 
 		// goback_port のために battleresult から受け取った脱出艦・曳航艦IDを保持する
-		private int[] pendingEscapeShipIds = null;
-		private int[] pendingTowShipIds = null;
+		internal int[] pendingEscapeShipIds = null;
+		internal int[] pendingTowShipIds = null;
 
 		#endregion
 
@@ -387,17 +404,7 @@ namespace Grabacr07.KanColleWrapper
 		/// URL エンコードされたリクエスト Body を辞書にパースします。
 		/// </summary>
 		private static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody)
-		{
-			var dict = new Dictionary<string, string>();
-			if (string.IsNullOrEmpty(requestBody)) return dict;
-			foreach (var p in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
-			{
-				var kv = p.Split(new[] { '=' }, 2);
-				if (kv.Length == 2)
-					dict[Uri.UnescapeDataString(kv[0])] = Uri.UnescapeDataString(kv[1]);
-			}
-			return dict;
-		}
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.ParseRequestBody(requestBody);
 
 		#region 制空共通処理
 		/// <summary>
@@ -405,53 +412,13 @@ namespace Grabacr07.KanColleWrapper
 		/// 制空情報が取得できた場合のみ true を返します。
 		/// </summary>
 		private static bool TryParseAirSuperiority(string normalized, out AirSuperiority airResult, string contextForLog)
-		{
-			airResult = AirSuperiority.None;
-			if (string.IsNullOrEmpty(normalized)) return false;
-
-			try
-			{
-				var root = JToken.Parse(normalized);
-				var data = root["api_data"] ?? root;
-				return TryParseAirSuperiorityFromApiData(data, out airResult);
-			}
-			catch (Exception ex)
-			{
-				LogError(contextForLog, ex);
-				return false;
-			}
-		}
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.TryParseAirSuperiority(normalized, out airResult, contextForLog);
 
 		/// <summary>
 		/// api_data トークンから制空状態を解析します。
 		/// </summary>
 		private static bool TryParseAirSuperiorityFromApiData(JToken data, out AirSuperiority airResult)
-		{
-			airResult = AirSuperiority.None;
-			if (data == null) return false;
-
-			var kouku = data.SelectToken("api_kouku");
-			var planeFrom = kouku?["api_plane_from"];
-
-			// 制空戦が発生していない場合
-			if (planeFrom == null || !planeFrom.Any(t => t.HasValues))
-			{
-				return false;
-			}
-
-			var stage1 = data.SelectToken("api_kouku.api_stage1");
-			var dispSeiku = stage1?["api_disp_seiku"];
-			if (dispSeiku == null) return false;
-
-			int val;
-			if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
-			{
-				airResult = (AirSuperiority)val;
-				return true;
-			}
-
-			return false;
-		}
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.TryParseAirSuperiorityFromApiData(data, out airResult);
 		#endregion
 
 		/// <summary>
@@ -460,619 +427,34 @@ namespace Grabacr07.KanColleWrapper
 		/// <param name="context">どの処理で発生したかを示す文字列（例: メソッド名や API パス）</param>
 		/// <param name="ex">発生した例外</param>
 		private static void LogError(string context, Exception ex)
-		{
-			try
-			{
-				System.Diagnostics.Debug.WriteLine($"[KanColleClient] Error in {context}: {ex}");
-			}
-			catch
-			{
-				// ログ出力自体が失敗しても何もしない
-			}
-		}
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.LogError(context, ex);
 
-		private void RunOnUi(Action action)
-		{
-			try
-			{
-				if (Application.Current != null && Application.Current.Dispatcher != null)
-				{
-					Application.Current.Dispatcher.BeginInvoke(action);
-				}
-				else
-				{
-					action();
-				}
-			}
-			catch (Exception ex) { LogError("RunOnUi", ex); }
-		}
+		internal void RunOnUi(Action action)
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.RunOnUi(action);
 
 		/// <summary>
 		/// 出撃開始 (api_req_map/start)
 		/// </summary>
 		private bool TryHandleMapStart(string url, string requestBody, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_req_map/start")) return false;
-			try
-			{
-				int deckId = -1;
-				if (!string.IsNullOrEmpty(requestBody))
-				{
-					try
-					{
-						var pairs = requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
-						foreach (var p in pairs)
-						{
-							var kv = p.Split(new[] { '=' }, 2);
-							if (kv.Length == 2 && kv[0] == "api_deck_id" && int.TryParse(Uri.UnescapeDataString(kv[1]), out var id))
-							{
-								deckId = id;
-								break;
-							}
-						}
-					}
-					catch (Exception)
-					{
-					}
-				}
-
-				if (deckId > 0)
-				{
-					try
-					{
-						var org = this.Homeport?.Organization;
-						if (org != null && org.Fleets.ContainsKey(deckId))
-						{
-							org.Fleets[deckId].Sortie();
-							this.sortieDeckIds.Add(deckId);
-
-							if (deckId == 1)
-							{
-								bool isCombined = false;
-								try { isCombined = org.Combined; } catch { isCombined = false; }
-
-								if (isCombined && org.Fleets.ContainsKey(2))
-								{
-									org.Fleets[2].Sortie();
-									this.sortieDeckIds.Add(2);
-								}
-							}
-						}
-					}
-					catch (Exception)
-					{
-					}
-				}
-
-				// SortieInfo の更新（出撃開始）
-				try
-				{
-					if (!string.IsNullOrEmpty(normalized))
-					{
-						var root = JToken.Parse(normalized);
-						var data = root["api_data"] ?? root;
-						if (data != null)
-						{
-							int mapAreaId = data["api_maparea_id"]?.Value<int>() ?? 0;
-							int mapInfoNo = data["api_mapinfo_no"]?.Value<int>() ?? 0;
-							int cellNo = data["api_no"]?.Value<int>() ?? 0;
-
-							// cellNo をキャッシュ（battle 時に使用）
-							this.cachedCellNo = cellNo;
-
-							// mapId をキャッシュ（battleresult 時に使用）
-							if (mapAreaId > 0 && mapInfoNo > 0)
-								this.cachedMapId = mapAreaId * 10 + mapInfoNo;
-
-							if (mapAreaId > 0 && mapInfoNo > 0)
-							{
-								RunOnUi(() =>
-								{
-									try
-									{
-										// 設定に応じて cellNo を表示するかどうかを切り替え
-										var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
-										if (showOnArrival && cellNo > 0)
-										{
-											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
-											this.SortieInfo.Next(cellNo);
-										}
-										else
-										{
-											this.SortieInfo.Start(mapAreaId, mapInfoNo, 0);
-										}
-										this.hasPendingAirResult = false;
-										this.pendingAirResult = AirSuperiority.None;
-									}
-									catch (Exception ex) { LogError("TryHandleMapStart", ex); }
-								});
-							}
-						}
-					}
-				}
-				catch (Exception ex) { LogError("TryHandleMapStart", ex); }
-
-				RunOnUi(() =>
-				{
-					try
-					{
-						this.IsInSortie = true;
-					}
-					catch (Exception)
-					{
-					}
-				});
-			}
-			catch (Exception)
-			{
-			}
-			this.Proxy.PublishSession("/kcsapi/api_req_map/start", normalized, ParseRequestBody(requestBody));
-			return true;
-		}
+			=> this.battleHandler.TryHandleMapStart(url, requestBody, normalized);
 
 		/// <summary>
 		/// 次の海域へ進撃 (api_req_map/next)
 		/// </summary>
 		private bool TryHandleMapNext(string url, string normalized)
-		{
-			if (!url.Contains("/kcsapi/api_req_map/next")) return false;
-
-			try
-			{
-				if (!string.IsNullOrEmpty(normalized))
-				{
-					var root = JToken.Parse(normalized);
-					var data = root["api_data"] ?? root;
-					if (data != null)
-					{
-						int cellNo = data["api_no"]?.Value<int>() ?? 0;
-
-						// mapId をキャッシュ（battleresult 時に使用）
-						int mapAreaId = data["api_maparea_id"]?.Value<int>() ?? 0;
-						int mapInfoNo = data["api_mapinfo_no"]?.Value<int>() ?? 0;
-						if (mapAreaId > 0 && mapInfoNo > 0)
-							this.cachedMapId = mapAreaId * 10 + mapInfoNo;
-
-						if (cellNo > 0)
-						{
-							// cellNo をキャッシュ（battle 時に使用）
-							this.cachedCellNo = cellNo;
-
-							// 設定に応じて即座に表示するかどうかを切り替え
-							var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;
-							if (showOnArrival)
-							{
-								RunOnUi(() =>
-								{
-									try
-									{
-										this.SortieInfo.Next(cellNo);
-									}
-									catch (Exception ex) { LogError("TryHandleMapNext", ex); }
-									// ※クリアは UI スレッドで行っておく
-									this.hasPendingAirResult = false;
-									this.pendingAirResult = AirSuperiority.None;
-								});
-							}
-							else
-							{
-								// showOnArrival == false の場合でも、次セル到達で前の battle に紐づく pending は破棄する
-								this.hasPendingAirResult = false;
-								this.pendingAirResult = AirSuperiority.None;
-							}
-						}
-
-						// 防空戦 (api_destruction_battle) の制空結果を解析
-						try
-						{
-							var destructionBattle = data["api_destruction_battle"];
-							if (destructionBattle != null)
-							{
-								var stage1 = destructionBattle.SelectToken("api_air_base_attack.api_stage1");
-								if (stage1 != null)
-								{
-									var dispSeiku = stage1["api_disp_seiku"];
-									if (dispSeiku != null)
-									{
-										int val;
-										if (int.TryParse(dispSeiku.ToString(), out val) && val >= 0 && val <= 4)
-										{
-											var airResult = (AirSuperiority)val;
-											RunOnUi(() =>
-											{
-												try
-												{
-													// 防空戦は CellNo なしで制空結果のみ表示（例: "5-5 [優勢]"）
-													this.SortieInfo.SetDestructionAirResult(airResult);
-												}
-												catch (Exception ex) { LogError("TryHandleMapNext", ex); }
-											});
-										}
-									}
-								}
-							}
-						}
-						catch (Exception ex) { LogError("TryHandleMapNext", ex); }
-					}
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleMapNext", ex); }
-
-				this.Proxy.PublishSession("/kcsapi/api_req_map/next", normalized);
-				return true;
-			}
+			=> this.battleHandler.TryHandleMapNext(url, normalized);
 
 		/// <summary>
 		/// 戦闘開始（各種 battle API）
 		/// </summary>
 		private bool TryHandleBattle(string url, string normalized)
-		{
-			// battle 系 API をまとめて判定
-			if (!(url.Contains("/kcsapi/api_req_sortie/battle")
-				|| url.Contains("/kcsapi/api_req_sortie/airbattle")
-				|| url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
-				|| url.Contains("/kcsapi/api_req_battle_midnight")
-				|| url.Contains("/kcsapi/api_req_combined_battle/")))
-				return false;
-
-			// battleresult・goback_port は別ハンドラで処理するため除外
-			if (url.Contains("battleresult")) return false;
-			if (url.Contains("goback_port")) return false;
-
-			// 航空戦マス（ld_airbattle）かどうかを判定
-			bool isLdAirbattle =
-				url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
-				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle")
-				|| url.Contains("/kcsapi/api_req_sortie/airbattle")
-				|| url.Contains("/kcsapi/api_req_combined_battle/airbattle");
-
-			// battle/ld_airbattle/midnight/combined_battle など を記録
-			if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
-				|| url.Contains("/kcsapi/api_req_combined_battle/ld_airbattle"))
-			{
-				this.lastBattleApiType = "ld_airbattle";
-			}
-			else if (url.Contains("/kcsapi/api_req_sortie/battle")
-				|| url.Contains("/kcsapi/api_req_combined_battle/battle"))
-			{
-				this.lastBattleApiType = "battle";
-			}
-			else
-			{
-				this.lastBattleApiType = null;
-			}
-
-			// 設定参照
-			var restrictToAir = this.Settings?.ShowAirSuperiority ?? false;   // true = 航空戦マスのみ表示
-			var showOnArrival = this.Settings?.ShowCellOnArrival ?? false;    // true = ネタバレ（battle 時に表示）
-
-			// 航空戦の制空状態を JSON から先に読み取る条件
-			// ネタバレがオフの場合は battle では解析しない（battleresult で反映するため）
-			AirSuperiority airResult = AirSuperiority.None;
-			bool parsedBattleAir = false;
-			bool shouldParseAir = false;
-			if (showOnArrival)
-			{
-				// ネタバレON のときは従来どおり、設定に応じて全 battle または ld_airbattle のみ解析
-				shouldParseAir = !restrictToAir || isLdAirbattle;
-			}
-			else
-			{
-				// ネタバレOFF のときは battle では解析しない（battleresult で表示）
-				shouldParseAir = false;
-			}
-
-			if (!string.IsNullOrEmpty(normalized))
-			{
-				// 解析は常に試行（showOnArrival=false 時は「表示せずキャッシュ」の既存挙動を維持）
-				parsedBattleAir = TryParseAirSuperiority(normalized, out airResult, "TryHandleBattle");
-			}
-
-			RunOnUi(() =>
-			{
-				try
-				{
-					if (this.cachedCellNo > 0)
-					{
-						var showOnArrivalLocal = this.Settings?.ShowCellOnArrival ?? false;
-
-						if (!showOnArrivalLocal)
-						{
-							// 従来動作: battle 時に cellNo を表示開始
-							this.SortieInfo.EnterBattle(this.cachedCellNo);
-						}
-						else if (!this.SortieInfo.CellNo.HasValue || this.SortieInfo.CellNo.Value != this.cachedCellNo)
-						{
-							// セル到達時表示モードだが、CellNo が未設定または古い場合はフォールバック更新
-							this.SortieInfo.EnterBattle(this.cachedCellNo);
-						}
-					}
-
-					// 航空戦マスフラグを設定
-					this.SortieInfo.IsLdAirbattle = isLdAirbattle;
-
-					// battle 時に反映するのは shouldParseAir が true の場合のみ
-					if (shouldParseAir && parsedBattleAir)
-					{
-						this.SortieInfo.SetAirResult(airResult);
-						// 表示したので pending はクリア
-						this.hasPendingAirResult = false;
-						this.pendingAirResult = AirSuperiority.None;
-					}
-					else if (!shouldParseAir && parsedBattleAir)
-					{
-						// 解析はできたが表示を保留 → battleresult 時に使えるようキャッシュしておく
-						this.pendingAirResult = airResult;
-						this.hasPendingAirResult = true;
-					}
-				}
-				catch (Exception ex) { LogError("TryHandleBattle", ex); }
-			});
-
-			return true;
-		}
+			=> this.battleHandler.TryHandleBattle(url, normalized);
 
 		/// <summary>
 		/// 戦闘結果　BattleResult
 		/// </summary>
 		private bool TryHandleBattleResult(string url, string normalized)
-		{
-			// battleresult系を広く拾う（判定漏れ対策）
-			var isBattleResultApi =
-				url.Contains("battleresult")
-				&& (url.Contains("/kcsapi/api_req_sortie/")
-					|| url.Contains("/kcsapi/api_req_combined_battle/")
-					|| url.Contains("/kcsapi/api_req_battle_midnight/"));
-
-			if (!isBattleResultApi)
-				return false;
-
-			Models.Raw.kcsapi_battleresult brLocal = null;
-			Models.Raw.kcsapi_combined_battle_battleresult cbrLocal = null;
-
-			try
-			{
-				if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_battleresult>(normalized, out brLocal))
-				{
-				}
-				else if (ApiDataDeserializer.TryDeserializeApiData<Models.Raw.kcsapi_combined_battle_battleresult>(normalized, out cbrLocal))
-				{
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
-
-			// 設定値
-			var showSortieInfo = this.Settings?.ShowSortieInfo ?? false;
-			var restrictToAir = this.Settings?.ShowAirSuperiority ?? false;
-			var showCellOnArrival = this.Settings?.ShowCellOnArrival ?? false;
-
-			// 制空権情報を表示するか判定
-			bool showAirResult = false;
-			if (showCellOnArrival)
-			{
-				// ネタバレ ON の場合、
-				// - ShowAirSuperiority が true のときは「航空戦マスのみ」を意味するので、直前が ld_airbattle のときのみ表示
-				// - ShowAirSuperiority が false のときは制限なしで表示
-				if (restrictToAir)
-				{
-					showAirResult = (this.lastBattleApiType == "ld_airbattle");
-				}
-				else
-				{
-					showAirResult = true;
-				}
-			}
-			else if (!showSortieInfo)
-			{
-				// 出撃情報自体が無効なら表示しない
-				showAirResult = false;
-			}
-			else
-			{
-				// ShowSortieInfo が有効な場合、ShowAirSuperiority が true なら「航空戦マスのみ」、
-				// false なら「制限なし（すべての battle で表示）」とする
-				if (restrictToAir)
-				{
-					showAirResult = (this.lastBattleApiType == "ld_airbattle");
-				}
-				else
-				{
-					showAirResult = true;
-				}
-			}
-
-			// battleresult で制空情報を取得（必要な場合のみ）
-			AirSuperiority airResult = AirSuperiority.None;
-			bool parsedAir = false; // JSON に制空情報が含まれているか
-			if (showAirResult)
-			{
-				parsedAir = TryParseAirSuperiority(normalized, out airResult, "TryHandleBattleResult");
-			}
-
-			// WinRank 取得（既存ロジック）
-			string winRank = null;
-			try
-			{
-				if (brLocal != null) winRank = brLocal.api_win_rank;
-				else if (cbrLocal != null) winRank = cbrLocal.api_win_rank;
-				else
-				{
-					try
-					{
-						var root = JToken.Parse(normalized);
-						var data = root["api_data"] ?? root;
-						winRank = data?["api_win_rank"]?.Value<string>();
-					}
-					catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
-
-			// goback_port のために脱出情報を記録
-			// DataContractJsonSerializer のネスト型サイレント null 問題を回避するため JToken から直接パース
-			try
-			{
-				var jroot = JToken.Parse(normalized);
-				var jdata = jroot["api_data"] ?? jroot;
-
-				int escapeFlag = jdata?["api_escape_flag"]?.Value<int>() ?? 0;
-
-				if (escapeFlag == 1)
-				{
-					int[] escapeIdxArr = null;
-					int[] towIdxArr = null;
-
-					try
-					{
-						var escapeIdxTok = jdata?["api_escape"]?["api_escape_idx"];
-						if (escapeIdxTok != null && escapeIdxTok.Type == JTokenType.Array)
-							escapeIdxArr = escapeIdxTok.ToObject<int[]>();
-					}
-					catch (Exception ex) { LogError("TryHandleBattleResult/escape_idx", ex); }
-
-					try
-					{
-						var towIdxTok = jdata?["api_escape"]?["api_tow_idx"];
-						if (towIdxTok != null && towIdxTok.Type == JTokenType.Array)
-							towIdxArr = towIdxTok.ToObject<int[]>();
-					}
-					catch (Exception ex) { LogError("TryHandleBattleResult/tow_idx", ex); }
-
-					if (escapeIdxArr != null && escapeIdxArr.Length > 0)
-					{
-						var org = this.Homeport?.Organization;
-						if (org != null)
-						{
-							// 出撃艦隊の Ship 配列を特定
-							// 連合艦隊（sortieDeckIds >= 2）: デッキ1+2 を結合
-							// 単一艦隊（sortieDeckIds == 1）: 実際の出撃デッキを使用
-							Ship[] shipArray;
-							if (this.sortieDeckIds.Count >= 2)
-							{
-								shipArray = org.Fleets.OrderBy(f => f.Key)
-									.Take(2)
-									.SelectMany(f => f.Value.Ships)
-									.ToArray();
-							}
-							else if (this.sortieDeckIds.Count == 1)
-							{
-								var deckId = this.sortieDeckIds.First();
-								shipArray = org.Fleets.ContainsKey(deckId)
-									? org.Fleets[deckId].Ships
-									: new Ship[0];
-							}
-							else
-							{
-								shipArray = org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships : new Ship[0];
-							}
-
-							this.pendingEscapeShipIds = escapeIdxArr
-								.Where(idx => idx >= 1 && idx <= shipArray.Length)
-								.Select(idx => shipArray[idx - 1].Id)
-								.ToArray();
-
-							// 単艦退避（api_escape_type==1）は api_tow_idx が存在しない → empty
-							this.pendingTowShipIds = (towIdxArr != null && towIdxArr.Length > 0)
-								? towIdxArr
-									.Where(idx => idx >= 1 && idx <= shipArray.Length)
-									.Select(idx => shipArray[idx - 1].Id)
-									.ToArray()
-								: new int[0];
-
-							System.Diagnostics.Debug.WriteLine(
-								$"[TryHandleBattleResult] escape: idx=[{string.Join(",", escapeIdxArr)}] " +
-								$"escapeIds=[{string.Join(",", this.pendingEscapeShipIds)}] " +
-								$"towIds=[{string.Join(",", this.pendingTowShipIds)}] " +
-								$"sortieDeckIds=[{string.Join(",", this.sortieDeckIds)}] " +
-								$"shipArrayLen={shipArray.Length}");
-						}
-					}
-					else
-					{
-						this.pendingEscapeShipIds = null;
-						this.pendingTowShipIds = null;
-					}
-				}
-				else
-				{
-					this.pendingEscapeShipIds = null;
-					this.pendingTowShipIds = null;
-				}
-			}
-			catch (Exception ex) { LogError("TryHandleBattleResult/escape", ex); }
-
-			RunOnUi(() =>
-			{
-				try
-				{
-					var org = this.Homeport?.Organization;
-					if (org == null) return;
-
-					foreach (var fleet in org.Fleets.Values)
-					{
-						try { fleet.State.Update(); fleet.State.Calculate(); fleet.RaiseShipsUpdated(); } catch { }
-					}
-
-					try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-
-					try
-					{
-						if (Application.Current != null && Application.Current.Dispatcher != null)
-						{
-							Application.Current.Dispatcher.InvokeAsync(() =>
-							{
-								try { this.Homeport?.Organization?.NotifyUpdated(); } catch { }
-							}, System.Windows.Threading.DispatcherPriority.Background);
-						}
-					}
-					catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
-
-					// parsedAir が true のときだけ制空結果を反映。
-					// JSON に含まれていない場合は、もし battle 側で解析して保留している値があればそれを反映する。
-					if (parsedAir)
-					{
-						try { this.SortieInfo.SetAirResult(airResult); } catch { }
-						// 反映したので pending をクリア
-						this.hasPendingAirResult = false;
-						this.pendingAirResult = AirSuperiority.None;
-					}
-					else if (this.hasPendingAirResult && showAirResult)
-					{
-						try { this.SortieInfo.SetAirResult(this.pendingAirResult); } catch { }
-						this.hasPendingAirResult = false;
-						this.pendingAirResult = AirSuperiority.None;
-					}
-
-					// WinRank を反映
-					if (!string.IsNullOrEmpty(winRank))
-					{
-						try { this.SortieInfo.SetBattleResult(winRank); } catch { }
-					}
-
-					// 使用済みフラグはクリア（次回判定へ影響しないよう）
-					this.lastBattleApiType = null;
-				}
-				catch (Exception ex) { LogError("TryHandleBattleResult", ex); }
-			});
-
-			// EventMapHpViewer 等のプラグインへ battleresult を通知
-			try
-			{
-				if (this.cachedMapId > 0)
-					this.BattleResultReceived?.Invoke(this.cachedMapId, normalized);
-			}
-			catch (Exception) { }
-
-			// EventMapHpViewer 等のプラグインへ battleresult を通知（1回だけ）
-			try
-			{
-				if (this.cachedMapId > 0)
-					this.BattleResultReceived?.Invoke(this.cachedMapId, normalized);
-			}
-			catch (Exception ex) { LogError("TryHandleBattleResult/BattleResultReceived", ex); }
-
-			return true;
-		}
+			=> this.battleHandler.TryHandleBattleResult(url, normalized);
 
 		/// <summary>
 		/// 基地航空隊
@@ -1248,21 +630,33 @@ namespace Grabacr07.KanColleWrapper
 							var org = this.Homeport?.Organization;
 							if (org != null)
 							{
-								var returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
-									if (returning.Length > 0)
+								// lock 内で sortieDeckIds を読み取り、returning をローカルにコピー
+								int[] returning;
+								lock (BattleStateLock)
+									returning = this.sortieDeckIds.Intersect(org.Fleets.Keys).ToArray();
+
+								if (returning.Length > 0)
+								{
+									try
 									{
-										try
-										{
-											// 脱出フラグのクリアや全艦 Situation のリセットも含めて一括処理
-											org.Homing();
-										}
-										catch (Exception ex) { LogError("TryHandlePort", ex); }
+										// 脱出フラグのクリアや全艦 Situation のリセットも含めて一括処理
+										// (Homing は lock 外で実行してデッドロックを避ける)
+										org.Homing();
+									}
+									catch (Exception ex) { LogError("TryHandlePort", ex); }
+
+									lock (BattleStateLock)
+									{
 										foreach (var returningDeckId in returning)
 											this.sortieDeckIds.Remove(returningDeckId);
 									}
 								}
 
-								this.IsInSortie = this.sortieDeckIds.Count > 0;
+								bool isInSortie;
+								lock (BattleStateLock)
+									isInSortie = this.sortieDeckIds.Count > 0;
+								this.IsInSortie = isInSortie;
+							}
 						}
 						catch (Exception)
 						{
@@ -1273,8 +667,11 @@ namespace Grabacr07.KanColleWrapper
 						{
 							this.SortieInfo.Reset();
 							// 母港に戻ったら pending は破棄
-							this.hasPendingAirResult = false;
-							this.pendingAirResult = AirSuperiority.None;
+							lock (BattleStateLock)
+							{
+								this.hasPendingAirResult = false;
+								this.pendingAirResult = AirSuperiority.None;
+							}
 						}
 						catch (Exception ex) { LogError("TryHandlePort", ex); }
 					});
@@ -4986,45 +4383,7 @@ namespace Grabacr07.KanColleWrapper
 		/// 脱出情報は TryHandleBattleResult でキャッシュ済みのものを使用します。
 		/// </summary>
 		private bool TryHandleGobackPort(string url)
-		{
-			if (!url.Contains("goback_port")) return false;
-
-			try
-			{
-				var escapeIds = this.pendingEscapeShipIds;
-				var towIds = this.pendingTowShipIds;
-
-				// 脱出艦がなければ何もしない
-				if (escapeIds == null || escapeIds.Length == 0)
-				{
-					this.pendingEscapeShipIds = null;
-					this.pendingTowShipIds = null;
-					return true;
-				}
-
-				RunOnUi(() =>
-				{
-					try
-					{
-						var org = this.Homeport?.Organization;
-						if (org == null) return;
-
-						// 曳航艦がない場合（単艦退避）は -1 を渡す
-						int towId = (towIds != null && towIds.Length >= 1) ? towIds[0] : -1;
-						org.AddEvacuatedShips(escapeIds[0], towId);
-					}
-					catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
-					finally
-					{
-						this.pendingEscapeShipIds = null;
-						this.pendingTowShipIds = null;
-					}
-				});
-			}
-			catch (Exception ex) { LogError("TryHandleGobackPort", ex); }
-
-			return true;
-		}
+			=> this.battleHandler.TryHandleGobackPort(url);
 
 		#endregion
 
