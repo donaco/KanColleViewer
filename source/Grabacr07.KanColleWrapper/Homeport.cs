@@ -48,25 +48,9 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public AirBases AirBases { get; }
 
-		// UI スレッドへ安全に実行するヘルパー
+		// UI スレッドへ安全に実行するヘルパー（共通実装は HandlerHelper に統一）
 		private static void RunOnUi(Action action)
-		{
-			try
-			{
-				if (Application.Current != null && Application.Current.Dispatcher != null)
-				{
-					Application.Current.Dispatcher.BeginInvoke(action);
-				}
-				else
-				{
-					action();
-				}
-			}
-			catch
-			{
-				try { action(); } catch { }
-			}
-		}
+			=> Grabacr07.KanColleWrapper.Handlers.HandlerHelper.RunOnUi(action);
 
 		#region Admiral 変更通知プロパティ
 

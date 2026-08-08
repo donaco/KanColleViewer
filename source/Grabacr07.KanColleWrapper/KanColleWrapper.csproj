@@ -118,6 +118,17 @@
     <Compile Include="ApiSession.cs" />
     <Compile Include="CapturedProcessor.cs" />
     <Compile Include="AirBases.cs" />
+    <Compile Include="Handlers\AirBaseHandler.cs" />
+    <Compile Include="Handlers\BasicHandler.cs" />
+    <Compile Include="Handlers\BattleHandler.cs" />
+    <Compile Include="Handlers\HandlerHelper.cs" />
+    <Compile Include="Handlers\HenseiHandler.cs" />
+    <Compile Include="Handlers\KaisouHandler.cs" />
+    <Compile Include="Handlers\KenzoHandler.cs" />
+    <Compile Include="Handlers\NyukyoHandler.cs" />
+    <Compile Include="Handlers\PortHandler.cs" />
+    <Compile Include="Handlers\ShipHandler.cs" />
+    <Compile Include="Handlers\SlotItemHandler.cs" />
     <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
     <Compile Include="KanColleServerOrigin.cs" />
     <Compile Include="Models\AirSuperiorityPotential.cs" />
