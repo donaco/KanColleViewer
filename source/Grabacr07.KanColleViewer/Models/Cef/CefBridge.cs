@@ -25,6 +25,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		private static readonly object cefInitLock = new object();
 		private const string CefInitFailedMarkerFileName = "cef-init-failed.marker";
 
+		/// <summary>
+		/// 外部ツール（公開日誌拡張版など）へ通信を中継するための内蔵 MITM プロキシです。
+		/// NetworkSettings.Relay.IsEnabled が true の場合のみ起動します。
+		/// </summary>
+		private static Grabacr07.KanColleWrapper.Net.RelayHttpProxy relayProxy;
+
 		private static string FallbackLocalAppData => Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 			"Grabacr07", "KanColleViewer");
@@ -155,6 +161,39 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		}
 
 		/// <summary>
+		/// NetworkSettings.Relay.IsEnabled が true の場合、内蔵 MITM 中継プロキシを起動します。
+		/// 証明書は RelayCertificateManager でキャッシュフォルダに生成・再利用します。
+		/// </summary>
+		private static void StartRelayProxyIfEnabled()
+		{
+			if (!Settings.NetworkSettings.Relay.IsEnabled.Value)
+			{
+				relayProxy?.Stop();
+				relayProxy = null;
+				return;
+			}
+
+			if (relayProxy != null) return;
+
+			try
+			{
+				var certificate = Grabacr07.KanColleWrapper.Net.RelayCertificateManager.GetOrCreate(CachePath);
+				var proxy = new Grabacr07.KanColleWrapper.Net.RelayHttpProxy(certificate)
+				{
+					UpstreamHost = Settings.NetworkSettings.Relay.UpstreamHost.Value,
+					UpstreamPort = Settings.NetworkSettings.Relay.UpstreamPort.Value,
+				};
+				proxy.Start(0); // 0 を指定し、空いているポートを自動割り当て
+				relayProxy = proxy;
+			}
+			catch
+			{
+				// 中継プロキシの起動失敗は致命的にせず、通常の直接通信にフォールバックする
+				relayProxy = null;
+			}
+		}
+
+		/// <summary>
 		/// CefSettings を毎回新しいインスタンスとして生成します。
 		/// Cef.Initialize() は内部で using(settings) を実行して settings を Dispose するため、
 		/// 同一インスタンスを再利用すると settings.settings が null になり NullReferenceException が発生します。
@@ -176,6 +215,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 			{
 				settings.CefCommandLineArgs.Add("disable-frame-rate-limit", "1");
 				settings.CefCommandLineArgs.Add("disable-gpu-vsync", "1");
+			}
+
+			// 内蔵中継プロキシが有効な場合、CEF の通信をすべてこのプロキシへ向ける
+			if (Settings.NetworkSettings.Relay.IsEnabled.Value && relayProxy != null)
+			{
+				settings.CefCommandLineArgs.Add("proxy-server", $"localhost:{relayProxy.ListeningPort}");
+				// 内蔵プロキシが発行する自己署名証明書エラーを無視する
+				settings.CefCommandLineArgs.Add("ignore-certificate-errors", "1");
 			}
 
 #if DEBUG
@@ -217,6 +264,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 #if !DEBUG
 					TryDeleteFile(LogFilePath);
 #endif
+
+					// 内蔵中継プロキシが有効な場合、CEF 初期化前に起動しておく
+					// (CreateCefSettings が ListeningPort を参照するため)
+					StartRelayProxyIfEnabled();
 
 					// CefSettings は Cef.Initialize() 内部で Dispose されるため毎回新規生成する
 					AppendInitializeTrace("Calling Cef.Initialize");

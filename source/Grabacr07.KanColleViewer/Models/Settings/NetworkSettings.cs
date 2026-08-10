@@ -73,6 +73,37 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			}
 		}
 
+		/// <summary>
+		/// KanColleViewer 内蔵の MITM 中継プロキシ (RelayHttpProxy) に関する設定です。
+		/// 有効にすると、艦これサーバーとの HTTPS 通信を復号した上で、
+		/// 外部ツール（例: 公開日誌拡張版）へ平文 HTTP として中継します。
+		/// </summary>
+		public class Relay
+		{
+			/// <summary>
+			/// 内蔵中継プロキシを有効にするかどうかです。
+			/// </summary>
+			public static SerializableProperty<bool> IsEnabled { get; }
+				= new SerializableProperty<bool>(GetKey(), Providers.Local, false);
+
+			/// <summary>
+			/// 転送先の外部ツール（上流プロキシ）のホスト名です。
+			/// </summary>
+			public static SerializableProperty<string> UpstreamHost { get; }
+				= new SerializableProperty<string>(GetKey(), Providers.Local, "localhost");
+
+			/// <summary>
+			/// 転送先の外部ツール（上流プロキシ）のポート番号です。
+			/// </summary>
+			public static SerializableProperty<ushort> UpstreamPort { get; }
+				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 8887);
+
+			private static string GetKey([CallerMemberName] string propertyName = "")
+			{
+				return nameof(NetworkSettings) + "." + nameof(Relay) + "." + propertyName;
+			}
+		}
+
 		public static string LocalProxySettingsString
 		{
 			get

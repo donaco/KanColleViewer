@@ -212,6 +212,63 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#endregion
 
+		#region IsRelayEnabled 変更通知プロパティ
+
+		private bool _IsRelayEnabled;
+
+		public bool IsRelayEnabled
+		{
+			get { return this._IsRelayEnabled; }
+			set
+			{
+				if (this._IsRelayEnabled != value)
+				{
+					this._IsRelayEnabled = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region RelayUpstreamHost 変更通知プロパティ
+
+		private string _RelayUpstreamHost;
+
+		public string RelayUpstreamHost
+		{
+			get { return this._RelayUpstreamHost; }
+			set
+			{
+				if (this._RelayUpstreamHost != value)
+				{
+					this._RelayUpstreamHost = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
+		#region RelayUpstreamPort 変更通知プロパティ
+
+		private string _RelayUpstreamPort;
+
+		public string RelayUpstreamPort
+		{
+			get { return this._RelayUpstreamPort; }
+			set
+			{
+				if (this._RelayUpstreamPort != value)
+				{
+					this._RelayUpstreamPort = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		public void Initialize()
 		{
 			this.RevertToSavedSettings();
@@ -225,6 +282,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			NetworkSettings.Proxy.SocksHost.Subscribe(x => this.SpecificSocksProxyHost = x).AddTo(this);
 			NetworkSettings.Proxy.SocksPort.Subscribe(x => this.SpecificSocksProxyPort = x).AddTo(this);
 			NetworkSettings.Proxy.IsUseHttpProxyForAllProtocols.Subscribe(x => this.IsUseHttpProxyForAllProtocols = x).AddTo(this);
+			NetworkSettings.Relay.IsEnabled.Subscribe(x => this.IsRelayEnabled = x).AddTo(this);
+			NetworkSettings.Relay.UpstreamHost.Subscribe(x => this.RelayUpstreamHost = x).AddTo(this);
+			NetworkSettings.Relay.UpstreamPort.Subscribe(x => this.RelayUpstreamPort = x.ToString()).AddTo(this);
 		}
 
 		public void Apply()
@@ -240,6 +300,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			NetworkSettings.Proxy.SocksHost.Value = this.SpecificSocksProxyHost;
 			NetworkSettings.Proxy.SocksPort.Value = ushort.TryParse(this.SpecificSocksProxyPort, out port) ? port : NetworkSettings.Proxy.SocksPort.Default;
 			NetworkSettings.Proxy.IsUseHttpProxyForAllProtocols.Value = this.IsUseHttpProxyForAllProtocols;
+			NetworkSettings.Relay.IsEnabled.Value = this.IsRelayEnabled;
+			NetworkSettings.Relay.UpstreamHost.Value = this.RelayUpstreamHost;
+			NetworkSettings.Relay.UpstreamPort.Value = ushort.TryParse(this.RelayUpstreamPort, out port) ? port : NetworkSettings.Relay.UpstreamPort.Default;
 			this.RevertToSavedSettings();    // Parse 結果書き戻し
 		}
 
@@ -260,6 +323,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.SpecificSocksProxyHost = NetworkSettings.Proxy.SocksHost;
 			this.SpecificSocksProxyPort = NetworkSettings.Proxy.SocksPort.Value.ToString();
 			this.IsUseHttpProxyForAllProtocols = NetworkSettings.Proxy.IsUseHttpProxyForAllProtocols;
+			this.IsRelayEnabled = NetworkSettings.Relay.IsEnabled;
+			this.RelayUpstreamHost = NetworkSettings.Relay.UpstreamHost;
+			this.RelayUpstreamPort = NetworkSettings.Relay.UpstreamPort.Value.ToString();
 		}
 
 		private void IsUseHttpProxyForAllProtocolsChanged()

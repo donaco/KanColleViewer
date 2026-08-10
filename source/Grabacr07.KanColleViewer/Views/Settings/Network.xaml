@@ -241,6 +241,50 @@
 			</StackPanel>
 
 			<Border Height="8" />
+			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+			<Border Height="8" />
+			<CheckBox x:Name="CheckRelayEnabled"
+					  Content="外部ツールへ通信を中継する"
+					  IsChecked="{Binding IsRelayEnabled, Mode=TwoWay}" />
+
+			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
+					   IsEnabled="{Binding IsRelayEnabled}"
+					   Margin="20,2">
+				<Run Text="KanColleViewer 内蔵の中継プロキシが外部ツールへ転送します。" />
+			</TextBlock>
+
+			<Grid IsEnabled="{Binding IsRelayEnabled}"
+				  Margin="20,4,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="15" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="60" />
+				</Grid.ColumnDefinitions>
+
+				<TextBlock Grid.Column="0"
+						   TextAlignment="Right"
+						   VerticalAlignment="Center">
+					<Run Text="転送先" />
+					<Run Text=": " />
+				</TextBlock>
+
+				<controls:PromptTextBox Grid.Column="1"
+										 Text="{Binding RelayUpstreamHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+				<TextBlock Grid.Column="3"
+						   TextAlignment="Right"
+						   VerticalAlignment="Center">
+					<Run Text="ポート" />
+					<Run Text=": " />
+				</TextBlock>
+
+				<controls:PromptTextBox Grid.Column="4"
+										 Text="{Binding RelayUpstreamPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+			</Grid>
+
+			<Border Height="8" />
 			<StackPanel Orientation="Horizontal"
 						HorizontalAlignment="Right">
 				<TextBlock Text="※反映にはアプリケーションの再起動が必要です。"
