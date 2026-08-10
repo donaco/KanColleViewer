@@ -96,7 +96,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			/// 転送先の外部ツール（上流プロキシ）のポート番号です。
 			/// </summary>
 			public static SerializableProperty<ushort> UpstreamPort { get; }
-				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 8887);
+				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 8888);
 
 			private static string GetKey([CallerMemberName] string propertyName = "")
 			{
