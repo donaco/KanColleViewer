@@ -161,8 +161,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		}
 
 		/// <summary>
-		/// NetworkSettings.Relay.IsEnabled が true の場合、内蔵 MITM 中継プロキシを起動します。
-		/// 証明書は RelayCertificateManager でキャッシュフォルダに生成・再利用します。
+		/// NetworkSettings.Relay.IsEnabled が true の場合、内蔵中継プロキシを起動します。
+		/// このプロキシは TLS を復号しないため、証明書は使用しません。
 		/// </summary>
 		private static void StartRelayProxyIfEnabled()
 		{
@@ -177,8 +177,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 
 			try
 			{
-				var certificate = Grabacr07.KanColleWrapper.Net.RelayCertificateManager.GetOrCreate(CachePath);
-				var proxy = new Grabacr07.KanColleWrapper.Net.RelayHttpProxy(certificate)
+				var proxy = new Grabacr07.KanColleWrapper.Net.RelayHttpProxy
 				{
 					UpstreamHost = Settings.NetworkSettings.Relay.UpstreamHost.Value,
 					UpstreamPort = Settings.NetworkSettings.Relay.UpstreamPort.Value,

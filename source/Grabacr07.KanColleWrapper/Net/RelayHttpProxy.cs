@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -39,10 +38,8 @@ namespace Grabacr07.KanColleWrapper.Net
 		/// </summary>
 		public int UpstreamPort { get; set; }
 
-		public RelayHttpProxy(X509Certificate2 unusedServerCertificate = null)
+		public RelayHttpProxy()
 		{
-			// 証明書は使用しません（このプロキシは TLS を復号しないため）。
-			// 既存呼び出し元との互換性のため引数だけ残しています。
 		}
 
 		public void Start(int port)
