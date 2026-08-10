@@ -250,7 +250,7 @@
 			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 					   IsEnabled="{Binding IsRelayEnabled}"
 					   Margin="20,2">
-				<Run Text="KanColleViewer 内蔵の中継プロキシが外部ツールへ転送します。" />
+				<Run Text="KanColleViewer 内蔵の中継プロキシが外部ツールへ通信を転送します。" />
 			</TextBlock>
 
 			<Grid IsEnabled="{Binding IsRelayEnabled}"
