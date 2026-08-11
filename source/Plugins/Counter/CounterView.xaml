@@ -228,7 +228,8 @@
 						<ScrollViewer VerticalScrollBarVisibility="Auto"
 									  HorizontalScrollBarVisibility="Disabled"
 									  CanContentScroll="True"
-									  MaxHeight="277">
+									  MaxHeight="277"
+									  VerticalAlignment="Top">
 							<ItemsControl ItemsSource="{Binding SortieHistory.History}"
 										  Grid.IsSharedSizeScope="True">
 								<ItemsControl.ItemTemplate>
@@ -351,7 +352,8 @@
 						<ScrollViewer VerticalScrollBarVisibility="Auto"
 									  HorizontalScrollBarVisibility="Disabled"
 									  CanContentScroll="True"
-									  MaxHeight="277">
+									  MaxHeight="277"
+									  VerticalAlignment="Top">
 							<ItemsControl ItemsSource="{Binding SortieHistory.AreaCounts}"
 										  Grid.IsSharedSizeScope="True">
 								<ItemsControl.ItemTemplate>
@@ -371,90 +373,90 @@
 												<TextBlock Grid.Column="0"
 												   Style="{DynamicResource DefaultTextStyleKey}"
 												   Margin="0,0,4,0">
-											<Run Text="{Binding DisplayAreaCellKey, Mode=OneWay}"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+														<Run Text="{Binding DisplayAreaCellKey, Mode=OneWay}"
+															 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
 
-											<!-- ボス表示（例: [ボス]）-->
-											<TextBlock Grid.Column="1"
+												<!-- ボス表示（例: [ボス]）-->
+												<TextBlock Grid.Column="1"
+														   Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="0,0,0,0"
+														   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
+													<Run Text="{Binding BossText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 帰港表示（例: [帰港]） -->
+												<TextBlock Grid.Column="1"
+														   Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="0,0,0,0"
+														   Visibility="{Binding KikoText, Converter={StaticResource NullToCollapsedConverter}}">
+													<Run Text="{Binding KikoText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 防空戦表示（例: [防空]）ボスと同じ列に重ねる -->
+												<TextBlock Grid.Column="1"
+														   Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="0,0,0,0"
+														   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
+													<Run Text="{Binding DestructionText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+												<!-- 航空マス表示（例: [航空]）空なら非表示 -->
+												<TextBlock Grid.Column="1"
 													   Style="{DynamicResource DefaultTextStyleKey}"
 													   Margin="0,0,0,0"
-													   Visibility="{Binding BossText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding BossText, Mode=OneWay}"
+													   Visibility="{Binding LdAirbattleText, Converter={StaticResource NullToCollapsedConverter}}">
+												<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
 													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 帰港表示（例: [帰港]） -->
-											<TextBlock Grid.Column="1"
-													   Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,0,0,0"
-													   Visibility="{Binding KikoText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding KikoText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 防空戦表示（例: [防空]）ボスと同じ列に重ねる -->
-											<TextBlock Grid.Column="1"
-													   Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="0,0,0,0"
-													   Visibility="{Binding DestructionText, Converter={StaticResource NullToCollapsedConverter}}">
-												<Run Text="{Binding DestructionText, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
-											<!-- 航空マス表示（例: [航空]）空なら非表示 -->
-											<TextBlock Grid.Column="1"
-												   Style="{DynamicResource DefaultTextStyleKey}"
-												   Margin="0,0,0,0"
-												   Visibility="{Binding LdAirbattleText, Converter={StaticResource NullToCollapsedConverter}}">
-											<Run Text="{Binding LdAirbattleText, Mode=OneWay}"
-												 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+												</TextBlock>
 
-											<!-- 出撃数（例: :3）-->
-											<TextBlock Grid.Column="2"
-													   Style="{DynamicResource DefaultTextStyleKey}"
-													   Margin="4,0,4,0">
-												<Run Text=":"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-												<Run Text="{Binding Count, Mode=OneWay}"
-													 Style="{DynamicResource EmphaticTextElementStyleKey}" />
-											</TextBlock>
+												<!-- 出撃数（例: :3）-->
+												<TextBlock Grid.Column="2"
+														   Style="{DynamicResource DefaultTextStyleKey}"
+														   Margin="4,0,4,0">
+													<Run Text=":"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+													<Run Text="{Binding Count, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
 
-											<!-- 戦闘結果 S,A,B（横並び）-->
-											<StackPanel Grid.Column="3"
-														Orientation="Horizontal">
-												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Text="{Binding SText, Mode=OneWay}"
-														   Margin="0,2,4,0"
-														   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
-												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Text="{Binding AText, Mode=OneWay}"
-														   Margin="0,2,4,0"
-														   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
-												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Text="{Binding BText, Mode=OneWay}"
-														   Margin="0,2,4,0"
-														   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
-											</StackPanel>
+												<!-- 戦闘結果 S,A,B（横並び）-->
+												<StackPanel Grid.Column="3"
+															Orientation="Horizontal">
+													<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+															   Text="{Binding SText, Mode=OneWay}"
+															   Margin="0,2,4,0"
+															   Visibility="{Binding SCount, Converter={StaticResource CountToVisibilityConverter}}" />
+													<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+															   Text="{Binding AText, Mode=OneWay}"
+															   Margin="0,2,4,0"
+															   Visibility="{Binding ACount, Converter={StaticResource CountToVisibilityConverter}}" />
+													<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+															   Text="{Binding BText, Mode=OneWay}"
+															   Margin="0,2,4,0"
+															   Visibility="{Binding BCount, Converter={StaticResource CountToVisibilityConverter}}" />
+												</StackPanel>
 
-											<!-- 制空結果 確保,優勢（横並び）-->
-											<StackPanel Grid.Column="4"
-														Orientation="Horizontal">
-												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Text="{Binding AirSupremacyText, Mode=OneWay}"
-														   Margin="0,2,4,0"
-														   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
-												<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-														   Text="{Binding AirSuperiorText, Mode=OneWay}"
-														   Margin="0,2,4,0"
-														   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
-											</StackPanel>
-										</Grid>
-									</Border>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-						</ItemsControl>
-					</ScrollViewer>
-				</DockPanel>
-			</GroupBox>
+												<!-- 制空結果 確保,優勢（横並び）-->
+												<StackPanel Grid.Column="4"
+															Orientation="Horizontal">
+													<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+															   Text="{Binding AirSupremacyText, Mode=OneWay}"
+															   Margin="0,2,4,0"
+															   Visibility="{Binding AirSupremacyCount, Converter={StaticResource CountToVisibilityConverter}}" />
+													<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+															   Text="{Binding AirSuperiorText, Mode=OneWay}"
+															   Margin="0,2,4,0"
+															   Visibility="{Binding AirSuperiorCount, Converter={StaticResource CountToVisibilityConverter}}" />
+												</StackPanel>
+											</Grid>
+										</Border>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</ScrollViewer>
+					</DockPanel>
+				</GroupBox>
 			</UniformGrid>
 		</DockPanel>
 	</ScrollViewer>
