@@ -8,6 +8,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{BDE5A07D-7F83-48C7-B61B-198FD4C0BCD5}</ProjectGuid>
+    <Platforms>AnyCPU;x64</Platforms>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
@@ -56,11 +57,8 @@
     <None Include="app.config" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="CopyToHostPlugins" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\Plugins" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

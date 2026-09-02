@@ -9,6 +9,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{55C0036D-3206-4C63-A2C0-447C41CAFAF5}</ProjectGuid>
+    <Platforms>AnyCPU;x64</Platforms>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
@@ -53,13 +54,12 @@
     <None Include="app.config" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)DesktopToast.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\$(ConfigurationName)\Plugins\"
-mkdir "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins" 2&gt;nul
-xcopy /Y "$(TargetPath)" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"
-xcopy /Y "$(TargetDir)DesktopToast.dll" "$(SolutionDir)Grabacr07.KanColleViewer\bin\x64\$(ConfigurationName)\Plugins\"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="CopyToHostPlugins" AfterTargets="Build">
+    <ItemGroup>
+      <_PluginFilesToCopy Include="$(TargetPath)" />
+      <_PluginFilesToCopy Include="$(TargetDir)DesktopToast.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\Plugins" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

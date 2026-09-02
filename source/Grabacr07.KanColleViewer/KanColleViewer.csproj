@@ -1,719 +1,160 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\build\chromiumembeddedframework.runtime.win-x64.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Grabacr07.KanColleViewer</RootNamespace>
     <AssemblyName>KanColleViewer</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
+    <Platforms>AnyCPU;x64</Platforms>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
-    <ExpressionBlendVersion>12.0.50716.0</ExpressionBlendVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
     <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
     <NoWarn>0436</NoWarn>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\\x64\\Debug\\</OutputPath>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
-    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\\x64\\Release\\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release %28beta%29|AnyCPU'">
-    <OutputPath>bin\x86\Release %28beta%29\</OutputPath>
-    <DefineConstants>TRACE;BETA</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release %28beta%29|x64'">
-    <OutputPath>bin\x64\Release %28beta%29\</OutputPath>
-    <DefineConstants>TRACE;BETA</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="CommunityToolkit.Mvvm, Version=8.4.0.0, Culture=neutral, PublicKeyToken=4aff67a105548ee2, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\CommunityToolkit.Mvvm.8.4.2\lib\netstandard2.0\CommunityToolkit.Mvvm.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp, Version=145.0.260.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.145.0.260\lib\net462\CefSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core, Version=145.0.260.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.145.0.260\lib\net462\CefSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Wpf, Version=145.0.260.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Wpf.145.0.260\lib\net462\CefSharp.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.142\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
-    </Reference>
+    <PackageReference Include="CefSharp.Common" Version="145.0.260" />
+    <PackageReference Include="CefSharp.Wpf" Version="145.0.260" />
+    <PackageReference Include="chromiumembeddedframework.runtime.win-x64" Version="145.0.26" />
+    <PackageReference Include="chromiumembeddedframework.runtime.win-x86" Version="145.0.26" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="InternalReservedAttributeGenerator" Version="0.1.2" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Reactive" Version="6.1.0" />
+    <PackageReference Include="System.Buffers" Version="4.6.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.8" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Diagnostics.DiagnosticSource, Version=10.0.0.8, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.10.0.8\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
-    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive, Version=6.1.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.6.1.0\lib\net472\System.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Remoting" />
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
     <Reference Include="System.ValueTuple" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
     <Reference Include="Vannatech.CoreAudio">
       <HintPath>..\..\assemblies\Vannatech.CoreAudio.dll</HintPath>
     </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
   </ItemGroup>
+
   <ItemGroup>
-    <ApplicationDefinition Include="Application.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="Composition\AggregateNotifier.cs" />
-    <Compile Include="Composition\LoadFailedPluginData.cs" />
-    <Compile Include="Composition\Plugin.cs" />
-    <Compile Include="Composition\PluginHost.cs" />
-    <Compile Include="Composition\PluginMetadata.cs" />
-    <Compile Include="Infrastructure\Desktop\SystemEnvironment.cs" />
-    <Compile Include="Infrastructure\Interop\Dpi.cs" />
-    <Compile Include="Infrastructure\Lifetime\CompositeDisposable.cs" />
-    <Compile Include="Infrastructure\Lifetime\DelegateDisposable.cs" />
-    <Compile Include="Infrastructure\Lifetime\Disposable.cs" />
-    <Compile Include="Infrastructure\Lifetime\DisposableExtensions.cs" />
-    <Compile Include="Infrastructure\Lifetime\IDisposableHolder.cs" />
-    <Compile Include="Infrastructure\Linq\EnumerableEx.cs" />
-    <Compile Include="Infrastructure\Mvvm\MetroTrilithonMvvm.cs" />
-    <Compile Include="Infrastructure\Mvvm\NotifierAndExtensions.cs" />
-    <Compile Include="Infrastructure\Mvvm\RelayCommand.cs" />
-    <Compile Include="Infrastructure\Mvvm\ViewModelBase.cs" />
-    <Compile Include="Infrastructure\Serialization\MetroTrilithonSerialization.cs" />
-    <Compile Include="Infrastructure\Threading\TaskExtensions.cs" />
-    <Compile Include="Models\AppThemeService.cs" />
-    <Compile Include="Models\BrowserFrameRateMode.cs" />
-    <Compile Include="Models\BrowserZoomFactor.cs" />
-    <Compile Include="Models\Cef\BlockDownloadHandler.cs" />
-    <Compile Include="Models\Cef\CapturedHttp.cs" />
-    <Compile Include="Models\Cef\CaptureLogService.cs" />
-    <Compile Include="Models\Cef\CefBrowserProcessHandler.cs" />
-    <Compile Include="Models\Cef\ContextMenuHandler.cs" />
-    <Compile Include="Models\Cef\CefBridge.cs" />
-    <Compile Include="Models\Cef\CustomRequestHandler.cs" />
-    <Compile Include="Models\Cef\ResponseFilter.cs" />
-    <Compile Include="Models\Cef\ScreenshotRequest.cs" />
-    <Compile Include="Models\ExitConfirmationType.cs" />
-    <Compile Include="Models\IZoomFactor.cs" />
-    <Compile Include="Models\MonitorHelper.cs" />
-    <Compile Include="Models\NotifierHost.cs" />
-    <Compile Include="Models\ProductInfo.cs" />
-    <Compile Include="Models\Migration\_XmlFileReader.cs" />
-    <Compile Include="Models\Helper.cs" />
-    <Compile Include="Models\Migration\_ProxySettings.cs" />
-    <Compile Include="Models\ResourceService.cs" />
-    <Compile Include="Models\SallyArea.cs" />
-    <Compile Include="Models\MapCellNameUpdater.cs" />
-    <Compile Include="Models\Settings\GeneralSettings.cs" />
-    <Compile Include="Models\Settings\KanColleSettings.cs" />
-    <Compile Include="Models\Settings\KanColleWindowSettings.cs" />
-    <Compile Include="Models\Settings\Providers.cs" />
-    <Compile Include="Models\Settings\ScreenshotSettings.cs" />
-    <Compile Include="Models\Settings\NetworkSettings.cs" />
-    <Compile Include="Models\Settings\SettingsHost.cs" />
-    <Compile Include="Models\Settings\WindowSettings.cs" />
-    <Compile Include="Models\StatusService.cs" />
-    <Compile Include="Models\Migration\_Settings.cs" />
-    <Compile Include="Models\SupportedImageFormat.cs" />
-    <Compile Include="Models\TaskbarProgress.cs" />
-    <Compile Include="Models\UpdateChecker.cs" />
-    <Compile Include="Models\Volume.cs" />
-    <Compile Include="Models\DaiNaiShipProvider.cs" />
-    <Compile Include="Models\Migration\_KanColleClientSettings.cs" />
-    <Compile Include="ViewModels\AirBaseWindowViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\SlotItemTypeViewModel.cs" />
-    <Compile Include="ViewModels\QuestWindowViewModel.cs" />
-    <Compile Include="ViewModels\Composition\LoadFailedPluginViewModel.cs" />
-    <Compile Include="ViewModels\Contents\AirBases\AirBasesViewModel.cs" />
-    <Compile Include="ViewModels\Contents\AirBases\AirBaseViewModel.cs" />
-    <Compile Include="ViewModels\Contents\AirBases\AirBaseInfoViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ShipSpeedExtensions.cs" />
-    <Compile Include="ViewModels\InformationWindowViewModel.cs" />
-    <Compile Include="ViewModels\KanColleWindowViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\ShipCatalogFilter.cs" />
-    <Compile Include="ViewModels\Catalogs\ShipViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\SlotItemCatalogViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\SlotItemCounter.cs" />
-    <Compile Include="ViewModels\Catalogs\ShipCatalogSortWorker.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\CombinedFleetViewModel.cs" />
-    <Compile Include="ViewModels\Composition\NotifierViewModel.cs" />
-    <Compile Include="ViewModels\Composition\PluginViewModel.cs" />
-    <Compile Include="ViewModels\Composition\ToolViewModel.cs" />
-    <Compile Include="ViewModels\Contents\AdmiralViewModel.cs" />
-    <Compile Include="ViewModels\Contents\BuildingDockViewModel.cs" />
-    <Compile Include="ViewModels\Contents\CreatedSlotItemViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\FleetStateViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\QuickStateViewViewModel.cs" />
-    <Compile Include="ViewModels\Contents\RepairingDockViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ExpeditionsViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\ConditionViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\ExpeditionViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\HomeportViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\SortieViewModel.cs" />
-    <Compile Include="ViewModels\Contents\OverviewViewModel.cs" />
-    <Compile Include="ViewModels\Contents\QuestsViewModel.cs" />
-    <Compile Include="ViewModels\Contents\QuestViewModel.cs" />
-    <Compile Include="ViewModels\Settings\BindableTextViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\ShipTypeViewModel.cs" />
-    <Compile Include="ViewModels\Catalogs\ShipCatalogWindowViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ShipyardViewModel.cs" />
-    <Compile Include="ViewModels\Dev\DebugTabViewModel.cs" />
-    <Compile Include="ViewModels\Settings\CultureViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModel.cs" />
-    <Compile Include="ViewModels\FleetWindowViewModel.cs" />
-    <Compile Include="ViewModels\ItemViewModel.cs" />
-    <Compile Include="ViewModels\MainWindowViewModelBase.cs" />
-    <Compile Include="ViewModels\InformationViewModel.cs" />
-    <Compile Include="Models\INavigator.cs" />
-    <Compile Include="ViewModels\Contents\MaterialsViewModel.cs" />
-    <Compile Include="ViewModels\Messages\Response.cs" />
-    <Compile Include="ViewModels\NavigatorViewModel.cs" />
-    <Compile Include="ViewModels\NullViewModel.cs" />
-    <Compile Include="ViewModels\Settings\UserStyleSheetSettingsViewModel.cs" />
-    <Compile Include="ViewModels\Settings\NetworkSettingsViewModel.cs" />
-    <Compile Include="ViewModels\Settings\PluginSettingsWindowViewModel.cs" />
-    <Compile Include="ViewModels\Settings\ScreenshotSettingsViewModel.cs" />
-    <Compile Include="ViewModels\Settings\SettingsViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ShipsViewModel.cs" />
-    <Compile Include="ViewModels\Contents\SlotItemsViewModel.cs" />
-    <Compile Include="ViewModels\Settings\WindowSettingsViewModel.cs" />
-    <Compile Include="ViewModels\StatusBarViewModel.cs" />
-    <Compile Include="ViewModels\TabItemViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ToolsViewModel.cs" />
-    <Compile Include="ViewModels\VolumeViewModel.cs" />
-    <Compile Include="Views\AirBaseWindow.xaml.cs">
-      <DependentUpon>AirBaseWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Behaviors\FlickFleetsAction.cs" />
-    <Compile Include="Views\Behaviors\FlickTrigger.cs" />
-    <Compile Include="Views\Behaviors\FocusAction.cs" />
-    <Compile Include="Views\Behaviors\NavigatorBehavior.cs" />
-    <Compile Include="Views\Behaviors\ScreenshotAction.cs" />
-    <Compile Include="Views\Behaviors\TaskbarBehavior.cs" />
-    <Compile Include="Views\Behaviors\WindowActionBehavior.cs" />
-    <Compile Include="Views\Behaviors\WindowCloseCancelBehavior.cs" />
-    <Compile Include="Views\Behaviors\WindowScreenshotAction.cs" />
-    <Compile Include="Views\Behaviors\WindowTransitionBehavior.cs" />
-    <Compile Include="Views\BrowserWindow.xaml.cs">
-      <DependentUpon>BrowserWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\AirBases.xaml.cs">
-      <DependentUpon>AirBases.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\StateDetailIndicator.xaml.cs">
-      <DependentUpon>StateDetailIndicator.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\StateIconIndicator.xaml.cs">
-      <DependentUpon>StateIconIndicator.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\Tools.xaml.cs">
-      <DependentUpon>Tools.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Controls\ExpanderButton.cs" />
-    <Compile Include="Views\Controls\MetroComboBox.cs" />
-    <Compile Include="Views\Controls\PromptComboBox.cs" />
-    <Compile Include="Views\Controls\PromptTextBox.cs" />
-    <Compile Include="Views\Converters\HtmlBreakToNewLineConverter.cs" />
-    <Compile Include="Views\Converters\RangeToBooleanConverter.cs" />
-    <Compile Include="Views\Converters\StringToSlotItemIconTypeConverter.cs" />
-    <Compile Include="Views\Converters\StringToVisibilityConverter.cs" />
-    <Compile Include="Views\InformationWindow.xaml.cs">
-      <DependentUpon>InformationWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Controls\KanColleHost.cs" />
-    <Compile Include="Views\Behaviors\ZoomAction.cs" />
-    <Compile Include="Views\BrowserNavigator.xaml.cs">
-      <DependentUpon>BrowserNavigator.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Catalogs\ShipCatalogWindow.xaml.cs">
-      <DependentUpon>ShipCatalogWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Catalogs\SlotItemCatalogWindow.xaml.cs">
-      <DependentUpon>SlotItemCatalogWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\Overview.xaml.cs">
-      <DependentUpon>Overview.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\Homeport.xaml.cs">
-      <DependentUpon>Homeport.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\Quests.xaml.cs">
-      <DependentUpon>Quests.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\QuestViewSource.cs" />
-    <Compile Include="Views\Contents\Shipyard.xaml.cs">
-      <DependentUpon>Shipyard.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Contents\Expeditions.xaml.cs">
-      <DependentUpon>Expeditions.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Controls\ZoomFactorSelector.xaml.cs">
-      <DependentUpon>ZoomFactorSelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dev\DebugTab.xaml.cs">
-      <DependentUpon>DebugTab.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ExitDialog.xaml.cs">
-      <DependentUpon>ExitDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\FleetWindow.xaml.cs">
-      <DependentUpon>FleetWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\KanColleWindow.xaml.cs">
-      <DependentUpon>KanColleWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\KanColleWindowButtons.xaml.cs">
-      <DependentUpon>KanColleWindowButtons.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Browser.xaml.cs">
-      <DependentUpon>Browser.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\PluginSettingsWindow.xaml.cs">
-      <DependentUpon>PluginSettingsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Notification.xaml.cs">
-      <DependentUpon>Notification.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Operation.xaml.cs">
-      <DependentUpon>Operation.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Others.xaml.cs">
-      <DependentUpon>Others.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\PluginInfo.xaml.cs">
-      <DependentUpon>PluginInfo.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Plugins.xaml.cs">
-      <DependentUpon>Plugins.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\RichText.cs" />
-    <Compile Include="Views\Settings\VersionInfo.xaml.cs">
-      <DependentUpon>VersionInfo.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Window.xaml.cs">
-      <DependentUpon>Window.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\StartContent.xaml.cs">
-      <DependentUpon>StartContent.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Settings.xaml.cs">
-      <DependentUpon>Settings.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Settings\Network.xaml.cs">
-      <DependentUpon>Network.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\StatusBar.xaml.cs">
-      <DependentUpon>StatusBar.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\QuestWindow.xaml.cs">
-      <DependentUpon>QuestWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Validation\Int32Rule.cs" />
-    <Compile Include="Win32\INTERNET_CACHE_ENTRY_INFOA.cs" />
-    <Compile Include="Win32\WinHttp.cs" />
-    <Compile Include="Win32\WinInet.cs" />
-    <Compile Include="Win32\DVTARGETDEVICE.cs" />
-    <Compile Include="Win32\IServiceProvider.cs" />
-    <Compile Include="Win32\RECT.cs" />
-    <Compile Include="WindowService.cs" />
-    <Page Include="Styles\Controls.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Styles\Themes\Accents\Blue.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Styles\Themes\Accents\Dark.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Styles\Themes\Accents\Orange.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Styles\Themes\Accents\Purple.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Styles\Themes\Accents\Red.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\Generic.InternalControls.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\Generic.KanColleHost.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <DependentUpon>Generic.xaml</DependentUpon>
-    </Page>
-    <Page Include="Themes\Generic.MetroComboBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\AirBaseWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\BrowserNavigator.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\BrowserWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Catalogs\ShipCatalogWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Catalogs\SlotItemCatalogWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\AirBases.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\StateDetailIndicator.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\StateIconIndicator.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Overview.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Homeport.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Expeditions.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Quests.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Tools.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\InformationWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Controls\ZoomFactorSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dev\DebugTab.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ExitDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\FleetWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\KanColleWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\KanColleWindowButtons.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Browser.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Common.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\PluginSettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Notification.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Operation.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Others.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\PluginInfo.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Plugins.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\VersionInfo.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Window.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\StartContent.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Settings\Settings.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Settings\Network.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\StatusBar.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Shipyard.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Contents\Fleets.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Information.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Compile Include="Application.xaml.cs">
-      <DependentUpon>Application.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Application.Static.cs">
-      <DependentUpon>Application.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Win32\IViewObject.cs" />
-    <Compile Include="Win32\NativeMethods.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\FleetsViewModel.cs" />
-    <Compile Include="ViewModels\Contents\Fleets\FleetViewModel.cs" />
-    <Compile Include="ViewModels\StartContentViewModel.cs" />
-    <Compile Include="ViewModels\Contents\ShipViewModel.cs" />
-    <Compile Include="Views\Contents\Fleets.xaml.cs">
-      <DependentUpon>Fleets.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Information.xaml.cs">
-      <DependentUpon>Information.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Views\QuestWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <ProjectReference Include="..\Grabacr07.KanColleViewer.Composition\KanColleViewer.Composition.csproj" />
+    <ProjectReference Include="..\Grabacr07.KanColleViewer.Controls\KanColleViewer.Controls.csproj" />
+    <ProjectReference Include="..\Grabacr07.KanColleWrapper\KanColleWrapper.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.en.resx">
-      <DependentUpon>Resources.resx</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.ko-KR.resx">
-      <DependentUpon>Resources.resx</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.zh-CN.resx">
+    <EmbeddedResource Update="Properties\Resources.en.resx">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ko-KR.resx">
       <DependentUpon>Resources.resx</DependentUpon>
     </EmbeddedResource>
-    <None Include="DaiNai_Ship.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>json\DaiNai_Ship.json</TargetPath>
-    </None>
-    <None Include="EventMap.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>json\EventMap.json</TargetPath>
-    </None>
-    <None Include="TP_Ship_SlotItem.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>json\TP_Ship_SlotItem.json</TargetPath>
-    </None>
-    <None Include="MapCellNames.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>json\MapCellNames.json</TargetPath>
-    </None>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
+    <EmbeddedResource Update="Properties\Resources.zh-CN.resx">
+      <DependentUpon>Resources.resx</DependentUpon>
+    </EmbeddedResource>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <AppDesigner Include="Properties\" />
+    <Compile Update="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Grabacr07.KanColleViewer.Composition\KanColleViewer.Composition.csproj">
-      <Project>{cc139e98-d847-41da-b20f-8aca4564f375}</Project>
-      <Name>KanColleViewer.Composition</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Grabacr07.KanColleViewer.Controls\KanColleViewer.Controls.csproj">
-      <Project>{978239d0-3129-4c54-aac6-493f0de48bf5}</Project>
-      <Name>KanColleViewer.Controls</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Grabacr07.KanColleWrapper\KanColleWrapper.csproj">
-      <Project>{0bc8cf79-76d9-46ad-867f-fec6c6ad4594}</Project>
-      <Name>KanColleWrapper</Name>
-    </ProjectReference>
-    <!-- MetroTrilithon 参照削除済み (Phase 1): Infrastructure/ に内製化 -->
-  </ItemGroup>
+
   <ItemGroup>
     <DesignData Include="SampleData\ShipCatalogSortWorkerSampleData.xaml" />
     <DesignData Include="SampleData\ShipyardViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FleetsViewModelSampleData.xaml" />
     <DesignData Include="SampleData\FleetViewModelSampleData.xaml" />
     <DesignData Include="SampleData\ShipViewModelSampleData.xaml" />
+    <Page Remove="SampleData\**\*.xaml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Application.xaml" />
+    <ApplicationDefinition Include="Application.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="KanColleViewer.VisualElementsManifest.xml">
+    <None Update="DaiNai_Ship.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\DaiNai_Ship.json</TargetPath>
+    </None>
+    <None Update="EventMap.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\EventMap.json</TargetPath>
+    </None>
+    <None Update="TP_Ship_SlotItem.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\TP_Ship_SlotItem.json</TargetPath>
+    </None>
+    <None Update="MapCellNames.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>json\MapCellNames.json</TargetPath>
+    </None>
+    <None Update="KanColleViewer.VisualElementsManifest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="readme.txt">
+    <None Update="readme.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="..\..\LICENSE.txt">
@@ -727,32 +168,20 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <!-- CEF ファイルを bin 配下に確実にコピー（NuGet パッケージからコピー失敗対策） -->
+
   <ItemGroup>
     <Folder Include="Themes\Accents\" />
   </ItemGroup>
-  <Target Name="EnsureCefFilescopied" AfterTargets="Build">
+
+  <!-- CEF の locales を必要な言語のみに絞り、vk_swiftshader_icd.json を json 配下へ移動 -->
+  <Target Name="TrimCefFiles" AfterTargets="Build">
     <ItemGroup>
-      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\runtimes\win-x64\native\*.*" />
-      <_CefFilesToCopy Include="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\**\*.*" Exclude="$(MSBuildThisFileDirectory)..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\CEF\win-x64\locales\**\*.*" />
       <_CefLocalesToDelete Include="$(OutDir)locales\*.pak" Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
     </ItemGroup>
-    <Copy SourceFiles="@(_CefFilesToCopy)" DestinationFiles="@(_CefFilesToCopy->'$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <MakeDir Directories="$(OutDir)json" />
     <Delete Files="$(OutDir)json\vk_swiftshader_icd.json" TreatErrorsAsWarnings="true" />
     <Move SourceFiles="$(OutDir)vk_swiftshader_icd.json" DestinationFiles="$(OutDir)json\vk_swiftshader_icd.json" Condition="Exists('$(OutDir)vk_swiftshader_icd.json')" />
     <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
   </Target>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.145.0.26\build\chromiumembeddedframework.runtime.win-x64.props'))" />
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.145.0.26\build\chromiumembeddedframework.runtime.win-x86.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.targets'))" />
-  </Target>
-  <Import Project="..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.145.0.260\build\CefSharp.Common.targets')" />
+
 </Project>
