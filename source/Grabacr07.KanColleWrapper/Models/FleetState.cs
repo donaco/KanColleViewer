@@ -348,10 +348,22 @@ namespace Grabacr07.KanColleWrapper.Models
 				}
 			}
 
+			// 連合艦隊編成時、第二艦隊の旗艦が大破しても進撃可能なため、大破判定から除外
+			var ignoredHeavilyDamagedShipId = -1;
+			if (this.homeport.Organization.Combined)
+			{
+				var secondFleet = this.homeport.Organization.Fleets[2];
+				if (secondFleet != null && secondFleet.Ships.Length >= 1)
+				{
+					ignoredHeavilyDamagedShipId = secondFleet.Ships[0].Id;
+				}
+			}
+
 			var heavilyDamaged = ships
 				.Where(s => !this.homeport.Repairyard.CheckRepairing(s.Id))
 				.Where(s => !s.Situation.HasFlag(ShipSituation.Evacuation) && !s.Situation.HasFlag(ShipSituation.Tow))
 				.Where(s => !(state.HasFlag(FleetSituation.Sortie) && s.Situation.HasFlag(ShipSituation.DamageControlled)))
+				.Where(s => s.Id != ignoredHeavilyDamagedShipId)
 				.Any(s => s.HP.IsHeavilyDamage());
 			if (heavilyDamaged)
 			{
