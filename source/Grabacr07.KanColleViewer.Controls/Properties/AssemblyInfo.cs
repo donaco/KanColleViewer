@@ -1,7 +1,10 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Markup;
+
+[assembly: SupportedOSPlatform("windows")]
 
 [assembly: AssemblyTitle("KanColleViewer.Controls")]
 [assembly: AssemblyCompany("grabacr.net")]

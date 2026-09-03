@@ -1,6 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+
+// API の応答仕様に合わせた小文字の型名のため、CS8981 を抑制します。
+#pragma warning disable CS8981
 
 namespace Grabacr07.KanColleWrapper.Models.Raw
 {
@@ -18,3 +21,5 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 	}
 	// ReSharper restore InconsistentNaming
 }
+
+#pragma warning restore CS8981
