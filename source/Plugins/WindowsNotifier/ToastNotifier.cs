@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			var toast = new Toast(header, body);
 			toast.Activated += activated;
-			if (failed != null) toast.ToastFailed += () => failed(new Exception("Toast failed."));
+			if (failed != null) toast.ToastFailed += ex => failed(ex);
 
 			toast.Show();
 		}

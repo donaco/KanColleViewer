@@ -1,7 +1,11 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Markup;
+
+// 本アプリケーションは Windows 専用 (レジストリ / WPF / WMI などを使用)
+[assembly: SupportedOSPlatform("windows")]
 
 [assembly: AssemblyTitle("提督業も忙しい！")]
 [assembly: AssemblyDescription("提督業も忙しい！")]

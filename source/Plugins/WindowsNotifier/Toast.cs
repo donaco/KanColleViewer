@@ -1,73 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using DesktopToast;
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using CommunityToolkit.WinUI.Notifications;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
 	/// <summary>
-	/// Windows 8 のトースト通知機能を提供します。
+	/// Windows のトースト通知機能を提供します。
 	/// </summary>
 	public class Toast
 	{
 		#region static members
 
 		/// <summary>
-		/// トースト通期機能をサポートしているかどうかを示す値を取得します。
+		/// トースト通知機能をサポートしているかどうかを示す値を取得します。
 		/// </summary>
 		/// <returns>
-		/// 動作しているオペレーティング システムが Windows 8 (NT 6.2) 以降の場合は true、それ以外の場合は false。
+		/// 動作しているオペレーティング システムが Windows 10 以降の場合は true、それ以外の場合は false。
 		/// </returns>
-		public static bool IsSupported
-		{
-			get
-			{
-				var version = Environment.OSVersion.Version;
-				return (version.Major == 6 && version.Minor >= 2) || version.Major > 6;
+		public static bool IsSupported => Environment.OSVersion.Version.Major >= 10;
 
-			}
+		/// <summary>
+		/// 通知がクリックされたときに、対応する <see cref="Toast"/> を解決するためのテーブル。
+		/// </summary>
+		private static readonly ConcurrentDictionary<string, Toast> toasts = new ConcurrentDictionary<string, Toast>();
+
+		private static int isHandlerRegistered;
+
+		private const string TagKey = "kcv-toast-id";
+
+		private static void EnsureHandlerRegistered()
+		{
+			if (Interlocked.Exchange(ref isHandlerRegistered, 1) != 0) return;
+
+			ToastNotificationManagerCompat.OnActivated += e =>
+			{
+				var args = ToastArguments.Parse(e.Argument);
+				if (!args.Contains(TagKey)) return;
+
+				Toast toast;
+				if (toasts.TryRemove(args[TagKey], out toast))
+				{
+					toast.Activated?.Invoke();
+				}
+			};
 		}
 
 		#endregion
-#if DEBUG
-		public const string AppId = "Grabacr07.KanColleViewer.Debug";
-#else
-		public const string AppId = "Grabacr07.KanColleViewer"; 
-#endif
 
 		public event Action Activated;
 
-		public event Action ToastFailed;
+		public event Action<Exception> ToastFailed;
 
-		private readonly ToastRequest request;
+		private readonly string header;
+		private readonly string body;
+		private readonly string id = Guid.NewGuid().ToString("N");
 
 		public Toast(string header, string body)
 		{
-			this.request = new ToastRequest
-			{
-				ToastHeadline = header,
-				ToastBody = body,
-#if DEBUG
-				ShortcutFileName = "提督業も忙しい！ (debug).lnk",
-#else
-				ShortcutFileName = "提督業も忙しい！.lnk", 
-#endif
-				ShortcutTargetFilePath = Assembly.GetEntryAssembly().Location,
-				AppId = AppId,
-			};
+			this.header = header;
+			this.body = body;
 		}
 
 		public void Show()
 		{
-			ToastManager.ShowAsync(this.request)
-				.ContinueWith(t =>
-				{
-					if (t.Result == ToastResult.Activated)
-						this.Activated?.Invoke();
-					if (t.Result == ToastResult.Failed)
-						this.ToastFailed?.Invoke();
-				});
+			try
+			{
+				EnsureHandlerRegistered();
+				toasts[this.id] = this;
+
+				new ToastContentBuilder()
+					.AddArgument(TagKey, this.id)
+					.AddText(this.header)
+					.AddText(this.body)
+					.Show();
+			}
+			catch (Exception ex)
+			{
+				Toast removed;
+				toasts.TryRemove(this.id, out removed);
+				this.ToastFailed?.Invoke(ex);
+			}
 		}
 	}
 }

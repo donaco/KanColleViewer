@@ -1,5 +1,9 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+
+// 本プラグインは Windows 専用 (Windows 通知 API を使用)
+[assembly: SupportedOSPlatform("windows")]
 
 [assembly: AssemblyTitle("提督業も忙しい！ Windows 通知プラグイン")]
 [assembly: AssemblyDescription("提督業も忙しい！ Windows 通知プラグイン")]

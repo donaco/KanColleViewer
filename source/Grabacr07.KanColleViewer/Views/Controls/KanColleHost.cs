@@ -353,7 +353,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.focusInInputbox = hasFocus;
 			};
 
-			this.WebBrowser.JavascriptObjectRepository.Register(handler.Id, handler, true);
+			this.WebBrowser.JavascriptObjectRepository.Register(handler.Id, handler, BindingOptions.DefaultBinder);
 			frame.ExecuteJavaScriptAsync(script);
 		}
 	}

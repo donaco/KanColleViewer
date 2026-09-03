@@ -18,6 +18,17 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		// Assembly.GetExecutingAssembly または AppDomain.CurrentDomain.BaseDirectory を使う
 		private static readonly string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppDomain.CurrentDomain.BaseDirectory;
 		private static readonly string cefDirectory = ResolveCefDirectory();
+
+		/// <summary>
+		/// locales フォルダーのパスを解決します。
+		/// CEF ランタイムと同じ場所に存在する場合はそちらを優先します。
+		/// </summary>
+		private static string LocalesDirectory {
+			get {
+				var beside = Path.Combine(cefDirectory, "locales");
+				return Directory.Exists(beside) ? beside : Path.Combine(assemblyDirectory, "locales");
+			}
+		}
 		private const string MainProcessFileName = "KanColleViewer.exe";
 		private const string CustomBrowserSubprocessFileName = "KanColleViewer.BrowserSubprocess.exe";
 		private const string DefaultBrowserSubprocessFileName = "CefSharp.BrowserSubprocess.exe";
@@ -47,6 +58,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// サブフォルダー (x64/x86) → 出力ルート直下の順にフォールバックします。
 		/// </summary>
 		private static string ResolveCefDirectory() {
+			// .NET (Core) 版 CefSharp パッケージは runtimes\win-<arch>\native 配下に配置される
+			var runtimesDir = Path.Combine(
+				assemblyDirectory, "runtimes",
+				Environment.Is64BitProcess ? "win-x64" : "win-x86", "native");
+			if (File.Exists(Path.Combine(runtimesDir, "libcef.dll"))) {
+				return runtimesDir;
+			}
+
 			var archSubDir = Path.Combine(assemblyDirectory, Environment.Is64BitProcess ? "x64" : "x86");
 			if (File.Exists(Path.Combine(archSubDir, "libcef.dll"))) {
 				return archSubDir;
@@ -83,6 +102,12 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 				return customPath;
 			}
 
+			// .NET (Core) 版パッケージでは runtimes\win-<arch>\native 配下に配置される
+			var runtimesSubprocessPath = Path.Combine(cefDirectory, DefaultBrowserSubprocessFileName);
+			if (File.Exists(runtimesSubprocessPath)) {
+				return runtimesSubprocessPath;
+			}
+
 			return Path.Combine(assemblyDirectory, DefaultBrowserSubprocessFileName);
 		}
 
@@ -94,7 +119,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 				Path.Combine(cefDirectory, "icudtl.dat"),
 				Path.Combine(cefDirectory, "v8_context_snapshot.bin"),
 				browserSubprocessPath,
-				Path.Combine(assemblyDirectory, "locales", "en-US.pak"),
+				Path.Combine(LocalesDirectory, "en-US.pak"),
 			};
 
 			var missingFiles = requiredFiles
@@ -204,7 +229,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 				BrowserSubprocessPath = browserSubprocessPath,
 				RootCachePath = CachePath,
 				ResourcesDirPath = cefDirectory,
-				LocalesDirPath = Path.Combine(assemblyDirectory, "locales"),
+				LocalesDirPath = LocalesDirectory,
 				LogSeverity = LogSeverity.Disable,
 			};
 

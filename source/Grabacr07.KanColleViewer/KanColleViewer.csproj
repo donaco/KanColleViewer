@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
@@ -12,7 +12,6 @@
     <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
     <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
     <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
@@ -44,32 +43,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CefSharp.Common" Version="145.0.260" />
-    <PackageReference Include="CefSharp.Wpf" Version="145.0.260" />
-    <PackageReference Include="chromiumembeddedframework.runtime.win-x64" Version="145.0.26" />
-    <PackageReference Include="chromiumembeddedframework.runtime.win-x86" Version="145.0.26" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="145.0.260" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="InternalReservedAttributeGenerator" Version="0.1.2" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
-    <PackageReference Include="System.Buffers" Version="4.6.1" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.8" />
-    <PackageReference Include="System.Memory" Version="4.6.3" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <PackageReference Include="System.Management" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Runtime.Remoting" />
-    <Reference Include="System.ValueTuple" />
-    <Reference Include="System.Web" />
     <Reference Include="Vannatech.CoreAudio">
       <HintPath>..\..\assemblies\Vannatech.CoreAudio.dll</HintPath>
     </Reference>
