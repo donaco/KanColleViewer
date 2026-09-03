@@ -34,7 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterialChartPlugin", "Plug
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterDataViewer", "Plugins\MasterDataViewer\MasterDataViewer.csproj", "{08226BB3-A7A0-49E3-84DE-ED5B7A7D293E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventMapHpViewer", "..\..\EventMapHpViewer\EventMapHpViewer\EventMapHpViewer.csproj", "{912029C5-C147-459B-A735-3D559B2F193D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventMapHpViewer", "Plugins\EventMapHpViewer\EventMapHpViewer\EventMapHpViewer.csproj", "{912029C5-C147-459B-A735-3D559B2F193D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,9 +115,13 @@ Global
 		{08226BB3-A7A0-49E3-84DE-ED5B7A7D293E}.Release|x64.ActiveCfg = Release|x64
 		{08226BB3-A7A0-49E3-84DE-ED5B7A7D293E}.Release|x64.Build.0 = Release|x64
 		{912029C5-C147-459B-A735-3D559B2F193D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{912029C5-C147-459B-A735-3D559B2F193D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{912029C5-C147-459B-A735-3D559B2F193D}.Debug|x64.ActiveCfg = Debug|x64
+		{912029C5-C147-459B-A735-3D559B2F193D}.Debug|x64.Build.0 = Debug|x64
 		{912029C5-C147-459B-A735-3D559B2F193D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{912029C5-C147-459B-A735-3D559B2F193D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{912029C5-C147-459B-A735-3D559B2F193D}.Release|x64.ActiveCfg = Release|x64
+		{912029C5-C147-459B-A735-3D559B2F193D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
