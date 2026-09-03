@@ -26,4 +26,4 @@ using System.Windows.Markup;
 // 内製コントロール (PromptTextBox, PromptComboBox, ExpanderButton, Int32Rule 等) を kcvc に登録
 [assembly: XmlnsDefinition("http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls", "Grabacr07.KanColleViewer.Views.Controls")]
 
-[assembly: AssemblyVersion("4.8.5")]
+[assembly: AssemblyVersion("5.0.0")]
