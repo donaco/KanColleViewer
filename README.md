@@ -64,14 +64,6 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
 
-#### [Desktop Toast](https://github.com/emoacht/DesktopToast)
-> The MIT License (MIT)
->
-> Copyright (c) 2014-2015 EMO
-* **用途 :** トースト通知
-* **ライセンス :** The MIT License (MIT)
-* **ライセンス全文 :** [licenses/DesktopToast.txt](licenses/DesktopToast.txt)
-
 #### [.NET Core Audio APIs](https://netcoreaudio.codeplex.com/)
 > The MIT License (MIT)
 >
@@ -80,7 +72,7 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/NETCoreAudioAPIs.txt](licenses/NETCoreAudioAPIs.txt)
 
-#### [CefSharp.Wpf](http://cefsharp.github.io/)
+#### [CefSharp.Wpf.NETCore](http://cefsharp.github.io/)
 * **用途 :** 内蔵 Web ブラウザー
 * **ライセンス :** The 3-Clause BSD License
 * **ライセンス全文 :** [licenses/CefSharp.txt](licenses/CefSharp.txt)
@@ -89,4 +81,29 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **用途 :** 非同期処理
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/System.Reactive.txt](licenses/System.Reactive.txt)
+
+#### [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
+* **用途 :** MVVM 実装支援
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/CommunityToolkit.Mvvm.txt](licenses/CommunityToolkit.Mvvm.txt)
+
+#### [CommunityToolkit.WinUI.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
+* **用途 :** トースト通知
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/CommunityToolkit.WinUI.Notifications.txt](licenses/CommunityToolkit.WinUI.Notifications.txt)
+
+#### [Microsoft.Xaml.Behaviors.Wpf](https://github.com/microsoft/XamlBehaviorsWpf)
+* **用途 :** XAML ビヘイビア拡張
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/Microsoft.Xaml.Behaviors.Wpf.txt](licenses/Microsoft.Xaml.Behaviors.Wpf.txt)
+
+#### [System.ComponentModel.Composition](https://github.com/dotnet/runtime)
+* **用途 :** MEF によるプラグイン合成
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/System.ComponentModel.Composition.txt](licenses/System.ComponentModel.Composition.txt)
+
+#### [System.Management](https://github.com/dotnet/runtime)
+* **用途 :** WMI を利用したシステム管理情報の取得
+* **ライセンス :** The MIT License (MIT)
+* **ライセンス全文 :** [licenses/System.Management.txt](licenses/System.Management.txt)
 
