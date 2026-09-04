@@ -35,7 +35,7 @@ Chromium ベースの内蔵 Web ブラウザー ([CefSharp.Wpf](http://cefsharp.
 * Windows 11
 * Windows 10
   
-* [Microsoft Visual C++ 2015-2022 再頒布可能パッケージ](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+* [.NET デスクトップ ランタイム 10.0.11](https://dotnet.microsoft.com/ja-jp/download/dotnet/thank-you/runtime-desktop-10.0.11-windows-x64-installer)
 
 環境によってはMicrosoft Visual C++ 2015-2022 再頒布可能パッケージのインストールが必要になる場合があります。
 現在、艦これ本体のセキュア化に伴い暫定対応しています。  
