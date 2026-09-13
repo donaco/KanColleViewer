@@ -13,6 +13,7 @@ using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Settings;
+using Grabacr07.KanColleViewer.Services;
 using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleViewer.Views;
 using Grabacr07.KanColleWrapper;
@@ -83,6 +84,8 @@ namespace Grabacr07.KanColleViewer
 			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
 			if (isFirstInstance)
 			{
+				AppNotificationService.Initialize();
+
 				this.DispatcherUnhandledException += (sender, args) =>
 				{
 					if (args.Exception is DllNotFoundException dllEx)
@@ -260,6 +263,8 @@ namespace Grabacr07.KanColleViewer
 
 			try
 			{
+				AppNotificationService.Shutdown();
+
 				// CefSharp の完全シャットダウンを待つ
 				System.Diagnostics.Debug.WriteLine("Application: Shutting down CefSharp...");
 				Cef.Shutdown();

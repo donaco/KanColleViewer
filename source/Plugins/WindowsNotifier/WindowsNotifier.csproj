@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- ToastNotificationManagerCompat / Show() は Windows SDK 18362 以上で有効になる -->
+    <!-- AppNotificationManager / Show() は Windows SDK 18362 以上で有効になる -->
     <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>
@@ -27,17 +27,11 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.1.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Grabacr07.KanColleViewer.Composition\KanColleViewer.Composition.csproj" />
@@ -52,9 +46,8 @@
   <Target Name="CopyToHostPlugins" AfterTargets="Build">
     <ItemGroup>
       <_PluginFilesToCopy Include="$(TargetPath)" />
-      <_PluginFilesToCopy Include="$(TargetDir)CommunityToolkit.WinUI.Notifications.dll" />
     </ItemGroup>
-    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\Plugins" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\win-x64\Plugins" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
