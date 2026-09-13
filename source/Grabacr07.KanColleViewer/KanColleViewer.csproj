@@ -172,6 +172,7 @@
     AssignTargetPaths の後に確定する項目から不要ファイルを除外します。
     ・CEF の locales\*.pak は許可リスト以外を除外
     ・Windows App SDK (WinUI) の *.mui は全言語不要のため除外
+    ・Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
   -->
   <Target Name="FilterUnusedLocaleResources" AfterTargets="AssignTargetPaths">
     <ItemGroup>
@@ -182,15 +183,27 @@
 
       <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
       <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
+
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)"
+                             Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)"
+                           Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
     </ItemGroup>
   </Target>
 
-  <!-- CefSharp が ReferenceCopyLocalPaths 経由で追加する locales\*.pak / mui も除外 -->
+  <!--
+    CefSharp が ReferenceCopyLocalPaths 経由で追加する locales\*.pak / mui、
+    および Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
+  -->
   <Target Name="FilterUnusedReferenceCopyLocalPaths" AfterTargets="ResolveReferences">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
                                Condition="'%(Extension)' == '.pak' and $([System.String]::Copy('%(FullPath)').Contains('\locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.mui'" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="$([System.String]::Copy('%(FullPath)').Contains('\NpuDetect\')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
     </ItemGroup>
   </Target>
 
