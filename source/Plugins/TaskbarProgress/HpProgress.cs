@@ -85,20 +85,19 @@ namespace Grabacr07.KanColleViewer.Plugins
 			var org = KanColleClient.Current.Homeport?.Organization;
 			if (org == null) return;
 
-			Ship[] ships;
+			IEnumerable<Ship> ships;
 			if (org.Fleets.Values.Any(x => x.IsInSortie))
 			{
 				ships = org.Fleets.Values
 					.Where(x => x.IsInSortie)
 					.SelectMany(x => x.Ships)
-					.Where(x => !x.Situation.HasFlag(ShipSituation.Tow) && !x.Situation.HasFlag(ShipSituation.Evacuation))
-					.ToArray();
+					.Where(x => !x.Situation.HasFlag(ShipSituation.Tow) && !x.Situation.HasFlag(ShipSituation.Evacuation));
 			}
 			else
 			{
 				ships = org.Combined && org.CombinedFleet != null
-					? org.CombinedFleet.Fleets.SelectMany(x => x.Ships).ToArray()
-					: org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships?.ToArray() ?? Array.Empty<Ship>()
+					? org.CombinedFleet.Fleets.SelectMany(x => x.Ships)
+					: org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships ?? Array.Empty<Ship>()
 												: Array.Empty<Ship>();
 			}
 

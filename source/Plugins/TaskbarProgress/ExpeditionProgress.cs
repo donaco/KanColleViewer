@@ -100,11 +100,10 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 			this.wrappers = KanColleClient.Current.Homeport.Organization.Fleets
 				.Skip(1)
-				.Select(x => new { x.Value.Id, x.Value.Expedition, })
-				.Where(a => a.Expedition != null)
-				.Select(a =>
+				.Where(x => x.Value.Expedition != null)
+				.Select(x =>
 				{
-					var w = new ExpeditionWrapper(a.Id, a.Expedition);
+					var w = new ExpeditionWrapper(x.Value.Id, x.Value.Expedition);
 						w.Subscribe(nameof(ExpeditionWrapper.State), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(w);
 						w.AddTo(this.wrapperDisposable);
 					return w;
