@@ -122,6 +122,10 @@ namespace Grabacr07.KanColleViewer
 				// DaiNaiShipProvider はゲーム中にローカルファイルのみを参照します。
 				_ = DaiNaiShipProvider.UpdateLocalFileAsync();
 
+				// TP_Ship_SlotItem.json も起動時だけ更新します。
+				// TransportPointCalculator はゲーム中にローカルファイルのみを参照します。
+				_ = TpShipSlotItemUpdater.UpdateLocalFileAsync();
+
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
 

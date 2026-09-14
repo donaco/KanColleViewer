@@ -87,5 +87,14 @@ namespace Grabacr07.KanColleViewer.Properties {
                 return ((string)(this["DaiNaiShipSource"]));
             }
         }
+
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://dona-co.art/kcv/TP_Ship_SlotItem.json")]
+        public string TP_ShipSource {
+            get {
+                return ((string)(this["TP_ShipSource"]));
+            }
+        }
     }
 }
