@@ -98,7 +98,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			{
 				{ 75, 5m }, { 68, 8m }, { 193, 8m }, { 166, 8m }, { 230, 8m },
 				{ 449, 8m }, { 355, 8m }, { 436, 8m }, { 482, 8m }, { 408, 8m },
-				{ 409, 8m }, { 494, 8m }, { 495, 8m }, { 514, 8m }, { 167, 2m },
+				{ 409, 8m }, { 494, 8m }, { 495, 8m }, { 514, 8m }, { 576, 8m }, { 167, 2m },
 				{ 525, 2m }, { 526, 2m }, { 145, 1m }, { 150, 1m }, { 241, 1m },
 			};
 
@@ -116,7 +116,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 				_shipTypeTp = ParseDictionary(root["shipTypeTp"] as JObject, "shipTypeTp") ?? _shipTypeTp;
 				_shipTp = ParseDictionary(root["shipTp"] as JObject, "shipTp") ?? _shipTp;
-				_ItemTp = ParseDictionary(root["ItemTp"] as JObject, "ItemTp") ?? _ItemTp;
+				_ItemTp = ParseDictionary(root["slotItemTp"] as JObject, "ItemTp") ?? _ItemTp;
 			}
 			catch
 			{
