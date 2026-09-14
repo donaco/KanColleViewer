@@ -8,7 +8,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 	/// </summary>
 	public class Toast
 	{
-		#region static members
+		private static readonly bool IsWindows10OrLater = Environment.OSVersion.Version.Major >= 10;
 
 		/// <summary>
 		/// トースト通知機能をサポートしているかどうかを示す値を取得します。
@@ -16,12 +16,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		/// <returns>
 		/// 動作しているオペレーティング システムが Windows 10 以降の場合は true、それ以外の場合は false。
 		/// </returns>
-		public static bool IsSupported => Environment.OSVersion.Version.Major >= 10 && AppNotificationService.IsAvailable;
-
-		/// <summary>
-		/// 通知がクリックされたときに、対応する <see cref="Toast"/> を解決するためのテーブル。
-		/// </summary>
-		#endregion
+		public static bool IsSupported => IsWindows10OrLater && AppNotificationService.IsAvailable;
 
 		public event Action Activated;
 
