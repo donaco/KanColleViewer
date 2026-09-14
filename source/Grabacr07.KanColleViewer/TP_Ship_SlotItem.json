@@ -1,4 +1,5 @@
 {
+  "version": 2026091410,
   "shipTypeTp": {
     "2": { "shipTypeTp": "5", "comment": "駆逐艦" },
     "3": { "shipTypeTp": "2", "comment": "軽巡洋艦" },
@@ -29,6 +30,7 @@
     "494": { "ItemTp": "8", "comment": "特大発動艇+チハ" },
     "495": { "ItemTp": "8", "comment": "特大発動艇+チハ改" },
     "514": { "ItemTp": "8", "comment": "特大発動艇+Ⅲ号戦車J型" },
+    "576": { "ItemTp": "8", "comment": "大発動艇(R35&フランス兵)" },
     "167": { "ItemTp": "2", "comment": "特二式内火艇" },
     "525": { "ItemTp": "2", "comment": "特四式内火艇" },
     "526": { "ItemTp": "2", "comment": "特四式内火艇改" },
