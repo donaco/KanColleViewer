@@ -121,6 +121,10 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		#endregion
 
 		private const int DeepSeaThreshold = 1500;
+		private static readonly char[] CsvSpecialCharacters = { ',', '"', '\n', '\r' };
+		private static readonly Regex HtmlBreakRegex = new Regex(
+			@"<\s*br\s*/?\s*>",
+			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
@@ -296,7 +300,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		{
 			if (string.IsNullOrEmpty(field)) return "";
 
-			if (field.IndexOfAny(new[] { ',', '"', '\n', '\r' }) >= 0)
+			if (field.IndexOfAny(CsvSpecialCharacters) >= 0)
 			{
 				return "\"" + field.Replace("\"", "\"\"") + "\"";
 			}
@@ -319,7 +323,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 			{
 				return text;
 			}
-			return Regex.Replace(text, @"<\s*br\s*/?\s*>", "", RegexOptions.IgnoreCase);
+			return HtmlBreakRegex.Replace(text, string.Empty);
 		}
 
 		private void UpdateItems()
