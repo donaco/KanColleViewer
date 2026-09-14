@@ -66,7 +66,7 @@
   </ItemGroup>
 
   <Target Name="CopyToHostPlugins" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\win-x64\Plugins" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Configuration)\win-x64\Plugins" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

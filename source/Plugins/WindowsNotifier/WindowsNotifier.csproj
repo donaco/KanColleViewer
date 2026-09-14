@@ -47,7 +47,7 @@
     <ItemGroup>
       <_PluginFilesToCopy Include="$(TargetPath)" />
     </ItemGroup>
-    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Platform)\$(Configuration)\win-x64\Plugins" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Grabacr07.KanColleViewer\bin\$(Configuration)\win-x64\Plugins" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
