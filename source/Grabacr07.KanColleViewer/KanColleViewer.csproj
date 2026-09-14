@@ -4,6 +4,10 @@
     <!-- WindowsNotifier プラグインが使用する WinRT ランタイムを配置するため SDK 版を指定 -->
     <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SatelliteResourceLanguages>en-US;ja-JP;ko-KR;zh-CN</SatelliteResourceLanguages>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
@@ -36,18 +40,19 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>14.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>14.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="145.0.260" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="InternalReservedAttributeGenerator" Version="0.1.2" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
@@ -158,15 +163,73 @@
     <Folder Include="Themes\Accents\" />
   </ItemGroup>
 
-  <!-- CEF の locales を必要な言語のみに絞り、vk_swiftshader_icd.json を json 配下へ移動 -->
-  <Target Name="TrimCefFiles" AfterTargets="Build">
+  <!-- 出力に含める CEF ロケール (pak) の許可リスト -->
+  <PropertyGroup>
+    <KeepCefLocales>;en-US.pak;ja.pak;ko.pak;zh-CN.pak;</KeepCefLocales>
+  </PropertyGroup>
+
+  <!--
+    AssignTargetPaths の後に確定する項目から不要ファイルを除外します。
+    ・CEF の locales\*.pak は許可リスト以外を除外
+    ・Windows App SDK (WinUI) の *.mui は全言語不要のため除外
+    ・Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
+  -->
+  <Target Name="FilterUnusedLocaleResources" AfterTargets="AssignTargetPaths">
     <ItemGroup>
-      <_CefLocalesToDelete Include="$(OutDir)locales\*.pak" Exclude="$(OutDir)locales\ja.pak;$(OutDir)locales\en-US.pak;$(OutDir)locales\zh-CN.pak;$(OutDir)locales\ko.pak" />
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)"
+                             Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)"
+                           Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
+
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)"
+                             Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)"
+                           Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
     </ItemGroup>
+  </Target>
+
+  <!--
+    CefSharp が ReferenceCopyLocalPaths 経由で追加する locales\*.pak / mui、
+    および Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
+  -->
+  <Target Name="FilterUnusedReferenceCopyLocalPaths" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="'%(Extension)' == '.pak' and $([System.String]::Copy('%(FullPath)').Contains('\locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.mui'" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="$([System.String]::Copy('%(FullPath)').Contains('\NpuDetect\')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="TrimCefFiles" AfterTargets="Build">
     <MakeDir Directories="$(OutDir)json" />
     <Delete Files="$(OutDir)json\vk_swiftshader_icd.json" TreatErrorsAsWarnings="true" />
     <Move SourceFiles="$(OutDir)vk_swiftshader_icd.json" DestinationFiles="$(OutDir)json\vk_swiftshader_icd.json" Condition="Exists('$(OutDir)vk_swiftshader_icd.json')" />
-    <Delete Files="@(_CefLocalesToDelete)" TreatErrorsAsWarnings="true" />
+  </Target>
+
+  <!--
+    プラグイン側の CopyToHostPlugins は、プラグイン自体に変更が無い場合
+    (最新性チェックによりビルドがスキップされた場合) 実行されないことがあるため、
+    ホストのビルド完了後に各プラグインの出力を確実にコピーします。
+  -->
+  <ItemGroup>
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\Counter\bin\$(Platform)\$(Configuration)\Counter.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\TaskbarProgress\bin\$(Platform)\$(Configuration)\TaskbarProgress.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\MasterDataViewer\bin\$(Platform)\$(Configuration)\ExPlugin.MasterDataViewer.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\WindowsNotifier\bin\$(Platform)\$(Configuration)\WindowsNotifier.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\EventMapHpViewer\EventMapHpViewer\bin\$(Platform)\$(Configuration)\EventMapHpViewer.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\MaterialChartPlugin\MaterialChartPlugin\bin\$(Platform)\$(Configuration)\MaterialChartPlugin.dll" />
+    <PluginBinaries Include="$(MSBuildThisFileDirectory)..\Plugins\MaterialChartPlugin\MaterialChartPlugin\bin\$(Platform)\$(Configuration)\System.Windows.Controls.DataVisualization.Toolkit.dll" />
+  </ItemGroup>
+
+  <Target Name="CopyPluginsToHostOutput" AfterTargets="Build">
+    <Copy SourceFiles="%(PluginBinaries.Identity)" DestinationFolder="$(OutDir)Plugins" SkipUnchangedFiles="true" Condition="Exists('%(PluginBinaries.Identity)')" />
   </Target>
 
 </Project>

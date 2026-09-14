@@ -151,3 +151,12 @@ $RECYCLE.BIN/
 .github/
 # Application Insights Key
 *.InstrumentationKey.cs
+
+#############
+## Windows App SDK / AI 関連の自動生成ファイル
+#############
+
+# Microsoft.WindowsAppSDK パッケージが生成する AI/NPU 検出関連ファイル
+# (本プロジェクトは AI/NPU 機能を使用していないため除外)
+**/Microsoft.Windows.AI.*
+**/NpuDetect/
