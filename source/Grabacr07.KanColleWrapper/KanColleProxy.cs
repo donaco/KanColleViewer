@@ -11,11 +11,29 @@ namespace Grabacr07.KanColleWrapper
 	public partial class KanColleProxy
 	{
 		private readonly Subject<ApiSession> _apiSessionSubject = new Subject<ApiSession>();
+		private readonly IObservable<ApiSession> _apiSessionSource;
+		private readonly IObservable<ApiSession> _apiStart2GetData;
+		private readonly IObservable<ApiSession> _apiPort;
+		private readonly IObservable<ApiSession> _apiGetMemberMapInfo;
+		private readonly IObservable<ApiSession> _apiReqMapStart;
+		private readonly IObservable<ApiSession> _apiReqMapNext;
+		private readonly IObservable<ApiSession> _apiReqMapSelectEventMapRank;
+
+		public KanColleProxy()
+		{
+			this._apiSessionSource = this._apiSessionSubject.AsObservable();
+			this._apiStart2GetData = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_start2/getData");
+			this._apiPort = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_port/port");
+			this._apiGetMemberMapInfo = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/mapinfo");
+			this._apiReqMapStart = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/start");
+			this._apiReqMapNext = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/next");
+			this._apiReqMapSelectEventMapRank = this._apiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/select_eventmap_rank");
+		}
 
 		/// <summary>
 		/// KanColle API セッションを配信します。
 		/// </summary>
-		public IObservable<ApiSession> ApiSessionSource => this._apiSessionSubject.AsObservable();
+		public IObservable<ApiSession> ApiSessionSource => this._apiSessionSource;
 
 		/// <summary>
 		/// KanColleClient から API セッションを発行します。
@@ -28,22 +46,22 @@ namespace Grabacr07.KanColleWrapper
 		// ── 個別エンドポイント プロパティ (T4 生成相当) ────────────────────────────
 
 		public IObservable<ApiSession> api_start2_getData
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_start2/getData");
+			=> this._apiStart2GetData;
 
 		public IObservable<ApiSession> api_port
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_port/port");
+			=> this._apiPort;
 
 		public IObservable<ApiSession> api_get_member_mapinfo
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/mapinfo");
+			=> this._apiGetMemberMapInfo;
 
 		public IObservable<ApiSession> api_req_map_start
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/start");
+			=> this._apiReqMapStart;
 
 		public IObservable<ApiSession> api_req_map_next
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/next");
+			=> this._apiReqMapNext;
 
 		public IObservable<ApiSession> api_req_map_select_eventmap_rank
-			=> this.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/select_eventmap_rank");
+			=> this._apiReqMapSelectEventMapRank;
 	}
 
 	/// <summary>
@@ -56,7 +74,8 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		public static IObservable<SvData<T>> TryParse<T>(this IObservable<ApiSession> source) where T : class
 		{
-			return source.SelectMany(session =>
+			return source
+				.Select(session =>
 			{
 				try
 				{
@@ -64,14 +83,14 @@ namespace Grabacr07.KanColleWrapper
 					var root = JToken.Parse(body);
 					var dataTok = root["api_data"] ?? root;
 					var data = dataTok.ToObject<T>();
-					if (data == null) return Enumerable.Empty<SvData<T>>();
-					return new[] { new SvData<T>(session.Request, data) };
+					return data == null ? null : new SvData<T>(session.Request, data);
 				}
 				catch
 				{
-					return Enumerable.Empty<SvData<T>>();
+					return null;
 				}
-			});
+			})
+				.Where(data => data != null);
 		}
 	}
 

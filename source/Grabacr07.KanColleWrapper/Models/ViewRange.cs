@@ -252,7 +252,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (KanColleClient.Current.Settings.IsViewRangeCalcIncludeSecondFleet)
 				return fleets.Last().Ships;
 
-			return new Ship[0];
+			return Array.Empty<Ship>();
 		}
 
 		private static double GetLevelCoefficient(SlotItem item)

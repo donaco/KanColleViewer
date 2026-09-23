@@ -57,7 +57,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Ships 変更通知プロパティ
 
-		private Ship[] _Ships = new Ship[0];
+		private Ship[] _Ships = Array.Empty<Ship>();
 
 		/// <summary>
 		/// 艦隊に所属している艦娘の配列を取得します。

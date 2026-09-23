@@ -372,9 +372,9 @@ namespace Grabacr07.KanColleWrapper.Models
 				this.HP = new LimitedValue(this.RawData.api_nowhp, this.RawData.api_maxhp, 0);
 				this.Fuel = new LimitedValue(this.RawData.api_fuel, this.RawData.api_fuel, 0);
 				this.Bull = new LimitedValue(this.RawData.api_bull, this.RawData.api_bull, 0);
-				this.Slots = new ShipSlot[0];
+				this.Slots = Array.Empty<ShipSlot>();
 				this.ExSlot = new ShipSlot(null, 0, 0);
-				this.EquippedItems = new ShipSlot[0];
+				this.EquippedItems = Array.Empty<ShipSlot>();
 				return;
 			}
 
@@ -401,18 +401,18 @@ namespace Grabacr07.KanColleWrapper.Models
 			// null チェック強化
 			if (this.RawData.api_slot == null)
 			{
-				this.Slots = new ShipSlot[0];
+				this.Slots = Array.Empty<ShipSlot>();
 				this.ExSlot = new ShipSlot(null, 0, 0);
-				this.EquippedItems = new ShipSlot[0];
+				this.EquippedItems = Array.Empty<ShipSlot>();
 				return;
 			}
 
 			// homeport または Itemyard が null の場合のガード
 			if (this.homeport?.Itemyard?.SlotItems == null)
 			{
-				this.Slots = new ShipSlot[0];
+				this.Slots = Array.Empty<ShipSlot>();
 				this.ExSlot = new ShipSlot(null, 0, 0);
-				this.EquippedItems = new ShipSlot[0];
+				this.EquippedItems = Array.Empty<ShipSlot>();
 				return;
 			}
 

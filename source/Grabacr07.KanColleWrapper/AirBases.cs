@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			System.Diagnostics.Debug.WriteLine($"[AirBases.Update] Grouped into {groupedByArea.Count} areas.");
 
 			// 拡張情報をディクショナリに変換（海域IDをキーに）
-			var expandedDict = (expandedInfo ?? new kcsapi_air_base_expanded_info[0])
+			var expandedDict = (expandedInfo ?? Array.Empty<kcsapi_air_base_expanded_info>())
 				.ToDictionary(x => x.api_area_id);
 
 			// 各海域の航空隊を作成
@@ -273,7 +273,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.AreaName = GetAreaNameFromId(areaId);
 			this.MaintenanceLevel = expandedInfo?.api_maintenance_level ?? 0;
 			this.BaseCount = rawData.Length;
-			this.AirBaseNames = rawData?.Select(x => x.api_name).ToArray() ?? new string[0];
+			this.AirBaseNames = rawData?.Select(x => x.api_name).ToArray() ?? Array.Empty<string>();
 
 			// 各基地の情報を個別に保持（行動半径・装備スロットを計算）
 			this.AirBaseInfos = rawData?.Select(x => new AirBaseInfo
@@ -284,7 +284,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				EquipmentSlotIds = x.api_plane_info?
 					.Take(4)
 					.Select(p => p.api_slotid)
-					.ToArray() ?? new int[0],
+					.ToArray() ?? Array.Empty<int>(),
 				EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
 				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 				EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
@@ -297,7 +297,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				EquipmentConds = GetEquipmentConds(x.api_plane_info),
 				EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
 				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
-			}).ToArray() ?? new AirBaseInfo[0];
+			}).ToArray() ?? Array.Empty<AirBaseInfo>();
 
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
 		}
@@ -306,7 +306,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static string[] GetEquipmentIconTypes(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new string[0];
+				return Array.Empty<string>();
 
 			var icons = new List<string>();
 			foreach (var plane in planeInfo.Take(4))
@@ -349,7 +349,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentTypes(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var types = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -383,7 +383,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentSlotItemIds(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var ids = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -429,7 +429,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 				// 再構築・通知
 				this.RebuildAirBaseInfos();
-				this.AirBaseNames = this._rawData?.Select(x => x.api_name).ToArray() ?? new string[0];
+				this.AirBaseNames = this._rawData?.Select(x => x.api_name).ToArray() ?? Array.Empty<string>();
 				this.RaisePropertyChanged(nameof(this.AirBaseNames));
 			}
 			catch (Exception ex)
@@ -559,7 +559,7 @@ namespace Grabacr07.KanColleWrapper.Models
 					EquipmentSlotIds = x.api_plane_info?
 						.Take(4)
 						.Select(p => p.api_slotid)
-						.ToArray() ?? new int[0],
+						.ToArray() ?? Array.Empty<int>(),
 					EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
 					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
 					EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
@@ -572,7 +572,7 @@ namespace Grabacr07.KanColleWrapper.Models
 					EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
 					EquipmentConds = GetEquipmentConds(x.api_plane_info),
 					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
-				}).ToArray() ?? new AirBaseInfo[0];
+				}).ToArray() ?? Array.Empty<AirBaseInfo>();
 			}
 			catch (Exception ex)
 			{
@@ -585,7 +585,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static string[] GetEquipmentNames(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new string[0];
+				return Array.Empty<string>();
 
 			var names = new System.Collections.Generic.List<string>();
 			foreach (var plane in planeInfo.Take(4))
@@ -625,7 +625,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentLevels(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+					return Array.Empty<int>();
 
 			var levels = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -658,7 +658,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentAlvs(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var alvs = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -691,7 +691,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentAntiAirs(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var antiAirs = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -724,7 +724,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentIntercepts(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var intercepts = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -758,7 +758,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentAntibombs(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var antibombs = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -792,7 +792,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentCounts(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var counts = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -813,7 +813,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentMaxCounts(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var maxCounts = new List<int>();
 			foreach (var plane in planeInfo.Take(4))
@@ -897,7 +897,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static int[] GetEquipmentConds(kcsapi_plane_info[] planeInfo)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
-				return new int[0];
+				return Array.Empty<int>();
 
 			var conds = new List<int>();
 			foreach (var plane in planeInfo.Take(4))

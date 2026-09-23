@@ -235,7 +235,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		public FleetState(Homeport homeport, params Fleet[] fleets)
 		{
 			this.homeport = homeport;
-			this.source = fleets ?? new Fleet[0];
+			this.source = fleets ?? Array.Empty<Fleet>();
 
 			this.Condition = new FleetCondition();
 			this.CompositeDisposable.Add(this.Condition);
@@ -260,7 +260,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		public void Calculate()
 		{
 			var ships = this.source.SelectMany(x => x.Ships).WithoutEvacuated().ToArray();
-			var firstFleetShips = this.source.FirstOrDefault()?.Ships.WithoutEvacuated().ToArray() ?? new Ship[0];
+			var firstFleetShips = this.source.FirstOrDefault()?.Ships.WithoutEvacuated().ToArray() ?? Array.Empty<Ship>();
 
 			this.TotalLevel = ships.HasItems() ? ships.Sum(x => x.Level) : 0;
 			this.AverageLevel = ships.HasItems() ? (double)this.TotalLevel / ships.Length : 0.0;

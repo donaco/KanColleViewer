@@ -485,11 +485,11 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									deckId = Client.sortieDeckIds.First();
 								shipArray = org.Fleets.ContainsKey(deckId)
 									? org.Fleets[deckId].Ships
-									: new Ship[0];
+									: Array.Empty<Ship>();
 							}
 							else
 							{
-								shipArray = org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships : new Ship[0];
+								shipArray = org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships : Array.Empty<Ship>();
 							}
 
 							lock (Client.BattleStateLock)
@@ -504,7 +504,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										.Where(idx => idx >= 1 && idx <= shipArray.Length)
 										.Select(idx => shipArray[idx - 1].Id)
 										.ToArray()
-									: new int[0];
+								: Array.Empty<int>();
 							}
 
 							System.Diagnostics.Debug.WriteLine(

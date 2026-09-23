@@ -688,8 +688,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							// RawData に対して安全に拡張スロットを追加（末尾に -1 / 0 を付与）
 							var raw = ship.RawData;
 
-							var oldSlots = raw.api_slot ?? new int[0];
-							var oldOnslots = raw.api_onslot ?? new int[0];
+							var oldSlots = raw.api_slot ?? Array.Empty<int>();
+							var oldOnslots = raw.api_onslot ?? Array.Empty<int>();
 
 							var newSlots = new int[oldSlots.Length + 1];
 							Array.Copy(oldSlots, newSlots, oldSlots.Length);
