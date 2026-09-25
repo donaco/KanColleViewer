@@ -1,52 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!-- WindowsNotifier プラグインが使用する WinRT ランタイムを配置するため SDK 版を指定 -->
-    <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
-    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <SatelliteResourceLanguages>en-US;ja-JP;ko-KR;zh-CN</SatelliteResourceLanguages>
-    <OutputType>WinExe</OutputType>
-    <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>Grabacr07.KanColleViewer</RootNamespace>
-    <AssemblyName>KanColleViewer</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
-    <Platforms>AnyCPU;x64</Platforms>
-    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
-    <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
-    <NoWarn>0436</NoWarn>
-  </PropertyGroup>
+<PropertyGroup>
+  <!-- WindowsNotifier プラグインが使用する WinRT ランタイムを配置するため SDK 版を指定 -->
+  <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
+  <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+  <WindowsPackageType>None</WindowsPackageType>
+  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  <SatelliteResourceLanguages>en-US;ja-JP;ko-KR;zh-CN</SatelliteResourceLanguages>
+  <OutputType>WinExe</OutputType>
+  <UseWPF>true</UseWPF>
+  <UseWindowsForms>true</UseWindowsForms>
+  <RootNamespace>Grabacr07.KanColleViewer</RootNamespace>
+  <AssemblyName>KanColleViewer</AssemblyName>
+  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  <AppDesignerFolder>Properties</AppDesignerFolder>
+  <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
+  <Platforms>AnyCPU;x64</Platforms>
+  <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
+  <LangVersion>14.0</LangVersion>
+  <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
+  <NoWarn>0436</NoWarn>
+</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
-  </PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+  <DefineConstants>TRACE;DEBUG;BETA</DefineConstants>
+</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>14.0</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>14.0</LangVersion>
-  </PropertyGroup>
+<PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <DefineConstants>TRACE</DefineConstants>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <NoWarn>$(NoWarn);1591</NoWarn>
+</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="145.0.260" />
