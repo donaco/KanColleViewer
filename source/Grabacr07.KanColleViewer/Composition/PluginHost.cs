@@ -122,8 +122,7 @@ namespace Grabacr07.KanColleViewer.Composition
 				try
 				{
 					var asmCatalog = new AssemblyCatalog(filepath);
-					var partCount = asmCatalog.Parts.ToList().Count;
-					if (partCount > 0)
+					if (asmCatalog.Parts.Any())
 					{
 						catalog.Catalogs.Add(asmCatalog);
 					}

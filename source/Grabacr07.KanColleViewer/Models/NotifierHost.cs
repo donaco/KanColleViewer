@@ -133,7 +133,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notification = Notification.Create(
 				Notification.Types.BuildingCompleted,
 				Resources.Dockyard_NotificationMessage_Title,
-				string.Format(Resources.Dockyard_NotificationMessage, args.DockId, shipName),
+				$"{Resources.Dockyard_NotificationMessage}(args.DockId, shipName)",
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
@@ -162,7 +162,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notification = Notification.Create(
 				Notification.Types.RepairingCompleted,
 				Resources.Repairyard_NotificationMessage_Title,
-				string.Format(Resources.Repairyard_NotificationMessage, args.DockId, args.Ship.Info.Name),
+				$"{Resources.Repairyard_NotificationMessage}(args.DockId, args.Ship.Info.Name)",
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
@@ -249,12 +249,12 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private bool HasNosakiInTop2(Fleet fleet)
 		{
-			if (fleet?.Ships == null) return false;
+			if (fleet == null) return false;
+			if (fleet.Ships == null) return false;
 
-			return fleet.Ships
-				.Take(2)
-				.Where(s => s != null)
-				.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
+			// 上位 2 隻の船を抽出し、野崎船が 1 隻でもいるかチェック
+			var topShipping = fleet.Ships.Take(2).Where(s => s != null).ToArray();
+			return topShipping.Any(s => NosakiShipIds.Contains(s.Info?.Id ?? -1));
 		}
 
 		private void ResetNosakiTimerByFleetChange()
@@ -298,7 +298,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notify = Notification.Create(
 				Notification.Types.ExpeditionReturned,
 				Resources.Expedition_NotificationMessage_Title,
-				string.Format(Resources.Expedition_NotificationMessage, args.FleetName),
+				$"{Resources.Expedition_NotificationMessage}(args.FleetName)",
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notify);

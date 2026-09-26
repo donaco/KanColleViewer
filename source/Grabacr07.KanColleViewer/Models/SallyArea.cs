@@ -72,18 +72,12 @@ namespace Grabacr07.KanColleViewer.Models
 
 						if (File.Exists(localPath) && remoteVersion <= localVersion)
 						{
-							Debug.WriteLine(
-								"SallyArea.UpdateLocalFileAsync: 更新不要です。"
-								+ " local=" + localVersion
-								+ ", remote=" + remoteVersion);
-							return;
-						}
+								Debug.WriteLine($"SallyArea.UpdateLocalFileAsync: 更新不要です。local={localVersion}, remote={remoteVersion}");
+								return;
+							}
 
-						WriteLocalFileAtomically(localPath, remoteJson);
-						Debug.WriteLine(
-							"SallyArea.UpdateLocalFileAsync: EventMap.json を更新しました。"
-							+ " version=" + remoteVersion
-							+ ", 件数=" + remoteAreas.Length);
+							WriteLocalFileAtomically(localPath, remoteJson);
+							Debug.WriteLine($"SallyArea.UpdateLocalFileAsync: EventMap.json を更新しました。バージョン={remoteVersion} 件数={remoteAreas.Length}");
 					}
 				}
 			}
