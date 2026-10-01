@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleWrapper
 		public ApiRequest Request { get; }
 		public ApiResponse Response { get; }
 
-		public ApiSession(string pathAndQuery, string responseBody, IReadOnlyDictionary<string, string> requestParams = null)
+		public ApiSession(string pathAndQuery, string responseBody, IReadOnlyDictionary<string, string>? requestParams = null)
 		{
 			this.Request = new ApiRequest(pathAndQuery, requestParams);
 			this.Response = new ApiResponse(responseBody);
@@ -26,14 +26,14 @@ namespace Grabacr07.KanColleWrapper
 		public string PathAndQuery { get; }
 		public IReadOnlyDictionary<string, string> Params { get; }
 
-		public ApiRequest(string pathAndQuery, IReadOnlyDictionary<string, string> requestParams)
+		public ApiRequest(string pathAndQuery, IReadOnlyDictionary<string, string>? requestParams)
 		{
 			this.PathAndQuery = pathAndQuery;
 			this.Params = requestParams ?? new Dictionary<string, string>();
 		}
 
 		/// <summary>インデクサー経由でリクエスト パラメーターへアクセスします。</summary>
-		public string this[string key]
+		public string? this[string key]
 		{
 			get
 			{

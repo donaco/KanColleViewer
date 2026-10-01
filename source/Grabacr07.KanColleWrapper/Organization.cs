@@ -17,9 +17,9 @@ namespace Grabacr07.KanColleWrapper
 		private readonly Homeport homeport;
 		private readonly CompositeDisposable disposables = new CompositeDisposable();
 
-		private readonly object _evacuationLock = new object();
-		private readonly List<int> evacuatedShipsIds = new List<int>();
-		private readonly List<int> towShipIds = new List<int>();
+		private readonly object _evacuationLock = new();
+		private readonly List<int> evacuatedShipsIds = [];
+		private readonly List<int> towShipIds = [];
 
 		#region Ships 変更通知プロパティ
 
@@ -67,19 +67,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Combined 変更通知プロパティ
 
-		private bool _Combined;
-
 		/// <summary>
 		/// 第一・第二艦隊による連合艦隊が編成されているかどうかを示す値を取得または設定します。
 		/// </summary>
 		public bool Combined
 		{
-			get { return this._Combined; }
+			get => field;
 			set
 			{
-				if (this._Combined != value)
+				if (field != value)
 				{
-					this._Combined = value;
+					field = value;
 					this.Combine(value);
 					this.RaisePropertyChanged();
 				}
@@ -419,7 +417,7 @@ namespace Grabacr07.KanColleWrapper
 				catch { }
 
 				// 3) 影響を受ける艦隊を再計算・再通知
-				var affectedIds = new List<int>();
+				List<int> affectedIds = [];
 				if (unsetShipRaw != null) affectedIds.Add(unsetShipRaw.api_id);
 				if (setShipRaw != null) affectedIds.Add(setShipRaw.api_id);
 

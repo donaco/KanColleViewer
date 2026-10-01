@@ -13,9 +13,10 @@ namespace Grabacr07.KanColleWrapper
 		/// レスポンスボディから svdata を抽出して、api_data 部分をデシリアライズします。
 		/// 成功時に true を返し out にデシリアライズ結果をセットします。
 		/// </summary>
-		public static bool TryDeserializeApiData<T>(string responseBody, out T result)
+		public static bool TryDeserializeApiData<T>(string? responseBody, out T? result)
 		{
 			result = default;
+			if (string.IsNullOrEmpty(responseBody)) return false;
 			try
 			{
 				var json = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);

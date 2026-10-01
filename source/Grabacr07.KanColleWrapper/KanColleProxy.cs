@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleWrapper
 {
 	public partial class KanColleProxy
 	{
-		private readonly Subject<ApiSession> _apiSessionSubject = new Subject<ApiSession>();
+		private readonly Subject<ApiSession> _apiSessionSubject = new();
 		private readonly IObservable<ApiSession> _apiSessionSource;
 		private readonly IObservable<ApiSession> _apiStart2GetData;
 		private readonly IObservable<ApiSession> _apiPort;
@@ -38,7 +38,7 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// KanColleClient から API セッションを発行します。
 		/// </summary>
-		internal void PublishSession(string pathAndQuery, string responseBody, IReadOnlyDictionary<string, string> requestParams = null)
+		internal void PublishSession(string pathAndQuery, string responseBody, IReadOnlyDictionary<string, string>? requestParams = null)
 		{
 			this._apiSessionSubject.OnNext(new ApiSession(pathAndQuery, responseBody, requestParams));
 		}
@@ -90,7 +90,7 @@ namespace Grabacr07.KanColleWrapper
 					return null;
 				}
 			})
-				.Where(data => data != null);
+				.OfType<SvData<T>>();
 		}
 	}
 

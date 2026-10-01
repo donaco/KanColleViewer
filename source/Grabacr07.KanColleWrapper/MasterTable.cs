@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
@@ -18,7 +19,7 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// テーブルから指定した ID の要素を取得します。ID が存在しない場合は null を返します。
 		/// </summary>
-		public TValue this[int key] => this.dictionary.ContainsKey(key) ? this.dictionary[key] : null;
+		public TValue? this[int key] => this.dictionary.ContainsKey(key) ? this.dictionary[key] : null;
 
 
 		public MasterTable() : this(new List<TValue>()) { }
@@ -47,7 +48,7 @@ namespace Grabacr07.KanColleWrapper
 			return this.dictionary.ContainsKey(key);
 		}
 
-		public bool TryGetValue(int key, out TValue value)
+		public bool TryGetValue(int key, [MaybeNullWhen(false)] out TValue value)
 		{
 			return this.dictionary.TryGetValue(key, out value);
 		}

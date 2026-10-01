@@ -12,22 +12,20 @@ namespace Grabacr07.KanColleWrapper
 	/// </summary>
 	public class Materials : Notifier, IDisposable
 	{
-		private readonly CompositeDisposable disposables = new CompositeDisposable();
+		private readonly CompositeDisposable disposables = new();
 		#region Fuel 変更通知プロパティ
-
-		private int _Fuel;
 
 		/// <summary>
 		/// 所有している燃料数を取得します。
 		/// </summary>
 		public int Fuel
 		{
-			get { return this._Fuel; }
+			get => field;
 			private set
 			{
-				if (this._Fuel != value)
+				if (field != value)
 				{
-					this._Fuel = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -37,19 +35,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Ammunition 変更通知プロパティ
 
-		private int _Ammunition;
-
 		/// <summary>
 		/// 所有している弾薬数を取得します。
 		/// </summary>
 		public int Ammunition
 		{
-			get { return this._Ammunition; }
+			get => field;
 			private set
 			{
-				if (this._Ammunition != value)
+				if (field != value)
 				{
-					this._Ammunition = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -59,19 +55,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Steel 変更通知プロパティ
 
-		private int _Steel;
-
 		/// <summary>
 		/// 所有している鉄鋼数を取得します。
 		/// </summary>
 		public int Steel
 		{
-			get { return this._Steel; }
+			get => field;
 			private set
 			{
-				if (this._Steel != value)
+				if (field != value)
 				{
-					this._Steel = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -81,19 +75,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Bauxite 変更通知プロパティ
 
-		private int _Bauxite;
-
 		/// <summary>
 		/// 所有しているボーキサイト数を取得します。
 		/// </summary>
 		public int Bauxite
 		{
-			get { return this._Bauxite; }
+			get => field;
 			private set
 			{
-				if (this._Bauxite != value)
+				if (field != value)
 				{
-					this._Bauxite = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -103,19 +95,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region DevelopmentMaterials 変更通知プロパティ
 
-		private int _DevelopmentMaterials;
-
 		/// <summary>
 		/// 所有している開発資材の数を取得します。
 		/// </summary>
 		public int DevelopmentMaterials
 		{
-			get { return this._DevelopmentMaterials; }
+			get => field;
 			private set
 			{
-				if (this._DevelopmentMaterials != value)
+				if (field != value)
 				{
-					this._DevelopmentMaterials = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -125,19 +115,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region InstantRepairMaterials 変更通知プロパティ
 
-		private int _InstantRepairMaterials;
-
 		/// <summary>
 		/// 所有している高速修復材の数を取得します。
 		/// </summary>
 		public int InstantRepairMaterials
 		{
-			get { return this._InstantRepairMaterials; }
+			get => field;
 			private set
 			{
-				if (this._InstantRepairMaterials != value)
+				if (field != value)
 				{
-					this._InstantRepairMaterials = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged("Bucket");
 				}
@@ -153,19 +141,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region InstantBuildMaterials 変更通知プロパティ
 
-		private int _InstantBuildMaterials;
-
 		/// <summary>
 		/// 所有している高速建造材の数を取得します。
 		/// </summary>
 		public int InstantBuildMaterials
 		{
-			get { return this._InstantBuildMaterials; }
+			get => field;
 			private set
 			{
-				if (this._InstantBuildMaterials != value)
+				if (field != value)
 				{
-					this._InstantBuildMaterials = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -175,16 +161,14 @@ namespace Grabacr07.KanColleWrapper
 
 		#region ImprovementMaterials 変更通知プロパティ
 
-		private int _ImprovementMaterials;
-
 		public int ImprovementMaterials
 		{
-			get { return this._ImprovementMaterials; }
+			get => field;
 			set
 			{
-				if (this._ImprovementMaterials != value)
+				if (field != value)
 				{
-					this._ImprovementMaterials = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}

@@ -14,7 +14,7 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
-		public IKanColleClientSettings Settings { get; set; }
+		public IKanColleClientSettings? Settings { get; set; }
 
 		/// <summary>
 		/// 艦これの通信をフックするプロキシを取得します。
@@ -24,40 +24,37 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// ユーザーに依存しないマスター情報を取得します。
 		/// </summary>
-		public Master Master { get; private set; }
+		public Master? Master { get; private set; }
 
 		/// <summary>
 		/// 母港の情報を取得します。
 		/// </summary>
-		private Homeport _Homeport;
 		public Homeport Homeport
 		{
-			get { return this._Homeport; }
+			get => field;
 			private set
 			{
-				if (this._Homeport != value)
+				if (field != value)
 				{
-					this._Homeport = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#region IsStarted 変更通知プロパティ
-
-		private bool _IsStarted;
 
 		/// <summary>
 		/// 艦これが開始されているかどうかを示す値を取得します。
 		/// </summary>
 		public bool IsStarted
 		{
-			get { return this._IsStarted; }
+			get => field;
 			set
 			{
-				if (this._IsStarted != value)
+				if (field != value)
 				{
-					this._IsStarted = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -67,19 +64,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region IsInSortie 変更通知プロパティ
 
-		private bool _IsInSortie;
-
 		/// <summary>
 		/// 艦隊が出撃中かどうかを示す値を取得します。
 		/// </summary>
 		public bool IsInSortie
 		{
-			get { return this._IsInSortie; }
+			get => field;
 			internal set
 			{
-				if (this._IsInSortie != value)
+				if (field != value)
 				{
-					this._IsInSortie = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -101,17 +96,17 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 補給が行われた時に発生します。
 		/// </summary>
-		public event EventHandler SupplyCompleted;
+		public event EventHandler? SupplyCompleted;
 
 		/// <summary>
 		/// 装備が破棄された時に発生します。
 		/// </summary>
-		public event EventHandler ItemDestroyed;
+		public event EventHandler? ItemDestroyed;
 
 		/// <summary>
 		/// 遠征が成功した時に発生します。(api_clear_result == 1 or 2)
 		/// </summary>
-		public event EventHandler MissionSucceeded;
+		public event EventHandler? MissionSucceeded;
 
 		#endregion
 
@@ -119,7 +114,7 @@ namespace Grabacr07.KanColleWrapper
 		/// 戦闘結果受信時に発生します。
 		/// 引数: mapId (エリアID*10+マップ番号), normalized JSON 文字列
 		/// </summary>
-		public event Action<int, string> BattleResultReceived;
+		public event Action<int, string>? BattleResultReceived;
 
 		/// <summary>
 		/// <see cref="BattleResultReceived"/> イベントを発火します。ハンドラークラスから利用します。
@@ -158,7 +153,7 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		internal void EnsureHomeport()
 		{
-			if (this.Homeport == null) this.Homeport = new Homeport();
+			this.Homeport ??= new Homeport();
 		}
 
 		// Captured 処理を委譲するコンポーネント
@@ -195,10 +190,10 @@ namespace Grabacr07.KanColleWrapper
 		private readonly Handlers.PortHandler portHandler;
 
 		// 出撃中の艦隊ID記録
-		internal readonly HashSet<int> sortieDeckIds = new HashSet<int>();
+		internal readonly HashSet<int> sortieDeckIds = [];
 
 		// 入渠
-		internal readonly HashSet<int> appliedRepairNdock = new HashSet<int>();
+		internal readonly HashSet<int> appliedRepairNdock = [];
 
 		private KanColleClient()
 		{
@@ -306,25 +301,25 @@ namespace Grabacr07.KanColleWrapper
 		internal int lastChangeDeckId = -1;
 
 		/// <summary>戦闘関連の共有状態を保護するロックオブジェクト。</summary>
-		internal readonly object BattleStateLock = new object();
+		internal readonly object BattleStateLock = new();
 
 		/// <summary>基地航空隊関連の共有状態（AirBases）を保護するロックオブジェクト。</summary>
-		internal readonly object AirBaseStateLock = new object();
+		internal readonly object AirBaseStateLock = new();
 
 		/// <summary>入渠関連の共有状態（appliedRepairNdock）を保護するロックオブジェクト。</summary>
-		internal readonly object NyukyoStateLock = new object();
+		internal readonly object NyukyoStateLock = new();
 
 		/// <summary>編成関連の共有状態（lastChangeDeckId）を保護するロックオブジェクト。</summary>
-		internal readonly object HenseiStateLock = new object();
+		internal readonly object HenseiStateLock = new();
 
 		/// <summary>装備関連の共有状態を保護するロックオブジェクト。</summary>
-		internal readonly object SlotItemStateLock = new object();
+		internal readonly object SlotItemStateLock = new();
 
 		/// <summary>艦娘装備系（改装系）の共有状態を保護するロックオブジェクト。</summary>
-		internal readonly object KaisouStateLock = new object();
+		internal readonly object KaisouStateLock = new();
 
 		/// <summary>艦娘のライフサイクル（一覧・解体・補給）関連の共有状態を保護するロックオブジェクト。</summary>
-		internal readonly object ShipStateLock = new object();
+		internal readonly object ShipStateLock = new();
 
 		// start/next で取得した cellNo をキャッシュ（battle で使用）
 		internal int cachedCellNo = 0;
@@ -333,15 +328,15 @@ namespace Grabacr07.KanColleWrapper
 		internal int cachedMapId = 0;
 
 		// 直近に受信した battle 系 API の種別を保持 ("battle" / "ld_airbattle" / null)
-		internal string lastBattleApiType = null;
+		internal string? lastBattleApiType;
 
 		// battle で解析したが表示を保留した制空情報を一時保持する
 		internal AirSuperiority pendingAirResult = AirSuperiority.None;
 		internal bool hasPendingAirResult = false;
 
 		// goback_port のために battleresult から受け取った脱出艦・曳航艦IDを保持する
-		internal int[] pendingEscapeShipIds = null;
-		internal int[] pendingTowShipIds = null;
+		internal int[]? pendingEscapeShipIds;
+		internal int[]? pendingTowShipIds;
 
 		#endregion
 
@@ -349,7 +344,7 @@ namespace Grabacr07.KanColleWrapper
 		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
 		/// </summary>
-		public void ProcessCaptured(string url, string responseBody, string requestBody = null)
+		public void ProcessCaptured(string url, string responseBody, string? requestBody = null)
 		{
 			// オリジン検証：正規サーバー以外からの注入を遮断する
 			if (!KanColleServerOrigin.IsValid(url)) return;
@@ -400,8 +395,7 @@ namespace Grabacr07.KanColleWrapper
 						var token = Newtonsoft.Json.Linq.JToken.Parse(trimmed).SelectToken("api_result");
 						if (token != null)
 						{
-							int apiResult;
-							if (int.TryParse(token.ToString(), out apiResult) && apiResult != 1) return;
+							if (int.TryParse(token.ToString(), out var apiResult) && apiResult != 1) return;
 						}
 					}
 				}

@@ -63,7 +63,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				.ToDictionary(x => x.api_area_id);
 
 			// 各海域の航空隊を作成
-			var airBasesByArea = new Dictionary<int, AirBase>();
+			Dictionary<int, AirBase> airBasesByArea = [];
 			foreach (var kvp in groupedByArea)
 			{
 				var areaId = kvp.Key;
@@ -132,19 +132,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AreaId 海域ID
 
-		private int _AreaId;
-
 		/// <summary>
 		/// 海域ID を取得
 		/// </summary>
 		public int AreaId
 		{
-			get { return this._AreaId; }
+			get => field;
 			private set
 			{
-				if (this._AreaId != value)
+				if (field != value)
 				{
-					this._AreaId = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -176,19 +174,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region MaintenanceLevel 整備レベル
 
-		private int _MaintenanceLevel;
-
 		/// <summary>
 		/// 整備レベルを取得
 		/// </summary>
 		public int MaintenanceLevel
 		{
-			get { return this._MaintenanceLevel; }
+			get => field;
 			private set
 			{
-				if (this._MaintenanceLevel != value)
+				if (field != value)
 				{
-					this._MaintenanceLevel = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -198,19 +194,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region BaseCount 基地航空隊の数
 
-		private int _BaseCount;
-
 		/// <summary>
 		/// 各海域に配置されている基地航空隊の数を取得
 		/// </summary>
 		public int BaseCount
 		{
-			get { return this._BaseCount; }
+			get => field;
 			private set
 			{
-				if (this._BaseCount != value)
+				if (field != value)
 				{
-					this._BaseCount = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -220,19 +214,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region ActionKind 出撃状態
 
-		private int _ActionKind;
-
 		/// <summary>
 		/// 出撃状態を取得（1=出撃、2=防空、3=退避、4=休息、0=待機）
 		/// </summary>
 		public int ActionKind
 		{
-			get { return this._ActionKind; }
+			get => field;
 			private set
 			{
-				if (this._ActionKind != value)
+				if (field != value)
 				{
-					this._ActionKind = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -308,7 +300,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<string>();
 
-			var icons = new List<string>();
+			List<string> icons = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -351,7 +343,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var types = new List<int>();
+			List<int> types = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -385,7 +377,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var ids = new List<int>();
+			List<int> ids = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -627,7 +619,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 					return Array.Empty<int>();
 
-			var levels = new List<int>();
+			List<int> levels = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -660,7 +652,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var alvs = new List<int>();
+			List<int> alvs = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -693,7 +685,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var antiAirs = new List<int>();
+			List<int> antiAirs = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -726,7 +718,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var intercepts = new List<int>();
+			List<int> intercepts = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -760,7 +752,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var antibombs = new List<int>();
+			List<int> antibombs = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -794,7 +786,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var counts = new List<int>();
+			List<int> counts = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -815,7 +807,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var maxCounts = new List<int>();
+			List<int> maxCounts = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try
@@ -899,7 +891,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			if (planeInfo == null || planeInfo.Length == 0)
 				return Array.Empty<int>();
 
-			var conds = new List<int>();
+			List<int> conds = [];
 			foreach (var plane in planeInfo.Take(4))
 			{
 				try

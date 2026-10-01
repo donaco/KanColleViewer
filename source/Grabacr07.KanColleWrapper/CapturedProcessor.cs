@@ -6,14 +6,14 @@ namespace Grabacr07.KanColleWrapper
 {
 	public class CapturedProcessor
 	{
-		private readonly object capturedLock = new object();
+		private readonly object capturedLock = new();
 		private bool capturedStart2;
 		private bool capturedRequireInfo;
 		// lastCapturedAt は現在未使用。将来のタイムアウト検出やデバッグ用途に向けて保持。
 		private DateTime lastCapturedAt = DateTime.MinValue;
 
-		private kcsapi_start2 capturedStart2Data;
-		private kcsapi_require_info capturedRequireInfoData;
+		private kcsapi_start2? capturedStart2Data;
+		private kcsapi_require_info? capturedRequireInfoData;
 
 		private readonly Func<bool> isStartedProvider;
 		private readonly Action<kcsapi_start2, kcsapi_require_info> onInitialized;
@@ -34,8 +34,8 @@ namespace Grabacr07.KanColleWrapper
 
 			// lock 外で呼び出すコールバック引数を保持する変数
 			// null のままであれば lock 内で条件が揃わなかったことを示す
-			kcsapi_start2 pendingStart2 = null;
-			kcsapi_require_info pendingRequireInfo = null;
+			kcsapi_start2? pendingStart2 = null;
+			kcsapi_require_info? pendingRequireInfo = null;
 
 			try
 			{

@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		/// <param name="url">検証対象の URL 文字列</param>
 		/// <returns>正規オリジンであれば true</returns>
-		public static bool IsValid(string url)
+		public static bool IsValid(string? url)
 		{
 			if (string.IsNullOrEmpty(url)) return false;
 
@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		/// <param name="host">検証対象のホスト名（例: w14.kancolle-server.com）</param>
 		/// <returns>正規ホストであれば true</returns>
-		public static bool IsAllowedHost(string host)
+		public static bool IsAllowedHost(string? host)
 		{
 			if (string.IsNullOrEmpty(host)) return false;
 
