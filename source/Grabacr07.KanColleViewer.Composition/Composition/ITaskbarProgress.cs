@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using System.Windows.Shell;
 
-namespace Grabacr07.KanColleViewer.Composition
-{
+namespace Grabacr07.KanColleViewer.Composition;
+
 	/// <summary>
 	/// タスク バーのプログレス インジケーターに状態を報告するためのメンバーを公開します。
 	/// このインターフェイスは、KanColleViewer プラグインのコントラクト型です。
@@ -36,6 +33,5 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// <summary>
 		/// <see cref="State"/> または <see cref="Value"/> が変更されたときに発生します。
 		/// </summary>
-		event EventHandler Updated;
-	}
+		event EventHandler? Updated;
 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Grabacr07.KanColleViewer.Composition;
 
-namespace Grabacr07.KanColleViewer.Composition
-{
 	/// <summary>
 	/// [ツール] タブに表示されるツールに必要なメンバーを公開します。
 	/// このインターフェイスは、KanColleViewer プラグインのコントラクト型です。
@@ -21,5 +16,4 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// [ツール] タブ内に表示される UI のルート要素を取得します。
 		/// </summary>
 		object View { get; }
-	}
 }

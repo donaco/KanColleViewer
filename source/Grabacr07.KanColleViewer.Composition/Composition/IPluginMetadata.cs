@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Grabacr07.KanColleViewer.Composition;
 
-namespace Grabacr07.KanColleViewer.Composition
-{
 	/// <summary>
 	/// KanColleViewer プラグインのメタデータを公開します。
 	/// </summary>
@@ -29,5 +24,4 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// プラグインの開発者を取得します。
 		/// </summary>
 		string Author { get; }
-	}
 }

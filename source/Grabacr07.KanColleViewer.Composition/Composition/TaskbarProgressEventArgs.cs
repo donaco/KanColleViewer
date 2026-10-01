@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Windows.Shell;
 
-namespace Grabacr07.KanColleViewer.Composition
-{
+namespace Grabacr07.KanColleViewer.Composition;
+
 	/// <summary>
 	/// <see cref="ITaskbarProgress.Updated"/> イベントのデータを提供します。
 	/// </summary>
@@ -18,6 +18,5 @@ namespace Grabacr07.KanColleViewer.Composition
 		{
 			this.ProgressState = state;
 			this.ProgressValue = value;
-		}
 	}
 }

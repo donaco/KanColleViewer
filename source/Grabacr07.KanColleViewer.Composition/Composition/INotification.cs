@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
+namespace Grabacr07.KanColleViewer.Composition;
 
-namespace Grabacr07.KanColleViewer.Composition
-{
 	/// <summary>
 	/// ユーザーへの通知を表すメンバーを公開します。
 	/// </summary>
@@ -28,12 +24,12 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// <summary>
 		/// 通知に対しユーザーが実行できるアクションを表すメソッドを取得します。
 		/// </summary>
-		Action Activated { get; }
+		Action? Activated { get; }
 
 		/// <summary>
 		/// 通知に失敗したとき、その失敗の原因を表す例外オブジェクトを受け取るメソッドを取得します。
 		/// </summary>
-		Action<Exception> Failed { get; }
+		Action<Exception>? Failed { get; }
 	}
 
 	public static class Notification
@@ -69,7 +65,7 @@ namespace Grabacr07.KanColleViewer.Composition
 			public static string FleetRejuvenated { get; } = nameof(FleetRejuvenated);
 		}
 
-		public static INotification Create(string type, string header, string body, Action activated = null, Action<Exception> failed = null)
+		public static INotification Create(string type, string header, string body, Action? activated = null, Action<Exception>? failed = null)
 		{
 			return new AnonymousNotification
 			{
@@ -83,15 +79,14 @@ namespace Grabacr07.KanColleViewer.Composition
 
 		private class AnonymousNotification : INotification
 		{
-			public string Type { get; internal set; }
+			public required string Type { get; init; }
 
-			public string Header { get; internal set; }
+			public required string Header { get; init; }
 
-			public string Body { get; internal set; }
+			public required string Body { get; init; }
 
-			public Action Activated { get; internal set; }
+			public Action? Activated { get; init; }
 
-			public Action<Exception> Failed { get; internal set; }
-		}
+			public Action<Exception>? Failed { get; init; }
 	}
 }
