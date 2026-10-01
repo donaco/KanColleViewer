@@ -17,13 +17,13 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		private readonly KanColleClient client;
 
 		/// <summary>建造関連の共有状態を保護するロックオブジェクト。</summary>
-		private readonly object KenzoStateLock = new object();
+		private readonly object KenzoStateLock = new();
 
 		/// <summary>建造でキャッシュする消費資源（kdockId をキーとする）。</summary>
-		private readonly Dictionary<int, int[]> pendingCreateMaterials = new Dictionary<int, int[]>();
+		private readonly Dictionary<int, int[]> pendingCreateMaterials = new();
 
 		/// <summary>高速建造材を即時減算済みの kdockId を保持する（二重減算防止用）。</summary>
-		private readonly HashSet<int> appliedBuildKdock = new HashSet<int>();
+		private readonly HashSet<int> appliedBuildKdock = new();
 
 		/// <summary>直近に処理した建造ドック ID を保持（createship の requestBody が届く時用）。</summary>
 		private int lastCreateKdockId = -1;
@@ -50,9 +50,9 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			if (string.IsNullOrEmpty(requestBody)) return true;
 
 			// dict と keyId を外側スコープで宣言して後続から参照できるようにする
-			IReadOnlyDictionary<string, string> dict = null;
+			IReadOnlyDictionary<string, string>? dict = null;
 			int keyId = -1;
-			int[] items = null;
+			int[]? items = null;
 
 			try
 			{
@@ -72,7 +72,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				}
 
 				// api_item1..api_item5 を抜き出す
-				var tmp = new List<int>();
+				List<int> tmp = [];
 				for (int i = 1; i <= 5; i++)
 				{
 					if (dict.TryGetValue($"api_item{i}", out var s) && int.TryParse(s, out var v))
@@ -136,7 +136,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			{
 				if (!string.IsNullOrEmpty(normalized))
 				{
-					JToken root;
+					JToken? root;
 					try { root = JToken.Parse(normalized); }
 					catch (Exception ex) { root = null; LogError("TryHandleCreateShip", ex); }
 
@@ -255,7 +255,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				{
 					try
 					{
-						var org = this.client.Homeport?.Organization;
+						var homeport = this.client.Homeport;
+						var org = homeport?.Organization;
 
 						// --- kdock / 入手扱いの処理（可能なら kcsapi_kdock_getship として AddFromDock を呼ぶ） ---
 						var kdockProcessed = false;
@@ -264,7 +265,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							try
 							{
 								// Dock 表示用に従来の kcsapi_kdock[] にも更新する（UI のドック状態）
-								kcsapi_kdock[] kdocks = null;
+								kcsapi_kdock[]? kdocks = null;
 								try
 								{
 									kdocks = kdockTok.ToObject<kcsapi_kdock[]>();
@@ -278,7 +279,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								}
 
 								// kdock 配列から api_state マップを作成（kdock_getship に state が無い場合のフォールバック用）
-								Dictionary<int, int> kdockStateMap = null;
+								Dictionary<int, int>? kdockStateMap = null;
 								if (kdocks != null)
 								{
 									try { kdockStateMap = kdocks.ToDictionary(k => k.api_id, k => k.api_state); } catch { kdockStateMap = null; }
@@ -400,7 +401,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									// まず既存の Update で試す（既存艦の更新を優先）
 									try
 									{
-										this.client.Homeport.Organization.Update(new[] { ship });
+										org?.Update(new[] { ship });
 									}
 									catch (Exception)
 									{
@@ -411,11 +412,11 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									try
 									{
 										var exists = org?.Ships?[ship.api_id];
-										if (exists == null)
+										if (exists == null && org != null && homeport != null)
 										{
 											try
 											{
-												org?.Ships.Add(new Ship(this.client.Homeport, ship));
+												org.Ships.Add(new Ship(homeport, ship));
 												try { org?.RaiseShipsChanged(); }
 												catch (Exception) { try { org?.NotifyUpdated(); } catch { } }
 											}
@@ -502,7 +503,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		{
 			try
 			{
-				int[] req = null;
+				int[]? req = null;
 				lock (this.KenzoStateLock)
 				{
 					if (!this.pendingCreateMaterials.TryGetValue(kdockId, out req)) return;

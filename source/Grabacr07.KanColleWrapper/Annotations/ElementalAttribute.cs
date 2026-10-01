@@ -25,9 +25,9 @@ namespace Grabacr07.KanColleWrapper.Annotations
     {
         public string Description { get; private set; }
 
-        protected ElementalAttribute(string description = null)
+        protected ElementalAttribute(string? description = null)
         {
-            this.Description = description;
+            this.Description = description ?? string.Empty;
         }
     }
 
@@ -36,7 +36,8 @@ namespace Grabacr07.KanColleWrapper.Annotations
         private static readonly Lazy<IReadOnlyDictionary<Type, string>> _elements =
             new Lazy<IReadOnlyDictionary<Type, string>>(() => typeof(CodeElement).GetTypeInfo().Assembly.DefinedTypes
                 .Where(x => x.IsSubclassOf(typeof(ElementalAttribute)))
-                .ToDictionary(x => x.AsType(), x => (string) x.GetDeclaredField("Name").GetValue(null))
+                .ToDictionary(x => x.AsType(), x => x.GetDeclaredField("Name")?.GetValue(null) as string
+                    ?? throw new InvalidOperationException($"{x.FullName} does not declare a string Name field."))
             );
 
         public static IEnumerable<Type> Types

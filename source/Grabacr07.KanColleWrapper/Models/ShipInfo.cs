@@ -13,7 +13,7 @@ namespace Grabacr07.KanColleWrapper.Models
 	/// </summary>
 	public class ShipInfo : RawDataWrapper<kcsapi_mst_ship>, IIdentifiable
 	{
-		private ShipType shipType;
+		private ShipType? shipType;
 
 		/// <summary>
 		/// 艦を一意に識別する ID を取得します。
@@ -25,7 +25,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 艦の名称を取得します。
 		/// </summary>
-		public string Name => this.RawData.api_name;
+		public string Name => this.RawData.api_name ?? string.Empty;
 
 		/// <summary>
 		/// 艦種を取得します。
@@ -37,14 +37,14 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 各装備スロットの最大搭載機数を取得します。
 		/// </summary>
-		public int[] Slots => this.RawData.api_maxeq;
+		public int[] Slots => this.RawData.api_maxeq ?? [];
 
 		#region 用意したけど使わないっぽい？
 
 		/// <summary>
 		/// よみがなを取得します。
 		/// </summary>
-		public string Kana => this.RawData.api_yomi;
+		public string Kana => this.RawData.api_yomi ?? string.Empty;
 
 		/// <summary>
 		/// 火力の最大値を取得します。

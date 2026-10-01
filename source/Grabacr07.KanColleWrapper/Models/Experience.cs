@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region admiralTable
 
-		private static readonly Dictionary<int, Experience> admiralTable = new Dictionary<int, Experience>
+		private static readonly Dictionary<int, Experience> admiralTable = new()
 		{
 			{ 1, new Experience(1, 100, 0) },
 			{ 2, new Experience(2, 200, 100) },

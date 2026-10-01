@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +20,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			: base(rawData)
 		{
 			this.Id = rawData.api_id;
-			this.Name = rawData.api_name;
+			this.Name = rawData.api_name ?? string.Empty;
 		}
 
 		public override string ToString()

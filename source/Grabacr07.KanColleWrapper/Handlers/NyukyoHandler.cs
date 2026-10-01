@@ -28,11 +28,11 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// レスポンス JSON から資源の増分（api_get_material 相当）を解析します。
 		/// 解析できない場合は null を返します。
 		/// </summary>
-		private static int[] ParseAddMaterials(string normalized, string contextForLog)
+		private static int[]? ParseAddMaterials(string normalized, string contextForLog)
 		{
 			try
 			{
-				JToken root = null;
+				JToken? root = null;
 				try { root = JToken.Parse(normalized); } catch { root = null; }
 				var data = root?["api_data"] ?? root;
 				var matTok = data?["api_get_material"] ?? data?["api_get_materials"] ?? data?["api_get"];
@@ -68,7 +68,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							// JSON 側をパースして api_item1..4 を集計し、まだ適用していない ndock に対して一度だけ減算する
 							try
 							{
-								JToken root = null;
+								JToken? root = null;
 								try { root = JToken.Parse(normalized); } catch { root = null; }
 								var dataTok = root?["api_data"] ?? root;
 
@@ -142,7 +142,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				}
 
 				// フォールバック: JSON をパースして api_data を探す（既存のフォールバックは維持）
-				JToken rootTok;
+				JToken? rootTok;
 				try { rootTok = JToken.Parse(normalized); } catch { rootTok = null; }
 				var data2 = rootTok?["api_data"] ?? rootTok;
 				if (data2 == null) return true;

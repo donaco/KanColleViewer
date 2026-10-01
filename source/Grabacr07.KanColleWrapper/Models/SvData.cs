@@ -11,9 +11,9 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public bool IsSuccess => this.RawData.api_result == 1;
 
-		public T Data => this.RawData.api_data;
+		public T? Data => this.RawData.api_data;
 
-		public kcsapi_deck[] Fleets => this.RawData.api_data_deck;
+		public kcsapi_deck[]? Fleets => this.RawData.api_data_deck;
 
 		public SvData(svdata<T> rawData, string reqBody)
 			: base(rawData)

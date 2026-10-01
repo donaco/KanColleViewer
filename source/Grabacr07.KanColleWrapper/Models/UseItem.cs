@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		public int Id => this.RawData.api_id;
 
-		public string Name => this.RawData.api_name;
+		public string Name => this.RawData.api_name ?? string.Empty;
 
 		public int Count => this.RawData.api_count;
 

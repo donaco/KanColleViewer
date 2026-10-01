@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			: base(maparea)
 		{
 			this.Id = maparea.api_id;
-			this.Name = maparea.api_name;
+			this.Name = maparea.api_name ?? string.Empty;
 			this.MapInfos = new MasterTable<MapInfo>(mapInfos.Values.Where(x => x.MapAreaId == maparea.api_id));
 			foreach (var cell in this.MapInfos.Values)
 				cell.MapArea = this;

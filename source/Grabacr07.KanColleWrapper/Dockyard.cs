@@ -19,16 +19,14 @@ namespace Grabacr07.KanColleWrapper
 		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		#region Dock 変更通知プロパティ
 
-		private MemberTable<BuildingDock> _Docks;
-
 		public MemberTable<BuildingDock> Docks
 		{
-			get { return this._Docks; }
+			get => field;
 			set
 			{
-				if (this._Docks != value)
+				if (field != value)
 				{
-					this._Docks = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -38,12 +36,12 @@ namespace Grabacr07.KanColleWrapper
 
 		#region CreatedSlotItem 変更通知プロパティ
 
-		private CreatedSlotItem _CreatedSlotItem;
+		private CreatedSlotItem? _CreatedSlotItem;
 
 		/// <summary>
 		/// 最後に開発された装備アイテムの情報を取得します。
 		/// </summary>
-		public CreatedSlotItem CreatedSlotItem
+		public CreatedSlotItem? CreatedSlotItem
 		{
 			get { return this._CreatedSlotItem; }
 			internal set
@@ -69,7 +67,7 @@ namespace Grabacr07.KanColleWrapper
 			this.disposables.Dispose();
 		}
 
-		internal void Update(kcsapi_kdock[] source)
+		internal void Update(kcsapi_kdock[]? source)
 		{
 			if (source == null) return;
 
@@ -103,6 +101,7 @@ namespace Grabacr07.KanColleWrapper
 
 		private void CreateSlotItem(SvData<kcsapi_createitem> svd)
 		{
+			if (svd.Data is null) return;
 			this.CreatedSlotItem = new CreatedSlotItem(svd.Data);
 		}
 	}

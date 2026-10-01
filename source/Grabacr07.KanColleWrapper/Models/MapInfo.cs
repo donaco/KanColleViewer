@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public int MapAreaId { get;}
 
-		public MapArea MapArea { get; internal set; }
+		public MapArea MapArea { get; internal set; } = MapArea.Dummy;
 
 		public int IdInEachMapArea { get;}
 
@@ -30,12 +30,12 @@ namespace Grabacr07.KanColleWrapper.Models
 			: base(mapinfo)
 		{
 			this.Id = mapinfo.api_id;
-			this.Name = mapinfo.api_name;
+			this.Name = mapinfo.api_name ?? string.Empty;
 			this.MapAreaId = mapinfo.api_maparea_id;
 			this.IdInEachMapArea = mapinfo.api_no;
 			this.Level = mapinfo.api_level;
-			this.OperationName = mapinfo.api_opetext;
-			this.OperationSummary = mapinfo.api_infotext;
+			this.OperationName = mapinfo.api_opetext ?? string.Empty;
+			this.OperationSummary = mapinfo.api_infotext ?? string.Empty;
 			this.RequiredDefeatCount = mapinfo.api_required_defeat_count ?? 1;
 		}
 

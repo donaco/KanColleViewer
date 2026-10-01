@@ -90,7 +90,8 @@ namespace Grabacr07.KanColleWrapper
 					return null;
 				}
 			})
-				.OfType<SvData<T>>();
+				.Where(data => data is not null)
+				.Select(data => data!);
 		}
 	}
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,16 +17,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Id 変更通知プロパティ
 
-		private int _Id;
-
 		public int Id
 		{
-			get { return this._Id; }
+			get => field;
 			private set
 			{
-				if (this._Id != value)
+				if (field != value)
 				{
-					this._Id = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -36,16 +34,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region State 変更通知プロパティ
 
-		private RepairingDockState _State;
-
 		public RepairingDockState State
 		{
-			get { return this._State; }
+			get => field;
 			private set
 			{
-				if (this._State != value)
+				if (field != value)
 				{
-					this._State = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -55,19 +51,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region ShipId 変更通知プロパティ
 
-		private int _ShipId;
-
 		/// <summary>
 		/// 入渠中の艦娘を一意に識別する ID を取得します。
 		/// </summary>
 		public int ShipId
 		{
-			get { return this._ShipId; }
+			get => field;
 			private set
 			{
-				if (this._ShipId != value)
+				if (field != value)
 				{
-					this._ShipId = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -77,24 +71,22 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Ship 変更通知プロパティ
 
-		private Ship target;
-
 		/// <summary>
 		/// 入渠中の艦娘の情報を取得します。
 		/// </summary>
-		public Ship Ship
+		public Ship? Ship
 		{
-			get { return this.target; }
+			get => field;
 			private set
 			{
-				if (this.target != value)
+				if (field != value)
 				{
-					var oldShip = this.target;
+					var oldShip = field;
 					var newShip = value;
 					if (oldShip != null) oldShip.Situation &= ~ShipSituation.Repair;
 					if (newShip != null) newShip.Situation |= ShipSituation.Repair;
 
-					this.target = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -104,19 +96,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region CompleteTime 変更通知プロパティ
 
-		private DateTimeOffset? _CompleteTime;
-
 		/// <summary>
 		/// 入渠完了時刻を取得します。
 		/// </summary>
 		public DateTimeOffset? CompleteTime
 		{
-			get { return this._CompleteTime; }
+			get => field;
 			private set
 			{
-				if (this._CompleteTime != value)
+				if (field != value)
 				{
-					this._CompleteTime = value;
+					field = value;
 					this.notificated = false;
 					this.RaisePropertyChanged();
 				}
@@ -127,19 +117,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Remaining 変更通知プロパティ
 
-		private TimeSpan? _Remaining;
-
 		/// <summary>
 		/// 入渠が完了するまでの残り時間を取得します。1 秒ごとに更新されます。
 		/// </summary>
 		public TimeSpan? Remaining
 		{
-			get { return this._Remaining; }
+			get => field;
 			private set
 			{
-				if (this._Remaining != value)
+				if (field != value)
 				{
-					this._Remaining = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -150,7 +138,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 入渠が完了したときに発生します。
 		/// </summary>
-		public event EventHandler<RepairingCompletedEventArgs> Completed;
+		public event EventHandler<RepairingCompletedEventArgs>? Completed;
 
 
 		internal RepairingDock(Homeport parent, kcsapi_ndock rawData)

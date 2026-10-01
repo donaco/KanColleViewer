@@ -22,19 +22,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AverageLevel 変更通知プロパティ
 
-		private double _AverageLevel;
-
 		/// <summary>
 		/// 艦隊の平均レベルを取得します。
 		/// </summary>
 		public double AverageLevel
 		{
-			get { return this._AverageLevel; }
+			get => field;
 			private set
 			{
-				if (!this._AverageLevel.Equals(value))
+				if (!field.Equals(value))
 				{
-					this._AverageLevel = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -44,16 +42,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region TotalLevel 変更通知プロパティ
 
-		private int _TotalLevel;
-
 		public int TotalLevel
 		{
-			get { return this._TotalLevel; }
+			get => field;
 			private set
 			{
-				if (this._TotalLevel != value)
+				if (field != value)
 				{
-					this._TotalLevel = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -63,19 +59,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region MinAirSuperiorityPotential 変更通知プロパティ
 
-		private double _MinAirSuperiorityPotential;
-
 		/// <summary>
 		/// 艦隊の制空能力を取得します。
 		/// </summary>
 		public double MinAirSuperiorityPotential
 		{
-			get { return this._MinAirSuperiorityPotential; }
+			get => field;
 			private set
 			{
-				if (this._MinAirSuperiorityPotential != value)
+				if (field != value)
 				{
-					this._MinAirSuperiorityPotential = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -85,19 +79,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region MaxAirSuperiorityPotential 変更通知プロパティ
 
-		private double _MaxAirSuperiorityPotential;
-
 		/// <summary>
 		/// 艦隊の制空能力を取得します。
 		/// </summary>
 		public double MaxAirSuperiorityPotential
 		{
-			get { return this._MaxAirSuperiorityPotential; }
+			get => field;
 			private set
 			{
-				if (this._MaxAirSuperiorityPotential != value)
+				if (field != value)
 				{
-					this._MaxAirSuperiorityPotential = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -107,19 +99,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region TransportPoint 変更通知プロパティ
 
-		private decimal _TransportPoint;
-
 		/// <summary>
 		/// 艦隊の輸送能力(TP / S勝利時基準)を取得します。
 		/// </summary>
 		public decimal TransportPoint
 		{
-			get { return this._TransportPoint; }
+			get => field;
 			private set
 			{
-				if (this._TransportPoint != value)
+				if (field != value)
 				{
-					this._TransportPoint = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -129,19 +119,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region ViewRange 変更通知プロパティ
 
-		private double _ViewRange;
-
 		/// <summary>
 		/// 艦隊の索敵値を取得します。索敵の計算は <see cref="IKanColleClientSettings.ViewRangeCalcType"/> で指定された方法を使用します。
 		/// </summary>
 		public double ViewRange
 		{
-			get { return this._ViewRange; }
+			get => field;
 			private set
 			{
-				if (this._ViewRange != value)
+				if (field != value)
 				{
-					this._ViewRange = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -151,35 +139,31 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region ViewRangeCalcType 変更通知プロパティ
 
-		private string _ViewRangeCalcType;
-
 		public string ViewRangeCalcType
 		{
-			get { return this._ViewRangeCalcType; }
+			get => field;
 			set
 			{
-				if (this._ViewRangeCalcType != value)
+				if (field != value)
 				{
-					this._ViewRangeCalcType = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#endregion
 
 		#region Speed 変更通知プロパティ
 
-		private FleetSpeed _Speed;
-
 		public FleetSpeed Speed
 		{
-			get { return this._Speed; }
+			get => field;
 			set
 			{
-				if (this._Speed != value)
+				if (field != value)
 				{
-					this._Speed = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -189,16 +173,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Situation 変更通知プロパティ
 
-		private FleetSituation _Situation;
-
 		public FleetSituation Situation
 		{
-			get { return this._Situation; }
+			get => field;
 			private set
 			{
-				if (this._Situation != value)
+				if (field != value)
 				{
-					this._Situation = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -208,19 +190,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region IsReady 変更通知プロパティ
 
-		private bool _IsReady;
-
 		/// <summary>
 		/// 艦隊の出撃準備ができているかどうかを示す値を取得します。
 		/// </summary>
 		public bool IsReady
 		{
-			get { return this._IsReady; }
+			get => field;
 			private set
 			{
-				if (this._IsReady != value)
+				if (field != value)
 				{
-					this._IsReady = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -228,14 +208,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
-		public event EventHandler Updated;
-		public event EventHandler Calculated;
+		public event EventHandler? Updated;
+		public event EventHandler? Calculated;
 
 
 		public FleetState(Homeport homeport, params Fleet[] fleets)
 		{
 			this.homeport = homeport;
 			this.source = fleets ?? Array.Empty<Fleet>();
+			this.Speed = new FleetSpeed([]);
 
 			this.Condition = new FleetCondition();
 			this.CompositeDisposable.Add(this.Condition);

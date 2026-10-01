@@ -54,13 +54,13 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Admiral 変更通知プロパティ
 
-		private Admiral _Admiral;
+		private Admiral? _Admiral;
 
 		/// <summary>
 		/// 現在ログインしている提督を取得します。
 		/// <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントによる変更通知をサポートします。
 		/// </summary>
-		public Admiral Admiral
+		public Admiral? Admiral
 		{
 			get { return this._Admiral; }
 			private set

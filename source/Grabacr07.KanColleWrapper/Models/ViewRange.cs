@@ -26,14 +26,13 @@ namespace Grabacr07.KanColleWrapper.Models
 
 	public abstract class ViewRangeCalcLogic : ICalcViewRange
 	{
-		private static readonly Dictionary<string, ICalcViewRange> logics = new Dictionary<string, ICalcViewRange>();
+		private static readonly Dictionary<string, ICalcViewRange> logics = new();
 
 		public static IEnumerable<ICalcViewRange> Logics => logics.Values;
 
 		public static ICalcViewRange Get(string key)
 		{
-			ICalcViewRange logic;
-			return logics.TryGetValue(key, out logic) ? logic : new ViewRangeType1();
+			return logics.TryGetValue(key, out var logic) ? logic : new ViewRangeType1();
 		}
 
 		static ViewRangeCalcLogic()
@@ -158,7 +157,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				.Select(x => Math.Sqrt(x))
 				.Sum() * 1.69;
 
-			var level = (((KanColleClient.Current.Homeport.Admiral.Level + 4) / 5) * 5);
+			var level = ((((KanColleClient.Current.Homeport.Admiral?.Level ?? 0) + 4) / 5) * 5);
 			var admiralScore = level * -0.61;
 
 			return itemScore + shipScore + admiralScore;
@@ -227,7 +226,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				.Select(x => x.ViewRange - x.EquippedItems.Sum(s => s.Item.Info.RawData.api_saku))
 				.Sum(x => Math.Sqrt(x));
 
-			var admiralScore = Math.Ceiling(KanColleClient.Current.Homeport.Admiral.Level * 0.4);
+			var admiralScore = Math.Ceiling((KanColleClient.Current.Homeport.Admiral?.Level ?? 0) * 0.4);
 
 			var isCombined = 1 < fleets.Count()
 							 && KanColleClient.Current.Settings.IsViewRangeCalcIncludeFirstFleet

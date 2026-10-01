@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Grabacr07.KanColleWrapper
 		/// レスポンスボディから svdata を抽出して、api_data 部分をデシリアライズします。
 		/// 成功時に true を返し out にデシリアライズ結果をセットします。
 		/// </summary>
-		public static bool TryDeserializeApiData<T>(string? responseBody, out T? result)
+		public static bool TryDeserializeApiData<T>(string? responseBody, [NotNullWhen(true)] out T? result)
 		{
 			result = default;
 			if (string.IsNullOrEmpty(responseBody)) return false;
@@ -64,7 +65,7 @@ namespace Grabacr07.KanColleWrapper
 				try
 				{
 					result = apiDataToken.ToObject<T>();
-					return true;
+					return result is not null;
 				}
 				catch (Exception)
 				{

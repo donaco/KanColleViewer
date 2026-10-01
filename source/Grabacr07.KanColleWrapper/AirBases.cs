@@ -14,19 +14,17 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		#region AreaGroup 変更通知プロパティ
 
-		private MemberTable<AirBase> _AreaGroup;
-
 		/// <summary>
 		/// 海域ごとにグループ化された航空隊を取得します
 		/// </summary>
 		public MemberTable<AirBase> AreaGroup
 		{
-			get { return this._AreaGroup; }
+			get => field;
 			private set
 			{
-				if (this._AreaGroup != value)
+				if (field != value)
 				{
-					this._AreaGroup = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -42,7 +40,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 航空隊情報を更新します
 		/// </summary>
-		internal void Update(kcsapi_air_base[] airBases, kcsapi_air_base_expanded_info[] expandedInfo)
+		internal void Update(kcsapi_air_base[] airBases, kcsapi_air_base_expanded_info[]? expandedInfo)
 		{
 			System.Diagnostics.Debug.WriteLine($"[AirBases.Update] Called with {airBases?.Length ?? 0} airBases.");
 
@@ -127,8 +125,8 @@ namespace Grabacr07.KanColleWrapper.Models
 	public class AirBase : Notifier, IIdentifiable
 	{
 		private readonly kcsapi_air_base[] _rawData;
-		private readonly kcsapi_air_base_expanded_info _expandedInfo;
-		public string[] AirBaseNames { get; private set; }
+		private readonly kcsapi_air_base_expanded_info? _expandedInfo;
+		public string[] AirBaseNames { get; private set; } = [];
 
 		#region AreaId 海域ID
 
@@ -152,23 +150,21 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AreaName 海域名
 
-		private string _AreaName;
-
 		/// <summary>
 		/// 海域名を取得（"中部海域"、"南西海域"など）
 		/// </summary>
 		public string AreaName
 		{
-			get { return this._AreaName; }
+			get => field;
 			private set
 			{
-				if (this._AreaName != value)
+				if (field != value)
 				{
-					this._AreaName = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = string.Empty;
 
 		#endregion
 
@@ -234,29 +230,27 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AirBaseInfos 基地情報リスト
 
-		private AirBaseInfo[] _AirBaseInfos;
-
 		/// <summary>
 		/// 各基地の名前と出撃状態を取得
 		/// </summary>
 		public AirBaseInfo[] AirBaseInfos
 		{
-			get { return this._AirBaseInfos; }
+			get => field;
 			private set
 			{
-				if (this._AirBaseInfos != value)
+				if (field != value)
 				{
-					this._AirBaseInfos = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = [];
 
 		#endregion
 
 		public int Id => this.AreaId;
 
-		internal AirBase(int areaId, kcsapi_air_base[] rawData, kcsapi_air_base_expanded_info expandedInfo)
+		internal AirBase(int areaId, kcsapi_air_base[] rawData, kcsapi_air_base_expanded_info? expandedInfo)
 		{
 			this._rawData = rawData;
 			this._expandedInfo = expandedInfo;
@@ -265,30 +259,30 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.AreaName = GetAreaNameFromId(areaId);
 			this.MaintenanceLevel = expandedInfo?.api_maintenance_level ?? 0;
 			this.BaseCount = rawData.Length;
-			this.AirBaseNames = rawData?.Select(x => x.api_name).ToArray() ?? Array.Empty<string>();
+			this.AirBaseNames = rawData?.Select(x => x.api_name ?? string.Empty).ToArray() ?? Array.Empty<string>();
 
 			// 各基地の情報を個別に保持（行動半径・装備スロットを計算）
 			this.AirBaseInfos = rawData?.Select(x => new AirBaseInfo
 			{
-				Name = x.api_name,
+				Name = x.api_name ?? string.Empty,
 				ActionKind = x.api_action_kind,
 				Distance = (x.api_distance?.api_base ?? 0) + (x.api_distance?.api_bonus ?? 0),
 				EquipmentSlotIds = x.api_plane_info?
 					.Take(4)
 					.Select(p => p.api_slotid)
 					.ToArray() ?? Array.Empty<int>(),
-				EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
-				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
-				EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
-				EquipmentNames = GetEquipmentNames(x.api_plane_info),
-				EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
-				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
-				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
-				EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
-				EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
-				EquipmentConds = GetEquipmentConds(x.api_plane_info),
-				EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
-				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
+				EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info ?? []),
+				EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info ?? []),
+				EquipmentTypes = GetEquipmentTypes(x.api_plane_info ?? []),
+				EquipmentNames = GetEquipmentNames(x.api_plane_info ?? []),
+				EquipmentLevels = GetEquipmentLevels(x.api_plane_info ?? []),
+				EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info ?? []),
+				EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info ?? []),
+				EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info ?? []),
+				EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info ?? []),
+				EquipmentConds = GetEquipmentConds(x.api_plane_info ?? []),
+				EquipmentCounts = GetEquipmentCounts(x.api_plane_info ?? []),
+				EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info ?? [])
 			}).ToArray() ?? Array.Empty<AirBaseInfo>();
 
 			this.ActionKind = rawData?.FirstOrDefault()?.api_action_kind ?? 0;
@@ -421,7 +415,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 				// 再構築・通知
 				this.RebuildAirBaseInfos();
-				this.AirBaseNames = this._rawData?.Select(x => x.api_name).ToArray() ?? Array.Empty<string>();
+				this.AirBaseNames = this._rawData?.Select(x => x.api_name ?? string.Empty).ToArray() ?? Array.Empty<string>();
 				this.RaisePropertyChanged(nameof(this.AirBaseNames));
 			}
 			catch (Exception ex)
@@ -479,9 +473,9 @@ namespace Grabacr07.KanColleWrapper.Models
 		#endregion
 
 		#region スロット変更時、情報更新
-		internal void UpdateFromSetPlane(kcsapi_plane_info[] planeInfo, ApiDistance distance, int baseId)
+		internal void UpdateFromSetPlane(kcsapi_plane_info[]? planeInfo, ApiDistance? distance, int baseId)
 		{
-			if (planeInfo == null || planeInfo.Length == 0)
+			if (planeInfo == null && distance == null)
 				return;
 
 			try
@@ -498,7 +492,7 @@ namespace Grabacr07.KanColleWrapper.Models
 					targetBase.api_distance = distance;
 				}
 
-				foreach (var newPlane in planeInfo)
+				foreach (var newPlane in planeInfo ?? [])
 				{
 					try
 					{
@@ -545,25 +539,25 @@ namespace Grabacr07.KanColleWrapper.Models
 			{
 				this.AirBaseInfos = this._rawData?.Select(x => new AirBaseInfo
 				{
-					Name = x.api_name,
+					Name = x.api_name ?? string.Empty,
 					ActionKind = x.api_action_kind,
 					Distance = (x.api_distance?.api_base ?? 0) + (x.api_distance?.api_bonus ?? 0),
 					EquipmentSlotIds = x.api_plane_info?
 						.Take(4)
 						.Select(p => p.api_slotid)
 						.ToArray() ?? Array.Empty<int>(),
-					EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info),
-					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info),
-					EquipmentTypes = GetEquipmentTypes(x.api_plane_info),
-					EquipmentNames = GetEquipmentNames(x.api_plane_info),
-					EquipmentLevels = GetEquipmentLevels(x.api_plane_info),
-					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info),
-					EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info),
-					EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info),
-					EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info),
-					EquipmentCounts = GetEquipmentCounts(x.api_plane_info),
-					EquipmentConds = GetEquipmentConds(x.api_plane_info),
-					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info)
+					EquipmentSlotItemIds = GetEquipmentSlotItemIds(x.api_plane_info ?? []),
+					EquipmentIconTypes = GetEquipmentIconTypes(x.api_plane_info ?? []),
+					EquipmentTypes = GetEquipmentTypes(x.api_plane_info ?? []),
+					EquipmentNames = GetEquipmentNames(x.api_plane_info ?? []),
+					EquipmentLevels = GetEquipmentLevels(x.api_plane_info ?? []),
+					EquipmentAlvs = GetEquipmentAlvs(x.api_plane_info ?? []),
+					EquipmentAntiAirs = GetEquipmentAntiAirs(x.api_plane_info ?? []),
+					EquipmentIntercepts = GetEquipmentIntercepts(x.api_plane_info ?? []),
+					EquipmentAntibombs = GetEquipmentAntibombs(x.api_plane_info ?? []),
+					EquipmentCounts = GetEquipmentCounts(x.api_plane_info ?? []),
+					EquipmentConds = GetEquipmentConds(x.api_plane_info ?? []),
+					EquipmentMaxCounts = GetEquipmentMaxCounts(x.api_plane_info ?? [])
 				}).ToArray() ?? Array.Empty<AirBaseInfo>();
 			}
 			catch (Exception ex)
@@ -828,7 +822,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 補給 API のレスポンスから搭載数を更新します。
 		/// </summary>
-		internal void UpdateFromSupply(kcsapi_plane_info[] planeInfo, ApiDistance distance)
+		internal void UpdateFromSupply(kcsapi_plane_info[] planeInfo, ApiDistance? distance)
 		{
 			if (planeInfo == null || planeInfo.Length == 0)
 				return;

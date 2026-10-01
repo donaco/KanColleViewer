@@ -1,4 +1,4 @@
-﻿using Grabacr07.KanColleWrapper.Models.Raw;
+using Grabacr07.KanColleWrapper.Models.Raw;
 
 namespace Grabacr07.KanColleWrapper.Models
 {
@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public int MapInfoId { get; }
 
-		public MapInfo MapInfo { get; internal set; }
+		public MapInfo MapInfo { get; internal set; } = MapInfo.Dummy;
 
 		public int MapAreaId { get; }
 

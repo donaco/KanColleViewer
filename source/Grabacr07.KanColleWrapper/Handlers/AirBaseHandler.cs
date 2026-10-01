@@ -66,8 +66,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				var data = root["api_data"] ?? root;
 				if (data == null) return true;
 
-				kcsapi_plane_info[] planeInfo = null;
-				ApiDistance distance = null;
+				kcsapi_plane_info[]? planeInfo = null;
+				ApiDistance? distance = null;
 
 				try
 				{
@@ -167,8 +167,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 						if (airBaseTok != null)
 						{
-							kcsapi_air_base[] ab = null;
-							kcsapi_air_base_expanded_info[] abi = null;
+							kcsapi_air_base[]? ab = null;
+							kcsapi_air_base_expanded_info[]? abi = null;
 							try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
 							try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }
 
@@ -239,7 +239,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			try
 			{
-				JToken root = null;
+				JToken? root = null;
 				try { root = JToken.Parse(normalized); } catch { root = null; }
 				var data = root?["api_data"] ?? root;
 				if (data == null) return true;
@@ -262,7 +262,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				catch (Exception ex) { afterBauxite = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				// api_plane_info を取得
-				kcsapi_plane_info[] planeInfo = null;
+				kcsapi_plane_info[]? planeInfo = null;
 				try
 				{
 					var planeTok = data["api_plane_info"];
@@ -274,7 +274,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				catch (Exception ex) { planeInfo = null; LogError("TryHandleAirCorpsSupply", ex); }
 
 				// api_distance を取得
-				ApiDistance distance = null;
+				ApiDistance? distance = null;
 				try
 				{
 					var distanceTok = data["api_distance"];
@@ -349,7 +349,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			try
 			{
-				JToken root = null;
+				JToken? root = null;
 				try { root = JToken.Parse(normalized); } catch { root = null; }
 				var data = root?["api_data"] ?? root;
 				if (data == null) return true;
@@ -359,8 +359,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 				var expandedTok = data["api_air_base_expanded_info"] ?? data.SelectToken("api_air_base_expanded_info");
 
-				kcsapi_air_base[] ab = null;
-				kcsapi_air_base_expanded_info[] abi = null;
+				kcsapi_air_base[]? ab = null;
+				kcsapi_air_base_expanded_info[]? abi = null;
 
 				try { ab = airBaseTok.ToObject<kcsapi_air_base[]>(); } catch { ab = null; }
 				try { abi = expandedTok?.ToObject<kcsapi_air_base_expanded_info[]>(); } catch { abi = null; }

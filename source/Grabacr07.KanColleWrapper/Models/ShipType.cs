@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		public int Id => this.RawData.api_id;
 
-		public string Name => this.RawData.api_name;
+		public string Name => this.RawData.api_name ?? string.Empty;
 
 		public int SortNumber => this.RawData.api_sortno;
 
@@ -28,7 +28,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region static members
 
-	    public static ShipType Dummy { get; } = new ShipType(new kcsapi_mst_stype
+		public static ShipType Dummy { get; } = new(new kcsapi_mst_stype
 		{
 		    api_id = 999,
 		    api_sortno = 999,

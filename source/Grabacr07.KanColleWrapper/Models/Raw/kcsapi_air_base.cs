@@ -25,12 +25,12 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 		/// <summary>
 		/// 航空隊の名前
 		/// </summary>
-		public string api_name { get; set; }
+		public string? api_name { get; set; }
 
 		/// <summary>
 		/// 距離情報
 		/// </summary>
-		public ApiDistance api_distance { get; set; }
+		public ApiDistance? api_distance { get; set; }
 
 		/// <summary>
 		/// 行動種別（0: 休止、1: 出撃、2: 防空）
@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 		/// <summary>
 		/// 航空機情報の配列
 		/// </summary>
-		public kcsapi_plane_info[] api_plane_info { get; set; }
+		public kcsapi_plane_info[]? api_plane_info { get; set; }
 	}
 
 	/// <summary>

@@ -22,7 +22,7 @@ namespace Grabacr07.KanColleWrapper.Annotations
     {
         public const string Name = "Dark";
 
-        public DarkAttribute(string description = null)
+        public DarkAttribute(string? description = null)
             : base(description)
         {
         }

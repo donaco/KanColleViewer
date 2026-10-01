@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +11,8 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 	{
 		public int api_id { get; set; }
 		public int api_sortno { get; set; }
-		public string api_name { get; set; }
-		public int[] api_type { get; set; }
+		public string? api_name { get; set; }
+		public int[]? api_type { get; set; }
 		public int api_taik { get; set; }
 		public int api_souk { get; set; }
 		public int api_houg { get; set; }
@@ -32,9 +32,9 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 		public int api_luck { get; set; }
 		public int api_leng { get; set; }
 		public int api_rare { get; set; }
-		public int[] api_broken { get; set; }
-		public string api_info { get; set; }
-		public string api_usebull { get; set; }
+		public int[]? api_broken { get; set; }
+		public string? api_info { get; set; }
+		public string? api_usebull { get; set; }
 		public int api_cost { get; set; }
 		public int api_distance { get; set; }
 	}

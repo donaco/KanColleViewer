@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -8,7 +8,6 @@ namespace Grabacr07.KanColleWrapper.Models
 {
 	public class FleetCondition : TimerNotifier
 	{
-		private Ship[] ships;
 		private bool notificated;
 		private int minCondition;
 
@@ -17,23 +16,21 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public bool IsEnabled { get; set; }
 
-		public string Name { get; set; }
+		public string Name { get; set; } = null!;
 
 		#region RejuvenateTime / IsRejuvenating 変更通知プロパティ
-
-		private DateTimeOffset? _RejuvenateTime;
 
 		/// <summary>
 		/// 疲労回復の目安時間を取得します。
 		/// </summary>
 		public DateTimeOffset? RejuvenateTime
 		{
-			get { return this._RejuvenateTime; }
+			get => field;
 			private set
 			{
-				if (this._RejuvenateTime != value)
+				if (field != value)
 				{
-					this._RejuvenateTime = value;
+					field = value;
 					this.notificated = false;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.IsRejuvenating));
@@ -50,19 +47,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Remaining 変更通知プロパティ
 
-		private TimeSpan? _Remaining;
-
 		/// <summary>
 		/// 疲労の回復が完了するまでの残り時間を取得します。1 秒ごとに更新されます。
 		/// </summary>
 		public TimeSpan? Remaining
 		{
-			get { return this._Remaining; }
+			get => field;
 			private set
 			{
-				if (this._Remaining != value)
+				if (field != value)
 				{
-					this._Remaining = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -70,19 +65,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
-		public event EventHandler<ConditionRejuvenatedEventArgs> Rejuvenated;
+		public event EventHandler<ConditionRejuvenatedEventArgs>? Rejuvenated;
 
 		internal void Update(Ship[] s)
 		{
-			this.ships = s;
-
-			if (this.ships.Length == 0)
+			if (s.Length == 0)
 			{
 				this.RejuvenateTime = null;
 				return;
 			}
 
-			var condition = this.ships.Min(x => x.Condition);
+			var condition = s.Min(x => x.Condition);
 			if (condition != this.minCondition)
 			{
 				this.minCondition = condition;

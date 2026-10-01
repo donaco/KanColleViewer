@@ -9,9 +9,9 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		public int Id => this.RawData.api_id;
 
-		public string Name => this.RawData.api_name;
+		public string Name => this.RawData.api_name ?? string.Empty;
 
-		public string Detail => this.RawData.api_detail;
+		public string Detail => this.RawData.api_detail ?? string.Empty;
 
 		internal BGMInfo(kcsapi_mst_bgm rawData) : base(rawData) { }
 

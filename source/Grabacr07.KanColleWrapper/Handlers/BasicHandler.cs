@@ -67,7 +67,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				if (data == null) return true;
 
 				// api_material: int[] または api_get_material など、安定的に取得できる場合は Materials を更新
-				int[] apiMaterialArray = null;
+				int[]? apiMaterialArray = null;
 				var matTok = data["api_material"] ?? data["api_get_material"];
 				if (matTok != null && matTok.Type == JTokenType.Array)
 				{
@@ -136,7 +136,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										if (cloned != null)
 										{
 											cloned.api_max_slotitem = (cloned.api_max_slotitem) + deltaCapacity;
-											this.client.Homeport.UpdateAdmiral(cloned);
+											this.client.Homeport?.UpdateAdmiral(cloned);
 										}
 									}
 									catch (Exception ex) { LogError("TryHandleClearItemGet", ex); }

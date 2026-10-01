@@ -16,16 +16,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Id 変更通知プロパティ
 
-		private int _Id;
-
 		public int Id
 		{
-			get { return this._Id; }
+			get => field;
 			private set
 			{
-				if (this._Id != value)
+				if (field != value)
 				{
-					this._Id = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -35,19 +33,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Mission 変更通知プロパティ
 
-		private Mission _Mission;
-
 		/// <summary>
 		/// 実行中の遠征任務を取得します。
 		/// </summary>
-		public Mission Mission
+		public Mission? Mission
 		{
-			get { return this._Mission; }
+			get => field;
 			private set
 			{
-				if (this._Mission != value)
+				if (field != value)
 				{
-					this._Mission = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -57,18 +53,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region ReturnTime / Remaining / IsInExecution 変更通知プロパティ
 
-		private DateTimeOffset? _ReturnTime;
 		/// <summary>
 		/// 遠征から帰還する日時を取得します。
 		/// </summary>
 		public DateTimeOffset? ReturnTime
 		{
-			get { return this._ReturnTime; }
+			get => field;
 			private set
 			{
-				if (this._ReturnTime != value)
+				if (field != value)
 				{
-					this._ReturnTime = value;
+					field = value;
 					this.notificated = false;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.Remaining));
@@ -95,7 +90,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 艦隊が遠征から帰ったときに発生します。
 		/// </summary>
-		public event EventHandler<ExpeditionReturnedEventArgs> Returned;
+		public event EventHandler<ExpeditionReturnedEventArgs>? Returned;
 
 
 		public Expedition(Fleet fleet)

@@ -21,7 +21,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 艦娘の種類に基づく情報を取得します。
 		/// </summary>
-		public ShipInfo Info { get; private set; }
+		public ShipInfo Info { get; private set; } = null!;
 
 		public int SortNumber => this.RawData.api_sortno;
 
@@ -62,17 +62,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region HP 変更通知プロパティ
 
-		private LimitedValue _HP;
-
 		/// <summary>
 		/// 耐久値を取得します。
 		/// </summary>
 		public LimitedValue HP
 		{
-			get { return this._HP; }
+			get => field;
 			private set
 			{
-				this._HP = value;
+				field = value;
 				this.RaisePropertyChanged();
 
 				if (value.IsHeavilyDamage())
@@ -90,17 +88,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Fuel 変更通知プロパティ
 
-		private LimitedValue _Fuel;
-
 		/// <summary>
 		/// 燃料を取得します。
 		/// </summary>
 		public LimitedValue Fuel
 		{
-			get { return this._Fuel; }
+			get => field;
 			private set
 			{
-				this._Fuel = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -109,14 +105,12 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Bull 変更通知プロパティ
 
-		private LimitedValue _Bull;
-
 		public LimitedValue Bull
 		{
-			get { return this._Bull; }
+			get => field;
 			private set
 			{
-				this._Bull = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -125,17 +119,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Firepower 変更通知プロパティ
 
-		private ModernizableStatus _Firepower;
-
 		/// <summary>
 		/// 火力ステータス値を取得します。
 		/// </summary>
 		public ModernizableStatus Firepower
 		{
-			get { return this._Firepower; }
+			get => field;
 			private set
 			{
-				this._Firepower = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -144,17 +136,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Torpedo 変更通知プロパティ
 
-		private ModernizableStatus _Torpedo;
-
 		/// <summary>
 		/// 雷装ステータス値を取得します。
 		/// </summary>
 		public ModernizableStatus Torpedo
 		{
-			get { return this._Torpedo; }
+			get => field;
 			private set
 			{
-				this._Torpedo = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -163,17 +153,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AA 変更通知プロパティ
 
-		private ModernizableStatus _AA;
-
 		/// <summary>
 		/// 対空ステータス値を取得します。
 		/// </summary>
 		public ModernizableStatus AA
 		{
-			get { return this._AA; }
+			get => field;
 			private set
 			{
-				this._AA = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -182,17 +170,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Armer 変更通知プロパティ
 
-		private ModernizableStatus _Armer;
-
 		/// <summary>
 		/// 装甲ステータス値を取得します。
 		/// </summary>
 		public ModernizableStatus Armer
 		{
-			get { return this._Armer; }
+			get => field;
 			private set
 			{
-				this._Armer = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -201,17 +187,15 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Luck 変更通知プロパティ
 
-		private ModernizableStatus _Luck;
-
 		/// <summary>
 		/// 運のステータス値を取得します。
 		/// </summary>
 		public ModernizableStatus Luck
 		{
-			get { return this._Luck; }
+			get => field;
 			private set
 			{
-				this._Luck = value;
+				field = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -220,79 +204,71 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Slots 変更通知プロパティ
 
-		private ShipSlot[] _Slots;
-
 		/// <summary>
 		/// この艦娘の装備スロットを取得します。装備していないスロットには <see cref="ShipSlot.Equipped"/> が false のオブジェクトが割り当てられます (null を返しません)。
 		/// </summary>
 		public ShipSlot[] Slots
 		{
-			get { return this._Slots; }
+			get => field;
 			set
 			{
-				if (this._Slots != value)
+				if (field != value)
 				{
-					this._Slots = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = [];
 
 		#endregion
 
 		#region EquippedSlots 変更通知プロパティ
-
-		private ShipSlot[] _EquippedSlots;
 
 		/// <summary>
 		/// <see cref="Slots"/> と <see cref="ExSlot"/> のなかで <see cref="ShipSlot.Equipped"/> が true (空でないスロット) を列挙します。
 		/// </summary>
 		public ShipSlot[] EquippedItems
 		{
-			get { return this._EquippedSlots; }
+			get => field;
 			set
 			{
-				if (this._EquippedSlots != value)
+				if (field != value)
 				{
-					this._EquippedSlots = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = [];
 
 		#endregion
 
 		#region ExSlot 変更通知プロパティ
 
-		private ShipSlot _ExSlot;
-
 		public ShipSlot ExSlot
 		{
-			get { return this._ExSlot; }
+			get => field;
 			set
 			{
-				if (this._ExSlot != value)
+				if (field != value)
 				{
-					this._ExSlot = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = new ShipSlot(null, 0, 0);
 
 		#endregion
 
 		#region TimeToRepair 変更通知プロパティ
 
-		private TimeSpan _TimeToRepair;
-
 		public TimeSpan TimeToRepair
 		{
-			get { return this._TimeToRepair; }
+			get => field;
 			set
 			{
-				if (this._TimeToRepair != value)
+				if (field != value)
 				{
-					this._TimeToRepair = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -334,16 +310,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Status 変更通知プロパティ
 
-		private ShipSituation situation;
-
 		public ShipSituation Situation
 		{
-			get { return this.situation; }
+			get => field;
 			set
 			{
-				if (this.situation != value)
+				if (field != value)
 				{
-					this.situation = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -438,7 +412,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		}
 
 
-		internal void Charge(int fuel, int bull, int[] onslot)
+		internal void Charge(int fuel, int bull, int[]? onslot)
 		{
 			this.Fuel = this.Fuel.Update(fuel);
 			this.Bull = this.Bull.Update(bull);

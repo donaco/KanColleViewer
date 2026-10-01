@@ -23,19 +23,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Ships 変更通知プロパティ
 
-		private MemberTable<Ship> _Ships;
-
 		/// <summary>
 		/// 母港に所属する艦娘のコレクションを取得します。
 		/// </summary>
 		public MemberTable<Ship> Ships
 		{
-			get { return this._Ships; }
+			get => field;
 			private set
 			{
-				if (this._Ships != value)
+				if (field != value)
 				{
-					this._Ships = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -45,19 +43,17 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Fleets 変更通知プロパティ
 
-		private MemberTable<Fleet> _Fleets;
-
 		/// <summary>
 		/// 編成された艦隊のコレクションを取得します。
 		/// </summary>
 		public MemberTable<Fleet> Fleets
 		{
-			get { return this._Fleets; }
+			get => field;
 			private set
 			{
-				if (this._Fleets != value)
+				if (field != value)
 				{
-					this._Fleets = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -88,9 +84,9 @@ namespace Grabacr07.KanColleWrapper
 
 		#region CombinedFleet 変更通知プロパティ
 
-		private CombinedFleet _CombinedFleet;
+		private CombinedFleet? _CombinedFleet;
 
-		public CombinedFleet CombinedFleet
+		public CombinedFleet? CombinedFleet
 		{
 			get { return this._CombinedFleet; }
 			set
@@ -118,7 +114,7 @@ namespace Grabacr07.KanColleWrapper
 		/// <summary>
 		/// 指定した ID の艦娘が所属する艦隊を取得します。
 		/// </summary>
-		internal Fleet GetFleet(int shipId)
+		internal Fleet? GetFleet(int shipId)
 		{
 			return this.Fleets.Select(x => x.Value).SingleOrDefault(x => x.Ships.Any(s => s.Id == shipId));
 		}
@@ -129,8 +125,10 @@ namespace Grabacr07.KanColleWrapper
 
 			try
 			{
-				var fleet = this.Fleets[int.Parse(data.Request["api_deck_id"])];
+				if (!int.TryParse(data.Request["api_deck_id"], out var deckId)) return;
+				var fleet = this.Fleets[deckId];
 				var name = data.Request["api_name"];
+				if (fleet == null || name == null) return;
 
 				fleet.Name = name;
 			}
@@ -172,8 +170,14 @@ namespace Grabacr07.KanColleWrapper
 					{
 						lock (this._evacuationLock)
 						{
-							foreach (var id in this.evacuatedShipsIds) this.Ships[id].Situation |= ShipSituation.Evacuation;
-							foreach (var id in this.towShipIds) this.Ships[id].Situation |= ShipSituation.Tow;
+							foreach (var id in this.evacuatedShipsIds)
+							{
+								if (this.Ships.TryGetValue(id, out var ship)) ship.Situation |= ShipSituation.Evacuation;
+							}
+							foreach (var id in this.towShipIds)
+							{
+								if (this.Ships.TryGetValue(id, out var ship)) ship.Situation |= ShipSituation.Tow;
+							}
 						}
 					}
 
@@ -236,11 +240,11 @@ namespace Grabacr07.KanColleWrapper
 
 			try
 			{
-				var fleet = this.Fleets[int.Parse(data.Request["api_id"])];
+				if (!int.TryParse(data.Request["api_id"], out var fleetId)
+					|| !int.TryParse(data.Request["api_ship_idx"], out var index)
+					|| !int.TryParse(data.Request["api_ship_id"], out var shipId)
+					|| !this.Fleets.TryGetValue(fleetId, out var fleet)) return;
 				fleet.RaiseShipsUpdated();
-
-				var index = int.Parse(data.Request["api_ship_idx"]);
-				var shipId = int.Parse(data.Request["api_ship_id"]);
 				if (index == 0 && shipId == -2)
 				{
 					// 旗艦以外をすべて外すケース
@@ -291,7 +295,8 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				var ship = this.Ships[int.Parse(data.Request["api_id"])];
+				if (data.Data is null || !int.TryParse(data.Request["api_id"], out var shipId)) return;
+				var ship = this.Ships[shipId];
 				if (ship == null) return;
 
 				ship.RawData.api_slot = data.Data.api_slot;
@@ -314,9 +319,9 @@ namespace Grabacr07.KanColleWrapper
 
 		private void Charge(kcsapi_charge source)
 		{
-			Fleet fleet = null; // 補給した艦が所属している艦隊。艦隊をまたいで補給はできないので、必ず 1 つに絞れる
+			Fleet? fleet = null; // 補給した艦が所属している艦隊。艦隊をまたいで補給はできないので、必ず 1 つに絞れる
 
-			foreach (var ship in source.api_ship)
+			foreach (var ship in source.api_ship ?? [])
 			{
 				var target = this.Ships[ship.api_id];
 				if (target == null) continue;
@@ -340,13 +345,15 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				this.Ships[svd.Data.api_ship.api_id]?.Update(svd.Data.api_ship);
+				if (svd.Data is null) return;
+				if (svd.Data.api_ship != null) this.Ships[svd.Data.api_ship.api_id]?.Update(svd.Data.api_ship);
 
-				var items = svd.Request["api_id_items"]
+				var items = (svd.Request["api_id_items"] ?? string.Empty)
 					.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
 					.Select(int.Parse)
 					.Where(x => this.Ships.ContainsKey(x))
 					.Select(x => this.Ships[x])
+					.OfType<Ship>()
 					.ToArray();
 
 				// (改修に使った艦娘のこと item って呼ぶのどうなの…)
@@ -358,7 +365,7 @@ namespace Grabacr07.KanColleWrapper
 				}
 
 				this.RaiseShipsChanged();
-				this.Update(svd.Data.api_deck);
+				if (svd.Data.api_deck != null) this.Update(svd.Data.api_deck);
 			}
 			catch (Exception ex)
 			{
@@ -453,7 +460,8 @@ namespace Grabacr07.KanColleWrapper
 		{
 			this.homeport.Itemyard.AddFromDock(source);
 
-			this.Ships.Add(new Ship(this.homeport, source.api_ship));
+			if (source.api_ship != null) this.Ships.Add(new Ship(this.homeport, source.api_ship));
+			else return;
 			this.RaiseShipsChanged();
 		}
 
@@ -461,10 +469,11 @@ namespace Grabacr07.KanColleWrapper
 		{
 			try
 			{
-				var ships = svd.Request["api_ship_id"]
+				var ships = (svd.Request["api_ship_id"] ?? string.Empty)
 					.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
 					.Select(x => int.Parse(x))
-					.Select(x => this.Ships[x]);
+					.Select(x => this.Ships[x])
+					.OfType<Ship>();
                     
 				foreach(var ship in ships)
 				{

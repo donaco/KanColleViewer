@@ -120,8 +120,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								try
 								{
 									var org = this.client.Homeport?.Organization;
-									if (org == null || !org.Fleets.ContainsKey(deckId)) return;
-									var fleet = org.Fleets[deckId];
+									if (org == null || !org.Fleets.TryGetValue(deckId, out var fleet)) return;
 
 									ApplyDeckChangeCount(fleet, org, respChangeCount);
 								}
@@ -193,7 +192,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								var key = kv[0];
 								string val;
 								try { val = Uri.UnescapeDataString(kv[1]); } catch { val = kv[1]; }
-								if (!multi.TryGetValue(key, out var list)) { list = new List<string>(); multi[key] = list; }
+								if (!multi.TryGetValue(key, out var list)) { list = []; multi[key] = list; }
 								list.Add(val);
 							}
 						}
@@ -222,7 +221,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							}
 						}
 
-						var idxs = new List<int>();
+						List<int> idxs = [];
 						if (multi.TryGetValue("api_ship_idx", out var idxVals))
 						{
 							foreach (var v in idxVals)
@@ -234,7 +233,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							}
 						}
 
-						var shipIds = new List<int>();
+						List<int> shipIds = [];
 						if (multi.TryGetValue("api_ship_id", out var shipVals))
 						{
 							foreach (var v in shipVals)
@@ -262,8 +261,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							{
 								var org = this.client.Homeport?.Organization;
 								if (org == null) return;
-								if (!org.Fleets.ContainsKey(deckId)) return;
-								var fleet = org.Fleets[deckId];
+								if (!org.Fleets.TryGetValue(deckId, out var fleet)) return;
 
 								// 1) 明示的な「旗艦以外全解除」
 								if (idxs.Count == 1 && idxs[0] == -2 && (!shipIds.Any() || shipIds.All(x => x == -2)))
@@ -573,8 +571,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 					{
 						var org = this.client.Homeport?.Organization;
 						if (org == null) return;
-						if (!org.Fleets.ContainsKey(deckId)) return;
-						var fleet = org.Fleets[deckId];
+						if (!org.Fleets.TryGetValue(deckId, out var fleet)) return;
 
 						// 直接艦隊名を更新して通知
 						try { fleet.Name = name; } catch { }

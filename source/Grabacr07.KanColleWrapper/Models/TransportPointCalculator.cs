@@ -11,11 +11,11 @@ namespace Grabacr07.KanColleWrapper.Models
 {
 	internal static class TransportPointCalculator
 	{
-		private static Dictionary<int, decimal> _shipTypeTp;
-		private static Dictionary<int, decimal> _shipTp;
-		private static Dictionary<int, decimal> _ItemTp;
+		private static Dictionary<int, decimal> _shipTypeTp = null!;
+		private static Dictionary<int, decimal> _shipTp = null!;
+		private static Dictionary<int, decimal> _ItemTp = null!;
 
-		private static string _jsonFilePath;
+		private static string _jsonFilePath = null!;
 		private static DateTime _lastLoadTime = DateTime.MinValue;
 
 		static TransportPointCalculator()
@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			LoadTpSettings();
 		}
 
-		public static decimal Calculate(IEnumerable<Ship> ships)
+		public static decimal Calculate(IEnumerable<Ship>? ships)
 		{
 			TryReloadIfModified();
 
@@ -83,18 +83,18 @@ namespace Grabacr07.KanColleWrapper.Models
 		private static void LoadTpSettings()
 		{
 			// フォールバック（現行ハードコード値）
-			_shipTypeTp = new Dictionary<int, decimal>
+			_shipTypeTp = new()
 			{
 				{ 2, 5m }, { 3, 2m }, { 10, 7m }, { 16, 9m }, { 14, 1m },
 				{ 21, 6m }, { 6, 4m }, { 22, 15m }, { 17, 12m }, { 20, 7m },
 			};
 
-			_shipTp = new Dictionary<int, decimal>
+			_shipTp = new()
 			{
 				{ 487, 8m },
 			};
 
-			_ItemTp = new Dictionary<int, decimal>
+			_ItemTp = new()
 			{
 				{ 75, 5m }, { 68, 8m }, { 193, 8m }, { 166, 8m }, { 230, 8m },
 				{ 449, 8m }, { 355, 8m }, { 436, 8m }, { 482, 8m }, { 408, 8m },
@@ -124,16 +124,16 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 		}
 
-		private static Dictionary<int, decimal> ParseDictionary(JObject obj, string valueKey)
+		private static Dictionary<int, decimal>? ParseDictionary(JObject? obj, string valueKey)
 		{
 			if (obj == null) return null;
 
-			var result = new Dictionary<int, decimal>();
+			Dictionary<int, decimal> result = new();
 			foreach (var p in obj.Properties())
 			{
 				if (!int.TryParse(p.Name, out var id)) continue;
 
-				string s;
+				string? s;
 				if (p.Value is JObject o)
 				{
 					s = o[valueKey]?.ToString(); // 例: shipTypeTp / shipTp / ItemTp

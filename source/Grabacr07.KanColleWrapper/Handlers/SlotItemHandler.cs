@@ -272,7 +272,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									var unsetTok = data["api_unset_items"] ?? data["api_unset_list"] ?? data["api_unset_slot"];
 									if (unsetTok != null)
 									{
-										try { iy.RaiseSlotItemsChanged(); } catch { }
+										try { iy?.RaiseSlotItemsChanged(); } catch { }
 									}
 								}
 								catch (Exception ex) { LogError("TryHandleCreateItem", ex); }

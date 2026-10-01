@@ -64,10 +64,10 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// </summary>
 		/// <param name="requestBody">パース対象のリクエスト Body</param>
 		/// <param name="keyComparer">キーの比較子。null の場合は既定の比較（大文字小文字を区別）</param>
-		internal static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody, IEqualityComparer<string> keyComparer)
+		internal static IReadOnlyDictionary<string, string> ParseRequestBody(string requestBody, IEqualityComparer<string>? keyComparer)
 		{
 			var dict = keyComparer == null
-				? new Dictionary<string, string>()
+				? new()
 				: new Dictionary<string, string>(keyComparer);
 			if (string.IsNullOrEmpty(requestBody)) return dict;
 			foreach (var p in requestBody.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
@@ -86,7 +86,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// <param name="materials">更新対象の資材</param>
 		/// <param name="addMaterials">4 要素の増分配列（負値を指定すれば減算になります）</param>
 		/// <param name="contextForLog">失敗時にログへ記録する処理名</param>
-		internal static void ApplyMaterialDelta(Materials materials, int[] addMaterials, string contextForLog)
+		internal static void ApplyMaterialDelta(Materials? materials, int[]? addMaterials, string contextForLog)
 		{
 			try
 			{
@@ -111,7 +111,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// <param name="materials">更新対象の資材</param>
 		/// <param name="consume">消費分の配列（4 要素未満でも不足分は 0 として扱います）</param>
 		/// <param name="contextForLog">失敗時にログへ記録する処理名</param>
-		internal static void ApplyMaterialConsumption(Materials materials, int[] consume, string contextForLog)
+		internal static void ApplyMaterialConsumption(Materials? materials, int[]? consume, string contextForLog)
 		{
 			try
 			{
@@ -138,7 +138,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// 個々の艦隊で例外が発生しても後続の艦隊の処理は継続します。
 		/// </summary>
 		/// <param name="homeport">対象の母港</param>
-		internal static void RefreshAllFleets(Homeport homeport)
+		internal static void RefreshAllFleets(Homeport? homeport)
 		{
 			try { homeport?.Organization?.NotifyUpdated(); } catch { }
 
@@ -159,11 +159,11 @@ namespace Grabacr07.KanColleWrapper.Handlers
 		/// <param name="shipId">対象艦娘の ID</param>
 		/// <param name="calculateFirst">true の場合 Calculate → Update、false の場合 Update → Calculate の順で呼び出す</param>
 		/// <param name="caller">失敗時にログへ記録する処理名</param>
-		internal static void RefreshFleetByShipId(Organization org, int shipId, bool calculateFirst, string caller)
+		internal static void RefreshFleetByShipId(Organization? org, int shipId, bool calculateFirst, string caller)
 		{
 			if (org == null) return;
 
-			Fleet fleet;
+			Fleet? fleet;
 			try { fleet = org.GetFleet(shipId); }
 			catch (Exception ex) { LogError(caller, ex); return; }
 
@@ -252,7 +252,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			{
 				if (itemyard.SlotItems.ContainsKey(raw.api_id))
 				{
-					try { itemyard.SlotItems[raw.api_id].Remodel(raw.api_level, raw.api_slotitem_id); }
+					try { itemyard.SlotItems[raw.api_id]?.Remodel(raw.api_level, raw.api_slotitem_id); }
 					catch (Exception ex) { LogError(contextForLog, ex); }
 				}
 				else

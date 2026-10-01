@@ -45,8 +45,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				if (ApiDataDeserializer.TryDeserializeApiData<kcsapi_port>(normalized, out var port))
 				{
 					// JSON 側も柔軟にパースして api_slot_item 等を探すためのトークンを準備
-					JToken root = null;
-					JToken dataTok = null;
+					JToken? root = null;
+					JToken? dataTok = null;
 					try { root = JToken.Parse(normalized); dataTok = root["api_data"] ?? root; } catch { root = null; dataTok = null; }
 
 					HandlerHelper.RunOnUi(() =>
@@ -77,7 +77,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							// 追加: JSON に api_slot_item が含まれている場合は Itemyard を更新する（kcsapi_port に未定義のため JToken 経由）
 							try
 							{
-								JToken slotTok = null;
+								JToken? slotTok = null;
 								if (dataTok != null)
 								{
 									slotTok = dataTok["api_slot_item"] ?? dataTok.SelectToken("api_slot_item");

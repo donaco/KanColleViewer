@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +14,8 @@ namespace Grabacr07.KanColleWrapper.Models.Raw
 		public int api_value { get; set; }
 		public int api_usetype { get; set; }
 		public int api_category { get; set; }
-		public string api_name { get; set; }
-		public string[] api_description { get; set; }
+		public string? api_name { get; set; }
+		public string[]? api_description { get; set; }
 		public int api_price { get; set; }
 		public int api_count { get; set; }
 	}

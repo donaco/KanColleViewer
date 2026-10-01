@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,16 +15,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Current 変更通知プロパティ
 
-		private int _Current;
-
 		public int Current
 		{
-			get { return this._Current; }
+			get => field;
 			set
 			{
-				if (this._Current != value)
+				if (field != value)
 				{
-					this._Current = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -32,7 +30,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
-		public ShipSlot(SlotItem item, int maximum, int current)
+		public ShipSlot(SlotItem? item, int maximum, int current)
 		{
 			this.Item = item ?? SlotItem.Dummy;
 			this.Maximum = maximum;

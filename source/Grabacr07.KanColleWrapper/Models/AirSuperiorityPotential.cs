@@ -200,7 +200,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 		}
 
-		private static readonly Dictionary<int, Proficiency> proficiencies = new Dictionary<int, Proficiency>()
+		private static readonly Dictionary<int, Proficiency> proficiencies = new()
 		{
 			{ 0, new Proficiency(0, 9, 0, 0) },
 			{ 1, new Proficiency(10, 24, 0, 0) },

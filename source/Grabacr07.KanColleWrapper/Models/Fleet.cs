@@ -14,20 +14,18 @@ namespace Grabacr07.KanColleWrapper.Models
 	public class Fleet : DisposableNotifier, IIdentifiable
 	{
 		private readonly Homeport homeport;
-		private Ship[] originalShips; // null も含んだやつ
+		private Ship?[] originalShips = [];
 
 		#region Id 変更通知プロパティ
 
-		private int _Id;
-
 		public int Id
 		{
-			get { return this._Id; }
+			get => field;
 			private set
 			{
-				if (this._Id != value)
+				if (field != value)
 				{
-					this._Id = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -37,62 +35,56 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region Name 変更通知プロパティ
 
-		private string _Name;
-
 		public string Name
 		{
-			get { return this._Name; }
+			get => field;
 			internal set
 			{
-				if (this._Name != value)
+				if (field != value)
 				{
-					this._Name = value;
+					field = value;
 					this.State.Condition.Name = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#endregion
 
 		#region Ships 変更通知プロパティ
-
-		private Ship[] _Ships = Array.Empty<Ship>();
 
 		/// <summary>
 		/// 艦隊に所属している艦娘の配列を取得します。
 		/// </summary>
 		public Ship[] Ships
 		{
-			get { return this._Ships; }
+			get => field;
 			private set
 			{
-				if (this._Ships != value)
+				if (field != value)
 				{
-					this._Ships = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = [];
 
 		[Dark("INotifyPropertyChanged が便利すぎる")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public object ShipsUpdated { get; set; }
+		public object? ShipsUpdated { get; set; }
 
 		#endregion
 
 		#region IsInSortie 変更通知プロパティ
 
-		private bool _IsInSortie;
-
 		public bool IsInSortie
 		{
-			get { return this._IsInSortie; }
+			get => field;
 			set
 			{
-				if (this._IsInSortie != value)
+				if (field != value)
 				{
-					this._IsInSortie = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -128,10 +120,10 @@ namespace Grabacr07.KanColleWrapper.Models
 		internal void Update(kcsapi_deck rawData)
 		{
 			this.Id = rawData.api_id;
-			this.Name = rawData.api_name;
+			this.Name = rawData.api_name ?? string.Empty;
 
-			this.Expedition.Update(rawData.api_mission);
-			this.UpdateShips(rawData.api_ship.Select(id => this.homeport.Organization.Ships[id]).ToArray());
+			this.Expedition.Update(rawData.api_mission ?? []);
+			this.UpdateShips((rawData.api_ship ?? []).Select(id => this.homeport.Organization.Ships[id]).ToArray());
 		}
 
 		#region 艦の編成 (Change, Unset)
@@ -142,11 +134,11 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <param name="index">編成を変更する艦のインデックス。通常は 0 ～ 5、旗艦以外をすべて外す場合は -1。</param>
 		/// <param name="ship">艦隊の <paramref name="index"/> 番目に新たに編成する艦。<paramref name="index"/> 番目から艦を外す場合は null。</param>
 		/// <returns>このメソッドを呼び出した時点で <paramref name="index"/> に配置されていた艦。</returns>
-		internal Ship Change(int index, Ship ship)
+		internal Ship? Change(int index, Ship? ship)
 		{
 			var current = this.originalShips[index];
 
-			List<Ship> list;
+			List<Ship?> list;
 			if (index == -1)
 			{
 				list = this.originalShips.Take(1).ToList();
@@ -158,7 +150,7 @@ namespace Grabacr07.KanColleWrapper.Models
 				list.RemoveAll(x => x == null);
 			}
 
-			var ships = new Ship[this.originalShips.Length];
+			var ships = new Ship?[this.originalShips.Length];
 			Array.Copy(list.ToArray(), ships, list.Count);
 
 			this.UpdateShips(ships);
@@ -176,7 +168,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			list[index] = null;
 			list.RemoveAll(x => x == null);
 
-			var ships = new Ship[this.originalShips.Length];
+			var ships = new Ship?[this.originalShips.Length];
 			Array.Copy(list.ToArray(), ships, list.Count);
 
 			this.UpdateShips(ships);
@@ -188,7 +180,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		internal void UnsetAll()
 		{
 			var list = this.originalShips.Take(1).ToList();
-			var ships = new Ship[this.originalShips.Length];
+			var ships = new Ship?[this.originalShips.Length];
 			Array.Copy(list.ToArray(), ships, list.Count);
 
 			this.UpdateShips(ships);
@@ -218,10 +210,10 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#endregion
 
-		private void UpdateShips(Ship[] ships)
+		private void UpdateShips(Ship?[] ships)
 		{
 			this.originalShips = ships;
-			this.Ships = ships.Where(x => x != null).ToArray();
+			this.Ships = ships.OfType<Ship>().ToArray();
 
 			this.State.Calculate();
 			this.State.Update();

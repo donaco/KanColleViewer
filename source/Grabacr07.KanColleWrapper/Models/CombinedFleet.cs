@@ -16,39 +16,35 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		#region Name 変更通知プロパティ
 
-		private string _Name;
-
 		public string Name
 		{
-			get { return this._Name; }
+			get => field;
 			set
 			{
-				if (this._Name != value)
+				if (field != value)
 				{
-					this._Name = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#endregion
 
 		#region Fleets 変更通知プロパティ
 
-		private Fleet[] _Fleets;
-
 		public Fleet[] Fleets
 		{
-			get { return this._Fleets; }
+			get => field;
 			set
 			{
-				if (this._Fleets != value)
+				if (field != value)
 				{
-					this._Fleets = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#endregion
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,12 +33,12 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// 任務名を取得します。
 		/// </summary>
-		public string Title => this.RawData.api_title;
+		public string Title => this.RawData.api_title ?? string.Empty;
 
 		/// <summary>
 		/// 任務の詳細を取得します。
 		/// </summary>
-		public string Detail => this.RawData.api_detail.Replace("<br>", Environment.NewLine);
+		public string Detail => (this.RawData.api_detail ?? string.Empty).Replace("<br>", Environment.NewLine);
 
 
 		public Quest(kcsapi_quest rawData) : base(rawData) { }

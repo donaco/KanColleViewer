@@ -48,7 +48,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			var unsetListTok = data["api_unset_list"]; // 装備解除時に返るケースあり
 
 			// 装備配列が来ている可能性を探す（api_slot_item / api_slotitem 等）
-			JToken slotTok = null;
+			JToken? slotTok = null;
 			try
 			{
 				slotTok = data["api_slot_item"] ?? data["api_slotitem"] ?? root["api_slot_item"] ?? root["api_slotitem"];
@@ -57,7 +57,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			// requestBody から api_id_items を取り出して削除対象ID配列を用意する（CEF 経路で使う）
 			// 注: powerup の api_id_items は「改修素材にした艦のID」の場合があるため、実行時に艦テーブルに存在するかで判定
-			int[] apiIdItemsRaw = null;
+			int[]? apiIdItemsRaw = null;
 			if (!string.IsNullOrEmpty(requestBody))
 			{
 				try
@@ -87,7 +87,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 					var org = this.client.Homeport?.Organization;
 					if (org == null) return;
 
-					var updatedShipIds = new List<int>();
+					List<int> updatedShipIds = [];
 
 					// 1) api_ship を柔軟にハンドル（単一 or 配列）
 					try
@@ -104,9 +104,9 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										if (raw == null) continue;
 										try
 										{
-											var existing = org.Ships?[raw.api_id];
+											var existing = org.Ships[raw.api_id];
 											if (existing != null) existing.Update(raw);
-											else this.client.Homeport.Organization.Update(new[] { raw });
+											else org.Update(new[] { raw });
 											updatedShipIds.Add(raw.api_id);
 										}
 										catch (Exception ex) { LogError("TryHandlePowerup", ex); }
@@ -120,9 +120,9 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								{
 									try
 									{
-										var existing = org.Ships?[raw.api_id];
+										var existing = org.Ships[raw.api_id];
 										if (existing != null) existing.Update(raw);
-										else this.client.Homeport.Organization.Update(new[] { raw });
+										else org.Update(new[] { raw });
 										updatedShipIds.Add(raw.api_id);
 									}
 									catch (Exception ex) { LogError("TryHandlePowerup", ex); }
@@ -142,13 +142,13 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								var decks = deckTok.ToObject<kcsapi_deck[]>();
 								if (decks != null)
 								{
-									foreach (var d in decks) try { this.client.Homeport.Organization.Update(d); } catch { }
+									foreach (var d in decks) try { org.Update(d); } catch { }
 								}
 							}
 							else if (deckTok.Type == JTokenType.Object)
 							{
 								var deck = deckTok.ToObject<kcsapi_deck>();
-								if (deck != null) try { this.client.Homeport.Organization.Update(deck); } catch { }
+								if (deck != null) try { org.Update(deck); } catch { }
 							}
 						}
 					}
@@ -202,7 +202,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 						{
 							try
 							{
-								var shipsToRemove = new List<Ship>();
+							List<Ship> shipsToRemove = [];
 								try
 								{
 									foreach (var id in apiIdItemsRaw)
@@ -336,7 +336,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 						try
 						{
 							var org = this.client.Homeport?.Organization;
-							var updatedShipIds = new List<int>();
+							List<int> updatedShipIds = [];
 
 							// ship データを個別に確実に反映
 							if (s3.api_ship_data != null)
@@ -354,7 +354,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										else
 										{
 											// もし存在しなければ既存の更新ルートにフォールバック
-											try { this.client.Homeport.Organization.Update(new[] { rawShip }); } catch { }
+											try { org?.Update(new[] { rawShip }); } catch { }
 										}
 
 										updatedShipIds.Add(rawShip.api_id);
@@ -368,7 +368,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							{
 								foreach (var deck in s3.api_deck_data)
 								{
-									try { this.client.Homeport.Organization.Update(deck); } catch { }
+									try { org?.Update(deck); } catch { }
 								}
 							}
 
@@ -435,7 +435,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			JToken data = root["api_data"] ?? root;
 
-			JToken slotToken = null;
+			JToken? slotToken = null;
 
 			// 1) api_ship_data がある場合はそちらから探す（単一オブジェクト or 配列）
 			var shipData = data["api_ship_data"];
@@ -479,7 +479,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			if (slotToken == null) return true;
 
 			// slotToken が配列であることを確認
-			JArray apiSlotArray = slotToken as JArray;
+			JArray? apiSlotArray = slotToken as JArray;
 			if (apiSlotArray == null)
 			{
 				// 場合によっては api_slot がオブジェクト内にある別形式の可能性もあるため失敗は無視
@@ -502,7 +502,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				try
 				{
 					var org = this.client.Homeport?.Organization;
-					var ship = org?.Ships?[shipId];
+					if (org == null) return;
+					var ship = org.Ships[shipId];
 					if (ship == null) return;
 
 					lock (this.client.KaisouStateLock)
@@ -547,7 +548,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 					// api_ship_data.api_unset_ship / api_set_ship を個別に反映
 					var shipData = data["api_ship_data"];
-					var affected = new List<int>();
+					List<int> affected = [];
 
 					if (shipData != null)
 					{
@@ -566,7 +567,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									}
 									else
 									{
-										try { this.client.Homeport.Organization.Update(new[] { unsetShip }); } catch { }
+										try { org.Update(new[] { unsetShip }); } catch { }
 									}
 									affected.Add(unsetShip.api_id);
 								}
@@ -589,7 +590,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									}
 									else
 									{
-										try { this.client.Homeport.Organization.Update(new[] { setShip }); } catch { }
+										try { org.Update(new[] { setShip }); } catch { }
 									}
 									affected.Add(setShip.api_id);
 								}
@@ -650,7 +651,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			try
 			{
 				var root = JToken.Parse(normalized);
-				isSuccess = root["api_result"] != null && root["api_result"].Value<int>() == 1;
+				isSuccess = root["api_result"]?.Value<int>() == 1;
 			}
 			catch (Exception)
 			{
@@ -678,7 +679,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				try
 				{
 					var org = this.client.Homeport?.Organization;
-					var ship = org?.Ships?[shipId];
+					if (org == null) return;
+					var ship = org.Ships[shipId];
 					if (ship == null) return;
 
 					try
@@ -791,7 +793,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				try
 				{
 					var org = this.client.Homeport?.Organization;
-					var ship = org?.Ships?[shipId];
+					if (org == null) return;
+					var ship = org.Ships[shipId];
 					if (ship == null) return;
 
 					try

@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleWrapper.Internal
 		/// <summary>
 		/// 既存の正規化実装は RetryObservableExtensions に移譲しました。
 		/// </summary>
-		public static string NormalizeSvDataString(string s)
+		public static string? NormalizeSvDataString(string? s)
 		{
 			return RetryObservableExtensions.NormalizeSvDataString(s);
 		}
@@ -18,9 +18,12 @@ namespace Grabacr07.KanColleWrapper.Internal
 		/// <summary>
 		/// <see cref="Int32" /> 型の配列に安全にアクセスします。
 		/// </summary>
-		public static int? Get(this int[] array, int index)
+		extension(int[]? array)
 		{
-			return array?.Length > index ? (int?)array[index] : null;
+			public int? Get(int index)
+			{
+				return array?.Length > index ? (int?)array[index] : null;
+			}
 		}
 	}
 }

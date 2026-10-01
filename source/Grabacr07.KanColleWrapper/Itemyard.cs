@@ -25,20 +25,18 @@ namespace Grabacr07.KanColleWrapper
 
 		#region SlotItems 変更通知プロパティ
 
-		private MemberTable<SlotItem> _SlotItems;
-
 		/// <summary>
 		/// 艦隊司令部が保有しているすべての装備を取得します。
 		/// <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントによる変更通知をサポートします。
 		/// </summary>
 		public MemberTable<SlotItem> SlotItems
 		{
-			get { return this._SlotItems; }
+			get => field;
 			set
 			{
-				if (this._SlotItems != value)
+				if (field != value)
 				{
-					this._SlotItems = value;
+					field = value;
 					this.RaiseSlotItemsChanged();
 				}
 			}
@@ -48,20 +46,18 @@ namespace Grabacr07.KanColleWrapper
 
 		#region UseItems 変更通知プロパティ
 
-		private MemberTable<UseItem> _UseItems;
-
 		/// <summary>
 		/// 母港が所有するすべての消費アイテムを取得します。
 		/// <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントによる変更通知をサポートします。
 		/// </summary>
 		public MemberTable<UseItem> UseItems
 		{
-			get { return this._UseItems; }
+			get => field;
 			set
 			{
-				if (this._UseItems != value)
+				if (field != value)
 				{
-					this._UseItems = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -142,7 +138,9 @@ namespace Grabacr07.KanColleWrapper
 
 			try
 			{
-				foreach (var x in data.Request["api_slotitem_ids"].Split(',').Select(int.Parse))
+				var ids = data.Request["api_slotitem_ids"];
+				if (string.IsNullOrEmpty(ids)) return;
+				foreach (var x in ids.Split(',').Select(int.Parse))
 				{
 					this.SlotItems.Remove(x);
 				}

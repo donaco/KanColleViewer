@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			try
 			{
 				// api_material と api_unset_list をまとめて1回のパースで取得する
-				int[] apiMat = null;
+				int[]? apiMat = null;
 				bool hasUnsetList = false;
 				try
 				{
@@ -52,7 +52,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				}
 
 				// requestBody から解体対象艦 ID を取得
-				var shipIds = new List<int>();
+				List<int> shipIds = [];
 				if (!string.IsNullOrEmpty(requestBody))
 				{
 					try
@@ -99,7 +99,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								{
 									try
 									{
-										var ship = org.Ships?[shipId];
+										var ship = org.Ships[shipId];
 										if (ship == null)
 										{
 											// ID 指定だが既に削除済みか存在しない場合は MemberTable から直接 Remove を試す
@@ -166,20 +166,20 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							if (org == null)
 							{
 								// 組織が未初期化なら既存のルートで反映
-								try { this.client.Homeport.Organization.Update(ships); } catch { }
+								try { this.client.Homeport?.Organization.Update(ships); } catch { }
 								return;
 							}
 
-							var updatedIds = new HashSet<int>();
+							HashSet<int> updatedIds = [];
 
 							// 既存インスタンスがあれば直接 Update を呼び、なければ Organization.Update に任せる
-							var toCreate = new List<Models.Raw.kcsapi_ship2>();
+							List<Models.Raw.kcsapi_ship2> toCreate = [];
 							foreach (var raw in ships)
 							{
 								if (raw == null) continue;
 								updatedIds.Add(raw.api_id);
 
-								var existing = org.Ships?[raw.api_id];
+								var existing = org.Ships[raw.api_id];
 								if (existing != null)
 								{
 									try
@@ -202,7 +202,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							// 新規の Ship 情報はまとめて Organization.Update に任せる
 							if (toCreate.Count > 0)
 							{
-								try { this.client.Homeport.Organization.Update(toCreate.ToArray()); } catch { }
+								try { org.Update(toCreate.ToArray()); } catch { }
 							}
 
 							// 影響を受ける艦隊のみ再計算・再通知
@@ -262,7 +262,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							// Ships の補給反映
 							if (charge.api_ship != null && charge.api_ship.Length > 0)
 							{
-								Fleet affectedFleet = null;
+								Fleet? affectedFleet = null;
 								var org = this.client.Homeport?.Organization;
 								foreach (var s in charge.api_ship)
 								{
@@ -273,7 +273,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 										ship.Charge(s.api_fuel, s.api_bull, s.api_onslot);
 
-										if (affectedFleet == null) affectedFleet = org.GetFleet(ship.Id);
+										if (affectedFleet == null) affectedFleet = org?.GetFleet(ship.Id);
 									}
 									catch (Exception)
 									{

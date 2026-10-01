@@ -33,19 +33,17 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		#region MapAreaId 変更通知プロパティ
 
-		private int _MapAreaId;
-
 		/// <summary>
 		/// 海域 ID を取得します (例: 6)
 		/// </summary>
 		public int MapAreaId
 		{
-			get { return this._MapAreaId; }
+			get => field;
 			set
 			{
-				if (this._MapAreaId != value)
+				if (field != value)
 				{
-					this._MapAreaId = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -56,19 +54,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region MapInfoNo 変更通知プロパティ
 
-		private int _MapInfoNo;
-
 		/// <summary>
 		/// マップ番号を取得します (例: 2 → 6-2)
 		/// </summary>
 		public int MapInfoNo
 		{
-			get { return this._MapInfoNo; }
+			get => field;
 			set
 			{
-				if (this._MapInfoNo != value)
+				if (field != value)
 				{
-					this._MapInfoNo = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -79,19 +75,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region CellNo 変更通知プロパティ
 
-		private int? _CellNo;
-
 		/// <summary>
 		/// 現在のセル番号を取得します (例: 2 → 6-2-2)
 		/// </summary>
 		public int? CellNo
 		{
-			get { return this._CellNo; }
+			get => field;
 			set
 			{
-				if (this._CellNo != value)
+				if (field != value)
 				{
-					this._CellNo = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -102,19 +96,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region WinRank 変更通知プロパティ
 
-		private string _WinRank;
-
 		/// <summary>
 		/// 戦闘結果のランクを取得します (例: "S", "A", "B" など)
 		/// </summary>
-		public string WinRank
+		public string? WinRank
 		{
-			get { return this._WinRank; }
+			get => field;
 			set
 			{
-				if (this._WinRank != value)
+				if (field != value)
 				{
-					this._WinRank = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -125,42 +117,38 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region AirResult 変更通知プロパティ
 
-		private AirSuperiority _AirResult = AirSuperiority.None;
-
 		/// <summary>
 		/// 航空戦の制空状態を取得します。
 		/// </summary>
 		public AirSuperiority AirResult
 		{
-			get { return this._AirResult; }
+			get => field;
 			set
 			{
-				if (this._AirResult != value)
+				if (field != value)
 				{
-					this._AirResult = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
 			}
-		}
+		} = AirSuperiority.None;
 
 		#endregion
 
 		#region IsActive 変更通知プロパティ
-
-		private bool _IsActive;
 
 		/// <summary>
 		/// 出撃中かどうかを取得します。
 		/// </summary>
 		public bool IsActive
 		{
-			get { return this._IsActive; }
+			get => field;
 			set
 			{
-				if (this._IsActive != value)
+				if (field != value)
 				{
-					this._IsActive = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -171,19 +159,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region IsDestruction 変更通知プロパティ
 
-		private bool _IsDestruction;
-
 		/// <summary>
 		/// 防空戦が発生したかどうかを示す値を取得します。
 		/// </summary>
 		public bool IsDestruction
 		{
-			get { return this._IsDestruction; }
+			get => field;
 			set
 			{
-				if (this._IsDestruction != value)
+				if (field != value)
 				{
-					this._IsDestruction = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}
@@ -194,19 +180,17 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		#region IsLdAirbattle 変更通知プロパティ
 
-		private bool _IsLdAirbattle;
-
 		/// <summary>
 		/// 航空戦マス（ld_airbattle）かどうかを示す値を取得します。
 		/// </summary>
 		public bool IsLdAirbattle
 		{
-			get { return this._IsLdAirbattle; }
+			get => field;
 			set
 			{
-				if (this._IsLdAirbattle != value)
+				if (field != value)
 				{
-					this._IsLdAirbattle = value;
+					field = value;
 					this.RaisePropertyChanged();
 					this.RaisePropertyChanged(nameof(this.DisplayText));
 				}

@@ -11,26 +11,24 @@ namespace Grabacr07.KanColleWrapper.Models
 	/// </summary>
 	public class Admiral : RawDataWrapper<kcsapi_basic>
 	{
-		public string MemberId => this.RawData.api_member_id;
+		public string MemberId => this.RawData.api_member_id ?? string.Empty;
 
-		public string Nickname => this.RawData.api_nickname;
+		public string Nickname => this.RawData.api_nickname ?? string.Empty;
 
 		#region Comment 変更通知プロパティ
 
-		private string _Comment;
-
 		public string Comment
 		{
-			get { return this._Comment; }
+			get => field;
 			set
 			{
-				if (this._Comment != value)
+				if (field != value)
 				{
-					this._Comment = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
-		}
+		} = null!;
 
 		#endregion
 
@@ -93,7 +91,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		internal Admiral(kcsapi_basic rawData)
 			: base(rawData)
 		{
-			this.Comment = this.RawData.api_comment;
+			this.Comment = this.RawData.api_comment ?? string.Empty;
 		}
 
 		public override string ToString()

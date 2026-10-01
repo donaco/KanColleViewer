@@ -9,9 +9,9 @@ namespace Grabacr07.KanColleWrapper.Models
 	{
 		public int Id => this.RawData.api_id;
 
-		public string Name => this.RawData.api_title;
+		public string Name => this.RawData.api_title ?? string.Empty;
 
-		public string Description => this.RawData.api_description;
+		public string Description => this.RawData.api_description ?? string.Empty;
 
 		public int Price => this.RawData.api_price;
 

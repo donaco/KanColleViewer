@@ -17,16 +17,14 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Docks 変更通知プロパティ
 
-		private MemberTable<RepairingDock> _Docks;
-
 		public MemberTable<RepairingDock> Docks
 		{
-			get { return this._Docks; }
+			get => field;
 			set
 			{
-				if (this._Docks != value)
+				if (field != value)
 				{
-					this._Docks = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -64,6 +62,7 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				var ship = this.homeport.Organization.Ships[int.Parse(shipIdStr)];
+				if (ship == null) return;
 				var highspeed = highspeedStr == "1";
 
 				if (highspeed)
@@ -83,9 +82,11 @@ namespace Grabacr07.KanColleWrapper
 			try
 			{
 				var dock = this.Docks[int.Parse(ndockIdStr)];
+				if (dock == null) return;
 				var ship = dock.Ship;
 
 				dock.Finish();
+				if (ship == null) return;
 				ship.Repair();
 
 				this.homeport.Organization.GetFleet(ship.Id)?.State.Update();

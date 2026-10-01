@@ -14,7 +14,7 @@ namespace Grabacr07.KanColleWrapper
 
 		#endregion
 
-		public IKanColleClientSettings? Settings { get; set; }
+		public IKanColleClientSettings Settings { get; set; } = null!;
 
 		/// <summary>
 		/// 艦これの通信をフックするプロキシを取得します。
@@ -281,8 +281,8 @@ namespace Grabacr07.KanColleWrapper
 					{
 						this.Homeport.UpdateAdmiral(data.api_basic);
 					}
-					this.Homeport.Itemyard.Update(data.api_slot_item);
-					this.Homeport.Dockyard.Update(data.api_kdock);
+					if (data.api_slot_item != null) this.Homeport.Itemyard.Update(data.api_slot_item);
+					if (data.api_kdock != null) this.Homeport.Dockyard.Update(data.api_kdock);
 				});
 			}
 			else
@@ -291,8 +291,8 @@ namespace Grabacr07.KanColleWrapper
 				{
 					this.Homeport.UpdateAdmiral(data.api_basic);
 				}
-				this.Homeport.Itemyard.Update(data.api_slot_item);
-				this.Homeport.Dockyard.Update(data.api_kdock);
+				if (data.api_slot_item != null) this.Homeport.Itemyard.Update(data.api_slot_item);
+				if (data.api_kdock != null) this.Homeport.Dockyard.Update(data.api_kdock);
 			}
 		}
 
@@ -380,6 +380,7 @@ namespace Grabacr07.KanColleWrapper
 
 				var normalized = Grabacr07.KanColleWrapper.Internal.Extensions.NormalizeSvDataString(responseBody);
 				if (string.IsNullOrEmpty(normalized)) normalized = responseBody;
+				var normalizedRequestBody = requestBody ?? string.Empty;
 
 				// api_result 検証：サーバーがエラーを返したレスポンスは内部状態を変更しない
 				// api_result が存在しない場合は後方互換性のため続行する
@@ -406,11 +407,11 @@ namespace Grabacr07.KanColleWrapper
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
 				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
-				if (TryHandleMapStart(url, requestBody, normalized)) return;
+				if (TryHandleMapStart(url, normalizedRequestBody, normalized)) return;
 				if (TryHandleBattle(url, normalized)) return;
 				if (TryHandleMapNext(url, normalized)) return;
 				if (TryHandleMapInfo(url, normalized)) return;
-				if (TryHandleSelectEventmapRank(url, requestBody, normalized)) return;
+				if (TryHandleSelectEventmapRank(url, normalizedRequestBody, normalized)) return;
 
 				// 小さな処理に分割して判定（早期 return ）
 				if (TryHandlePort(url, normalized)) return;
@@ -418,9 +419,9 @@ namespace Grabacr07.KanColleWrapper
 
 				// 任務完了や個別素材/消費アイテムの更新
 				if (TryHandleClearItemGet(url, normalized)) return;
-				if (TryHandleDestroyItem2(url, normalized, requestBody)) return;
-				if (TryHandleDestroyShip(url, normalized, requestBody)) return;
-				if (TryHandlePowerup(url, normalized, requestBody)) return;
+				if (TryHandleDestroyItem2(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleDestroyShip(url, normalized, normalizedRequestBody)) return;
+				if (TryHandlePowerup(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleMaterial(url, normalized)) return;
 				if (TryHandleUseItem(url, normalized)) return;
 
@@ -428,10 +429,10 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleShipArray(url, normalized)) return;
 
 				// 装備系
-				if (TryHandleSlotExchangeIndex(url, normalized, requestBody)) return;
-				if (TryHandleSlotDeprive(url, normalized, requestBody)) return;
-				if (TryHandleOpenExslot(url, normalized, requestBody)) return;
-				if (TryHandleSlotsetEx(url, normalized, requestBody)) return;
+				if (TryHandleSlotExchangeIndex(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleSlotDeprive(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleOpenExslot(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleSlotsetEx(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleShip3(url, normalized)) return;
 
 				if (TryHandleCharge(url, normalized)) return;
@@ -440,37 +441,37 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandlePresetSelect(url, normalized)) return;
 
 				// 艦隊名更新 は requestBody を使用して即時反映
-				if (TryHandleUpdatedeckname(url, normalized, requestBody)) return;
+				if (TryHandleUpdatedeckname(url, normalized, normalizedRequestBody)) return;
 
 				// 編成情報一般（deck / deck_port / change / preset_select など）
-				if (TryHandleDecks(url, normalized, requestBody)) return;
+				if (TryHandleDecks(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleShipDeck(url, normalized)) return;
 				if (TryHandlePresetDeck(url, normalized)) return;
 				if (TryHandleHenseiCombined(url, normalized)) return;
 				if (TryHandleSlotItems(url, normalized)) return;
-				if (TryHandleCreateItem(url, normalized, requestBody)) return;
+				if (TryHandleCreateItem(url, normalized, normalizedRequestBody)) return;
 
 				// 建造系
-				if (TryHandleCreateShip(url, normalized, requestBody)) return;
+				if (TryHandleCreateShip(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleKdock(url, normalized)) return;
 				if (TryHandleGetShip(url, normalized)) return;
 
-				if (TryHandleRemodelSlot(url, normalized, requestBody)) return;
+				if (TryHandleRemodelSlot(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleBattleResult(url, normalized)) return;
 				// goback_port はここでは呼ばない（正規化前に処理済み）
 
 				// 入渠系
-				if (TryHandleNyukyoStart(url, normalized, requestBody)) return;
-				if (TryHandleNyukyoSpeedChange(url, normalized, requestBody)) return;
+				if (TryHandleNyukyoStart(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleNyukyoSpeedChange(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleNdockList(url, normalized)) return;
 
 				// 基地航空隊
 				if (TryHandleAirCorpsSupply(url, normalized)) return;
-				if (TryHandleSetPlane(url, normalized, requestBody)) return;
-				if (TryHandleAirCorpsChangeOrSet(url, normalized, requestBody)) return;
+				if (TryHandleSetPlane(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleAirCorpsChangeOrSet(url, normalized, normalizedRequestBody)) return;
 
 				if (TryHandleMissionResult(url, normalized)) return;
-				if (TryHandleUpdateComment(url, normalized, requestBody)) return;
+				if (TryHandleUpdateComment(url, normalized, normalizedRequestBody)) return;
 				// 将来的なフォールバック追加箇所はここに追加
 			}
 			catch (Exception ex) { LogError("ProcessCaptured", ex); }

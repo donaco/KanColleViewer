@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		public int Id => this.RawData.api_id;
 
-		public string Name => this.RawData.api_name;
+		public string Name => this.RawData.api_name ?? string.Empty;
 
 		public SlotItemType Type => this.type ?? (SlotItemType)(this.type = (SlotItemType)(this.RawData.api_type.Get(2) ?? 0));
 
@@ -78,12 +78,12 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		internal SlotItemInfo(kcsapi_mst_slotitem rawData, MasterTable<SlotItemEquipType> types) : base(rawData)
 		{
-			this.EquipType = types[rawData.api_type?[2] ?? 0] ?? SlotItemEquipType.Dummy;
+			this.EquipType = types[rawData.api_type.Get(2) ?? 0] ?? SlotItemEquipType.Dummy;
 		}
 
 		public override string ToString()
 		{
-			return $"ID = {this.Id}, Name = \"{this.Name}\", Type = {{{this.RawData.api_type.ToString(", ")}}}";
+			return $"ID = {this.Id}, Name = \"{this.Name}\", Type = {{{(this.RawData.api_type ?? []).ToString(", ")}}}";
 		}
 
 		#region static members

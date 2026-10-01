@@ -32,14 +32,14 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// マップID（海域-マップ番号）をキーとした、セル番号→CellInfo のマッピング
 		/// </summary>
-		private static Dictionary<string, Dictionary<int, CellInfo>> _cellInfoByMap;
+		private static Dictionary<string, Dictionary<int, CellInfo>> _cellInfoByMap = null!;
 
 		/// <summary>
 		/// 海域ID → 表示用ラベル（例: 62 → "E1"）
 		/// </summary>
-		private static Dictionary<int, string> _areaLabels;
+		private static Dictionary<int, string> _areaLabels = null!;
 
-		private static string _jsonFilePath;
+		private static string _jsonFilePath = null!;
 		private static DateTime _lastLoadTime = DateTime.MinValue;
 
 		static MapCellNameProvider()
@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// ラベルが定義されている場合: (62, 1, "C") → "E1-C"
 		/// ラベルが未定義の場合:       (7, 4, "C")  → "7-4-C"
 		/// </summary>
-		public static string FormatDisplayKey(int mapAreaId, int mapInfoNo, string cellName = null)
+		public static string FormatDisplayKey(int mapAreaId, int mapInfoNo, string? cellName = null)
 		{
 			TryReloadIfModified();
 
@@ -111,7 +111,7 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// <summary>
 		/// セル番号に対応する CellInfo を取得します。
 		/// </summary>
-		public static CellInfo GetCellInfo(int mapAreaId, int mapInfoNo, int cellNo)
+		public static CellInfo? GetCellInfo(int mapAreaId, int mapInfoNo, int cellNo)
 		{
 			TryReloadIfModified();
 
@@ -182,8 +182,8 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		private static Dictionary<string, Dictionary<int, CellInfo>> LoadCellNames()
 		{
-			var result = new Dictionary<string, Dictionary<int, CellInfo>>();
-			_areaLabels = new Dictionary<int, string>();
+			Dictionary<string, Dictionary<int, CellInfo>> result = new();
+			_areaLabels = new();
 			_lastLoadTime = DateTime.Now;
 
 			try
@@ -221,7 +221,7 @@ namespace Grabacr07.KanColleWrapper.Models
 
 						if (cellNamesObj != null)
 						{
-							var cellInfos = new Dictionary<int, CellInfo>();
+							Dictionary<int, CellInfo> cellInfos = new();
 
 							foreach (var cellProp in cellNamesObj.Properties())
 							{
@@ -229,7 +229,7 @@ namespace Grabacr07.KanColleWrapper.Models
 								{
 									CellInfo info;
 
-									if (cellProp.Value.Type == JTokenType.Object)
+									if (cellProp.Value?.Type == JTokenType.Object)
 									{
 										// オブジェクト形式: { "name": "C", "boss": true, "kiko": true }
 										var obj = cellProp.Value as JObject;

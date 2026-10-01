@@ -70,9 +70,9 @@ namespace Grabacr07.KanColleWrapper.Handlers
 					try
 					{
 						var org = Client.Homeport?.Organization;
-						if (org != null && org.Fleets.ContainsKey(deckId))
+						if (org != null && org.Fleets.TryGetValue(deckId, out var fleet))
 						{
-							org.Fleets[deckId].Sortie();
+							fleet.Sortie();
 							lock (Client.BattleStateLock)
 								Client.sortieDeckIds.Add(deckId);
 
@@ -81,9 +81,9 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								bool isCombined = false;
 								try { isCombined = org.Combined; } catch { isCombined = false; }
 
-								if (isCombined && org.Fleets.ContainsKey(2))
+								if (isCombined && org.Fleets.TryGetValue(2, out var secondFleet))
 								{
-									org.Fleets[2].Sortie();
+									secondFleet.Sortie();
 									lock (Client.BattleStateLock)
 										Client.sortieDeckIds.Add(2);
 								}
@@ -371,8 +371,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			if (!isBattleResultApi)
 				return false;
 
-			Models.Raw.kcsapi_battleresult brLocal = null;
-			Models.Raw.kcsapi_combined_battle_battleresult cbrLocal = null;
+			Models.Raw.kcsapi_battleresult? brLocal = null;
+			Models.Raw.kcsapi_combined_battle_battleresult? cbrLocal = null;
 
 			try
 			{
@@ -389,7 +389,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			var restrictToAir = Client.Settings?.ShowAirSuperiority ?? false;
 			var showCellOnArrival = Client.Settings?.ShowCellOnArrival ?? false;
 
-			string lastBattleApiType;
+			string? lastBattleApiType;
 			lock (Client.BattleStateLock)
 				lastBattleApiType = Client.lastBattleApiType;
 
@@ -414,7 +414,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				parsedAir = TryParseAirSuperiority(normalized, out airResult, "BattleHandler.TryHandleBattleResult");
 			}
 
-			string winRank = null;
+			string? winRank = null;
 			try
 			{
 				if (brLocal != null) winRank = brLocal.api_win_rank;
@@ -442,8 +442,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 				if (escapeFlag == 1)
 				{
-					int[] escapeIdxArr = null;
-					int[] towIdxArr = null;
+					int[]? escapeIdxArr = null;
+					int[]? towIdxArr = null;
 
 					try
 					{
@@ -483,13 +483,13 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								int deckId;
 								lock (Client.BattleStateLock)
 									deckId = Client.sortieDeckIds.First();
-								shipArray = org.Fleets.ContainsKey(deckId)
-									? org.Fleets[deckId].Ships
+								shipArray = org.Fleets.TryGetValue(deckId, out var fleet)
+									? fleet.Ships
 									: Array.Empty<Ship>();
 							}
 							else
 							{
-								shipArray = org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships : Array.Empty<Ship>();
+								shipArray = org.Fleets.TryGetValue(1, out var fleet) ? fleet.Ships : Array.Empty<Ship>();
 							}
 
 							lock (Client.BattleStateLock)
@@ -610,8 +610,8 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 			try
 			{
-				int[] escapeIds;
-				int[] towIds;
+				int[]? escapeIds;
+				int[]? towIds;
 				lock (Client.BattleStateLock)
 				{
 					escapeIds = Client.pendingEscapeShipIds;

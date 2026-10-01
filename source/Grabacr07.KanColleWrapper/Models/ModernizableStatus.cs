@@ -42,7 +42,7 @@ namespace Grabacr07.KanColleWrapper.Models
         public bool IsMax => this.Max <= this.Current;
 
 
-	    internal ModernizableStatus(int[] status, int upgraded)
+        internal ModernizableStatus(int[]? status, int upgraded)
             : this()
         {
             if (status != null && status.Length == 2)

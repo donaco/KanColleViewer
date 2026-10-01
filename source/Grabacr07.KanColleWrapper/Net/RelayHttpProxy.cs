@@ -19,7 +19,7 @@ namespace Grabacr07.KanColleWrapper.Net
 	/// </summary>
 	public sealed class RelayHttpProxy : IDisposable
 	{
-		private TcpListener listener;
+		private TcpListener? listener;
 		private bool running;
 
 		/// <summary>
@@ -31,7 +31,7 @@ namespace Grabacr07.KanColleWrapper.Net
 		/// 転送先の外部ツール（上流プロキシ）のホスト名です。未設定 (null/空文字) の場合は
 		/// 実際の艦これサーバーへ直接転送します。
 		/// </summary>
-		public string UpstreamHost { get; set; }
+		public string? UpstreamHost { get; set; }
 
 		/// <summary>
 		/// 転送先の外部ツール（上流プロキシ）のポート番号です。
@@ -71,7 +71,7 @@ namespace Grabacr07.KanColleWrapper.Net
 					TcpClient client;
 					try
 					{
-						client = await this.listener.AcceptTcpClientAsync().ConfigureAwait(false);
+						client = await this.listener!.AcceptTcpClientAsync().ConfigureAwait(false);
 					}
 					catch (Exception) when (!this.running)
 					{
@@ -166,7 +166,7 @@ namespace Grabacr07.KanColleWrapper.Net
 			{
 				try
 				{
-					await upstreamTcp.ConnectAsync(this.UpstreamHost, this.UpstreamPort).ConfigureAwait(false);
+				await upstreamTcp.ConnectAsync(this.UpstreamHost!, this.UpstreamPort).ConfigureAwait(false);
 				}
 				catch
 				{
@@ -223,7 +223,7 @@ namespace Grabacr07.KanColleWrapper.Net
 			}
 		}
 
-		private static async Task<string> ReadLineAsync(Stream stream)
+		private static async Task<string?> ReadLineAsync(Stream stream)
 		{
 			var sb = new StringBuilder();
 			var prevWasCr = false;

@@ -20,7 +20,7 @@ namespace Grabacr07.KanColleWrapper
 		private readonly CompositeDisposable disposables = new CompositeDisposable();
 		#region All 変更通知プロパティ
 
-		private IReadOnlyCollection<Quest> _All;
+		private IReadOnlyCollection<Quest> _All = [];
 
 		public IReadOnlyCollection<Quest> All
 		{
@@ -39,12 +39,12 @@ namespace Grabacr07.KanColleWrapper
 
 		#region Current 変更通知プロパティ
 
-		private IReadOnlyCollection<Quest> _Current;
+		private IReadOnlyCollection<Quest?> _Current = [];
 
 		/// <summary>
 		/// 現在遂行中の任務のリストを取得します。未取得の任務がある場合、リスト内に null が含まれることに注意してください。
 		/// </summary>
-		public IReadOnlyCollection<Quest> Current
+		public IReadOnlyCollection<Quest?> Current
 		{
 			get { return this._Current; }
 			set
@@ -101,7 +101,8 @@ namespace Grabacr07.KanColleWrapper
 		internal Quests()
 		{
 			this.IsUntaken = true;
-			this.All = this.Current = new List<Quest>();
+			this.All = new List<Quest>();
+			this.Current = this.All;
 		}
 
 		public void Dispose()
@@ -117,7 +118,8 @@ namespace Grabacr07.KanColleWrapper
 			if (questlist.api_list == null)
 			{
 				this.IsEmpty = true;
-				this.All = this.Current = new List<Quest>();
+				this.All = new List<Quest>();
+				this.Current = this.All;
 			}
 			else
 			{
@@ -130,6 +132,7 @@ namespace Grabacr07.KanColleWrapper
 
 				var current = this.All.Where(x => x.State == QuestState.TakeOn || x.State == QuestState.Accomplished)
 					.OrderBy(x => x.Id)
+					.Cast<Quest?>()
 					.ToList();
 
 				// 遂行中の任務数に満たない場合、未取得分として null で埋める

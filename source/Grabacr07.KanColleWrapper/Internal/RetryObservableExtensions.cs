@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleWrapper.Internal
 	public static class RetryObservableExtensions
 	{
 		// svdata 正規化ロジック（Extensions.NormalizeSvDataString と互換）
-		public static string NormalizeSvDataString(string s)
+		public static string? NormalizeSvDataString(string? s)
 		{
 			if (string.IsNullOrEmpty(s)) return null;
 
@@ -130,7 +130,7 @@ namespace Grabacr07.KanColleWrapper.Internal
 				var empty = Observable.Empty<TSource>();
 				var count = 0;
 
-				IObservable<TSource> self = null;
+			IObservable<TSource> self = source;
 				self = source.Catch((TException ex) =>
 				{
 					onError(ex);
