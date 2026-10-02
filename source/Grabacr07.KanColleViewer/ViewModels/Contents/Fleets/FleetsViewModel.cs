@@ -58,8 +58,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			{
 				if (this._SelectedFleet != value)
 				{
-					if (this._SelectedFleet != null) this.SelectedFleet.IsSelected = false;
-					if (value != null) value.IsSelected = true;
+				this.SelectedFleet?.IsSelected = false;
+				value?.IsSelected = true;
 					this._SelectedFleet = value;
 					this.RaisePropertyChanged();
 				}

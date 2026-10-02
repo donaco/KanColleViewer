@@ -279,7 +279,7 @@ namespace Grabacr07.KanColleViewer
 		public void SetLocationLeft()
 		{
 			var window = System.Windows.Application.Current?.MainWindow;
-			if (window != null) window.Left = 0.0;
+			window?.Left = 0.0;
 		}
 
 

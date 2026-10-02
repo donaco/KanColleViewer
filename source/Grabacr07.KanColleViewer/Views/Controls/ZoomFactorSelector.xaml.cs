@@ -93,7 +93,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 						if (args.PropertyName == "Current")
 						{
 							var target = source.items.FirstOrDefault(x => x.Value == (int)(newValue.Current * 100));
-							if (target != null) target.IsSelected = true;
+							target?.IsSelected = true;
 						}
 					};
 					notifySource.PropertyChanged += handler;
