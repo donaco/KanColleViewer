@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		protected abstract void InitializeCore();
 
-		protected abstract void NotifyCore(string header, string body, Action activated, Action<Exception> failed);
+		protected abstract void NotifyCore(string header, string body, Action? activated, Action<Exception>? failed);
 
 		public void Initialize()
 		{

@@ -38,7 +38,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public double Value { get; private set; }
 
-		public event EventHandler Updated;
+		public event EventHandler? Updated;
 
 		public void Initialize()
 		{
@@ -95,10 +95,18 @@ namespace Grabacr07.KanColleViewer.Plugins
 			}
 			else
 			{
-				ships = org.Combined && org.CombinedFleet != null
-					? org.CombinedFleet.Fleets.SelectMany(x => x.Ships)
-					: org.Fleets.ContainsKey(1) ? org.Fleets[1].Ships ?? Array.Empty<Ship>()
-												: Array.Empty<Ship>();
+				if (org.Combined && org.CombinedFleet is { } combinedFleet)
+				{
+					ships = combinedFleet.Fleets.SelectMany(x => x.Ships);
+				}
+				else if (org.Fleets.TryGetValue(1, out var firstFleet) && firstFleet != null)
+				{
+					ships = firstFleet.Ships;
+				}
+				else
+				{
+					ships = Array.Empty<Ship>();
+				}
 			}
 
 			if (!ships.Any())

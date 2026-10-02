@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,8 +10,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 {
 	internal class BalloonNotifier : NotifierBase
 	{
-		private NotifyIcon notifyIcon;
-		private EventHandler activatedAction;
+		private NotifyIcon? notifyIcon;
+		private EventHandler? activatedAction;
 
 		public override bool IsSupported => !Toast.IsSupported;
 
@@ -19,7 +19,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		{
 			const string iconUri = "pack://application:,,,/KanColleViewer;Component/Assets/app.ico";
 
-			Uri uri;
+			Uri? uri;
 			if (!Uri.TryCreate(iconUri, UriKind.Absolute, out uri))
 				return;
 
@@ -41,7 +41,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 			});
 		}
 
-		protected override void NotifyCore(string header, string body, Action activated, Action<Exception> failed)
+		protected override void NotifyCore(string header, string body, Action? activated, Action<Exception>? failed)
 		{
 			if (this.notifyIcon == null) return;
 

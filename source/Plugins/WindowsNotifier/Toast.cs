@@ -18,9 +18,9 @@ namespace Grabacr07.KanColleViewer.Plugins
 		/// </returns>
 		public static bool IsSupported => IsWindows10OrLater && AppNotificationService.IsAvailable;
 
-		public event Action Activated;
+		public event Action? Activated;
 
-		public event Action<Exception> ToastFailed;
+		public event Action<Exception>? ToastFailed;
 
 		private readonly string header;
 		private readonly string body;

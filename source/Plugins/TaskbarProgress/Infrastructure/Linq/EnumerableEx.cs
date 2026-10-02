@@ -23,7 +23,7 @@ namespace MetroTrilithon.Linq
 
         public static string JoinString<T>(this IEnumerable<T> source, string separator)
         {
-            return string.Join(separator, source is IEnumerable<string> s ? s : source.Select(x => x.ToString()));
+            return string.Join(separator, source is IEnumerable<string> s ? s : source.Select(x => x is null ? string.Empty : x.ToString() ?? string.Empty));
         }
     }
 }

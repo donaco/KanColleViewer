@@ -52,7 +52,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		object ISettings.View => new ExpeditionProgressSettings { DataContext = this, };
 
-		public event EventHandler Updated;
+		public event EventHandler? Updated;
 
 		public void Initialize()
 		{
@@ -130,13 +130,15 @@ namespace Grabacr07.KanColleViewer.Plugins
 			else
 			{
 				var target = this.wrappers.Aggregate(Early);
-				if (target.Source.Remaining.HasValue && target.Source.ReturnTime.HasValue)
+				if (target.Source.Remaining.HasValue
+					&& target.Source.ReturnTime is { } returnTime
+					&& target.Source.Mission is { } mission)
 				{
 					var state = this.wrappers.Any(x => x.State == ExpeditionState.Waiting)
 						? TaskbarItemProgressState.Paused
 						: TaskbarItemProgressState.Normal;
-					var start = target.Source.ReturnTime.Value.Subtract(TimeSpan.FromMinutes(target.Source.Mission.RawData.api_time)); // 開始時間
-					var value = DateTimeOffset.Now.Subtract(start).TotalMinutes / target.Source.Mission.RawData.api_time;
+					var start = returnTime.Subtract(TimeSpan.FromMinutes(mission.RawData.api_time)); // 開始時間
+					var value = DateTimeOffset.Now.Subtract(start).TotalMinutes / mission.RawData.api_time;
 
 					this.State = state;
 					this.Value = value;

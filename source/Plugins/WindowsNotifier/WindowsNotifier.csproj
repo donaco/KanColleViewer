@@ -3,6 +3,7 @@
   <PropertyGroup>
     <!-- AppNotificationManager / Show() は Windows SDK 18362 以上で有効になる -->
     <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>

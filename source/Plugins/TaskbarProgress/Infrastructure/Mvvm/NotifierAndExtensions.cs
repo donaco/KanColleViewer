@@ -8,15 +8,15 @@ namespace MetroTrilithon.Mvvm
     // MetroTrilithon.Mvvm の内製化 (Phase 1)
     public class Notifier : INotifyPropertyChanged
     {
-        private event PropertyChangedEventHandler _propertyChanged;
+        private event PropertyChangedEventHandler? _propertyChanged;
 
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+        event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
         {
             add { this._propertyChanged += value; }
             remove { this._propertyChanged -= value; }
         }
 
-        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         {
             this._propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -27,7 +27,7 @@ namespace MetroTrilithon.Mvvm
         private readonly INotifyPropertyChanged _source;
         private readonly Dictionary<string, List<PropertyChangedEventHandler>> _handlers
             = new Dictionary<string, List<PropertyChangedEventHandler>>();
-        private readonly PropertyChangedEventHandler _globalHandler;
+        private PropertyChangedEventHandler? _globalHandler;
         private bool _isDisposed;
 
         public PropertyChangedEventListener(INotifyPropertyChanged source)
@@ -52,7 +52,7 @@ namespace MetroTrilithon.Mvvm
             list.Add(handler);
         }
 
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             this._globalHandler?.Invoke(sender, e);
             if (e.PropertyName != null && this._handlers.TryGetValue(e.PropertyName, out var list))
@@ -72,7 +72,7 @@ namespace MetroTrilithon.Mvvm
         public static IDisposable Subscribe(this INotifyPropertyChanged source, PropertyChangedEventHandler handler)
             => new PropertyChangedEventListener(source, handler);
 
-        public static IDisposable Subscribe(this INotifyPropertyChanged source, Action<string> action)
+        public static IDisposable Subscribe(this INotifyPropertyChanged source, Action<string?> action)
             => new PropertyChangedEventListener(source, (sender, args) => action(args.PropertyName));
 
         public static ListenerWrapper Subscribe(this INotifyPropertyChanged source, string propertyName, Action action, bool immediately = true)
