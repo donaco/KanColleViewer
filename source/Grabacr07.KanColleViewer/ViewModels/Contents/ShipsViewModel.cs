@@ -9,24 +9,18 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
 	public class ShipsViewModel : ViewModelBase
 	{
-		#region Count 変更通知プロパティ
-
-		private int _Count;
-
 		public int Count
 		{
-			get { return this._Count; }
+			get => field;
 			set
 			{
-				if (this._Count != value)
+				if (field != value)
 				{
-					this._Count = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
 
 		public ShipsViewModel()
 		{

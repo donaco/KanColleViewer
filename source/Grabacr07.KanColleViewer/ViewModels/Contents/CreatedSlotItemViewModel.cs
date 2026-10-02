@@ -9,43 +9,31 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
 	public class CreatedSlotItemViewModel : ViewModelBase
 	{
-		#region Succeed 変更通知プロパティ
-
-		private bool? _Succeed;
-
 		public bool? Succeed
 		{
-			get { return this._Succeed; }
+			get => field;
 			set
 			{
-				if (this._Succeed != value)
+				if (field != value)
 				{
-					this._Succeed = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region Name 変更通知プロパティ
-
-		private string _Name;
 
 		public string Name
 		{
-			get { return this._Name; }
+			get => field;
 			set
 			{
-				if (this._Name != value)
+				if (field != value)
 				{
-					this._Name = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
 
 		public CreatedSlotItemViewModel()
 		{
