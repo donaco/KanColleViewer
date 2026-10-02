@@ -22,7 +22,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		/// <summary>
 		/// アタッチされたウィンドウが閉じられたときに発生します。
 		/// </summary>
-		public event EventHandler Closed;
+		public event EventHandler? Closed;
 
 		public InformationWindowViewModel(MainWindowViewModelBase owner) : this(false)
 		{

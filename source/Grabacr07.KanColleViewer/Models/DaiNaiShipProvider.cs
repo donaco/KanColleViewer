@@ -16,22 +16,20 @@ namespace Grabacr07.KanColleViewer.Models
 		public int ShipId { get; set; }
 		public bool Daih { get; set; }
 		public bool Naik { get; set; }
-		public string Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 	}
 
 	internal static class DaiNaiShipProvider
 	{
 		private const int MaxResponseSizeBytes = 1 * 1024 * 1024;
 		private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(15);
-		private static IReadOnlyDictionary<int, DaiNaiShipEntry> _entries;
+		private static IReadOnlyDictionary<int, DaiNaiShipEntry>? _entries;
 
 		public static IReadOnlyDictionary<int, DaiNaiShipEntry> Entries
 		{
 			get
 			{
-				if (_entries == null)
-					_entries = Load();
-				return _entries;
+			return _entries ??= Load();
 			}
 		}
 
@@ -175,7 +173,7 @@ namespace Grabacr07.KanColleViewer.Models
 			};
 		}
 
-		private static string GetExistingLocalFilePath()
+		private static string? GetExistingLocalFilePath()
 		{
 			return GetLoadFilePaths().FirstOrDefault(File.Exists);
 		}
@@ -185,9 +183,9 @@ namespace Grabacr07.KanColleViewer.Models
 			return Path.Combine(GetExecutableDirectory(), "json", "DaiNai_Ship.json");
 		}
 
-		private static string ReadLocalFile(string localPath)
+		private static string? ReadLocalFile(string? localPath)
 		{
-			if (!File.Exists(localPath))
+			if (localPath == null || !File.Exists(localPath))
 			{
 				return null;
 			}
@@ -195,7 +193,7 @@ namespace Grabacr07.KanColleViewer.Models
 			return File.ReadAllText(localPath, Encoding.UTF8);
 		}
 
-		private static long GetVersion(string content)
+		private static long GetVersion(string? content)
 		{
 			try
 			{
@@ -207,9 +205,7 @@ namespace Grabacr07.KanColleViewer.Models
 				var root = JObject.Parse(content);
 				var version = root["version"]?.Value<long?>();
 
-				return version.GetValueOrDefault() > 0
-					? version.Value
-					: 0;
+				return version.GetValueOrDefault() > 0 ? version.GetValueOrDefault() : 0;
 			}
 			catch (Exception ex)
 			{
@@ -268,7 +264,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private static bool ToBool(JToken token)
+		private static bool ToBool(JToken? token)
 		{
 			if (token == null) return false;
 			if (int.TryParse(token.ToString(), out var i)) return i != 0;

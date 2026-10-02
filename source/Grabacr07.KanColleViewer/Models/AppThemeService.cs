@@ -25,7 +25,7 @@ namespace Grabacr07.KanColleViewer.Models
                 [AppAccent.Orange] = (Color.FromRgb(0xCA, 0x51, 0x00), Color.FromRgb(0xF0, 0x78, 0x28), Color.FromRgb(0xB4, 0x3C, 0x00)),
             };
 
-        private Application _app;
+        private Application? _app;
         private AppAccent _currentAccent = AppAccent.Purple;
 
         private AppThemeService() { }
@@ -56,35 +56,38 @@ namespace Grabacr07.KanColleViewer.Models
         /// </summary>
         public void ChangeAccent(Color color)
         {
-            if (this._app == null) return;
+            var app = this._app;
+            if (app == null) return;
 
             // ハイライト（+20%明度）・アクティブ（-10%明度）を自動算出
             var highlight = LightenColor(color, 0.2f);
             var active    = LightenColor(color, -0.1f);
 
-            this._app.Dispatcher.Invoke(() =>
+            app.Dispatcher.Invoke(() =>
             {
-                SetBrushResource(_app.Resources, "AccentColorKey",          color);
-                SetBrushResource(_app.Resources, "AccentBrushKey",          color);
-                SetBrushResource(_app.Resources, "AccentHighlightColorKey",  highlight);
-                SetBrushResource(_app.Resources, "AccentHighlightBrushKey",  highlight);
-                SetBrushResource(_app.Resources, "AccentActiveColorKey",     active);
-                SetBrushResource(_app.Resources, "AccentActiveBrushKey",     active);
+                SetBrushResource(app.Resources, "AccentColorKey",          color);
+                SetBrushResource(app.Resources, "AccentBrushKey",          color);
+                SetBrushResource(app.Resources, "AccentHighlightColorKey",  highlight);
+                SetBrushResource(app.Resources, "AccentHighlightBrushKey",  highlight);
+                SetBrushResource(app.Resources, "AccentActiveColorKey",     active);
+                SetBrushResource(app.Resources, "AccentActiveBrushKey",     active);
             });
         }
 
         private void ApplyAccent(AppAccent accent)
         {
             if (!_accentColors.TryGetValue(accent, out var colors)) return;
+            var app = this._app;
+            if (app == null) return;
 
-            this._app.Dispatcher.Invoke(() =>
+            app.Dispatcher.Invoke(() =>
             {
-                SetBrushResource(_app.Resources, "AccentColorKey",          colors.accent);
-                SetBrushResource(_app.Resources, "AccentBrushKey",          colors.accent);
-                SetBrushResource(_app.Resources, "AccentHighlightColorKey",  colors.highlight);
-                SetBrushResource(_app.Resources, "AccentHighlightBrushKey",  colors.highlight);
-                SetBrushResource(_app.Resources, "AccentActiveColorKey",     colors.active);
-                SetBrushResource(_app.Resources, "AccentActiveBrushKey",     colors.active);
+                SetBrushResource(app.Resources, "AccentColorKey",          colors.accent);
+                SetBrushResource(app.Resources, "AccentBrushKey",          colors.accent);
+                SetBrushResource(app.Resources, "AccentHighlightColorKey",  colors.highlight);
+                SetBrushResource(app.Resources, "AccentHighlightBrushKey",  colors.highlight);
+                SetBrushResource(app.Resources, "AccentActiveColorKey",     colors.active);
+                SetBrushResource(app.Resources, "AccentActiveBrushKey",     colors.active);
             });
         }
 

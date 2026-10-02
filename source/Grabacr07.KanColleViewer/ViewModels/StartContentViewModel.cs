@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 {
 	public class StartContentViewModel : ViewModelBase
 	{
-		public NavigatorViewModel Navigator { get; }
+		public NavigatorViewModel? Navigator { get; }
 
 
 		public bool ClearCacheOnNextStartup
@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region UpdateStatusText 変更通知プロパティ
 
-		private string _UpdateStatusText;
+		private string _UpdateStatusText = string.Empty;
 
 		public string UpdateStatusText
 		{
@@ -61,7 +61,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region UpdateUri 変更通知プロパティ
 
-		private Uri _UpdateUri;
+		private Uri _UpdateUri = null!;
 
 		public Uri UpdateUri
 		{
@@ -80,15 +80,15 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region CheckForUpdateCommand コマンド
 
-		private RelayCommand _CheckForUpdateCommand;
+		private RelayCommand? _CheckForUpdateCommand;
 
 		public RelayCommand CheckForUpdateCommand
-			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new RelayCommand(this.CheckForUpdate));
+			=> this._CheckForUpdateCommand ??= new RelayCommand(this.CheckForUpdate);
 
 		#endregion
 
 
-		public StartContentViewModel(NavigatorViewModel navigator)
+		public StartContentViewModel(NavigatorViewModel? navigator)
 		{
 			this.Navigator = navigator;
 

@@ -44,12 +44,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region Status 変更通知プロパティ
 
-		private ViewModelBase _Status;
+		private ViewModelBase? _Status;
 
 		/// <summary>
 		/// ステータス バーに表示するステータスを取得します。
 		/// </summary>
-		public virtual ViewModelBase Status
+		public virtual ViewModelBase? Status
 		{
 			get { return this._Status; }
 			protected set

@@ -13,7 +13,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 			"grabacr.net", "KanColleViewer", "Settings.xaml");
 
-		public static string LocalFilePath { get; } = Path.Combine(Application.Instance.LocalAppData.FullName, "Settings.xaml");
+		public static string LocalFilePath { get; } = Path.Combine(Application.Instance?.LocalAppData.FullName ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Settings.xaml");
 
 		public static ISerializationProvider Roaming { get; } = new FileSettingsProvider(RoamingFilePath);
 

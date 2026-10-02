@@ -15,23 +15,21 @@ namespace Grabacr07.KanColleViewer.Models
 	{
 		public int slotitemId { get; set; }
 		public bool ItemTp { get; set; }
-		public string Comment { get; set; }
+		public string Comment { get; set; } = string.Empty;
 	}
 
 	internal static class TPSlotItemProvider
 	{
 		private const int MaxResponseSizeBytes = 1 * 1024 * 1024;
 		private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(15);
-		private static IReadOnlyDictionary<int, TPSlotItemEntry> _entries;
+		private static IReadOnlyDictionary<int, TPSlotItemEntry>? _entries;
 		private const string SlotItemSectionKey = "slotItemTp";
 
 		public static IReadOnlyDictionary<int, TPSlotItemEntry> Entries
 		{
 			get
 			{
-				if (_entries == null)
-					_entries = Load();
-				return _entries;
+				return _entries ??= Load();
 			}
 		}
 
@@ -174,7 +172,7 @@ namespace Grabacr07.KanColleViewer.Models
 			};
 		}
 
-		private static string GetExistingLocalFilePath()
+		private static string? GetExistingLocalFilePath()
 		{
 			return GetLoadFilePaths().FirstOrDefault(File.Exists);
 		}
@@ -184,9 +182,9 @@ namespace Grabacr07.KanColleViewer.Models
 			return Path.Combine(GetExecutableDirectory(), "json", "TP_Ship_SlotItem.json");
 		}
 
-		private static string ReadLocalFile(string localPath)
+		private static string? ReadLocalFile(string? localPath)
 		{
-			if (!File.Exists(localPath))
+			if (localPath == null || !File.Exists(localPath))
 			{
 				return null;
 			}
@@ -194,7 +192,7 @@ namespace Grabacr07.KanColleViewer.Models
 			return File.ReadAllText(localPath, Encoding.UTF8);
 		}
 
-		private static long GetVersion(string content)
+		private static long GetVersion(string? content)
 		{
 			try
 			{
@@ -206,9 +204,7 @@ namespace Grabacr07.KanColleViewer.Models
 				var root = JObject.Parse(content);
 				var version = root["version"]?.Value<long?>();
 
-				return version.GetValueOrDefault() > 0
-					? version.Value
-					: 0;
+				return version.GetValueOrDefault() > 0 ? version.GetValueOrDefault() : 0;
 			}
 			catch (Exception ex)
 			{
@@ -267,7 +263,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private static bool ToBool(JToken token)
+		private static bool ToBool(JToken? token)
 		{
 			if (token == null) return false;
 			if (int.TryParse(token.ToString(), out var i)) return i != 0;

@@ -26,20 +26,20 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#endregion
 
-		private INotifier notifier;
+		private INotifier? notifier;
 		private bool isRegistered;
 
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
-		private CompositeDisposable dockyardDisposables;
-		private CompositeDisposable repairyardDisposables;
-		private CompositeDisposable organizationDisposables;
+		private CompositeDisposable? dockyardDisposables;
+		private CompositeDisposable? repairyardDisposables;
+		private CompositeDisposable? organizationDisposables;
 		private readonly Dictionary<int, string> fleetCompositionSignatures = new Dictionary<int, string>();
 		private readonly object nosakiTimerSync = new object();
 		private readonly Dictionary<int, DateTimeOffset> nosakiNextNotifyAt = new Dictionary<int, DateTimeOffset>();
 		private DateTimeOffset? nosakiSharedNextNotifyAt;
 		private long lastSavedNosakiUnixMs = -1;
-		private IDisposable nosakiTimerSubscription;
-		public event EventHandler NosakiTimerUpdated;
+		private IDisposable? nosakiTimerSubscription;
+		public event EventHandler? NosakiTimerUpdated;
 
 		// ﾉｻｷﾁｬﾝのID
 		private static readonly int[] NosakiShipIds = { 996, 1002 };
@@ -71,14 +71,14 @@ namespace Grabacr07.KanColleViewer.Models
 			this.notifier.Notify(notify);
 		}
 
-		public INotification CreateTest(string header = "テスト通知", string body = "これは「提督業も忙しい！」のテスト通知です。", Action activated = null, Action<Exception> failed = null)
+		public INotification CreateTest(string header = "テスト通知", string body = "これは「提督業も忙しい！」のテスト通知です。", Action? activated = null, Action<Exception>? failed = null)
 		{
 			return Notification.Create(Notification.Types.Test, header, body, activated ?? WindowService.Current.MainWindow.Activate, failed);
 		}
 
 		#region Initialize() method parts
 
-		private void HandleNotifyRequested(object sender, NotifyEventArgs e)
+		private void HandleNotifyRequested(object? sender, NotifyEventArgs e)
 		{
 			this.Notify(e);
 		}
@@ -122,12 +122,12 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private void HandleDockyardCompleted(object sender, BuildingCompletedEventArgs args)
+		private void HandleDockyardCompleted(object? sender, BuildingCompletedEventArgs args)
 		{
 			if (!Settings.KanColleSettings.NotifyBuildingCompleted) return;
 
 			var shipName = Settings.KanColleSettings.CanDisplayBuildingShipName
-				? args.Ship.Name
+				? args.Ship?.Name ?? Resources.Common_ShipGirl
 				: Resources.Common_ShipGirl;
 
 			var notification = Notification.Create(
@@ -155,7 +155,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private void HandleRepairyardCompleted(object sender, RepairingCompletedEventArgs args)
+		private void HandleRepairyardCompleted(object? sender, RepairingCompletedEventArgs args)
 		{
 			if (!Settings.KanColleSettings.NotifyRepairingCompleted) return;
 
@@ -291,7 +291,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private void HandleExpeditionReturned(object sender, ExpeditionReturnedEventArgs args)
+		private void HandleExpeditionReturned(object? sender, ExpeditionReturnedEventArgs args)
 		{
 			if (!Settings.KanColleSettings.NotifyExpeditionReturned) return;
 
@@ -304,7 +304,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.Notify(notify);
 		}
 
-		private void HandleConditionRejuvenated(object sender, ConditionRejuvenatedEventArgs args)
+		private void HandleConditionRejuvenated(object? sender, ConditionRejuvenatedEventArgs args)
 		{
 			if (!Settings.KanColleSettings.NotifyFleetRejuvenated) return;
 

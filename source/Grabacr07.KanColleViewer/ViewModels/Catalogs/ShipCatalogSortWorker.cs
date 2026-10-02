@@ -30,7 +30,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 		public static readonly SortableColumn ASWColumn = new SortableColumn { Name = "対潜", KeySelector = x => x.ASW, DefaultIsDescending = true, };
 		public static readonly SortableColumn TimeToRepairColumn = new SortableColumn { Name = "修復時間", KeySelector = x => x.TimeToRepair.Ticks, DefaultIsDescending = true, };
 
-		public static SortableColumn[] Columns { get; set; }
+		public static SortableColumn[] Columns { get; private set; } = Array.Empty<SortableColumn>();
 
 		static ShipCatalogSortWorker()
 		{
@@ -58,7 +58,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region Selectors 変更通知プロパティ
 
-		private SortableColumnSelector[] _Selectors;
+		private SortableColumnSelector[] _Selectors = Array.Empty<SortableColumnSelector>();
 
 		public SortableColumnSelector[] Selectors
 		{
@@ -91,12 +91,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			if (selectors.Length == 0) return ships;
 
-			var selector = selectors[0].Current.KeySelector;
+			var selector = selectors[0].Current!.KeySelector!;
 			var orderedShips = selectors[0].IsAscending ? ships.OrderBy(selector) : ships.OrderByDescending(selector);
 
 			for (var i = 1; i < selectors.Length; i++)
 			{
-				selector = selectors[i].Current.KeySelector;
+				selector = selectors[i].Current!.KeySelector!;
 				orderedShips = selectors[i].IsAscending ? orderedShips.ThenBy(selector) : orderedShips.ThenByDescending(selector);
 			}
 
@@ -131,13 +131,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		public void Clear()
 		{
-			this.Selectors = null;
+			this.Selectors = Array.Empty<SortableColumnSelector>();
 			this.UpdateSelectors();
 		}
 
-		private void UpdateSelectors(SortableColumnSelector target = null)
+		private void UpdateSelectors(SortableColumnSelector? target = null)
 		{
-			if (this.Selectors == null)
+			if (this.Selectors.Length == 0)
 			{
 				this.Selectors = Enumerable.Range(0, selectorNum)
 					.Select(_ => new SortableColumnSelector { Updated = x => this.UpdateSelectors(x), })
@@ -146,7 +146,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			// nonColumn 以外で選択された列
 			var selectedItems = new HashSet<SortableColumn>();
-			SortableColumnSelector previous = null;
+			SortableColumnSelector? previous = null;
 
 			// enabled は Selector の SelectableColumns を作り直すかどうか
 			// target が指定されていなければ全部、指定されていればその target の次から作り直す
@@ -157,27 +157,26 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				if (enabled)
 				{
 					var sortables = Columns.Where(x => !selectedItems.Contains(x)).ToList();
-					var current = selector.Current;
+					var selectedColumn = selector.Current;
 
-					if (previous != null && previous.Current == LevelColumn)
+					if (previous != null && previous.Current == ShipCatalogSortWorker.LevelColumn)
 					{
 						// 直前のソート列がレベルだったら、この列は次のレベルまでの経験値にしてあげる
-						sortables.Insert(1, ExpColumn);
-						current = ExpColumn;
+						sortables.Insert(1, ShipCatalogSortWorker.ExpColumn);
+						selectedColumn = ShipCatalogSortWorker.ExpColumn;
 						selector.SafeUpdate(!previous.IsAscending);
 					}
 
-					selector.SelectableColumns = sortables.ToArray();
-					selector.SafeUpdate(sortables.Contains(current) ? current : sortables.FirstOrDefault());
+					selector.SafeUpdate(selectedColumn != null && sortables.Contains(selectedColumn) ? selectedColumn : sortables.FirstOrDefault() ?? ShipCatalogSortWorker.NoneColumn);
 				}
 				else
 				{
 					enabled = selector == target;
 				}
 
-				if (selector.Current != NoneColumn)
+				if (selector.Current is { } selected && selected != ShipCatalogSortWorker.NoneColumn)
 				{
-					selectedItems.Add(selector.Current);
+					selectedItems.Add(selected);
 				}
 
 				previous = selector;
@@ -188,13 +187,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 	public class SortableColumnSelector : ViewModelBase
 	{
-		internal Action<SortableColumnSelector> Updated { get; set; }
+		internal Action<SortableColumnSelector>? Updated { get; set; }
 
 		#region Current 変更通知プロパティ
 
-		private SortableColumn _Current;
+		private SortableColumn? _Current;
 
-		public SortableColumn Current
+		public SortableColumn? Current
 		{
 			get { return this._Current; }
 			set
@@ -219,7 +218,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region SelectableColumns 変更通知プロパティ
 
-		private SortableColumn[] _SelectableColumns;
+		private SortableColumn[] _SelectableColumns = Array.Empty<SortableColumn>();
 
 		public SortableColumn[] SelectableColumns
 		{
@@ -259,7 +258,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#endregion
 
-		internal void SafeUpdate(SortableColumn column)
+		internal void SafeUpdate(SortableColumn? column)
 		{
 			this._Current = column;
 			this.RaisePropertyChanged(nameof(this.Current));
@@ -275,8 +274,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 	public class SortableColumn
 	{
-		public string Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 		public bool DefaultIsDescending { get; set; }
-		public Func<Ship, long> KeySelector { get; set; }
+		public Func<Ship, long>? KeySelector { get; set; }
 	}
 }

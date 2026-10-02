@@ -33,7 +33,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(KanColleHost), new FrameworkPropertyMetadata(typeof(KanColleHost)));
 		}
 
-		private ScrollViewer scrollViewer;
+		private ScrollViewer? scrollViewer;
 		private bool styleSheetApplied;
 		private bool focusInInputbox;
 
@@ -51,8 +51,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private static void WebBrowserPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var instance = (KanColleHost)d;
-			var newBrowser = (ChromiumWebBrowser)e.NewValue;
-			var oldBrowser = (ChromiumWebBrowser)e.OldValue;
+			var newBrowser = e.NewValue as ChromiumWebBrowser;
+			var oldBrowser = e.OldValue as ChromiumWebBrowser;
 
 			if (oldBrowser != null)
 			{
@@ -165,7 +165,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		#endregion
 
-		public event EventHandler<Size> OwnerSizeChangeRequested;
+		public event EventHandler<Size>? OwnerSizeChangeRequested;
 
 		public KanColleHost()
 		{
@@ -210,10 +210,11 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 			try
 			{
-				this.WebBrowser.ZoomLevel = 0;
-				this.WebBrowser.ZoomLevel = Math.Log(zoomFactor) / Math.Log(1.2);
+				if (this.WebBrowser is not { } browser) return;
+				browser.ZoomLevel = 0;
+				browser.ZoomLevel = Math.Log(zoomFactor) / Math.Log(1.2);
 			}
-			catch (Exception) when (Application.Instance.State == ApplicationState.Startup)
+			catch (Exception) when (Application.Instance?.State == ApplicationState.Startup)
 			{
 				// about:blank だから仕方ない
 			}
@@ -224,7 +225,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 		}
 
-		private void HandleLoadEnd(object sender, FrameLoadEndEventArgs e)
+		private void HandleLoadEnd(object? sender, FrameLoadEndEventArgs e)
 		{
 			// null チェック：e 自体が null またはそのプロパティが null の場合の防御
 			if (e == null)
@@ -282,7 +283,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.Dispatcher.Invoke(() =>
 				{
 					this.ApplySize();
-					this.ApplyMuteIfReady(this.WebBrowser);
+					if (this.WebBrowser is { } browser) this.ApplyMuteIfReady(browser);
 				});
 			}
 
@@ -311,19 +312,19 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			try
 			{
 				if (this.WebBrowser == null) return; // null時遅延　エラー回避
-				if (this.WebBrowser.TryGetKanColleCanvas(out var canvas))
+				if (this.WebBrowser is { } browser && browser.TryGetKanColleCanvas(out var canvas))
 				{
 					var escapedCss = EscapeForJsString(this.UserStyleSheet);
 					var js = $"var style = document.createElement(\"style\"); style.innerHTML = \"{escapedCss}\"; document.body.appendChild(style);";
-					this.WebBrowser.GetMainFrame().ExecuteJavaScriptAsync(js);
-					canvas.ExecuteJavaScriptAsync(js);
+					browser.GetMainFrame()?.ExecuteJavaScriptAsync(js);
+					canvas?.ExecuteJavaScriptAsync(js);
 
 					this.styleSheetApplied = true;
 
-					this.RegisterInputFocusHandler(canvas);
+					if (canvas is not null) this.RegisterInputFocusHandler(canvas);
 				}
 			}
-			catch (Exception) when (Application.Instance.State == ApplicationState.Startup)
+			catch (Exception) when (Application.Instance?.State == ApplicationState.Startup)
 			{
 				// about:blank だから仕方ない
 			}
@@ -360,7 +361,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 	public class InputboxFocusHandler
 	{
-		public event Action<bool> FocusChanged;
+		public event Action<bool>? FocusChanged;
 
 		public string Id { get; }
 

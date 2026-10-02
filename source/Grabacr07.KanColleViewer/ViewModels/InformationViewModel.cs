@@ -29,9 +29,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region SelectedItem 変更通知プロパティ
 
-		private TabItemViewModel _SelectedItem;
+		private TabItemViewModel? _SelectedItem;
 
-		public TabItemViewModel SelectedItem
+		public TabItemViewModel? SelectedItem
 		{
 			get { return this._SelectedItem; }
 			set

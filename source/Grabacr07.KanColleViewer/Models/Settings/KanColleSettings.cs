@@ -141,7 +141,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		#region instance members
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 
 		public KanColleSettings()
 		{
@@ -157,7 +157,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			_subscriptions.Dispose();
 		}
 
-		protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+		protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

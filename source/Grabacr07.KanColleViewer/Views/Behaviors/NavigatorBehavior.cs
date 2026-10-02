@@ -14,7 +14,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 	{
 		#region Navigator 依存関係プロパティ
 
-		public INavigator Navigator
+		public INavigator? Navigator
 		{
 			get { return (INavigator)this.GetValue(NavigatorProperty); }
 			set { this.SetValue(NavigatorProperty, value); }
@@ -25,8 +25,8 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 		private static void NavigatorPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var source = (NavigatorBehavior)d;
-			var oldNavigator = (INavigator)e.OldValue;
-			var newNavigator = (INavigator)e.NewValue;
+			var oldNavigator = (INavigator?)e.OldValue;
+			var newNavigator = (INavigator?)e.NewValue;
 
 			if (oldNavigator != null)
 			{
@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			this.AssociatedObject.FrameLoadEnd -= this.HandleLoadEnd;
 		}
 
-		private void HandleLoadEnd(object sender, FrameLoadEndEventArgs e)
+		private void HandleLoadEnd(object? sender, FrameLoadEndEventArgs e)
 		{
 			this.Dispatcher.Invoke(SetProperties);
 
@@ -78,12 +78,12 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			}
 		}
 
-		private void NavigatorOnUriRequested(object sender, Uri uri)
+		private void NavigatorOnUriRequested(object? sender, Uri uri)
 		{
 			this.AssociatedObject.Load(uri.ToString());
 		}
 
-		private void NavigatorOnGoBackRequested(object sender, EventArgs eventArgs)
+		private void NavigatorOnGoBackRequested(object? sender, EventArgs eventArgs)
 		{
 			if (this.AssociatedObject.CanGoBack)
 			{
@@ -91,7 +91,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			}
 		}
 
-		private void NavigatorOnGoForwardRequested(object sender, EventArgs eventArgs)
+		private void NavigatorOnGoForwardRequested(object? sender, EventArgs eventArgs)
 		{
 			if (this.AssociatedObject.CanGoForward)
 			{
@@ -99,7 +99,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			}
 		}
 
-		private void NavigatorOnRefreshRequested(object sender, EventArgs eventArgs)
+		private void NavigatorOnRefreshRequested(object? sender, EventArgs eventArgs)
 		{
 			this.AssociatedObject.Reload();
 		}

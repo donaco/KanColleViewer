@@ -21,7 +21,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region SlotItems 変更通知プロパティ
 
-		private IReadOnlyCollection<SlotItemCounter> _SlotItems;
+		private IReadOnlyCollection<SlotItemCounter> _SlotItems = Array.Empty<SlotItemCounter>();
 
 		public IReadOnlyCollection<SlotItemCounter> SlotItems
 		{
@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region SlotItemTypes 変更通知プロパティ
 
-		private IReadOnlyCollection<SlotItemTypeViewModel> _SlotItemTypes;
+		private IReadOnlyCollection<SlotItemTypeViewModel> _SlotItemTypes = Array.Empty<SlotItemTypeViewModel>();
 
 		public IReadOnlyCollection<SlotItemTypeViewModel> SlotItemTypes
 		{
@@ -97,11 +97,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			var uiScheduler = new SynchronizationContextScheduler(context);
 
 			// 装備種類リストを初期化（マスターに存在する Type のみ）
-			var master = KanColleClient.Current.Master;
-			var presentTypes = master.SlotItems.Values
+			var presentTypes = KanColleClient.Current.Master?.SlotItems?.Values
 				.Select(x => x.Type)
 				.Distinct()
-				.ToList();
+				.ToList() ?? new List<SlotItemType>();
 
 			// ここで表示優先順を定義します。必要な順に並べ替えてください。
 			// 例: 主砲 → 副砲 → 魚雷 → 艦上戦闘機 ...（欲しい順で編集）
@@ -208,14 +207,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 		{
 			var ships = KanColleClient.Current.Homeport.Organization.Ships.Values.ToList();
 			var items = KanColleClient.Current.Homeport.Itemyard.SlotItems.Values.ToList();
-			var master = KanColleClient.Current.Master.SlotItems;
+			var master = KanColleClient.Current.Master?.SlotItems;
+			if (master == null) return new List<SlotItemCounter>();
 
 			// dic (Dictionary<TK,TV>)
 			//  Key:   装備のマスター ID
 			//  Value: Key が示す ID に該当する所有装備カウンター
 			var dic = items
 				.GroupBy(x => x.Info.Id)
-				.ToDictionary(g => g.Key, g => new SlotItemCounter(master[g.Key], g));
+				.Where(g => master.TryGetValue(g.Key, out _))
+				.ToDictionary(g => g.Key, g => new SlotItemCounter(master[g.Key]!, g));
 
 			foreach (var ship in ships)
 			{

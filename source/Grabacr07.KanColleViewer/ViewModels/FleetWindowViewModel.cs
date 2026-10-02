@@ -13,11 +13,11 @@ namespace Grabacr07.KanColleViewer.ViewModels
 {
 	public class FleetWindowViewModel : WindowViewModel
 	{
-		private FleetViewModel[] allFleets;
+		private FleetViewModel[] allFleets = Array.Empty<FleetViewModel>();
 
 		#region Fleets 変更通知プロパティ
 
-		private ItemViewModel[] _Fleets;
+		private ItemViewModel[] _Fleets = Array.Empty<ItemViewModel>();
 
 		public ItemViewModel[] Fleets
 		{
@@ -36,12 +36,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region SelectedFleet 変更通知プロパティ
 
-		private ItemViewModel _SelectedFleet;
+		private ItemViewModel? _SelectedFleet;
 
 		/// <summary>
 		/// 現在選択されている艦隊を取得または設定します。
 		/// </summary>
-		public ItemViewModel SelectedFleet
+		public ItemViewModel? SelectedFleet
 		{
 			get { return this._SelectedFleet; }
 			set
@@ -65,7 +65,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		public FleetWindowViewModel()
 		{
 			this.Title = "艦隊詳細";
-			this.Fleets = new ItemViewModel[0];
+			this.Fleets = Array.Empty<ItemViewModel>();
 
 			// Settings を初期化（TopMost を保持）
 			this.Settings = new FleetWindowSettings();
@@ -126,7 +126,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 			if (KanColleClient.Current.Homeport.Organization.Combined)
 			{
-				var cfvm = new CombinedFleetViewModel(KanColleClient.Current.Homeport.Organization.CombinedFleet);
+				var combinedFleet = KanColleClient.Current.Homeport.Organization.CombinedFleet;
+				if (combinedFleet == null) return;
+				var cfvm = new CombinedFleetViewModel(combinedFleet);
 				var fleets = this.allFleets.Where(x => cfvm.Source.Fleets.All(f => f != x.Source));
 
 				this.Fleets = EnumerableEx.Return<ItemViewModel>(cfvm).Concat(fleets).ToArray();

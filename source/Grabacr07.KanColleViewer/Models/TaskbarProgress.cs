@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleViewer.Models
 		public static ITaskbarProgress[] Features => PluginService.Current.Get<ITaskbarProgress>();
 
 		private readonly CompositeDisposable compositDisposable = new CompositeDisposable();
-		private ITaskbarProgress current;
+		private ITaskbarProgress? current;
 
 		string ITaskbarProgress.Id
 		{
@@ -50,16 +50,14 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#region Value 変更通知プロパティ
 
-		private double _Value;
-
 		public double Value
 		{
-			get { return this._Value; }
+			get { return field; }
 			set
 			{
-				if (!this._Value.Equals(value))
+				if (!field.Equals(value))
 				{
-					this._Value = value;
+					field = value;
 					this.OnPropertyChanged(string.Empty);
 				}
 			}
@@ -67,7 +65,7 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#endregion
 
-		public event EventHandler Updated;
+		public event EventHandler? Updated;
 
 		public TaskbarProgress()
 		{
@@ -84,7 +82,7 @@ namespace Grabacr07.KanColleViewer.Models
 				.AddTo(this.compositDisposable);
 		}
 
-		public void Change(string normalSource = null, string sortieSource = null)
+		public void Change(string? normalSource = null, string? sortieSource = null)
 		{
 			var id = KanColleClient.Current.IsInSortie
 				? (sortieSource ?? GeneralSettings.TaskbarProgressSourceWhenSortie)
@@ -94,7 +92,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.Change(progress);
 		}
 
-		public void Change(ITaskbarProgress progress)
+		public void Change(ITaskbarProgress? progress)
 		{
 			if (this.current != null)
 			{
@@ -120,9 +118,9 @@ namespace Grabacr07.KanColleViewer.Models
 			this.OnPropertyChanged(nameof(this.Updated));
 		}
 
-		private void CurrentOnUpdated(object sender, EventArgs eventArgs)
+		private void CurrentOnUpdated(object? sender, EventArgs eventArgs)
 		{
-			var progress = (ITaskbarProgress)sender;
+			if (sender is not ITaskbarProgress progress) return;
 
 			this.State = progress.State;
 			this.Value = progress.Value;

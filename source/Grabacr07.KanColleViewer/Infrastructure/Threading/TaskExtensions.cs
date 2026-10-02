@@ -38,7 +38,10 @@ namespace MetroTrilithon.Threading.Tasks
             [CallerLineNumber] int callerLineNumber = 0)
         {
             task.ContinueWith(
-                x => TaskLog.Raise(new TaskLog(callerMemberName, callerFilePath, callerLineNumber, x.Exception)),
+                 x =>
+                 {
+                     if (x.Exception != null) TaskLog.Raise(new TaskLog(callerMemberName, callerFilePath, callerLineNumber, x.Exception));
+                 },
                 TaskContinuationOptions.OnlyOnFaulted);
         }
     }

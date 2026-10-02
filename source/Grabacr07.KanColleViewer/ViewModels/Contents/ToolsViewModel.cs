@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region Items 変更通知プロパティ
 
-		private List<ToolViewModel> _Tools;
+		private List<ToolViewModel> _Tools = new();
 
 		public List<ToolViewModel> Tools
 		{
@@ -36,9 +36,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region SelectedTool 変更通知プロパティ
 
-		private ToolViewModel _SelectedTool;
+		private ToolViewModel? _SelectedTool;
 
-		public ToolViewModel SelectedTool
+		public ToolViewModel? SelectedTool
 		{
 			get { return this._SelectedTool; }
 			set

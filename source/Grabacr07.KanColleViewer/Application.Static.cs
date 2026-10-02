@@ -8,10 +8,13 @@ namespace Grabacr07.KanColleViewer
 	{
 		static Application()
 		{
-			AppDomain.CurrentDomain.UnhandledException += (sender, args) => ReportException("AppDomain", sender, args.ExceptionObject as Exception);
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+			{
+				if (args.ExceptionObject is Exception exception) ReportException("AppDomain", sender, exception);
+			};
 		}
 
-		public static Application Instance => Current as Application;
+		public static Application? Instance => Current as Application;
 
 		internal static void ReportRecoverableException(string caller, object sender, Exception exception)
 		{

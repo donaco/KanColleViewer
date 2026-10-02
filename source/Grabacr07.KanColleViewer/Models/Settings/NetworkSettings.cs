@@ -23,19 +23,19 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 8888);
 
 			public static SerializableProperty<string> HttpsHost { get; }
-				= new SerializableProperty<string>(GetKey(), Providers.Local, null);
+				= new SerializableProperty<string>(GetKey(), Providers.Local, string.Empty);
 
 			public static SerializableProperty<ushort> HttpsPort { get; }
 				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 443);
 
 			public static SerializableProperty<string> FtpHost { get; }
-				= new SerializableProperty<string>(GetKey(), Providers.Local, null);
+				= new SerializableProperty<string>(GetKey(), Providers.Local, string.Empty);
 
 			public static SerializableProperty<ushort> FtpPort { get; }
 				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 21);
 
 			public static SerializableProperty<string> SocksHost { get; }
-				= new SerializableProperty<string>(GetKey(), Providers.Local, null);
+				= new SerializableProperty<string>(GetKey(), Providers.Local, string.Empty);
 
 			public static SerializableProperty<ushort> SocksPort { get; }
 				= new SerializableProperty<ushort>(GetKey(), Providers.Local, 1080);
@@ -134,19 +134,19 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		{
 			public ProxyType Type { get; set; }
 
-			public string HttpHost { get; set; }
+			public string HttpHost { get; set; } = string.Empty;
 
 			public ushort HttpPort { get; set; }
 
-			public string HttpsHost { get; set; }
+			public string HttpsHost { get; set; } = string.Empty;
 
 			public ushort HttpsPort { get; set; }
 
-			public string FtpHost { get; set; }
+			public string FtpHost { get; set; } = string.Empty;
 
 			public ushort FtpPort { get; set; }
 
-			public string SocksHost { get; set; }
+			public string SocksHost { get; set; } = string.Empty;
 
 			public ushort SocksPort { get; set; }
 
@@ -267,7 +267,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				};
 			}
 
-			internal string ToIEStyleSettings(string overrideHttpHost = null, ushort overrideHttpPort = 0)
+			internal string ToIEStyleSettings(string? overrideHttpHost = null, ushort overrideHttpPort = 0)
 			{
 				var httpHost = overrideHttpHost ?? this.HttpHost;
 				var httpPort = overrideHttpPort != 0 ? overrideHttpPort : this.HttpPort;

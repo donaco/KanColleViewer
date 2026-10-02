@@ -45,8 +45,8 @@ namespace Grabacr07.KanColleViewer
 	sealed partial class Application : INotifyPropertyChanged, IDisposableHolder
 	{
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
-		private event PropertyChangedEventHandler propertyChangedInternal;
-		private Mutex _appMutex;
+		private event PropertyChangedEventHandler? propertyChangedInternal;
+		private Mutex? _appMutex;
 		private bool startedInFallbackMode;
 
 		public DirectoryInfo LocalAppData = new DirectoryInfo(
@@ -361,13 +361,13 @@ namespace Grabacr07.KanColleViewer
 
 		#region INotifyPropertyChanged members
 
-		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
 		{
 			add { this.propertyChangedInternal += value; }
 			remove { this.propertyChangedInternal -= value; }
 		}
 
-		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+		private void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			this.propertyChangedInternal?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

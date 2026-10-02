@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 	{
 		#region Current 変更通知プロパティ
 
-		private QuestViewModel[] _Current;
+		private QuestViewModel[] _Current = Array.Empty<QuestViewModel>();
 
 		/// <summary>
 		/// 現在遂行中の任務一覧を取得します。
@@ -34,7 +34,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region Quests 変更通知プロパティ
 
-		private QuestViewModel[] _Quests;
+		private QuestViewModel[] _Quests = Array.Empty<QuestViewModel>();
 
 		/// <summary>
 		/// 全任務一覧を取得します（デイリー・ウィークリー等のフィルタ用）。

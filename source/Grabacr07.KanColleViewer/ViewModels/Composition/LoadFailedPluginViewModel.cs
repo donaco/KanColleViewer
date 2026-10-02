@@ -12,16 +12,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 	{
 		#region Message 変更通知プロパティ
 
-		private string _Message;
-
 		public string Message
 		{
-			get { return this._Message; }
+			get { return field; }
 			set
 			{
-				if (this._Message != value)
+				if (field != value)
 				{
-					this._Message = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -31,16 +29,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 
 		#region Exception 変更通知プロパティ
 
-		private string _Exception;
-
 		public string Exception
 		{
-			get { return this._Exception; }
+			get { return field; }
 			set
 			{
-				if (this._Exception != value)
+				if (field != value)
 				{
-					this._Exception = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -50,16 +46,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 
 		#region Metadata 変更通知プロパティ
 
-		private object _Metadata;
-
 		public object Metadata
 		{
-			get { return this._Metadata; }
+			get { return field; }
 			set
 			{
-				if (this._Metadata != value)
+				if (field != value)
 				{
-					this._Metadata = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -69,11 +63,19 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 
 		public LoadFailedPluginViewModel(LoadFailedPluginData data)
 		{
-			this.Metadata = data.Metadata ?? new BlacklistedAssembly { Name = Path.GetFileName(data.FilePath) } as object;
+			var metadata = data.Metadata;
+			if (metadata is null)
+			{
+				this.Metadata = new BlacklistedAssembly { Name = Path.GetFileName(data.FilePath) ?? string.Empty };
+			}
+			else
+			{
+				this.Metadata = metadata;
+			}
 
 			using (var reader = new StringReader(data.Message))
 			{
-				this.Message = reader.ReadLine();
+				this.Message = reader.ReadLine() ?? string.Empty;
 				this.Exception = reader.ReadToEnd();
 			}
 		}
@@ -81,6 +83,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 
 	public class BlacklistedAssembly
 	{
-		public string Name { get; set; }
+		public string Name { get; set; } = string.Empty;
 	}
 }

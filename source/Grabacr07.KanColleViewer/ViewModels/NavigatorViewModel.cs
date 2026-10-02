@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 	{
 		#region Source 変更通知プロパティ
 
-		private Uri _Source;
+		private Uri _Source = null!;
 
 		public Uri Source
 		{
@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region SourceString 変更通知プロパティ
 
-		private string _SourceString;
+		private string _SourceString = string.Empty;
 
 		public string SourceString
 		{
@@ -105,16 +105,16 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region NavigateCommand コマンド
 
-		private RelayCommand _NavigateCommand;
+		private RelayCommand? _NavigateCommand;
 
 		public RelayCommand NavigateCommand => this._NavigateCommand ?? (this._NavigateCommand = new RelayCommand(this.Navigate));
 
 		#endregion
 
-		public event EventHandler GoBackRequested;
-		public event EventHandler GoForwardRequested;
-		public event EventHandler RefreshRequested;
-		public event EventHandler<Uri> UriRequested;
+		public event EventHandler? GoBackRequested;
+		public event EventHandler? GoForwardRequested;
+		public event EventHandler? RefreshRequested;
+		public event EventHandler<Uri>? UriRequested;
 
 		public void GoBack()
 		{

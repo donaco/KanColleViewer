@@ -35,7 +35,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region AreaName 変更通知プロパティ
 
-		private string _AreaName;
+		private string _AreaName = string.Empty;
 
 		public string AreaName
 		{
@@ -92,7 +92,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region AirBaseNames 航空隊名リスト
 
-		private string[] _AirBaseNames;
+		private string[] _AirBaseNames = Array.Empty<string>();
 
 		public string[] AirBaseNames
 		{
@@ -111,7 +111,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region AirBaseInfos 基地情報ViewModel配列
 
-		private AirBaseInfoViewModel[] _AirBaseInfos;
+		private AirBaseInfoViewModel[] _AirBaseInfos = Array.Empty<AirBaseInfoViewModel>();
 
 		public AirBaseInfoViewModel[] AirBaseInfos
 		{
@@ -149,7 +149,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region ActionKindText 航空隊 状態名
 
-		private string _ActionKindText;
+		private string _ActionKindText = string.Empty;
 
 		public string ActionKindText
 		{

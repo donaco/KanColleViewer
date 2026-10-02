@@ -8,7 +8,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 {
 	public class DialogViewModel : WindowViewModel
 	{
-		public event EventHandler Accepted;
+		public event EventHandler? Accepted;
 
 		public DialogViewModel()
 		{

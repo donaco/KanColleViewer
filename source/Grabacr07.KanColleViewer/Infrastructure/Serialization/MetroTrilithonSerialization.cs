@@ -1,9 +1,11 @@
 // MetroTrilithon.Serialization の内製化 (Phase 1)
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,7 +20,7 @@ namespace MetroTrilithon.Serialization
         void Load();
         event EventHandler Reloaded;
         void SetValue<T>(string key, T value);
-        bool TryGetValue<T>(string key, out T value);
+        bool TryGetValue<T>(string key, [MaybeNullWhen(false)] out T value);
         bool RemoveValue(string key);
     }
 
@@ -32,7 +34,7 @@ namespace MetroTrilithon.Serialization
     [DebuggerDisplay("Value={Value}, Key={Key}, Default={Default}")]
     public abstract class SerializablePropertyBase<T> : INotifyPropertyChanged
     {
-        private T _value;
+        private T _value = default!;
         private bool _cached;
 
         public string Key { get; }
@@ -46,10 +48,10 @@ namespace MetroTrilithon.Serialization
             {
                 if (this._cached) return this._value;
                 if (!this.Provider.IsLoaded) this.Provider.Load();
-                object obj;
+                object? obj;
                 if (this.Provider.TryGetValue(this.Key, out obj))
                 {
-                    this._value = this.DeserializeCore(obj);
+                    this._value = this.DeserializeCore(obj!);
                     this._cached = true;
                 }
                 else
@@ -71,7 +73,7 @@ namespace MetroTrilithon.Serialization
             }
         }
 
-        protected SerializablePropertyBase(string key, ISerializationProvider provider) : this(key, provider, default(T)) { }
+        protected SerializablePropertyBase(string key, ISerializationProvider provider) : this(key, provider, default!) { }
 
         protected SerializablePropertyBase(string key, ISerializationProvider provider, T defaultValue)
         {
@@ -91,13 +93,13 @@ namespace MetroTrilithon.Serialization
                 }
                 else
                 {
-                    this.OnValueChanged(default(T), this.Value);
+                    this.OnValueChanged(default!, this.Value);
                 }
             };
         }
 
-        protected virtual object SerializeCore(T value) => value;
-        protected virtual T DeserializeCore(object value) => (T)value;
+        protected virtual object? SerializeCore(T value) => value;
+        protected virtual T DeserializeCore(object? value) => (T)value!;
 
         public virtual IDisposable Subscribe(Action<T> listener)
         {
@@ -108,12 +110,12 @@ namespace MetroTrilithon.Serialization
         public virtual void Reset()
         {
             if (!this.Provider.IsLoaded) this.Provider.Load();
-            object old;
+            object? old;
             if (this.Provider.TryGetValue(this.Key, out old))
             {
                 if (this.Provider.RemoveValue(this.Key))
                 {
-                    this._value = default(T);
+                    this._value = default!;
                     this._cached = false;
                     this.OnValueChanged(this.DeserializeCore(old), this.Default);
                     if (this.AutoSave) this.Provider.Save();
@@ -121,7 +123,7 @@ namespace MetroTrilithon.Serialization
             }
         }
 
-        public event EventHandler<ValueChangedEventArgs<T>> ValueChanged;
+        public event EventHandler<ValueChangedEventArgs<T>>? ValueChanged;
 
         protected virtual void OnValueChanged(T oldValue, T newValue)
             => this.ValueChanged?.Invoke(this, new ValueChangedEventArgs<T>(oldValue, newValue));
@@ -129,13 +131,17 @@ namespace MetroTrilithon.Serialization
         private readonly Dictionary<PropertyChangedEventHandler, EventHandler<ValueChangedEventArgs<T>>> _handlers
             = new Dictionary<PropertyChangedEventHandler, EventHandler<ValueChangedEventArgs<T>>>();
 
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+        event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
         {
-            add { this.ValueChanged += (this._handlers[value] = (sender, args) => value(sender, new PropertyChangedEventArgs(nameof(this.Value)))); }
+            add
+            {
+                if (value == null) return;
+                this.ValueChanged += (this._handlers[value] = (sender, args) => value(sender, new PropertyChangedEventArgs(nameof(this.Value))));
+            }
             remove
             {
-                EventHandler<ValueChangedEventArgs<T>> handler;
-                if (this._handlers.TryGetValue(value, out handler))
+                if (value == null) return;
+                if (this._handlers.TryGetValue(value, out var handler))
                 {
                     this.ValueChanged -= handler;
                     this._handlers.Remove(value);
@@ -155,17 +161,19 @@ namespace MetroTrilithon.Serialization
                 this._source = property;
                 this._source.ValueChanged += this.HandleValueChanged;
             }
-            private void HandleValueChanged(object sender, ValueChangedEventArgs<T> args) => this._listener(args.NewValue);
+            private void HandleValueChanged(object? sender, ValueChangedEventArgs<T> args) => this._listener(args.NewValue);
             public void Dispose() => this._source.ValueChanged -= this.HandleValueChanged;
         }
     }
 
     public sealed class SerializableProperty<T> : SerializablePropertyBase<T>
     {
-        public SerializableProperty(string key) : this(key, default(T)) { }
+        public SerializableProperty(string key) : base(key, (ISerializationProvider)ApplicationSettingsProvider.Default, default!) { }
         public SerializableProperty(string key, T defaultValue) : base(key, ApplicationSettingsProvider.Default, defaultValue) { }
         public SerializableProperty(string key, ISerializationProvider provider) : base(key, provider) { }
         public SerializableProperty(string key, ISerializationProvider provider, T defaultValue) : base(key, provider, defaultValue) { }
+
+        private static T GetDefaultValue() => default!;
     }
 
     public class ApplicationSettingsProvider : ApplicationSettingsBase, ISerializationProvider
@@ -175,7 +183,7 @@ namespace MetroTrilithon.Serialization
         public bool IsLoaded { get; private set; }
 
         [UserScopedSetting, EditorBrowsable(EditorBrowsableState.Never)]
-        public object __Infrastructure { get; }
+        public object __Infrastructure { get; } = null!;
 
         public ApplicationSettingsProvider() { }
         public ApplicationSettingsProvider(string settingsKey) : base(settingsKey) { }
@@ -186,11 +194,11 @@ namespace MetroTrilithon.Serialization
             this[key] = value;
         }
 
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<T>(string key, [MaybeNullWhen(false)] out T value)
         {
             this.AddProperty(key, typeof(T));
-            try { value = (T)this[key]; return true; }
-            catch { value = default(T); return false; }
+            try { value = (T)this[key]!; return true; }
+            catch { value = default!; return false; }
         }
 
         public bool RemoveValue(string key) => this.RemoveProperty(key);
@@ -234,7 +242,7 @@ namespace MetroTrilithon.Serialization
     {
         private readonly string _path;
         private readonly object _sync = new object();
-        private SortedDictionary<string, object> _settings = new SortedDictionary<string, object>();
+        private SortedDictionary<string, object?> _settings = new SortedDictionary<string, object?>();
 
         public bool IsLoaded { get; private set; }
 
@@ -245,17 +253,17 @@ namespace MetroTrilithon.Serialization
             lock (this._sync) this._settings[key] = value;
         }
 
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<T>(string key, [MaybeNullWhen(false)] out T value)
         {
             lock (this._sync)
             {
-                object obj;
+                object? obj;
                 if (this._settings.TryGetValue(key, out obj) && obj is T)
                 {
                     value = (T)obj; return true;
                 }
             }
-            value = default(T); return false;
+            value = default!; return false;
         }
 
         public bool RemoveValue(string key)
@@ -284,16 +292,16 @@ namespace MetroTrilithon.Serialization
                 {
                     lock (this._sync)
                     {
-                        var source = XamlServices.Load(stream) as IDictionary<string, object>;
+                        var source = XamlServices.Load(stream) as IDictionary<string, object?>;
                         this._settings = source == null
-                            ? new SortedDictionary<string, object>()
-                            : new SortedDictionary<string, object>(source);
+                            ? new SortedDictionary<string, object?>()
+                            : new SortedDictionary<string, object?>(source);
                     }
                 }
             }
             else
             {
-                lock (this._sync) this._settings = new SortedDictionary<string, object>();
+                lock (this._sync) this._settings = new SortedDictionary<string, object?>();
             }
             this.IsLoaded = true;
         }

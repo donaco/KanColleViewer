@@ -9,12 +9,12 @@ namespace Grabacr07.KanColleViewer.Models
 	public static class ProductInfo
 	{
 		private static readonly Assembly assembly = Assembly.GetExecutingAssembly();
-		private static readonly Lazy<string> titleLazy = new Lazy<string>(() => ((AssemblyTitleAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyTitleAttribute))).Title);
-		private static readonly Lazy<string> descriptionLazy = new Lazy<string>(() => ((AssemblyDescriptionAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyDescriptionAttribute))).Description);
-		private static readonly Lazy<string> companyLazy = new Lazy<string>(() => ((AssemblyCompanyAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyCompanyAttribute))).Company);
-		private static readonly Lazy<string> productLazy = new Lazy<string>(() => ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute))).Product);
-		private static readonly Lazy<string> copyrightLazy = new Lazy<string>(() => ((AssemblyCopyrightAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyCopyrightAttribute))).Copyright);
-		private static readonly Lazy<string> trademarkLazy = new Lazy<string>(() => ((AssemblyTrademarkAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyTrademarkAttribute))).Trademark);
+		private static readonly Lazy<string> titleLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title ?? string.Empty);
+		private static readonly Lazy<string> descriptionLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty);
+		private static readonly Lazy<string> companyLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty);
+		private static readonly Lazy<string> productLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty);
+		private static readonly Lazy<string> copyrightLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty);
+		private static readonly Lazy<string> trademarkLazy = new Lazy<string>(() => assembly.GetCustomAttribute<AssemblyTrademarkAttribute>()?.Trademark ?? string.Empty);
 		private static readonly Lazy<string> versionLazy = new Lazy<string>(() => $"{Version.ToString(3)}{(IsBetaRelease ? " β" : "")}{(Version.Revision == 0 ? "" : " rev." + Version.Revision)}");
 		private static readonly Lazy<IReadOnlyCollection<Library>> librariesLazy = new Lazy<IReadOnlyCollection<Library>>(() => new List<Library>
 		{
@@ -38,7 +38,7 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public static string Trademark => trademarkLazy.Value;
 
-		public static Version Version => assembly.GetName().Version;
+		public static Version Version => assembly.GetName().Version ?? new Version(0, 0);
 
 		public static string VersionString => versionLazy.Value;
 

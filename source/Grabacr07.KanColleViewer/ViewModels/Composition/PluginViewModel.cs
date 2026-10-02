@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 {
 	public class PluginViewModel : ViewModelBase
 	{
-		private readonly INotifier notifier;
+		private readonly INotifier? notifier;
 
 		protected Plugin Plugin { get; }
 
@@ -30,16 +30,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 
 		#region ErrorMessage 変更通知プロパティ
 
-		private string _ErrorMessage;
-
 		public string ErrorMessage
 		{
-			get { return this._ErrorMessage; }
+			get { return field ?? string.Empty; }
 			set
 			{
-				if (this._ErrorMessage != value)
+				if (field != value)
 				{
-					this._ErrorMessage = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -70,7 +68,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 		/// <summary>
 		/// プラグインの設定画面を取得します。
 		/// </summary>
-		public object SettingsView
+		public object? SettingsView
 		{
 			get { return this.Plugin.OfType<ISettings>().Select(x => x.View).FirstOrDefault(); }
 		}

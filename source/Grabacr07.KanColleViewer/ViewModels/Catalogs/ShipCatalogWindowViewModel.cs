@@ -16,7 +16,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 	{
 		private readonly Subject<Unit> updateSource = new Subject<Unit>();
 		private readonly Homeport homeport = KanColleClient.Current.Homeport;
-		private SallyArea[] sallyAreas;
+		private SallyArea[]? sallyAreas;
 
 		private IReadOnlyCollection<int> selectedShipTypeIds = Array.Empty<int>();
 		private IReadOnlyCollection<int> selectedDaiNaiShipIds = Array.Empty<int>();
@@ -48,7 +48,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region Ships 変更通知プロパティ
 
-		private IReadOnlyCollection<ShipViewModel> _Ships;
+		private IReadOnlyCollection<ShipViewModel> _Ships = Array.Empty<ShipViewModel>();
 
 		public IReadOnlyCollection<ShipViewModel> Ships
 		{
@@ -130,14 +130,14 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			this.SortWorker = new ShipCatalogSortWorker();
 
-			this.ShipTypes = KanColleClient.Current.Master.ShipTypes
+			this.ShipTypes = KanColleClient.Current.Master?.ShipTypes
 				.Where(kvp => !(kvp.Value.Id == 15 && kvp.Value.Name == "補給艦")) // おそらく敵艦用と思われる補給艦を除外
 				.Select(kvp => new ShipTypeViewModel(kvp.Value)
 				{
 					IsSelected = true,
 					SelectionChangedAction = () => this.Update()
 				})
-				.ToList();
+				.ToList() ?? new List<ShipTypeViewModel>();
 
 			this.ShipLevelFilter = new ShipLevelFilter(this.Update);
 			this.ShipLockFilter = new ShipLockFilter(this.Update);
@@ -203,7 +203,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		private DaiNaiFilterMode daiNaiFilterMode = DaiNaiFilterMode.None;
 
-		private void UpdateSelection(int[] shipTypeIds, Func<DaiNaiShipEntry, bool> predicate, DaiNaiFilterMode mode)
+		private void UpdateSelection(int[]? shipTypeIds, Func<DaiNaiShipEntry, bool> predicate, DaiNaiFilterMode mode)
 		{
 			this.selectedShipTypeIds = shipTypeIds ?? Array.Empty<int>();
 			this.selectedDaiNaiShipIds = predicate == null
@@ -286,7 +286,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				: Observable.Return(this.sallyAreas);
 		}
 
-		public void SetShipType(int[] ids)
+		public void SetShipType(int[]? ids)
 		{
 			this.selectedShipTypeIds = ids ?? Array.Empty<int>();
 			this.daiNaiFilterMode = DaiNaiFilterMode.None;

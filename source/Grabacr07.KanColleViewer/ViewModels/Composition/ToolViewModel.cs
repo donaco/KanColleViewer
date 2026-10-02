@@ -12,12 +12,12 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 	public class ToolViewModel : ViewModelBase
 	{
 		private readonly ITool tool;
-		private object view;
+		private object? view;
 		private bool viewCreated;
 
 		public string Name => this.tool.Name;
 
-		public object View
+		public object? View
 		{
 			get
 			{

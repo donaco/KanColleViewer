@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region RepairingDocks 変更通知プロパティ
 
-		private RepairingDockViewModel[] _RepairingDocks;
+		private RepairingDockViewModel[] _RepairingDocks = Array.Empty<RepairingDockViewModel>();
 
 		public RepairingDockViewModel[] RepairingDocks
 		{
@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region BuildingDocks 変更通知プロパティ
 
-		private BuildingDockViewModel[] _BuildingDocks;
+		private BuildingDockViewModel[] _BuildingDocks = Array.Empty<BuildingDockViewModel>();
 
 		public BuildingDockViewModel[] BuildingDocks
 		{

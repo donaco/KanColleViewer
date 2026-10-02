@@ -505,7 +505,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region SallyAreas 変更通知プロパティ
 
-		private SallyAreaFilterChild[] _SallyAreas;
+		private SallyAreaFilterChild[] _SallyAreas = Array.Empty<SallyAreaFilterChild>();
 
 		public SallyAreaFilterChild[] SallyAreas
 		{
@@ -560,7 +560,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			else
 			{
 				this.SallyAreas = EnumerableEx
-					.Return<SallyArea>(null)
+					.Return<SallyArea?>(null)
 					.Concat(areas)
 					.Select(x => new SallyAreaFilterChild(x, this))
 					.ToArray();
@@ -577,7 +577,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			#region Name 変更通知プロパティ
 
-			private string _Name;
+			private string _Name = string.Empty;
 
 			public string Name
 			{
@@ -614,7 +614,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 			#endregion
 
-			public SallyAreaFilterChild(SallyArea area, ShipSallyAreaFilter owner)
+			public SallyAreaFilterChild(SallyArea? area, ShipSallyAreaFilter owner)
 			{
 				this.model = area ?? SallyArea.Default;
 				this.owner = owner;

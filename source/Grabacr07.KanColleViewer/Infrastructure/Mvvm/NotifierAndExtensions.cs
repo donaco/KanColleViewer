@@ -14,15 +14,15 @@ namespace MetroTrilithon.Mvvm
     /// </summary>
     public class Notifier : INotifyPropertyChanged
     {
-        private event PropertyChangedEventHandler _propertyChanged;
+        private event PropertyChangedEventHandler? _propertyChanged;
 
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+        event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
         {
             add { this._propertyChanged += value; }
             remove { this._propertyChanged -= value; }
         }
 
-        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         {
             this._propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -36,7 +36,7 @@ namespace MetroTrilithon.Mvvm
         private readonly INotifyPropertyChanged _source;
         private readonly Dictionary<string, List<PropertyChangedEventHandler>> _handlers
             = new Dictionary<string, List<PropertyChangedEventHandler>>();
-        private PropertyChangedEventHandler _globalHandler;
+        private PropertyChangedEventHandler? _globalHandler;
         private bool _isDisposed;
 
         public InternalPropertyChangedEventListener(INotifyPropertyChanged source)
@@ -61,7 +61,7 @@ namespace MetroTrilithon.Mvvm
             list.Add(handler);
         }
 
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             this._globalHandler?.Invoke(sender, e);
 
@@ -86,7 +86,7 @@ namespace MetroTrilithon.Mvvm
             return new InternalPropertyChangedEventListener(source, handler);
         }
 
-        public static IDisposable Subscribe(this INotifyPropertyChanged source, Action<string> action)
+        public static IDisposable Subscribe(this INotifyPropertyChanged source, Action<string?> action)
         {
             return new InternalPropertyChangedEventListener(source, (sender, args) => action(args.PropertyName));
         }

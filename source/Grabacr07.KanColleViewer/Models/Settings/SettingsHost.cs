@@ -30,8 +30,8 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		{
 			var key = this.CategoryName + "." + propertyName;
 
-			object obj;
-			if (this.cachedProperties.TryGetValue(key, out obj) && obj is SerializableProperty<T>) return (SerializableProperty<T>)obj;
+			if (this.cachedProperties.TryGetValue(key, out var obj) && obj is SerializableProperty<T> cachedProperty)
+				return cachedProperty;
 
 			var property = create(key);
 			this.cachedProperties[key] = property;
@@ -140,8 +140,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// </summary>
 		public static T Instance<T>() where T : SettingsHost, new()
 		{
-			SettingsHost host;
-			return instances.TryGetValue(typeof(T), out host) ? (T)host : new T();
+			return instances.TryGetValue(typeof(T), out var host) && host is T instance ? instance : new T();
 		}
 	}
 }

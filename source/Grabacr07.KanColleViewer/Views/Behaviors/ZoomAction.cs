@@ -37,7 +37,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private void OnZoomRequested(object sender, EventArgs e)
+		private void OnZoomRequested(object? sender, EventArgs e)
 		{
 			this.AssociatedObject?.ApplySize();
 		}

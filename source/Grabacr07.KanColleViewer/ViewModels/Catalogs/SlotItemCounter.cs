@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -96,8 +96,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		public void AddShip(Ship ship)
 		{
-			SlotItemCounterByShip target;
-			if (this.itemsByShip.TryGetValue(ship.Id, out target))
+			if (this.itemsByShip.TryGetValue(ship.Id, out var target))
 			{
 				target.Count++;
 			}
@@ -112,7 +111,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 	public class SlotItemCounterByShip
 	{
-		public Ship Ship { get; set; }
+		public Ship Ship { get; set; } = null!;
 
 		public int Count { get; set; }
 

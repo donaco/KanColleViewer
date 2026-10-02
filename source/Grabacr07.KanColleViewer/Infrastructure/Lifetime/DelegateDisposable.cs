@@ -7,7 +7,7 @@ namespace Grabacr07.KanColleViewer.Infrastructure.Lifetime
 	/// </summary>
 	internal sealed class DelegateDisposable : IDisposable
 	{
-		private Action _action;
+		private Action? _action;
 
 		public DelegateDisposable(Action action)
 		{

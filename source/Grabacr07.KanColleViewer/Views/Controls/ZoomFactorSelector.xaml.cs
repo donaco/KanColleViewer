@@ -18,12 +18,12 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 	partial class ZoomFactorSelector
 	{
 		private Dpi? systemDpi;
-		private List<ZoomFactorSelectorItem> items;
-		private IDisposable zoomFactorNotifyListener;
+		private List<ZoomFactorSelectorItem> items = new();
+		private IDisposable? zoomFactorNotifyListener;
 
 		internal class ZoomFactorSelectorItem : ObservableObject
 		{
-			public Action SelectAction { get; set; }
+			public Action? SelectAction { get; set; } = null;
 			public Size ScreenSize { get; set; }
 			public int Value { get; set; }
 
@@ -66,7 +66,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private static void ZoomFactorPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var source = (ZoomFactorSelector)d;
-			var newValue = (IZoomFactor)e.NewValue;
+			var newValue = e.NewValue as IZoomFactor;
 
 			source.zoomFactorNotifyListener?.Dispose();
 
@@ -90,9 +90,10 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				{
 					PropertyChangedEventHandler handler = (s, args) =>
 					{
-						if (args.PropertyName == "Current")
+						var currentZoomFactor = source.ZoomFactor;
+						if (args?.PropertyName == "Current" && currentZoomFactor != null)
 						{
-							var target = source.items.FirstOrDefault(x => x.Value == (int)(newValue.Current * 100));
+							var target = source.items.FirstOrDefault(x => x.Value == (int)(currentZoomFactor.Current * 100));
 							target?.IsSelected = true;
 						}
 					};

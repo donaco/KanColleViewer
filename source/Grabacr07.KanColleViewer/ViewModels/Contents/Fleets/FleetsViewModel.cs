@@ -14,10 +14,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
 	public class FleetsViewModel : TabItemViewModel
 	{
-		private CompositeDisposable fleetListeners;
+		private CompositeDisposable fleetListeners = new();
 
 		// 艦隊詳細ウィンドウのインスタンスを保持
-		private static Window fleetWindowInstance;
+		private static Window? fleetWindowInstance;
 
 		public override string Name
 		{
@@ -27,7 +27,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 
 		#region Fleets 変更通知プロパティ
 
-		private FleetViewModel[] _Fleets;
+		private FleetViewModel[] _Fleets = Array.Empty<FleetViewModel>();
 
 		public FleetViewModel[] Fleets
 		{
@@ -46,20 +46,20 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 
 		#region SelectedFleet 変更通知プロパティ
 
-		private FleetViewModel _SelectedFleet;
+		private FleetViewModel? _SelectedFleet;
 
 		/// <summary>
 		/// 現在選択されている艦隊を取得または設定します。
 		/// </summary>
-		public FleetViewModel SelectedFleet
+		public FleetViewModel? SelectedFleet
 		{
 			get { return this._SelectedFleet; }
 			set
 			{
 				if (this._SelectedFleet != value)
 				{
-				this.SelectedFleet?.IsSelected = false;
-				value?.IsSelected = true;
+				if (this.SelectedFleet != null) this.SelectedFleet.IsSelected = false;
+				if (value != null) value.IsSelected = true;
 					this._SelectedFleet = value;
 					this.RaisePropertyChanged();
 				}

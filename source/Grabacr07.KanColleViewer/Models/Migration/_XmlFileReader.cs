@@ -29,14 +29,14 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 				throw new FileNotFoundException("ファイルが見つかりません。", filePath);
 			}
 
-			FileStream stream = null; // 読込用ストリーム
+			FileStream? stream = null; // 読込用ストリーム
 			T result; // 読み込んだデータ
 
 			try
 			{
 				// ファイルストリームを生成し、XML ファイルを読み込み
 				stream = new FileStream(filePath, FileMode.Open);
-				result = ReadData<T>(stream);
+				result = ReadData<T>(stream) ?? new T();
 			}
 			finally
 			{
@@ -59,14 +59,14 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 		/// <returns>読み込んだデータ。</returns>
 		public static T ReadData<T>(byte[] data) where T : new()
 		{
-			MemoryStream stream = null; // 読込用ストリーム	
+			MemoryStream? stream = null; // 読込用ストリーム	
 			T result; // 読み込んだデータ
 
 			try
 			{
 				// メモリストリームを生成し、バイトデータを読み込み
 				stream = new MemoryStream(data);
-				result = ReadData<T>(stream);
+				result = ReadData<T>(stream) ?? new T();
 			}
 			finally
 			{
@@ -87,7 +87,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 		/// <typeparam name="T">読み込むデータの型。</typeparam>
 		/// <param name="stream">読込先となる XML ファイルのストリーム。</param>
 		/// <returns>読み込んだデータ。</returns>
-		private static T ReadData<T>(Stream stream) where T : new()
+		private static T? ReadData<T>(Stream stream) where T : new()
 		{
 			var type = typeof(T);
 			var attr = Attribute.GetCustomAttribute(type, typeof(XmlRootAttribute));
@@ -105,7 +105,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 
 			using (var xmlReader = XmlReader.Create(stream, xmlReaderSettings))
 			{
-				return (T)serializer.Deserialize(xmlReader);
+				return (T?)serializer.Deserialize(xmlReader);
 			}
 		}
 	}

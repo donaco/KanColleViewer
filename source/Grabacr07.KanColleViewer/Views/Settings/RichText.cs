@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,15 +10,16 @@ namespace Grabacr07.KanColleViewer.Views.Settings
 {
 	public abstract class FunctionLink<T> : Link
 	{
-		public T Function { get; set; }
+		public T Function { get; set; } = default!;
 	}
 
 	public class SettingsText : FunctionLink<ISettings>
 	{
-		public string Title { get; set; }
+		public string? Title { get; set; }
 
 		public override void Click()
 		{
+			if (this.Function is null || this.Title is null) return;
 			var vm = new PluginSettingsWindowViewModel(this.Function, this.Title);
 			WindowService.Current.MainWindow.Transition(vm, typeof(PluginSettingsWindow));
 		}
@@ -26,11 +27,11 @@ namespace Grabacr07.KanColleViewer.Views.Settings
 
 	public class NotifierText : FunctionLink<INotifier>
 	{
-		public Action TestMethod { get; set; }
+		public Action TestMethod { get; set; } = () => { };
 
 		public override void Click()
 		{
-			this.TestMethod?.Invoke();
+			this.TestMethod();
 		}
 	}
 

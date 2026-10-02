@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// 外部ツール（公開日誌拡張版など）へ通信を中継するための内蔵 MITM プロキシです。
 		/// NetworkSettings.Relay.IsEnabled が true の場合のみ起動します。
 		/// </summary>
-		private static Grabacr07.KanColleWrapper.Net.RelayHttpProxy relayProxy;
+		private static Grabacr07.KanColleWrapper.Net.RelayHttpProxy? relayProxy;
 
 		private static string FallbackLocalAppData => Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -360,7 +360,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// IBrowser.GetFrameNames() を使用してフレーム名一覧を取得し、
 		/// kcs2/index.php を含む URL のフレームを探します。
 		/// </summary>
-		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame canvas) {
+		public static bool TryGetKanColleCanvas(this ChromiumWebBrowser webBrowser, out IFrame? canvas) {
 			try {
 				var browser = webBrowser.GetBrowser();
 				if (browser == null) {

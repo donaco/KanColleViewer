@@ -34,7 +34,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public UserStyleSheetSettingsViewModel UserStyleSheetSettings { get; }
 
-		public NavigatorViewModel Navigator { get; set; }
+		public NavigatorViewModel? Navigator { get; set; }
 
 		public BrowserZoomFactor BrowserZoomFactor { get; }
 
@@ -52,7 +52,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region UpdateStatusText 変更通知プロパティ
 
-		private string _UpdateStatusText;
+		private string _UpdateStatusText = string.Empty;
 
 		public string UpdateStatusText
 		{
@@ -90,7 +90,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region UpdateUri 変更通知プロパティ
 
-		private Uri _UpdateUri;
+		private Uri _UpdateUri = null!;
 
 		public Uri UpdateUri
 		{
@@ -109,16 +109,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region CheckForUpdateCommand コマンド
 
-		private RelayCommand _CheckForUpdateCommand;
+		private RelayCommand? _CheckForUpdateCommand;
 
 		public RelayCommand CheckForUpdateCommand
-			=> this._CheckForUpdateCommand ?? (this._CheckForUpdateCommand = new RelayCommand(this.CheckForUpdate));
+			=> this._CheckForUpdateCommand ??= new RelayCommand(this.CheckForUpdate);
 
 		#endregion
 
 		#region ViewRangeSettingsCollection 変更通知プロパティ
 
-		private List<ICalcViewRange> _ViewRangeSettingsCollection;
+		private List<ICalcViewRange> _ViewRangeSettingsCollection = new();
 
 		public List<ICalcViewRange> ViewRangeSettingsCollection
 		{
@@ -137,7 +137,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SelectedViewRangeCalcType 変更通知プロパティ
 
-		private ICalcViewRange _SelectedViewRangeCalcType;
+		private ICalcViewRange _SelectedViewRangeCalcType = null!;
 
 		public ICalcViewRange SelectedViewRangeCalcType
 		{
@@ -247,7 +247,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 	public class UpdateCheckModeItemViewModel : ItemViewModel
 	{
-		public string Display { get; set; }
+		public string Display { get; set; } = string.Empty;
 
 		public bool Value { get; set; }
 	}

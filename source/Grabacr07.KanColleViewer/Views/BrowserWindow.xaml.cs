@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,12 +15,16 @@ namespace Grabacr07.KanColleViewer.Views
 		/// このウィンドウにホストされている <see cref="System.Windows.Controls.WebBrowser"/> オブジェクトを取得します。
 		/// </summary>
 		public WebBrowser WebBrowser => this.webBrowser;
+		public object? ViewModel => this.DataContext;
 
 		public BrowserWindow()
 		{
 			this.InitializeComponent();
 
-			Application.Instance.MainWindow.Closed += (sender, args) => this.Close();
+			if (Application.Instance is { MainWindow: { } mainWindow })
+			{
+				mainWindow.Closed += (sender, args) => this.Close();
+			}
 		}
 	}
 }

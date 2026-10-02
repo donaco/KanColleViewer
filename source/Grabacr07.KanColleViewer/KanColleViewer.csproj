@@ -21,6 +21,7 @@
   <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
   <LangVersion>14.0</LangVersion>
+  <Nullable>enable</Nullable>
   <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
   <NoWarn>0436</NoWarn>
 </PropertyGroup>

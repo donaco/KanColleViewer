@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 	{
 		#region Text 変更通知プロパティ
 
-		private string _Text;
+		private string _Text = string.Empty;
 
 		public string Text
 		{
@@ -32,7 +32,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 	{
 		#region Uri 変更通知プロパティ
 
-		private Uri _Uri;
+		private Uri _Uri = null!;
 
 		public Uri Uri
 		{

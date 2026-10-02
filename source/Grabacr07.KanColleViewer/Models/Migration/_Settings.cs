@@ -31,7 +31,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 			"KanColleViewer",
 			"Settings.xml");
 
-		public static _Settings Current { get; set; }
+		public static _Settings? Current { get; set; }
 
 		public static void Load()
 		{
@@ -47,6 +47,8 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 
 				return;
 			}
+
+			if (Current == null) return;
 
 			// 設定のマイグレーション
 
@@ -92,9 +94,9 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 
 		public bool CanCloseWithoutConfirmation { get; set; }
 
-		public string ScreenshotFolder { get; set; }
+		public string ScreenshotFolder { get; set; } = string.Empty;
 
-		public string ScreenshotFilename { get; set; }
+		public string ScreenshotFilename { get; set; } = string.Empty;
 
 		public SupportedImageFormat ScreenshotImageFormat { get; set; }
 
@@ -108,18 +110,18 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 
 		public bool NotifyFleetRejuvenated { get; set; }
 
-		public _ProxySettings ProxySettings { get; set; }
+		public _ProxySettings? ProxySettings { get; set; }
 
 		public bool TopMost { get; set; }
 
-		public string Culture { get; set; }
+		public string Culture { get; set; } = string.Empty;
 
 		public int BrowserZoomFactorPercentage { get; set; }
 
 		public bool IsProxyMode { get; set; }
 
 #pragma warning disable 612
-		public _KanColleClientSettings KanColleClientSettings { get; set; }
+		public _KanColleClientSettings? KanColleClientSettings { get; set; }
 #pragma warning restore 612
 
 	}

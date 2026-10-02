@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#endregion
 
-		private CompositeDisposable airBaseListeners;
+		private CompositeDisposable airBaseListeners = new();
 
 		public override string Name
 		{
@@ -46,7 +46,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region AirBases
 
-		private AirBaseViewModel[] _AirBases;
+		private AirBaseViewModel[] _AirBases = Array.Empty<AirBaseViewModel>();
 
 		public AirBaseViewModel[] AirBases
 		{
@@ -65,9 +65,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		#region SelectedAirBase
 
-		private AirBaseViewModel _SelectedAirBase;
+		private AirBaseViewModel? _SelectedAirBase;
 
-		public AirBaseViewModel SelectedAirBase
+		public AirBaseViewModel? SelectedAirBase
 		{
 			get { return this._SelectedAirBase; }
 			set
@@ -237,7 +237,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		}
 
 		// 基地詳細ウィンドウのインスタンスを保持
-		private static Window airBaseWindowInstance;
+		private static Window? airBaseWindowInstance;
 
 		/// <summary>
 		/// 基地詳細ウィンドウを表示する（選択中の基地を渡す）

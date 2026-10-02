@@ -48,7 +48,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private void OnCloseRequested(object sender, EventArgs e)
+		private void OnCloseRequested(object? sender, EventArgs e)
 		{
 			if (!Application.Current.Dispatcher.CheckAccess())
 			{
@@ -59,7 +59,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			this.AssociatedObject?.Close();
 		}
 
-		private void OnActivateRequested(object sender, EventArgs e)
+		private void OnActivateRequested(object? sender, EventArgs e)
 		{
 			if (!Application.Current.Dispatcher.CheckAccess())
 			{

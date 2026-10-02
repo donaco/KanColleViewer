@@ -10,8 +10,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
 	public class OverviewViewModel : TabItemViewModel
 	{
-		private ShipCatalogWindowViewModel shipCatalog;
-		private SlotItemCatalogViewModel slotItemCatalog;
+		private ShipCatalogWindowViewModel? shipCatalog;
+		private SlotItemCatalogViewModel? slotItemCatalog;
 		public override string Name
 		{
 			get { return Resources.IntegratedView; }
@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public void Jump(string tabName)
 		{
-			TabItemViewModel target = null;
+			TabItemViewModel? target = null;
 
 			switch (tabName)
 			{

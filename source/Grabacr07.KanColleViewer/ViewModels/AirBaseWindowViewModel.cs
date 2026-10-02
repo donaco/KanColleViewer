@@ -12,11 +12,11 @@ namespace Grabacr07.KanColleViewer.ViewModels
 {
 	public class AirBaseWindowViewModel : WindowViewModel
 	{
-		private AirBasesViewModel source;
+		private readonly AirBasesViewModel source;
 
 		#region AirBases 変更通知プロパティ
 
-		private ObservableCollection<AirBaseViewModel> _AirBases;
+		private ObservableCollection<AirBaseViewModel> _AirBases = new();
 
 		public ObservableCollection<AirBaseViewModel> AirBases
 		{
@@ -35,9 +35,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region SelectedAirBase 変更通知プロパティ
 
-		private AirBaseViewModel _SelectedAirBase;
+		private AirBaseViewModel? _SelectedAirBase;
 
-		public AirBaseViewModel SelectedAirBase
+		public AirBaseViewModel? SelectedAirBase
 		{
 			get { return this._SelectedAirBase; }
 			set

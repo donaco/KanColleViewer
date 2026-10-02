@@ -34,7 +34,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificHttpProxyHost 変更通知プロパティ
 
-		private string _SpecificHttpProxyHost;
+		private string _SpecificHttpProxyHost = string.Empty;
 
 		public string SpecificHttpProxyHost
 		{
@@ -54,7 +54,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificHttpProxyPort 変更通知プロパティ
 
-		private string _SpecificHttpProxyPort;
+		private string _SpecificHttpProxyPort = string.Empty;
 
 		public string SpecificHttpProxyPort
 		{
@@ -94,7 +94,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificHttpsProxyHost 変更通知プロパティ
 
-		private string _SpecificHttpsProxyHost;
+		private string _SpecificHttpsProxyHost = string.Empty;
 
 		public string SpecificHttpsProxyHost
 		{
@@ -114,7 +114,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificHttpsProxyPort 変更通知プロパティ
 
-		private string _SpecificHttpsProxyPort;
+		private string _SpecificHttpsProxyPort = string.Empty;
 
 		public string SpecificHttpsProxyPort
 		{
@@ -134,7 +134,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificFtpProxyHost 変更通知プロパティ
 
-		private string _SpecificFtpProxyHost;
+		private string _SpecificFtpProxyHost = string.Empty;
 
 		public string SpecificFtpProxyHost
 		{
@@ -154,7 +154,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificFtpProxyPort 変更通知プロパティ
 
-		private string _SpecificFtpProxyPort;
+		private string _SpecificFtpProxyPort = string.Empty;
 
 		public string SpecificFtpProxyPort
 		{
@@ -174,7 +174,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificSocksProxyHost 変更通知プロパティ
 
-		private string _SpecificSocksProxyHost;
+		private string _SpecificSocksProxyHost = string.Empty;
 
 		public string SpecificSocksProxyHost
 		{
@@ -194,7 +194,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region SpecificSocksProxyPort 変更通知プロパティ
 
-		private string _SpecificSocksProxyPort;
+		private string _SpecificSocksProxyPort = string.Empty;
 
 		public string SpecificSocksProxyPort
 		{
@@ -233,7 +233,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region RelayUpstreamHost 変更通知プロパティ
 
-		private string _RelayUpstreamHost;
+		private string _RelayUpstreamHost = string.Empty;
 
 		public string RelayUpstreamHost
 		{
@@ -252,7 +252,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		#region RelayUpstreamPort 変更通知プロパティ
 
-		private string _RelayUpstreamPort;
+		private string _RelayUpstreamPort = string.Empty;
 
 		public string RelayUpstreamPort
 		{
@@ -274,13 +274,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.RevertToSavedSettings();
 			NetworkSettings.Proxy.Type.Subscribe(x => this.ProxyType = x).AddTo(this);
 			NetworkSettings.Proxy.Host.Subscribe(x => this.SpecificHttpProxyHost = x).AddTo(this);
-			NetworkSettings.Proxy.Port.Subscribe(x => this.SpecificHttpProxyPort = x).AddTo(this);
+			NetworkSettings.Proxy.Port.Subscribe(x => this.SpecificHttpProxyPort = x.ToString()).AddTo(this);
 			NetworkSettings.Proxy.HttpsHost.Subscribe(x => this.SpecificHttpsProxyHost = x).AddTo(this);
-			NetworkSettings.Proxy.HttpsPort.Subscribe(x => this.SpecificHttpsProxyPort = x).AddTo(this);
+			NetworkSettings.Proxy.HttpsPort.Subscribe(x => this.SpecificHttpsProxyPort = x.ToString()).AddTo(this);
 			NetworkSettings.Proxy.FtpHost.Subscribe(x => this.SpecificFtpProxyHost = x).AddTo(this);
-			NetworkSettings.Proxy.FtpPort.Subscribe(x => this.SpecificFtpProxyPort = x).AddTo(this);
+			NetworkSettings.Proxy.FtpPort.Subscribe(x => this.SpecificFtpProxyPort = x.ToString()).AddTo(this);
 			NetworkSettings.Proxy.SocksHost.Subscribe(x => this.SpecificSocksProxyHost = x).AddTo(this);
-			NetworkSettings.Proxy.SocksPort.Subscribe(x => this.SpecificSocksProxyPort = x).AddTo(this);
+			NetworkSettings.Proxy.SocksPort.Subscribe(x => this.SpecificSocksProxyPort = x.ToString()).AddTo(this);
 			NetworkSettings.Proxy.IsUseHttpProxyForAllProtocols.Subscribe(x => this.IsUseHttpProxyForAllProtocols = x).AddTo(this);
 			NetworkSettings.Relay.IsEnabled.Subscribe(x => this.IsRelayEnabled = x).AddTo(this);
 			NetworkSettings.Relay.UpstreamHost.Subscribe(x => this.RelayUpstreamHost = x).AddTo(this);

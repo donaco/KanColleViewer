@@ -19,25 +19,23 @@ namespace Grabacr07.KanColleViewer.Models
 			4.00,
 		};
 
-		private double[] supportedValuesCache;
+		private double[]? supportedValuesCache;
 
 		public double[] SupportedValues
 		{
-			get { return this.supportedValuesCache ?? (this.supportedValuesCache = zoomTable.Where(x => x.HasValue).Select(x => x.Value).ToArray()); }
+		get { return this.supportedValuesCache ?? (this.supportedValuesCache = zoomTable.Where(x => x.HasValue).Select(x => x.GetValueOrDefault()).ToArray()); }
 		}
 
 		#region Current 変更通知プロパティ
 
-		private double _Current;
-
 		public double Current
 		{
-			get { return this._Current; }
+			get { return field; }
 			set
 			{
-				if (this._Current.Equals(value)) return;
+				if (field.Equals(value)) return;
 
-				this._Current = value;
+				field = value;
 				this.CurrentParcentage = (int)(value * 100);
 				this.CanZoomDown = (zoomTable.FirstOrDefault() ?? neutral) < value;
 				this.CanZoomUp = value < (zoomTable.LastOrDefault() ?? neutral);
@@ -49,16 +47,14 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#region CurrentParcentage 変更通知プロパティ
 
-		private int _CurrentParcentage;
-
 		public int CurrentParcentage
 		{
-			get { return this._CurrentParcentage; }
+			get { return field; }
 			private set
 			{
-				if (this._CurrentParcentage != value)
+				if (field != value)
 				{
-					this._CurrentParcentage = value;
+					field = value;
 					this.OnPropertyChanged(string.Empty);
 				}
 			}
@@ -68,16 +64,14 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#region CanZoomUp 変更通知プロパティ
 
-		private bool _CanZoomUp;
-
 		public bool CanZoomUp
 		{
-			get { return this._CanZoomUp; }
+			get { return field; }
 			private set
 			{
-				if (this._CanZoomUp != value)
+				if (field != value)
 				{
-					this._CanZoomUp = value;
+					field = value;
 					this.OnPropertyChanged(string.Empty);
 				}
 			}
@@ -87,16 +81,14 @@ namespace Grabacr07.KanColleViewer.Models
 
 		#region CanZoomDown 変更通知プロパティ
 
-		private bool _CanZoomDown;
-
 		public bool CanZoomDown
 		{
-			get { return this._CanZoomDown; }
+			get { return field; }
 			private set
 			{
-				if (this._CanZoomDown != value)
+				if (field != value)
 				{
-					this._CanZoomDown = value;
+					field = value;
 					this.OnPropertyChanged(string.Empty);
 				}
 			}

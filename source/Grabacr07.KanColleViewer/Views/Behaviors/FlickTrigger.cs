@@ -20,7 +20,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 
 	public class FlickTrigger : TriggerBase<UIElement>
 	{
-		private StylusPointCollection downPoints;
+		private StylusPointCollection? downPoints;
 
 		protected override void OnAttached()
 		{

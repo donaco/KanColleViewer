@@ -22,7 +22,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 	public class KanColleWindowViewModel : MainWindowViewModelBase
 	{
 		// 分割されたやつ
-		private InformationWindowViewModel splitWindow;
+		private InformationWindowViewModel? splitWindow;
 		private readonly TaskbarProgress taskbarProgress;
 
 		public NavigatorViewModel Navigator { get; }
@@ -139,10 +139,10 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			SettingsViewModel.Instance.Initialize();
 			SettingsViewModel.Instance.Navigator = this.Navigator;
 
-			if (this.Settings.IsSplit)
+			if (this.Settings.IsSplit && this.splitWindow is { } splitWindow)
 			{
 				// ウィンドウ表示時点で既に分割設定されていた場合、このタイミングで分割ウィンドウも一緒に表示
-				this.SendTransition(this.splitWindow, typeof(InformationWindow), false);
+				this.SendTransition(splitWindow, typeof(InformationWindow), false);
 			}
 
 			this.UpdateTaskbar();
@@ -215,7 +215,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			}
 		}
 
-		private void HandleSplitWindowClosed(object sender, EventArgs eventArgs)
+		private void HandleSplitWindowClosed(object? sender, EventArgs eventArgs)
 		{
 			this.MergeWindow();
 		}

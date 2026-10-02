@@ -35,9 +35,9 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private void OnTransitionRequested(object sender, TransitionRequestedEventArgs e)
+		private void OnTransitionRequested(object? sender, TransitionRequestedEventArgs e)
 		{
-			var window = (Window)Activator.CreateInstance(e.WindowType);
+			if (Activator.CreateInstance(e.WindowType) is not Window window) return;
 			window.DataContext = e.ViewModel;
 
 			if (e.IsOwned) window.Owner = this.AssociatedObject;

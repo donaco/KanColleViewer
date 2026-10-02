@@ -23,12 +23,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region Content 変更通知プロパティ
 
-		private ViewModelBase _Content;
+		private ViewModelBase? _Content;
 
 		/// <summary>
 		/// アタッチされたウィンドウに表示するコンテンツを特定するための <see cref="ViewModelBase"/> オブジェクトを取得または設定します。
 		/// </summary>
-		public virtual ViewModelBase Content
+		public virtual ViewModelBase? Content
 		{
 			get { return this._Content; }
 			set
@@ -45,9 +45,9 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#region StatusBar 変更通知プロパティ
 
-		private ViewModelBase _StatusBar;
+		private ViewModelBase? _StatusBar;
 
-		public ViewModelBase StatusBar
+		public ViewModelBase? StatusBar
 		{
 			get { return this._StatusBar; }
 			set
@@ -75,7 +75,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 												|| !this.IsMainWindow
 												|| (GeneralSettings.ExitConfirmationType == ExitConfirmationType.None)
 												|| (GeneralSettings.ExitConfirmationType == ExitConfirmationType.InSortieOnly && !KanColleClient.Current.IsInSortie)
-												|| Application.Instance.State != ApplicationState.Running;
+				|| Application.Instance?.State != ApplicationState.Running;
 
 		protected MainWindowViewModelBase(bool isMainWindow)
 		{
@@ -83,7 +83,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.IsMainWindow = isMainWindow;
 			this.CanClose = false;
 
-			Application.Instance.Subscribe(nameof(Application.State), this.RaiseCanCloseChanged).AddTo(this);
+			Application.Instance?.Subscribe(nameof(Application.State), this.RaiseCanCloseChanged).AddTo(this);
 			KanColleClient.Current.Subscribe(nameof(KanColleClient.IsInSortie), this.RaiseCanCloseChanged).AddTo(this);
 			GeneralSettings.ExitConfirmationType.Subscribe(_ => this.RaiseCanCloseChanged());
 		}

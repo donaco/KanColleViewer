@@ -10,7 +10,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 	{
 		#region NotificationMessage 変更通知プロパティ
 
-		private string _NotificationMessage;
+		private string _NotificationMessage = string.Empty;
 
 		public string NotificationMessage
 		{

@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			? $"{(int)this.Ship.TimeToRepair.TotalHours:D2}:{this.Ship.TimeToRepair.ToString(@"mm\:ss")}"
 			: "";
 
-		public ShipViewModel(int index, Ship ship, SallyArea sallyArea)
+		public ShipViewModel(int index, Ship ship, SallyArea? sallyArea)
 		{
 			this.Index = index;
 			this.Ship = ship;

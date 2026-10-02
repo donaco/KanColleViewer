@@ -9,7 +9,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 {
 	public class ShipTypeViewModel : ViewModelBase
 	{
-		public Action SelectionChangedAction { get; set; }
+		public Action? SelectionChangedAction { get; set; }
 
 		#region Id 変更通知プロパティ
 
@@ -32,7 +32,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 
 		#region DisplayName 変更通知プロパティ
 
-		private string _DisplayName;
+		private string _DisplayName = string.Empty;
 
 		public string DisplayName
 		{
@@ -62,7 +62,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 				{
 					this._IsSelected = value;
 					this.RaisePropertyChanged();
-					if (this.SelectionChangedAction != null) this.SelectionChangedAction();
+					this.SelectionChangedAction?.Invoke();
 				}
 			}
 		}

@@ -42,9 +42,9 @@ namespace Grabacr07.KanColleViewer
 		public static WindowService Current { get; } = new WindowService();
 
 		private WindowServiceMode currentMode = (WindowServiceMode)(-1); // 初回で setter 入るように
-		private InformationViewModel information;
-		private KanColleWindowViewModel kanColleWindow;
-		private InformationWindowViewModel informationWindow;
+		private InformationViewModel? information;
+		private KanColleWindowViewModel? kanColleWindow;
+		private InformationWindowViewModel? informationWindow;
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 		// 各艦隊の Situation 変化購読を管理する
@@ -85,7 +85,7 @@ namespace Grabacr07.KanColleViewer
 		/// <summary>
 		/// 現在のメイン ウィンドウに提供されるデータを取得します。
 		/// </summary>
-		public MainWindowViewModelBase MainWindow { get; private set; }
+		public MainWindowViewModelBase MainWindow { get; private set; } = null!;
 
 		public InformationViewModel Information
 		{
@@ -242,7 +242,7 @@ namespace Grabacr07.KanColleViewer
 			}
 		}
 
-		private ChromiumWebBrowser FindFirstChromiumWebBrowser()
+		private ChromiumWebBrowser? FindFirstChromiumWebBrowser()
 		{
 			if (Application.Current == null) return null;
 
@@ -258,9 +258,9 @@ namespace Grabacr07.KanColleViewer
 		/// <summary>
 		/// アプリケーション内の最初の <see cref="ChromiumWebBrowser"/> を返します。
 		/// </summary>
-		public ChromiumWebBrowser FindBrowser() => this.FindFirstChromiumWebBrowser();
+		public ChromiumWebBrowser? FindBrowser() => this.FindFirstChromiumWebBrowser();
 
-		private T FindChild<T>(DependencyObject parent) where T : DependencyObject
+		private T? FindChild<T>(DependencyObject parent) where T : DependencyObject
 		{
 			if (parent == null) return null;
 

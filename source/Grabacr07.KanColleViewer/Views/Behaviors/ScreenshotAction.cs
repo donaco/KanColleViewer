@@ -44,7 +44,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private async void OnScreenshotRequested(object sender, ScreenshotRequestedEventArgs e)
+		private async void OnScreenshotRequested(object? sender, ScreenshotRequestedEventArgs e)
 		{
 			try
 			{
@@ -72,7 +72,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			}
 
 			// ゲームフレーム (kcs2 の iframe) の表示領域をメインフレームの JS から取得してクリップ領域を決定する
-			Viewport clip = null;
+			Viewport? clip = null;
 			try
 			{
 				var rectResult = await browser.EvaluateScriptAsync(@"

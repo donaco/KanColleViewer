@@ -13,11 +13,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 {
 	public class WindowSettingsViewModel : ViewModelBase
 	{
-		private KanColleWindowSettings settings;
+		private KanColleWindowSettings? settings;
 
 		public IReadOnlyCollection<DisplayViewModel<ExitConfirmationType>> ExitConfirmationTypes { get; }
 
-		private IReadOnlyCollection<DisplayViewModel<string>> _TaskbarProgressFeatures;
+		private IReadOnlyCollection<DisplayViewModel<string>> _TaskbarProgressFeatures = Array.Empty<DisplayViewModel<string>>();
 
 		public IReadOnlyCollection<DisplayViewModel<string>> TaskbarProgressFeatures
 		{
@@ -95,8 +95,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		public void Initialize()
 		{
 			this.settings = SettingsHost.Instance<KanColleWindowSettings>();
-			this.settings?.IsSplit.Subscribe(x => this.IsSplit = x).AddTo(this);
-			this.settings?.Dock.Subscribe(x => this.Dock = x).AddTo(this);
+			this.settings.IsSplit.Subscribe(x => this.IsSplit = x).AddTo(this);
+			this.settings.Dock.Subscribe(x => this.Dock = x).AddTo(this);
 		}
 
 		private void ReloadTaskbarProgressFeatures()

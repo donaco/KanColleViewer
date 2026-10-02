@@ -31,10 +31,10 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public SortieViewModel Sortie { get; }
 
 
-		public FleetStateViewModel(FleetState source, Fleet fleet = null)
+		public FleetStateViewModel(FleetState source, Fleet? fleet = null)
 		{
 			this.Source = source;
-			System.ComponentModel.PropertyChangedEventHandler stateHandler = (s, e) => this.RaisePropertyChanged(e.PropertyName);
+			System.ComponentModel.PropertyChangedEventHandler stateHandler = (s, e) => this.RaisePropertyChanged(e.PropertyName ?? string.Empty);
 			source.PropertyChanged += stateHandler;
 			this.CompositeDisposable.Add(new DelegateDisposable(() => source.PropertyChanged -= stateHandler));
 

@@ -15,21 +15,19 @@ namespace Grabacr07.KanColleViewer.Models
 {
 	public class Volume : ObservableObject, IAudioSessionEvents
 	{
-		private ISimpleAudioVolume simpleAudioVolume;
-		private IAudioSessionControl sessionControl;
+		private ISimpleAudioVolume? simpleAudioVolume;
+		private IAudioSessionControl? sessionControl;
 
 		#region IsMute 変更通知プロパティ
 
-		private bool _IsMute;
-
 		public bool IsMute
 		{
-			get { return this._IsMute; }
+			get { return field; }
 			private set
 			{
-				if (this._IsMute != value)
+				if (field != value)
 				{
-					this._IsMute = value;
+					field = value;
 					this.OnPropertyChanged(string.Empty);
 				}
 			}
@@ -41,8 +39,10 @@ namespace Grabacr07.KanColleViewer.Models
 		{
 			var volume = new Volume();
 
-			var deviceEnumeratorType = Type.GetTypeFromCLSID(new Guid(ComCLSIDs.MMDeviceEnumeratorCLSID));
-			var devenum = (IMMDeviceEnumerator)Activator.CreateInstance(deviceEnumeratorType);
+			var deviceEnumeratorType = Type.GetTypeFromCLSID(new Guid(ComCLSIDs.MMDeviceEnumeratorCLSID))
+				?? throw new InvalidOperationException("MMDeviceEnumerator の型を取得できません。");
+			var devenum = (IMMDeviceEnumerator)(Activator.CreateInstance(deviceEnumeratorType)
+				?? throw new InvalidOperationException("MMDeviceEnumerator を生成できません。"));
 
 			IMMDevice device;
 			devenum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia, out device).ThrowIfError();
@@ -60,7 +60,9 @@ namespace Grabacr07.KanColleViewer.Models
 			sessionManager.GetSimpleAudioVolume(Guid.Empty, 0, out simpleAudioVolume).ThrowIfError();
 			volume.simpleAudioVolume = simpleAudioVolume;
 
-			simpleAudioVolume.GetMute(out volume._IsMute).ThrowIfError();
+			bool isMute;
+			simpleAudioVolume.GetMute(out isMute).ThrowIfError();
+			volume.IsMute = isMute;
 
 			// sessionControl のインスタンスは取っておかないと通知来なくなる
 			sessionManager.GetAudioSessionControl(Guid.Empty, 0, out volume.sessionControl).ThrowIfError();
@@ -71,11 +73,13 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public void ToggleMute()
 		{
+			if (this.simpleAudioVolume is not { } simpleAudioVolume) return;
+
 			var newValue = !this.IsMute;
-			this.simpleAudioVolume.SetMute(newValue, Guid.NewGuid()).ThrowIfError();
+			simpleAudioVolume.SetMute(newValue, Guid.NewGuid()).ThrowIfError();
 
 			bool resultValue;
-			this.simpleAudioVolume.GetMute(out resultValue).ThrowIfError();
+			simpleAudioVolume.GetMute(out resultValue).ThrowIfError();
 
 			this.IsMute = resultValue;
 		}

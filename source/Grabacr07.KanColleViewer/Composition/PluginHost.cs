@@ -33,40 +33,40 @@ namespace Grabacr07.KanColleViewer.Composition
 		#endregion
 
 
-		private CompositionContainer container;
-		private Dictionary<Guid, Plugin> loadedPlugins;
+		private CompositionContainer? container;
+		private Dictionary<Guid, Plugin>? loadedPlugins;
 		private readonly List<LoadFailedPluginData> failedPlugins = new List<LoadFailedPluginData>();
-		private ResolveEventHandler pluginAssemblyResolver;
-		private string pluginsDirectoryPath;
+		private ResolveEventHandler? pluginAssemblyResolver;
+		private string? pluginsDirectoryPath;
 
 #pragma warning disable 649
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<IPlugin, IPluginMetadata>> importedAll;
+		private IEnumerable<Lazy<IPlugin, IPluginMetadata>> importedAll = Array.Empty<Lazy<IPlugin, IPluginMetadata>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<ISettings, IPluginGuid>> importedSettings;
+		private IEnumerable<Lazy<ISettings, IPluginGuid>> importedSettings = Array.Empty<Lazy<ISettings, IPluginGuid>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<INotifier, IPluginGuid>> importedNotifiers;
+		private IEnumerable<Lazy<INotifier, IPluginGuid>> importedNotifiers = Array.Empty<Lazy<INotifier, IPluginGuid>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<IRequestNotify, IPluginGuid>> importedNotifyRequesters;
+		private IEnumerable<Lazy<IRequestNotify, IPluginGuid>> importedNotifyRequesters = Array.Empty<Lazy<IRequestNotify, IPluginGuid>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<ITool, IPluginGuid>> importedTools;
+		private IEnumerable<Lazy<ITool, IPluginGuid>> importedTools = Array.Empty<Lazy<ITool, IPluginGuid>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<ILocalizable, IPluginGuid>> importedLocalizables;
+		private IEnumerable<Lazy<ILocalizable, IPluginGuid>> importedLocalizables = Array.Empty<Lazy<ILocalizable, IPluginGuid>>();
 
 		[ImportMany(RequiredCreationPolicy = CreationPolicy.Shared)]
-		private IEnumerable<Lazy<ITaskbarProgress, IPluginGuid>> importedTaskbarProgress;
+		private IEnumerable<Lazy<ITaskbarProgress, IPluginGuid>> importedTaskbarProgress = Array.Empty<Lazy<ITaskbarProgress, IPluginGuid>>();
 
 #pragma warning restore 649
 
 		private static class Cache<TContract>
 		{
-			private static List<TContract> plugins;
+			private static List<TContract> plugins = new();
 
 			public static List<TContract> Plugins => plugins ?? (plugins = new List<TContract>());
 		}
@@ -81,7 +81,7 @@ namespace Grabacr07.KanColleViewer.Composition
 		/// </summary>
 		public LoadFailedPluginData[] FailedPlugins => this.failedPlugins.ToArray();
 
-		public event Action PluginsReloaded;
+		public event Action? PluginsReloaded;
 
 		private PluginService() { }
 
@@ -210,7 +210,7 @@ namespace Grabacr07.KanColleViewer.Composition
 				{
 					var failds = ex.RootCauses
 						.Select(x => x as ComposablePartException)
-						.Select(x => x?.Element.Origin as AssemblyCatalog)
+						.Select(x => x?.Element?.Origin as AssemblyCatalog)
 						.Select(x => new LoadFailedPluginData
 						{
 							FilePath = x?.Assembly.Location,
@@ -252,8 +252,7 @@ namespace Grabacr07.KanColleViewer.Composition
 				Guid guid;
 				if (!Guid.TryParse(lazy.Metadata.Guid, out guid)) continue;
 
-				Plugin plugin;
-				if (!this.loadedPlugins.TryGetValue(guid, out plugin)) continue;
+				if (this.loadedPlugins == null || !this.loadedPlugins.TryGetValue(guid, out var plugin)) continue;
 
 				try
 				{
@@ -273,7 +272,7 @@ namespace Grabacr07.KanColleViewer.Composition
 			}
 		}
 
-		private Assembly ResolvePluginAssembly(object sender, ResolveEventArgs args)
+		private Assembly? ResolvePluginAssembly(object? sender, ResolveEventArgs args)
 		{
 			var name = new AssemblyName(args.Name).Name;
 			if (string.IsNullOrEmpty(name))

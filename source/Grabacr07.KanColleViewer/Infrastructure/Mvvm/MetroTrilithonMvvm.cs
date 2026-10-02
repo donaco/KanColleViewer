@@ -16,7 +16,7 @@ namespace MetroTrilithon.Mvvm
     {
         #region Title
 
-        private string _Title;
+        private string _Title = string.Empty;
         public string Title
         {
             get { return this._Title; }
@@ -52,22 +52,22 @@ namespace MetroTrilithon.Mvvm
         public WindowState WindowState { get; set; }
 
         /// <summary>ウィンドウを閉じるよう View に要求するイベントです。</summary>
-        public event EventHandler CloseRequested;
+        public event EventHandler? CloseRequested;
 
         /// <summary>ウィンドウをアクティブ化するよう View に要求するイベントです。</summary>
-        public event EventHandler ActivateRequested;
+        public event EventHandler? ActivateRequested;
 
         /// <summary>新しいウィンドウへの遷移を View に要求するイベントです。</summary>
-        public event EventHandler<TransitionRequestedEventArgs> TransitionRequested;
+        public event EventHandler<TransitionRequestedEventArgs>? TransitionRequested;
 
         /// <summary>タスクバーの状態更新を View に要求するイベントです。</summary>
-        public event EventHandler<TaskbarUpdateEventArgs> TaskbarUpdateRequested;
+        public event EventHandler<TaskbarUpdateEventArgs>? TaskbarUpdateRequested;
 
         /// <summary>スクリーンショット保存を View に要求するイベントです。</summary>
-        public event EventHandler<ScreenshotRequestedEventArgs> ScreenshotRequested;
+        public event EventHandler<ScreenshotRequestedEventArgs>? ScreenshotRequested;
 
         /// <summary>WebBrowser のズームリセットを View に要求するイベントです。</summary>
-        public event EventHandler ZoomRequested;
+        public event EventHandler? ZoomRequested;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void Initialize()
@@ -203,7 +203,7 @@ namespace MetroTrilithon.Mvvm
     {
         #region Value
 
-        private T _Value;
+        private T _Value = default!;
         public T Value
         {
             get { return this._Value; }
@@ -214,7 +214,7 @@ namespace MetroTrilithon.Mvvm
 
         #region Display
 
-        private string _Display;
+        private string _Display = string.Empty;
         public string Display
         {
             get { return this._Display; }

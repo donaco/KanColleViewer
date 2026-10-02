@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
             base.OnDetaching();
         }
 
-        private void OnScreenshotRequested(object sender, ScreenshotRequestedEventArgs e)
+        private void OnScreenshotRequested(object? sender, ScreenshotRequestedEventArgs e)
         {
             try
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +10,16 @@ namespace Grabacr07.KanColleViewer.Views.Catalogs
     /// </summary>
     partial class SlotItemCatalogWindow
     {
+        public object? ViewModel => this.DataContext;
+
         public SlotItemCatalogWindow()
         {
             this.InitializeComponent();
 
-            Application.Instance.MainWindow.Closed += (sender, args) => this.Close();
+            if (Application.Instance is { MainWindow: { } mainWindow })
+            {
+                mainWindow.Closed += (sender, args) => this.Close();
+            }
         }
     }
 }

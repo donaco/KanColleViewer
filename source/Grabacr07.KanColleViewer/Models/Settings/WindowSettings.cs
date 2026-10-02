@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +20,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		protected WindowSettings() : this(null) { }
 
-		public WindowSettings(string key)
+		public WindowSettings(string? key)
 		{
 			this.CategoryName = key ?? this.GetType().Name;
 		}

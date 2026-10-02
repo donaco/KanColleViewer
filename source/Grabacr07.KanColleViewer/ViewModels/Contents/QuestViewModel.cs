@@ -87,7 +87,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region Title 変更通知プロパティ
 
-		private string _Title;
+		private string _Title = string.Empty;
 
 		public string Title
 		{
@@ -106,7 +106,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region Detail 変更通知プロパティ
 
-		private string _Detail;
+		private string _Detail = string.Empty;
 
 		public string Detail
 		{
@@ -143,7 +143,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 		#endregion
 
 
-		public QuestViewModel(Quest quest)
+		public QuestViewModel(Quest? quest)
 		{
 			if (quest == null)
 			{

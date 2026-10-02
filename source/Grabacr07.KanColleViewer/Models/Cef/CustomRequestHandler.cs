@@ -109,7 +109,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			this.isMainFrame = isMainFrame;
 		}
 
-		protected override IResponseFilter GetResourceResponseFilter(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response)
+		protected override IResponseFilter? GetResourceResponseFilter(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, IResponse response)
 		{
 			if (request?.Url == null) return null;
 
@@ -138,10 +138,10 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 					var copy = bytes != null ? (byte[])bytes.Clone() : new byte[0];
 					Task.Run(() =>
 					{
-						string responseBodyText = null;
+						string? responseBodyText = null;
 						try { responseBodyText = ResponseFilter.TryDecode(copy); } catch { responseBodyText = null; }
 
-						string normalized = null;
+						string? normalized = null;
 						try
 						{
 							if (ShouldDecompressGzip(snapshotResponseHeaders, copy))
@@ -171,7 +171,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 								Url = snapshotUrl,
 								Method = snapshotMethod,
 								StatusCode = snapshotStatus ?? 0,
-								RequestBody = snapshotRequestBody,
+								RequestBody = snapshotRequestBody ?? string.Empty,
 								ResponseBody = normalized,
 								ResponseHeaders = snapshotResponseHeaders
 							};
@@ -192,13 +192,14 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			});
 		}
 
-		private static IDictionary<string, string> BuildHeadersDictionary(IResponse response)
+		private static IDictionary<string, string> BuildHeadersDictionary(IResponse? response)
 		{
-			if (response?.Headers == null) return null;
 			var dict = new Dictionary<string, string>();
+			if (response?.Headers == null) return dict;
 			foreach (var key in response.Headers.AllKeys)
 			{
-				dict[key] = response.Headers[key];
+				if (key != null)
+					dict[key] = response.Headers[key] ?? string.Empty;
 			}
 			return dict;
 		}
@@ -220,8 +221,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				return false;
 			}
 
-			string contentEncoding;
-			if (!headers.TryGetValue("Content-Encoding", out contentEncoding))
+			if (!headers.TryGetValue("Content-Encoding", out var contentEncoding))
 			{
 				var header = headers.FirstOrDefault(x => string.Equals(x.Key, "Content-Encoding", StringComparison.OrdinalIgnoreCase));
 				contentEncoding = header.Value;
@@ -231,7 +231,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 				&& contentEncoding.IndexOf("gzip", StringComparison.OrdinalIgnoreCase) >= 0;
 		}
 
-		private static string TryDecompressGzip(byte[] bytes)
+		private static string? TryDecompressGzip(byte[] bytes)
 		{
 			if (bytes == null || bytes.Length == 0 || bytes.Length > MaxCapturedResponseBytes)
 			{
@@ -253,7 +253,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			}
 		}
 
-		private static string ExtractRequestBody(IRequest request)
+		private static string? ExtractRequestBody(IRequest request)
 		{
 			try
 			{

@@ -17,9 +17,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region SelectedItem1 変更通知プロパティ
 
-		private MaterialViewModel _SelectedItem1;
+		private MaterialViewModel? _SelectedItem1;
 
-		public MaterialViewModel SelectedItem1
+		public MaterialViewModel? SelectedItem1
 		{
 			get { return this._SelectedItem1; }
 			set
@@ -28,7 +28,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 				{
 					this._SelectedItem1 = value;
 					this.RaisePropertyChanged();
-					KanColleSettings.DisplayMaterial1.Value = value?.Key;
+					KanColleSettings.DisplayMaterial1.Value = value?.Key ?? string.Empty;
 				}
 			}
 		}
@@ -37,9 +37,9 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		#region SelectedItem2 変更通知プロパティ
 
-		private MaterialViewModel _SelectedItem2;
+		private MaterialViewModel? _SelectedItem2;
 
-		public MaterialViewModel SelectedItem2
+		public MaterialViewModel? SelectedItem2
 		{
 			get { return this._SelectedItem2; }
 			set
@@ -48,7 +48,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 				{
 					this._SelectedItem2 = value;
 					this.RaisePropertyChanged();
-					KanColleSettings.DisplayMaterial2.Value = value?.Key;
+					KanColleSettings.DisplayMaterial2.Value = value?.Key ?? string.Empty;
 				}
 			}
 		}

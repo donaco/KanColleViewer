@@ -103,7 +103,7 @@ namespace Grabacr07.KanColleViewer.Models
 			return Path.Combine(executableDirectory, "json", "MapCellNames.json");
 		}
 
-		private static string ReadLocalFile(string localPath)
+		private static string? ReadLocalFile(string localPath)
 		{
 			if (!File.Exists(localPath))
 			{
@@ -116,7 +116,7 @@ namespace Grabacr07.KanColleViewer.Models
 		/// <summary>
 		/// version 未指定の従来形式は 0 として扱います。
 		/// </summary>
-		private static long GetVersion(string content)
+		private static long GetVersion(string? content)
 		{
 			try
 			{
@@ -128,9 +128,7 @@ namespace Grabacr07.KanColleViewer.Models
 				var root = JObject.Parse(content);
 				var version = root["version"]?.Value<long?>();
 
-				return version.GetValueOrDefault() > 0
-					? version.Value
-					: 0;
+				return version is > 0 ? version.Value : 0;
 			}
 			catch (Exception ex)
 			{

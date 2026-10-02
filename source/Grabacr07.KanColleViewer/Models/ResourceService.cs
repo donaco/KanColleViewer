@@ -57,7 +57,7 @@ namespace Grabacr07.KanColleViewer.Models
 						return null;
 					}
 				})
-				.Where(x => x != null)
+				.OfType<CultureInfo>()
 				.ToList();
 		}
 
@@ -67,9 +67,9 @@ namespace Grabacr07.KanColleViewer.Models
 		/// <param name="name">カルチャの名前。</param>
 		public void ChangeCulture(string name)
 		{
-			Resources.Culture = this.SupportedCultures.SingleOrDefault(x => x.Name == name);
+			Resources.Culture = this.SupportedCultures.SingleOrDefault(x => x.Name == name) ?? CultureInfo.InvariantCulture;
 			
-			GeneralSettings.Culture.Value = Resources.Culture?.Name;
+			GeneralSettings.Culture.Value = Resources.Culture?.Name ?? string.Empty;
 			this.OnPropertyChanged(nameof(this.Resources));
 
 			Controls.Globalization.ResourceService.Current.ChangeCulture(name);

@@ -78,7 +78,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		public void Dispose() => buffer?.Dispose();
 
 		// ヘルパー: バイト配列を可能な限り文字列化（UTF-8 → default → Base64）
-		public static string TryDecode(byte[] bytes)
+		public static string? TryDecode(byte[] bytes)
 		{
 			if (bytes == null || bytes.Length == 0) return null;
 			try { return Encoding.UTF8.GetString(bytes); }

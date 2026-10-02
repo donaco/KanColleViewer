@@ -19,7 +19,7 @@ namespace Grabacr07.KanColleViewer.Models
 
 		public int Area { get; private set; }
 
-		public string Name { get; private set; }
+		public string Name { get; private set; } = string.Empty;
 
 		public Color Color { get; private set; } = Colors.Transparent;
 
@@ -135,7 +135,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private static string ReadLocalFile(string localPath)
+		private static string? ReadLocalFile(string localPath)
 		{
 			if (!File.Exists(localPath))
 			{
@@ -184,22 +184,21 @@ namespace Grabacr07.KanColleViewer.Models
 		/// 新形式の { "version": 1, "EventMap": [...] } からバージョンを読み込みます。
 		/// 従来の配列形式は version 0 として扱います。
 		/// </summary>
-		private static long GetVersion(string content)
+		private static long GetVersion(string? content)
 		{
 			try
 			{
-				var trimmed = (content ?? string.Empty).TrimStart();
+				var json = content ?? string.Empty;
+				var trimmed = json.TrimStart();
 				if (!trimmed.StartsWith("{"))
 				{
 					return 0;
 				}
 
-				var root = JObject.Parse(content);
+				var root = JObject.Parse(json);
 				var version = root["version"]?.Value<long?>();
 
-				return version.GetValueOrDefault() > 0
-					? version.Value
-					: 0;
+				return version.GetValueOrDefault() > 0 ? version.GetValueOrDefault() : 0;
 			}
 			catch (Exception ex)
 			{
@@ -208,22 +207,23 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private static SallyArea[] ParseAreas(string content)
+		private static SallyArea[] ParseAreas(string? content)
 		{
 			try
 			{
-				var trimmed = (content ?? string.Empty).TrimStart();
-				JToken listToken = null;
+				var json = content ?? string.Empty;
+				var trimmed = json.TrimStart();
+				JToken? listToken = null;
 
 				if (trimmed.StartsWith("["))
 				{
 					// 従来形式: [ { "area": "...", ... } ]
-					listToken = JArray.Parse(content);
+					listToken = JArray.Parse(json);
 				}
 				else if (trimmed.StartsWith("{"))
 				{
 					// 新形式: { "version": 1, "EventMap": [ ... ] }
-					var root = JObject.Parse(content);
+					var root = JObject.Parse(json);
 					listToken = root["EventMap"];
 				}
 
@@ -238,8 +238,8 @@ namespace Grabacr07.KanColleViewer.Models
 					.Select(x => new SallyArea
 					{
 						Area = ParseArea(x["area"]),
-						Name = (string)x["name"] ?? string.Empty,
-						Color = Helper.StringToColor((string)x["color"] ?? string.Empty),
+						Name = x["name"]?.Value<string>() ?? string.Empty,
+						Color = Helper.StringToColor(x["color"]?.Value<string>() ?? string.Empty),
 					})
 					.ToArray();
 			}
@@ -250,7 +250,7 @@ namespace Grabacr07.KanColleViewer.Models
 			}
 		}
 
-		private static int ParseArea(JToken token)
+		private static int ParseArea(JToken? token)
 		{
 			var value = token?.Value<string>();
 			if (!string.IsNullOrWhiteSpace(value))

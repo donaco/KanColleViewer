@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 	{
 		#region Model 変更通知プロパティ
 
-		public Admiral Model => KanColleClient.Current.Homeport.Admiral;
+		public Admiral? Model => KanColleClient.Current.Homeport.Admiral;
 
 		#endregion
 

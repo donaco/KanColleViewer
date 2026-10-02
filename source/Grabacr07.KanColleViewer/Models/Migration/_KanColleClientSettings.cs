@@ -18,7 +18,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 	{
 		public int NotificationShorteningTime { get; set; }
 		public int ReSortieCondition { get; set; }
-		public string ViewRangeCalcType { get; set; }
+		public string ViewRangeCalcType { get; set; } = string.Empty;
 		public bool IsViewRangeCalcIncludeFirstFleet { get; set; }
 		public bool IsViewRangeCalcIncludeSecondFleet { get; set; }
 		public bool CheckFlagshipIsRepairShip { get; set; }
@@ -26,7 +26,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 		public bool ShowAirSuperiority { get; set; }
 		public bool ShowSortieInfo { get; set; }
 
-		event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+		event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
 		{
 			add { }
 			remove { }

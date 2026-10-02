@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 	{
 		private const string PART_Popup = "PART_Popup";
 
-		private Popup popup;
+		private Popup? popup;
 		private double prevOffsetH;
 
 		static MetroComboBox()
@@ -52,13 +52,15 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				height += LayoutInformation.GetLayoutSlot(container).Height;
 			}
 
+			if (this.popup is null) return;
+
 			this.popup.VerticalOffset -= this.prevOffsetH;
 			this.popup.VerticalOffset += -height;
 
 			this.prevOffsetH = -height;
 		}
 
-		private void PopupOnOpened(object sender, EventArgs eventArgs)
+		private void PopupOnOpened(object? sender, EventArgs eventArgs)
 		{
 			this.SetOffset();
 		}

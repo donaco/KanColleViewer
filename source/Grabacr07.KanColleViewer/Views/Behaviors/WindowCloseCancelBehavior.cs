@@ -35,7 +35,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
 		{
 			var vm = this.ViewModel;
 			if (vm == null) return;
@@ -47,7 +47,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			}
 		}
 
-		private void OnClosed(object sender, System.EventArgs e)
+		private void OnClosed(object? sender, System.EventArgs e)
 		{
 			var vm = this.ViewModel ?? (this.AssociatedObject?.DataContext as WindowViewModel);
 			vm?.Dispose();

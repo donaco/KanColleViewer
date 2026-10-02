@@ -32,7 +32,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public void Show()
 		{
-			AppNotificationService.Show(this.header, this.body, this.Activated, this.ToastFailed);
+			AppNotificationService.Show(this.header, this.body, this.Activated ?? (() => { }), this.ToastFailed ?? (_ => { }));
 		}
 	}
 }

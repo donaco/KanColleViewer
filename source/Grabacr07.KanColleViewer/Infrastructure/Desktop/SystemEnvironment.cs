@@ -8,14 +8,14 @@ namespace MetroTrilithon.Desktop
 {
     public class SystemEnvironment
     {
-        public string OS { get; }
-        public string OSVersion { get; }
-        public string Architecture { get; }
-        public string CPU { get; }
-        public string TotalPhysicalMemorySize { get; }
-        public string FreePhysicalMemorySize { get; }
-        public string DotNetVersion { get; }
-        public string ErrorMessage { get; }
+        public string? OS { get; }
+        public string? OSVersion { get; }
+        public string? Architecture { get; }
+        public string? CPU { get; }
+        public string? TotalPhysicalMemorySize { get; }
+        public string? FreePhysicalMemorySize { get; }
+        public string? DotNetVersion { get; }
+        public string? ErrorMessage { get; }
 
         public SystemEnvironment()
         {

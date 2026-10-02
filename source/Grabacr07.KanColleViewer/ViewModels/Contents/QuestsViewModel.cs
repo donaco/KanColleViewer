@@ -13,7 +13,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 	public class QuestsViewModel : TabItemViewModel
 	{
 		// 任務一覧ウィンドウのインスタンスを保持
-		private static Window questWindowInstance;
+		private static Window? questWindowInstance;
 
 		public override string Name
 		{

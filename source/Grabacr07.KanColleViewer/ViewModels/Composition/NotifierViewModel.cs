@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Composition
 	{
 		private readonly INotifier notifier;
 
-		public NotifierViewModel(Plugin plugin, IEnumerable<INotifier> notifiers = null)
+		public NotifierViewModel(Plugin plugin, IEnumerable<INotifier>? notifiers = null)
 			: base(plugin)
 		{
 			this.notifier = new AggregateNotifier(notifiers ?? plugin.OfType<INotifier>());

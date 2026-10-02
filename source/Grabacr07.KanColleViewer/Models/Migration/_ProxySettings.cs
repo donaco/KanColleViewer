@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 		public _ProxySettings()
 		{
 			this._SettingType = ProxyType.SystemProxy;
-			this._Host = null;
+			this._Host = string.Empty;
 			this._Port = 80;
 		}
 
@@ -47,7 +47,7 @@ namespace Grabacr07.KanColleViewer.Models.Migration
 
 		#region Host 変更通知プロパティ
 
-		private string _Host;
+		private string _Host = string.Empty;
 
 		[XmlElement(ElementName = "ProxyHost")]
 		public string Host

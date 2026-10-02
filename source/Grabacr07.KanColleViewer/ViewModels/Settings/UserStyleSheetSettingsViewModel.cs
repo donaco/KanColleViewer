@@ -12,7 +12,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 	{
 		#region UserStyleSheet 変更通知プロパティ
 
-		private string _UserStyleSheet;
+		private string _UserStyleSheet = string.Empty;
 
 		public string UserStyleSheet
 		{

@@ -27,7 +27,7 @@ namespace Grabacr07.KanColleViewer.Infrastructure.Mvvm
 		/// <summary>
 		/// プロパティ変更通知を発火します。
 		/// </summary>
-		protected new void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		protected new void OnPropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			base.OnPropertyChanged(propertyName);
 		}
@@ -35,7 +35,7 @@ namespace Grabacr07.KanColleViewer.Infrastructure.Mvvm
 		/// <summary>
 		/// Livet 互換: <see cref="OnPropertyChanged(string)"/> の別名です。
 		/// </summary>
-		protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+		protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			base.OnPropertyChanged(propertyName);
 		}

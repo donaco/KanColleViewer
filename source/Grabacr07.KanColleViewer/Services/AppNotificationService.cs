@@ -44,7 +44,7 @@ namespace Grabacr07.KanColleViewer.Services
 			IsAvailable = false;
 		}
 
-		public static void Show(string header, string body, Action activated, Action<Exception> failed)
+		public static void Show(string header, string body, Action activated, Action<Exception>? failed)
 		{
 			if (!IsAvailable) return;
 

@@ -36,7 +36,7 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			base.OnDetaching();
 		}
 
-		private void OnTaskbarUpdateRequested(object sender, TaskbarUpdateEventArgs e)
+		private void OnTaskbarUpdateRequested(object? sender, TaskbarUpdateEventArgs e)
 		{
 			var w = this.AssociatedObject;
 			if (w == null) return;

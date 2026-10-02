@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 	{
 		private readonly Expedition source;
 
-		public Mission Mission => this.source.Mission;
+		public Mission Mission => this.source.Mission!;
 
 		public bool IsInExecution => this.source.IsInExecution;
 

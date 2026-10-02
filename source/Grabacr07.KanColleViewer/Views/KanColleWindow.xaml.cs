@@ -116,7 +116,7 @@ namespace Grabacr07.KanColleViewer.Views
 			base.OnClosed(e);
 			((IDisposable)this).Dispose();
 
-			Application.Instance.Shutdown();
+			Application.Instance?.Shutdown();
 		}
 	}
 }
