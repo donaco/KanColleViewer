@@ -23,7 +23,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		/// <summary>
 		/// 現在のインスタンスにキャッシュされている <see cref="SerializableProperty{T}"/>
-		/// を取得します。 キャッシュがない場合は <see cref="create"/> に従って生成します。
+		/// を取得します。 キャッシュがない場合は <paramref name="create"/> に従って生成します。
 		/// </summary>
 		/// <returns></returns>
 		protected SerializableProperty<T> Cache<T>(Func<string, SerializableProperty<T>> create, [CallerMemberName] string propertyName = "")

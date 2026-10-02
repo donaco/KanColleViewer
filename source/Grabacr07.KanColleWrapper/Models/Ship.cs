@@ -45,20 +45,20 @@ namespace Grabacr07.KanColleWrapper.Models
 		/// </summary>
 		public int ExpForNextLevel => this.RawData.api_exp.Get(1) ?? 0;
 
-		/// <summary>
-		/// この艦娘の次の改造までに必要な経験値を取得します。
-		/// </summary>
-		/// public int ExpForNextRemodelingLevel => Math.Max(Experience.GetShipExpForSpecifiedLevel(this.Exp, this.Info?.NextRemodelingLevel), 0);
+		// <summary>
+		// この艦娘の次の改造までに必要な経験値を取得します。
+		// </summary>
+		// public int ExpForNextRemodelingLevel => Math.Max(Experience.GetShipExpForSpecifiedLevel(this.Exp, this.Info?.NextRemodelingLevel), 0);
 
-		/// <summary>
-		/// この艦娘とケッコンカッコカリするために必要な経験値を取得します。
-		/// </summary>
-		/// public int ExpForMarrige => Math.Max(Experience.GetShipExpForSpecifiedLevel(this.Exp, 99), 0);
+		// <summary>
+		// この艦娘とケッコンカッコカリするために必要な経験値を取得します。
+		// </summary>
+		// public int ExpForMarrige => Math.Max(Experience.GetShipExpForSpecifiedLevel(this.Exp, 99), 0);
 
-		/// <summary>
-		/// この艦娘が最大Lvになるために必要な経験値を取得します。
-		/// </summary>
-		/// public int ExpForLevelMax => Experience.GetShipExpForSpecifiedLevel(this.Exp, 188);
+		// <summary>
+		// この艦娘が最大Lvになるために必要な経験値を取得します。
+		// </summary>
+		// public int ExpForLevelMax => Experience.GetShipExpForSpecifiedLevel(this.Exp, 188);
 
 		#region HP 変更通知プロパティ
 

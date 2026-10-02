@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleViewer.Infrastructure.Mvvm
 	/// <summary>
 	/// <see cref="CommunityToolkit.Mvvm.ComponentModel.ObservableObject"/> を基底クラスとし、
 	/// <see cref="IDisposableHolder"/> を実装した ViewModel 基底クラスです。
-	/// <see cref="Livet.ViewModel"/> の代替として使用します。
+		/// <c>Livet.ViewModel</c> の代替として使用します。
 	/// </summary>
 	public abstract class ViewModelBase : ObservableObject, IDisposableHolder
 	{

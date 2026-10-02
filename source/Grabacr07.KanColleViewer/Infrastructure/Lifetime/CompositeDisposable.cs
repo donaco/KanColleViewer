@@ -6,7 +6,7 @@ namespace MetroTrilithon.Lifetime
 {
 	/// <summary>
 	/// 複数の <see cref="IDisposable"/> を一括管理し、<see cref="Dispose"/> 時に全て解放する内製クラスです。
-	/// <see cref="Livet.LivetCompositeDisposable"/> の代替として使用します。
+	/// <c>Livet.LivetCompositeDisposable</c> の代替として使用します。
 	/// </summary>
 	public sealed class CompositeDisposable : ICollection<IDisposable>, IDisposable
 	{
