@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Grabacr07.KanColleWrapper.Models;
@@ -21,8 +17,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public bool IsDetailView
 		{
-			get { return (bool)this.GetValue(IsDetailViewProperty); }
-			set { this.SetValue(IsDetailViewProperty, value); }
+			get => (bool)this.GetValue(IsDetailViewProperty);
+			set => this.SetValue(IsDetailViewProperty, value);
 		}
 		public static readonly DependencyProperty IsDetailViewProperty =
 			DependencyProperty.Register(nameof(IsDetailView), typeof(bool), typeof(Quest), new UIPropertyMetadata(false));
@@ -33,8 +29,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public QuestCategory Category
 		{
-			get { return (QuestCategory)this.GetValue(CategoryProperty); }
-			set { this.SetValue(CategoryProperty, value); }
+			get => (QuestCategory)this.GetValue(CategoryProperty);
+			set => this.SetValue(CategoryProperty, value);
 		}
 		public static readonly DependencyProperty CategoryProperty =
 			DependencyProperty.Register(nameof(Category), typeof(QuestCategory), typeof(Quest), new UIPropertyMetadata(QuestCategory.Sortie));
@@ -45,8 +41,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public QuestState State
 		{
-			get { return (QuestState)this.GetValue(StateProperty); }
-			set { this.SetValue(StateProperty, value); }
+			get => (QuestState)this.GetValue(StateProperty);
+			set => this.SetValue(StateProperty, value);
 		}
 		public static readonly DependencyProperty StateProperty =
 			DependencyProperty.Register(nameof(State), typeof(QuestState), typeof(Quest), new UIPropertyMetadata(QuestState.None));
@@ -57,8 +53,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public QuestProgress Progress
 		{
-			get { return (QuestProgress)this.GetValue(ProgressProperty); }
-			set { this.SetValue(ProgressProperty, value); }
+			get => (QuestProgress)this.GetValue(ProgressProperty);
+			set => this.SetValue(ProgressProperty, value);
 		}
 		public static readonly DependencyProperty ProgressProperty =
 			DependencyProperty.Register(nameof(Progress), typeof(QuestProgress), typeof(Quest), new UIPropertyMetadata(QuestProgress.None));
@@ -69,8 +65,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public string Title
 		{
-			get { return (string)this.GetValue(TitleProperty); }
-			set { this.SetValue(TitleProperty, value); }
+			get => (string)this.GetValue(TitleProperty);
+			set => this.SetValue(TitleProperty, value);
 		}
 		public static readonly DependencyProperty TitleProperty =
 			DependencyProperty.Register(nameof(Title), typeof(string), typeof(Quest), new UIPropertyMetadata(""));
@@ -81,8 +77,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public string Detail
 		{
-			get { return (string)this.GetValue(DetailProperty); }
-			set { this.SetValue(DetailProperty, value); }
+			get => (string)this.GetValue(DetailProperty);
+			set => this.SetValue(DetailProperty, value);
 		}
 		public static readonly DependencyProperty DetailProperty =
 			DependencyProperty.Register(nameof(Detail), typeof(string), typeof(Quest), new UIPropertyMetadata(""));
@@ -93,8 +89,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public bool IsUntaken
 		{
-			get { return (bool)this.GetValue(IsUntakenProperty); }
-			set { this.SetValue(IsUntakenProperty, value); }
+			get => (bool)this.GetValue(IsUntakenProperty);
+			set => this.SetValue(IsUntakenProperty, value);
 		}
 		public static readonly DependencyProperty IsUntakenProperty =
 			DependencyProperty.Register(nameof(IsUntaken), typeof(bool), typeof(Quest), new UIPropertyMetadata(false));
@@ -105,8 +101,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public TextWrapping TextWrapping
 		{
-			get { return (TextWrapping)this.GetValue(TextWrappingProperty); }
-			set { this.SetValue(TextWrappingProperty, value); }
+			get => (TextWrapping)this.GetValue(TextWrappingProperty);
+			set => this.SetValue(TextWrappingProperty, value);
 		}
 		public static readonly DependencyProperty TextWrappingProperty =
 			DependencyProperty.Register(nameof(TextWrapping), typeof(TextWrapping), typeof(Quest), new UIPropertyMetadata(TextWrapping.Wrap));

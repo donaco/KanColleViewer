@@ -1,7 +1,5 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Shell;
 
 namespace Grabacr07.KanColleViewer.Controls.Metro

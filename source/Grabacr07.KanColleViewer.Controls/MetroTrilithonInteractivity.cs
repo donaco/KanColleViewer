@@ -10,10 +10,10 @@ namespace MetroTrilithon.UI.Interactivity
     // Livet.Messaging.InteractionMessage の内製代替
     public abstract class InteractionMessage : Freezable
     {
-        public string MessageKey { get; private set; }
+        public string? MessageKey { get; private set; }
 
         protected InteractionMessage() { }
-        protected InteractionMessage(string messageKey) { this.MessageKey = messageKey; }
+        protected InteractionMessage(string? messageKey) { this.MessageKey = messageKey; }
     }
 
     // MetroTrilithon.Desktop Interactivity の内製化 (Phase 1)
@@ -91,7 +91,7 @@ namespace MetroTrilithon.UI.Interactivity
     public class TaskbarMessage : InteractionMessage
     {
         public TaskbarMessage() { }
-        public TaskbarMessage(string messageKey) : base(messageKey) { }
+        public TaskbarMessage(string? messageKey) : base(messageKey) { }
 
         public TaskbarItemProgressState? ProgressState
         {
@@ -109,17 +109,17 @@ namespace MetroTrilithon.UI.Interactivity
         public static readonly DependencyProperty ProgressValueProperty =
             DependencyProperty.Register(nameof(ProgressValue), typeof(double?), typeof(TaskbarMessage), new UIPropertyMetadata(null));
 
-        public ImageSource Overlay
+        public ImageSource? Overlay
         {
-            get { return (ImageSource)this.GetValue(OverlayProperty); }
+            get => (ImageSource?)this.GetValue(OverlayProperty);
             set { this.SetValue(OverlayProperty, value); }
         }
         public static readonly DependencyProperty OverlayProperty =
             DependencyProperty.Register(nameof(Overlay), typeof(ImageSource), typeof(TaskbarMessage), new UIPropertyMetadata(null));
 
-        public string Description
+        public string? Description
         {
-            get { return (string)this.GetValue(DescriptionProperty); }
+            get => (string?)this.GetValue(DescriptionProperty);
             set { this.SetValue(DescriptionProperty, value); }
         }
         public static readonly DependencyProperty DescriptionProperty =
@@ -133,9 +133,9 @@ namespace MetroTrilithon.UI.Interactivity
         public static readonly DependencyProperty ThumbnailClipMarginProperty =
             DependencyProperty.Register(nameof(ThumbnailClipMargin), typeof(Thickness?), typeof(TaskbarMessage), new UIPropertyMetadata(null));
 
-        public ThumbButtonInfoCollection ThumbButtonInfos
+        public ThumbButtonInfoCollection? ThumbButtonInfos
         {
-            get { return (ThumbButtonInfoCollection)this.GetValue(ThumbButtonInfosProperty); }
+            get => (ThumbButtonInfoCollection?)this.GetValue(ThumbButtonInfosProperty);
             set { this.SetValue(ThumbButtonInfosProperty, value); }
         }
         public static readonly DependencyProperty ThumbButtonInfosProperty =
@@ -165,8 +165,8 @@ namespace MetroTrilithon.UI.Interactivity
             var taskbarInfo = this.AssociatedObject.TaskbarItemInfo
                 ?? (this.AssociatedObject.TaskbarItemInfo = new TaskbarItemInfo());
 
-            if (message.ProgressState != null) taskbarInfo.ProgressState = message.ProgressState.Value;
-            if (message.ProgressValue != null) taskbarInfo.ProgressValue = message.ProgressValue.Value;
+            if (message.ProgressState is { } progressState) taskbarInfo.ProgressState = progressState;
+            if (message.ProgressValue is { } progressValue) taskbarInfo.ProgressValue = progressValue;
             if (message.Overlay != null) taskbarInfo.Overlay = message.Overlay;
             if (message.Description != null) taskbarInfo.Description = message.Description;
             if (message.ThumbnailClipMargin != null) taskbarInfo.ThumbnailClipMargin = message.ThumbnailClipMargin.Value;
@@ -176,7 +176,7 @@ namespace MetroTrilithon.UI.Interactivity
 
     public class TaskbarThumbnailBehavior : Behavior<FrameworkElement>
     {
-        private Window _owner;
+        private Window? _owner;
 
         protected override void OnAttached()
         {
@@ -230,9 +230,9 @@ namespace MetroTrilithon.UI.Interactivity
             if (window != null) window.LayoutUpdated -= this.OwnerOnLayoutUpdated;
         }
 
-        private void OwnerOnLayoutUpdated(object sender, EventArgs e) => this.UpdateClipMargin();
+        private void OwnerOnLayoutUpdated(object? sender, EventArgs e) => this.UpdateClipMargin();
 
-        private Window GetWindow()
+        private Window? GetWindow()
         {
             if (this._owner == null)
                 this._owner = Window.GetWindow(this.AssociatedObject);

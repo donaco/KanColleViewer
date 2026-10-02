@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -19,8 +15,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public Visibility AnchorVisibility
 		{
-			get { return (Visibility)this.GetValue(AnchorVisibilityProperty); }
-			set { this.SetValue(AnchorVisibilityProperty, value); }
+			get => (Visibility)this.GetValue(AnchorVisibilityProperty);
+			set => this.SetValue(AnchorVisibilityProperty, value);
 		}
 		public static readonly DependencyProperty AnchorVisibilityProperty =
 			DependencyProperty.Register(nameof(AnchorVisibility), typeof(Visibility), typeof(AppIcon), new UIPropertyMetadata(Visibility.Visible));
@@ -31,8 +27,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public Visibility BandVisibility
 		{
-			get { return (Visibility)this.GetValue(BandVisibilityProperty); }
-			set { this.SetValue(BandVisibilityProperty, value); }
+			get => (Visibility)this.GetValue(BandVisibilityProperty);
+			set => this.SetValue(BandVisibilityProperty, value);
 		}
 		public static readonly DependencyProperty BandVisibilityProperty =
 			DependencyProperty.Register(nameof(BandVisibility), typeof(Visibility), typeof(AppIcon), new UIPropertyMetadata(Visibility.Visible));

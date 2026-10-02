@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -51,7 +51,7 @@ namespace Grabacr07.KanColleViewer.Controls.Globalization
 						return null;
 					}
 				})
-				.Where(x => x != null)
+				.OfType<CultureInfo>()
 				.ToList();
 		}
 
@@ -68,9 +68,9 @@ namespace Grabacr07.KanColleViewer.Controls.Globalization
 
 		#region PropertyChanged event
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

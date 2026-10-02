@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Grabacr07.KanColleWrapper.Models;
@@ -25,8 +21,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public ModernizableStatus Status
 		{
-			get { return (ModernizableStatus)this.GetValue(StatusProperty); }
-			set { this.SetValue(StatusProperty, value); }
+			get => (ModernizableStatus)this.GetValue(StatusProperty);
+			set => this.SetValue(StatusProperty, value);
 		}
 		public static readonly DependencyProperty StatusProperty =
 			DependencyProperty.Register(nameof(Status), typeof(ModernizableStatus), typeof(Modernizable), new UIPropertyMetadata(ModernizableStatus.Dummy, StatusPropertyChangedCallback));
@@ -45,8 +41,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public bool IsMax
 		{
-			get { return (bool)this.GetValue(IsMaxProperty); }
-			private set { this.SetValue(IsMaxProperty, value); }
+			get => (bool)this.GetValue(IsMaxProperty);
+			private set => this.SetValue(IsMaxProperty, value);
 		}
 		public static readonly DependencyProperty IsMaxProperty =
 			DependencyProperty.Register(nameof(IsMax), typeof(bool), typeof(Modernizable), new UIPropertyMetadata(false));

@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Grabacr07.KanColleWrapper.Models;
@@ -22,8 +18,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public int Number
 		{
-			get { return (int)this.GetValue(NumberProperty); }
-			set { this.SetValue(NumberProperty, value); }
+			get => (int)this.GetValue(NumberProperty);
+			set => this.SetValue(NumberProperty, value);
 		}
 		public static readonly DependencyProperty NumberProperty =
 			DependencyProperty.Register(nameof(Number), typeof(int), typeof(BuildingDock), new UIPropertyMetadata(0));
@@ -34,8 +30,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public BuildingDockState State
 		{
-			get { return (BuildingDockState)this.GetValue(StateProperty); }
-			set { this.SetValue(StateProperty, value); }
+			get => (BuildingDockState)this.GetValue(StateProperty);
+			set => this.SetValue(StateProperty, value);
 		}
 		public static readonly DependencyProperty StateProperty =
 			DependencyProperty.Register("State", typeof(BuildingDockState), typeof(BuildingDock), new UIPropertyMetadata(BuildingDockState.Locked));
@@ -46,8 +42,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public string ShipName
 		{
-			get { return (string)this.GetValue(ShipNameProperty); }
-			set { this.SetValue(ShipNameProperty, value); }
+			get => (string)this.GetValue(ShipNameProperty);
+			set => this.SetValue(ShipNameProperty, value);
 		}
 		public static readonly DependencyProperty ShipNameProperty =
 			DependencyProperty.Register("ShipName", typeof(string), typeof(BuildingDock), new UIPropertyMetadata(""));
@@ -58,8 +54,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public string CompleteTime
 		{
-			get { return (string)this.GetValue(CompleteTimeProperty); }
-			set { this.SetValue(CompleteTimeProperty, value); }
+			get => (string)this.GetValue(CompleteTimeProperty);
+			set => this.SetValue(CompleteTimeProperty, value);
 		}
 		public static readonly DependencyProperty CompleteTimeProperty =
 			DependencyProperty.Register("CompleteTime", typeof(string), typeof(BuildingDock), new UIPropertyMetadata(""));
@@ -70,8 +66,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public string RemainingTime
 		{
-			get { return (string)this.GetValue(RemainingTimeProperty); }
-			set { this.SetValue(RemainingTimeProperty, value); }
+			get => (string)this.GetValue(RemainingTimeProperty);
+			set => this.SetValue(RemainingTimeProperty, value);
 		}
 		public static readonly DependencyProperty RemainingTimeProperty =
 			DependencyProperty.Register("RemainingTime", typeof(string), typeof(BuildingDock), new UIPropertyMetadata(""));
@@ -82,8 +78,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public bool IsDisplayShipName
 		{
-			get { return (bool)this.GetValue(IsDisplayShipNameProperty); }
-			set { this.SetValue(IsDisplayShipNameProperty, value); }
+			get => (bool)this.GetValue(IsDisplayShipNameProperty);
+			set => this.SetValue(IsDisplayShipNameProperty, value);
 		}
 		public static readonly DependencyProperty IsDisplayShipNameProperty =
 			DependencyProperty.Register("IsDisplayShipName", typeof(bool), typeof(BuildingDock), new UIPropertyMetadata(false));

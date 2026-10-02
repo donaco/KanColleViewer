@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Xaml.Behaviors;
 using System.Windows.Threading;
+using Microsoft.Xaml.Behaviors;
 
 namespace Grabacr07.KanColleViewer.Interactivity
 {
@@ -14,7 +11,7 @@ namespace Grabacr07.KanColleViewer.Interactivity
 	/// </summary>
 	public class TimerBehavior : Behavior<TextBlock>
 	{
-		private DispatcherTimer timer;
+		private DispatcherTimer? timer;
 
 		#region Interval 依存関係プロパティ
 
@@ -23,8 +20,8 @@ namespace Grabacr07.KanColleViewer.Interactivity
 		/// </summary>
 		public TimeSpan Interval
 		{
-			get { return (TimeSpan)this.GetValue(IntervalProperty); }
-			set { this.SetValue(IntervalProperty, value); }
+			get => (TimeSpan)this.GetValue(IntervalProperty);
+			set => this.SetValue(IntervalProperty, value);
 		}
 
 		/// <summary>
@@ -49,10 +46,10 @@ namespace Grabacr07.KanColleViewer.Interactivity
 		/// <summary>
 		/// タイマーによって実行される処理を取得または設定します。
 		/// </summary>
-		public Func<string> Proc
+		public Func<string>? Proc
 		{
-			get { return (Func<string>)this.GetValue(ProcProperty); }
-			set { this.SetValue(ProcProperty, value); }
+			get => (Func<string>?)this.GetValue(ProcProperty);
+			set => this.SetValue(ProcProperty, value);
 		}
 
 		/// <summary>
@@ -76,12 +73,16 @@ namespace Grabacr07.KanColleViewer.Interactivity
 			base.OnDetaching();
 
 			this.Stop();
-			this.timer.Tick -= this.Tick;
+			if (this.timer is not null)
+			{
+				this.timer.Tick -= this.Tick;
+				this.timer = null;
+			}
 		}
 
 		protected virtual void Initialize()
 		{
-			if (this.timer != null) return;
+			if (this.timer is not null) return;
 
 			this.timer = new DispatcherTimer(DispatcherPriority.Normal)
 			{
@@ -92,16 +93,16 @@ namespace Grabacr07.KanColleViewer.Interactivity
 
 		protected virtual void Start()
 		{
-			this.timer.Start();
+			this.timer?.Start();
 			this.AssociatedObject.Text = this.GetText();
 		}
 
 		protected virtual void Stop()
 		{
-			this.timer.Stop();
+			this.timer?.Stop();
 		}
 
-		protected virtual void Tick(object sender, EventArgs e)
+		protected virtual void Tick(object? sender, EventArgs e)
 		{
 			this.AssociatedObject.Text = this.GetText();
 		}

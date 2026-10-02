@@ -15,7 +15,7 @@ namespace MetroTrilithon.UI.Controls
     // RichText 系（PluginViewModel / RichText.cs から MetroTrilithon.UI.Controls で参照される）
     public abstract class RichText
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 
     public abstract class Link : RichText
@@ -38,30 +38,30 @@ namespace MetroTrilithon.UI.Controls
         private bool _hasParameter;
 
         #region MethodTarget 依存関係プロパティ
-        public object MethodTarget
+        public object? MethodTarget
         {
-            get { return this.GetValue(MethodTargetProperty); }
-            set { this.SetValue(MethodTargetProperty, value); }
+            get => this.GetValue(MethodTargetProperty);
+            set => this.SetValue(MethodTargetProperty, value);
         }
         public static readonly DependencyProperty MethodTargetProperty =
             DependencyProperty.Register(nameof(MethodTarget), typeof(object), typeof(CallMethodButton), new UIPropertyMetadata(null));
         #endregion
 
         #region MethodName 依存関係プロパティ
-        public string MethodName
+        public string? MethodName
         {
-            get { return (string)this.GetValue(MethodNameProperty); }
-            set { this.SetValue(MethodNameProperty, value); }
+            get => (string?)this.GetValue(MethodNameProperty);
+            set => this.SetValue(MethodNameProperty, value);
         }
         public static readonly DependencyProperty MethodNameProperty =
             DependencyProperty.Register(nameof(MethodName), typeof(string), typeof(CallMethodButton), new UIPropertyMetadata(null));
         #endregion
 
         #region MethodParameter 依存関係プロパティ
-        public object MethodParameter
+        public object? MethodParameter
         {
-            get { return this.GetValue(MethodParameterProperty); }
-            set { this.SetValue(MethodParameterProperty, value); }
+            get => this.GetValue(MethodParameterProperty);
+            set => this.SetValue(MethodParameterProperty, value);
         }
         public static readonly DependencyProperty MethodParameterProperty =
             DependencyProperty.Register(nameof(MethodParameter), typeof(object), typeof(CallMethodButton), new UIPropertyMetadata(null, (d, e) => ((CallMethodButton)d)._hasParameter = true));
@@ -91,7 +91,7 @@ namespace MetroTrilithon.UI.Controls
             method?.Invoke(target, null);
         }
 
-        private static void InvokeMethod(object target, string methodName, object parameter)
+        private static void InvokeMethod(object target, string methodName, object? parameter)
         {
             var paramType = parameter?.GetType() ?? typeof(object);
             var method = target.GetType().GetMethod(methodName,
@@ -114,8 +114,8 @@ namespace MetroTrilithon.UI.Controls
 
         public SortDirection Direction
         {
-            get { return (SortDirection)this.GetValue(DirectionProperty); }
-            set { this.SetValue(DirectionProperty, value); }
+            get => (SortDirection)this.GetValue(DirectionProperty);
+            set => this.SetValue(DirectionProperty, value);
         }
         public static readonly DependencyProperty DirectionProperty =
             DependencyProperty.Register(nameof(Direction), typeof(SortDirection), typeof(SortButton), new UIPropertyMetadata(SortDirection.None));
@@ -140,10 +140,10 @@ namespace MetroTrilithon.UI.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(RichTextView), new FrameworkPropertyMetadata(typeof(RichTextView)));
         }
 
-        public IEnumerable<RichText> Source
+        public IEnumerable<RichText>? Source
         {
-            get { return (IEnumerable<RichText>)this.GetValue(SourceProperty); }
-            set { this.SetValue(SourceProperty, value); }
+            get => (IEnumerable<RichText>?)this.GetValue(SourceProperty);
+            set => this.SetValue(SourceProperty, value);
         }
         public static readonly DependencyProperty SourceProperty =
             DependencyProperty.Register(nameof(Source), typeof(IEnumerable<RichText>), typeof(RichTextView),
@@ -151,8 +151,8 @@ namespace MetroTrilithon.UI.Controls
 
         public Collection<DataTemplate> RichTextTemplates
         {
-            get { return (Collection<DataTemplate>)this.GetValue(RichTextTemplatesProperty); }
-            set { this.SetValue(RichTextTemplatesProperty, value); }
+            get => (Collection<DataTemplate>)this.GetValue(RichTextTemplatesProperty);
+            set => this.SetValue(RichTextTemplatesProperty, value);
         }
         public static readonly DependencyProperty RichTextTemplatesProperty =
             DependencyProperty.Register(nameof(RichTextTemplates), typeof(Collection<DataTemplate>), typeof(RichTextView),
@@ -216,7 +216,7 @@ namespace MetroTrilithon.UI.Controls
             }
         }
 
-        public static object GetAxWebbrowser2(WebBrowser browser)
+        public static object? GetAxWebbrowser2(WebBrowser browser)
         {
             var prop = typeof(WebBrowser).GetProperty("AxIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic);
             return prop?.GetValue(browser, null);
@@ -225,10 +225,10 @@ namespace MetroTrilithon.UI.Controls
 
     public class HyperlinkEx : Hyperlink
     {
-        public Uri Uri
+        public Uri? Uri
         {
-            get { return (Uri)this.GetValue(UriProperty); }
-            set { this.SetValue(UriProperty, value); }
+            get => (Uri?)this.GetValue(UriProperty);
+            set => this.SetValue(UriProperty, value);
         }
         public static readonly DependencyProperty UriProperty =
             DependencyProperty.Register(nameof(Uri), typeof(Uri), typeof(HyperlinkEx), new UIPropertyMetadata(null));

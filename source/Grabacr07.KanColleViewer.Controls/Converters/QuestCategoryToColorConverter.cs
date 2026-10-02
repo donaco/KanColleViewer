@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 using Grabacr07.KanColleWrapper.Models;
@@ -11,11 +8,10 @@ namespace Grabacr07.KanColleViewer.Converters
 {
 	public class QuestCategoryToColorConverter : IValueConverter
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
-			if (value is QuestCategory)
+			if (value is QuestCategory category)
 			{
-				var category = (QuestCategory)value;
 				switch (category)
 				{
 					case QuestCategory.Composition:
@@ -42,7 +38,7 @@ namespace Grabacr07.KanColleViewer.Converters
 			return Color.FromRgb(128, 128, 128);
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			throw new NotImplementedException();
 		}

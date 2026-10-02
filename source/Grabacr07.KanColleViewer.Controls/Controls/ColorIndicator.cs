@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -25,8 +21,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public LimitedValue LimitedValue
 		{
-			get { return (LimitedValue)this.GetValue(LimitedValueProperty); }
-			set { this.SetValue(LimitedValueProperty, value); }
+			get => (LimitedValue)this.GetValue(LimitedValueProperty);
+			set => this.SetValue(LimitedValueProperty, value);
 		}
 		public static readonly DependencyProperty LimitedValueProperty =
 			DependencyProperty.Register(nameof(LimitedValue), typeof(LimitedValue), typeof(ColorIndicator), new UIPropertyMetadata(new LimitedValue(), LimitedValuePropertyChangedCallback));
@@ -45,8 +41,8 @@ namespace Grabacr07.KanColleViewer.Controls
 
 		public int Columns
 		{
-			get { return (int)this.GetValue(ColumnsProperty); }
-			set { this.SetValue(ColumnsProperty, value); }
+			get => (int)this.GetValue(ColumnsProperty);
+			set => this.SetValue(ColumnsProperty, value);
 		}
 		public static readonly DependencyProperty ColumnsProperty =
 			DependencyProperty.Register(nameof(Columns), typeof(int), typeof(ColorIndicator), new UIPropertyMetadata(4));

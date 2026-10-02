@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
 using System.Windows;
 
 namespace Grabacr07.KanColleViewer.Interactivity
@@ -18,8 +15,8 @@ namespace Grabacr07.KanColleViewer.Interactivity
 		/// </summary>
 		public DateTimeOffset? Period
 		{
-			get { return (DateTimeOffset?)this.GetValue(PeriodProperty); }
-			set { this.SetValue(PeriodProperty, value); }
+			get => (DateTimeOffset?)this.GetValue(PeriodProperty);
+			set => this.SetValue(PeriodProperty, value);
 		}
 
 		/// <summary>
@@ -31,11 +28,9 @@ namespace Grabacr07.KanColleViewer.Interactivity
 		private static void PeriodChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var instance = (CountdownBehavior)d;
-			var period = (DateTimeOffset?)e.NewValue;
-
-			if (period.HasValue)
+			if (e.NewValue is DateTimeOffset period)
 			{
-				instance.Proc = () => DateTimeOffset.Now.Subtract(period.Value).ToString();
+				instance.Proc = () => DateTimeOffset.Now.Subtract(period).ToString();
 				instance.Start();
 			}
 			else

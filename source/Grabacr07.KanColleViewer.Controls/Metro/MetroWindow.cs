@@ -1,7 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Shell;
 
 namespace Grabacr07.KanColleViewer.Controls.Metro
@@ -23,8 +21,8 @@ namespace Grabacr07.KanColleViewer.Controls.Metro
                 new FrameworkPropertyMetadata(typeof(MetroWindow)));
         }
 
-        private FrameworkElement _resizeGrip;
-        private FrameworkElement _captionBar;
+        private FrameworkElement? _resizeGrip;
+        private FrameworkElement? _captionBar;
 
         // ── IsCaptionBar 添付プロパティ ────────────────────────────────
 

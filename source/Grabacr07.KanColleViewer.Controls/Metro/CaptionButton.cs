@@ -43,7 +43,7 @@ namespace Grabacr07.KanColleViewer.Controls.Metro
                 new FrameworkPropertyMetadata(typeof(CaptionButton)));
         }
 
-        private Window _owner;
+        private Window? _owner;
 
         // ── WindowAction ───────────────────────────────────────────────
 
