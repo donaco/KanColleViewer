@@ -13,9 +13,9 @@ namespace Counter
 {
 	public abstract class ObservableObject : INotifyPropertyChanged
 	{
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 
-		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
@@ -32,7 +32,7 @@ namespace Counter
 		}
 
 		#region Text 変更通知プロパティ
-		private string _Text;
+		private string _Text = string.Empty;
 		public string Text
 		{
 			get { return this._Text; }
@@ -196,7 +196,7 @@ namespace Counter
 		/// <summary>
 		/// セル名（例: "O"）。セルに到達しなかった場合は null
 		/// </summary>
-		public string CellName { get; }
+		public string? CellName { get; }
 
 		/// <summary>
 		/// セル番号（生の値）。セルに到達しなかった場合は null
@@ -206,7 +206,7 @@ namespace Counter
 		/// <summary>
 		/// 戦闘結果ランク（例: "S"）。
 		/// </summary>
-		public string WinRank { get; }
+		public string? WinRank { get; }
 
 		/// <summary>
 		/// 括弧付きの戦闘結果表示（例: "[S]"）。WinRank が空なら空文字。
@@ -321,7 +321,7 @@ namespace Counter
 			}
 		}
 
-		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
+		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
@@ -380,7 +380,7 @@ namespace Counter
 		/// <summary>
 		/// セル名（例: "C"）。ラベル変換表示に使用
 		/// </summary>
-		public string CellName { get; }
+		public string? CellName { get; }
 
 		/// <summary>
 		/// ラベル変換済みの表示用キー（例: "E1-1-3" や "7-4-C"）
@@ -616,7 +616,7 @@ namespace Counter
 		/// </summary>
 		public string DestructionText => this.DestructionCount > 0 ? "[防空]" : string.Empty;
 
-		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null, string cellName = null)
+		public SortieAreaCount(string areaCellKey, int? mapAreaId = null, int? mapInfoNo = null, int? cellNo = null, string? cellName = null)
 		{
 			this.AreaCellKey = areaCellKey;
 			this.MapAreaId = mapAreaId;
@@ -692,7 +692,7 @@ namespace Counter
 		/// <param name="winRank">戦闘結果ランク（"S", "A", "B" など）</param>
 		/// <param name="airResult">航空戦の制空状態</param>
 		/// <param name="isDestruction">防空戦かどうか</param>
-		public void Increment(string winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
+		public void Increment(string? winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			this.Count++;
 
@@ -745,7 +745,7 @@ namespace Counter
 	public class SortieHistoryCounter : ObservableObject, IDisposable
 	{
 		private readonly int _maxHistory;
-		private readonly SortieInfo _sortieInfo;
+		private readonly SortieInfo? _sortieInfo;
 
 		// 出撃中の海域・セル情報を一時保持
 		private int _currentMapAreaId;
@@ -801,7 +801,7 @@ namespace Counter
 
 		#region History 変更通知プロパティ
 
-		private ObservableCollection<SortieRecord> _History;
+		private ObservableCollection<SortieRecord> _History = new ObservableCollection<SortieRecord>();
 
 		/// <summary>
 		/// 直近の出撃履歴（新しいものが先頭）
@@ -823,7 +823,7 @@ namespace Counter
 
 		#region AreaCounts 変更通知プロパティ
 
-		private ObservableCollection<SortieAreaCount> _AreaCounts;
+		private ObservableCollection<SortieAreaCount> _AreaCounts = new ObservableCollection<SortieAreaCount>();
 
 		/// <summary>
 		/// 海域-セルごとの出撃数一覧（出撃数の多い順）
@@ -850,8 +850,6 @@ namespace Counter
 		public SortieHistoryCounter(int maxHistory = 20)
 		{
 			this._maxHistory = maxHistory;
-			this.History = new ObservableCollection<SortieRecord>();
-			this.AreaCounts = new ObservableCollection<SortieAreaCount>();
 			this._areaCountMap = new Dictionary<string, SortieAreaCount>();
 
 			// SortieInfo への参照を保持し、PropertyChanged を監視
@@ -867,9 +865,9 @@ namespace Counter
 			}
 		}
 
-		private void SortieInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		private void SortieInfo_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
-			var sortieInfo = (SortieInfo)sender;
+			if (sender is not SortieInfo sortieInfo) return;
 
 			switch (e.PropertyName)
 			{
@@ -915,7 +913,7 @@ namespace Counter
 
 						// SortieInfo から直接 CellNo を読み取り、ローカルキャッシュとマージ
 						var cellNo = this._currentCellNo;
-						var liveCellNo = this._sortieInfo.CellNo;
+						var liveCellNo = this._sortieInfo?.CellNo;
 						if (liveCellNo.HasValue && liveCellNo.Value > 0)
 						{
 							cellNo = liveCellNo;
@@ -977,11 +975,11 @@ namespace Counter
 		/// <summary>
 		/// 履歴を1件追加し、海域ごとの出撃数を更新します。
 		/// </summary>
-		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			try
 			{
-				SortieRecord record = null;
+				SortieRecord record;
 				try
 				{
 					record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle);
@@ -1046,7 +1044,7 @@ namespace Counter
 		/// <summary>
 		/// 海域-セルごとの出撃数とランク別・制空別集計を更新します。
 		/// </summary>
-		private void UpdateAreaCount(SortieRecord record, string winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		private void UpdateAreaCount(SortieRecord record, string? winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
 		{
 			var areaCellKey = record.AreaCellKey;
 

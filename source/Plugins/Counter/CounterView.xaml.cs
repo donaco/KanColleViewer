@@ -32,7 +32,7 @@ namespace Counter
 	/// </summary>
 	public class CountToVisibilityConverter : IValueConverter
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			if (value is int count && count > 0)
 			{
@@ -41,7 +41,7 @@ namespace Counter
 			return Visibility.Collapsed;
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			throw new NotSupportedException();
 		}
@@ -52,12 +52,12 @@ namespace Counter
 	/// </summary>
 	public class NullToCollapsedConverter : IValueConverter
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			return value != null ? Visibility.Visible : Visibility.Collapsed;
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			throw new NotSupportedException();
 		}
@@ -68,7 +68,7 @@ namespace Counter
 	/// </summary>
 	public class InverseBoolToVisibilityConverter : IValueConverter
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			if (value is bool b && b)
 			{
@@ -77,7 +77,7 @@ namespace Counter
 			return Visibility.Visible;
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			throw new NotSupportedException();
 		}
@@ -88,7 +88,7 @@ namespace Counter
 	/// </summary>
 	public class BoolToVisibilityConverter : IValueConverter
 	{
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			if (value is bool b && b)
 			{
@@ -97,7 +97,7 @@ namespace Counter
 			return Visibility.Collapsed;
 		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			throw new NotSupportedException();
 		}

@@ -69,9 +69,9 @@ namespace Counter
 		{
 			var helperType = this.GetKanColleViewerType("Grabacr07.KanColleViewer.Models.Helper");
 			var createPathMethod = helperType?.GetMethod("CreateScreenshotFilePath", BindingFlags.Public | BindingFlags.Static);
-			if (createPathMethod != null)
+			if (createPathMethod?.Invoke(null, new[] { imageFormat }) is string createdPath)
 			{
-				return (string)createPathMethod.Invoke(null, new[] { imageFormat });
+				return createdPath;
 			}
 
 			var destination = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
@@ -90,7 +90,7 @@ namespace Counter
 				throw new InvalidOperationException("KanColleViewer 本体アセンブリが見つかりません。");
 			}
 
-			var type = assembly.GetType(typeName) ?? assemblies.Select(x => x.GetType(typeName, false)).FirstOrDefault(x => x != null);
+			Type? type = assembly.GetType(typeName) ?? assemblies.Select(x => x.GetType(typeName, false)).FirstOrDefault(x => x != null);
 			if (type == null)
 			{
 				throw new InvalidOperationException(typeName + " が見つかりません。");
@@ -99,7 +99,7 @@ namespace Counter
 			return type;
 		}
 
-		private void CaptureWindow(string path, string imageFormat)
+		private void CaptureWindow(string path, string? imageFormat)
 		{
 			var source = PresentationSource.FromVisual(this);
 			var dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;

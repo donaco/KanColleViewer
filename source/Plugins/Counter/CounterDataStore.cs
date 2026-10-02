@@ -53,11 +53,11 @@ namespace Counter
 		/// </summary>
 		public class AreaCountData
 		{
-			public string AreaCellKey { get; set; }
+			public string AreaCellKey { get; set; } = string.Empty;
 			public int? MapAreaId { get; set; }
 			public int? MapInfoNo { get; set; }
 			public int? CellNo { get; set; }
-			public string CellName { get; set; }
+			public string? CellName { get; set; }
 			public int Count { get; set; }
 			public int SCount { get; set; }
 			public int ACount { get; set; }
@@ -76,19 +76,19 @@ namespace Counter
 			public int MapAreaId { get; set; }
 			public int MapInfoNo { get; set; }
 			public int? CellNo { get; set; }
-			public string WinRank { get; set; }
+			public string? WinRank { get; set; }
 			public int AirResult { get; set; }
 			public bool IsDestruction { get; set; }
 			public bool IsLdAirbattle { get; set; }
-			public string Timestamp { get; set; }
+			public string? Timestamp { get; set; }
 		}
 
 		/// <summary>
 		/// カウンターデータを JSON ファイルに保存します。
 		/// </summary>
 		public static void Save(
-			IEnumerable<CounterBase> counters,
-			SortieHistoryCounter sortieHistory,
+			IEnumerable<CounterBase>? counters,
+			SortieHistoryCounter? sortieHistory,
 			bool isCounterEnabled,
 			bool isSortieHistoryEnabled,
 			bool showAirSuperiority,
@@ -180,7 +180,7 @@ namespace Counter
 		/// <summary>
 		/// JSON ファイルからカウンターデータを読み込みます。
 		/// </summary>
-		public static CounterSaveData Load()
+		public static CounterSaveData? Load()
 		{
 			try
 			{

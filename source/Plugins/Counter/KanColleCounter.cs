@@ -19,14 +19,14 @@ namespace Counter
 	[ExportMetadata("Author", "@Grabacr07")]
 	public class KanColleCounter : IPlugin, ITool, IRequestNotify
 	{
-		private CounterViewModel viewModel;
+		private CounterViewModel? viewModel;
 		private bool _dataSaved;
 
 		string ITool.Name => "Counter";
 
 		object ITool.View => new CounterView { DataContext = this.viewModel, };
 
-		public event EventHandler<NotifyEventArgs> NotifyRequested;
+		public event EventHandler<NotifyEventArgs>? NotifyRequested;
 
 		public void Initialize()
 		{
@@ -80,13 +80,16 @@ namespace Counter
 		/// </summary>
 		private void RestoreSavedData()
 		{
+			var viewModel = this.viewModel;
+			if (viewModel == null) return;
+
 			var data = CounterDataStore.Load();
 			if (data == null) return;
 
 			// 各カウンターの値を復元（Text をキーに照合）
-			if (data.Counters != null && this.viewModel.Counters != null)
+			if (data.Counters != null && viewModel.Counters != null)
 			{
-				foreach (var counter in this.viewModel.Counters)
+				foreach (var counter in viewModel.Counters)
 				{
 					if (!string.IsNullOrEmpty(counter.Text) && data.Counters.TryGetValue(counter.Text, out var count))
 					{
@@ -97,37 +100,37 @@ namespace Counter
 			}
 
 			// 海域ごとの出撃数を復元
-			if (data.AreaCounts != null && this.viewModel.SortieHistory != null)
+			if (data.AreaCounts != null && viewModel.SortieHistory != null)
 			{
-				this.viewModel.SortieHistory.RestoreAreaCounts(data.AreaCounts);
+				viewModel.SortieHistory.RestoreAreaCounts(data.AreaCounts);
 			}
 
 			// 戦闘履歴を復元
-			if (data.History != null && this.viewModel.SortieHistory != null)
+			if (data.History != null && viewModel.SortieHistory != null)
 			{
-				this.viewModel.SortieHistory.RestoreHistory(data.History);
+				viewModel.SortieHistory.RestoreHistory(data.History);
 			}
 
 			// 設定項目の復元
 			if (data.IsCounterEnabled.HasValue)
 			{
-				this.viewModel.IsCounterEnabled = data.IsCounterEnabled.Value;
+				viewModel.IsCounterEnabled = data.IsCounterEnabled.Value;
 			}
 			if (data.IsSortieHistoryEnabled.HasValue)
 			{
-				this.viewModel.IsSortieHistoryEnabled = data.IsSortieHistoryEnabled.Value;
+				viewModel.IsSortieHistoryEnabled = data.IsSortieHistoryEnabled.Value;
 			}
 			if (data.ShowAirSuperiority.HasValue)
 			{
-				this.viewModel.ShowAirSuperiority = data.ShowAirSuperiority.Value;
+				viewModel.ShowAirSuperiority = data.ShowAirSuperiority.Value;
 			}
 			if (data.IsTopMost.HasValue)
 			{
-				this.viewModel.IsTopMost = data.IsTopMost.Value;
+				viewModel.IsTopMost = data.IsTopMost.Value;
 			}
-			if (data.BossOnly.HasValue && this.viewModel.SortieHistory != null)
+			if (data.BossOnly.HasValue && viewModel.SortieHistory != null)
 			{
-				this.viewModel.SortieHistory.BossOnly = data.BossOnly.Value;
+				viewModel.SortieHistory.BossOnly = data.BossOnly.Value;
 			}
 		}
 

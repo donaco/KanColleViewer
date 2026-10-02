@@ -12,13 +12,13 @@ namespace Counter
 		/// <summary>
 		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
 		/// </summary>
-		private CounterWindow _popupWindow;
+		private CounterWindow? _popupWindow;
 
 		#region Counters 変更通知プロパティ
 
-		private ObservableCollection<CounterBase> _Counters;
+		private ObservableCollection<CounterBase>? _Counters;
 
-		public ObservableCollection<CounterBase> Counters
+		public ObservableCollection<CounterBase>? Counters
 		{
 			get { return this._Counters; }
 			set
@@ -35,12 +35,12 @@ namespace Counter
 
 		#region SortieHistory 変更通知プロパティ
 
-		private SortieHistoryCounter _SortieHistory;
+		private SortieHistoryCounter? _SortieHistory;
 
 		/// <summary>
 		/// 出撃履歴カウンター
 		/// </summary>
-		public SortieHistoryCounter SortieHistory
+		public SortieHistoryCounter? SortieHistory
 		{
 			get { return this._SortieHistory; }
 			set
