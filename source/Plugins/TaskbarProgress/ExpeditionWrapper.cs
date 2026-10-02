@@ -16,16 +16,14 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		#region State notification property
 
-		private ExpeditionState _State;
-
 		public ExpeditionState State
 		{
-			get { return this._State; }
+			get => field;
 			set
 			{
-				if (this._State != value)
+				if (field != value)
 				{
-					this._State = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
@@ -38,7 +36,6 @@ namespace Grabacr07.KanColleViewer.Plugins
 			this.Id = id;
 			this.Source = expedition;
 			this.Source.Subscribe(nameof(Expedition.Remaining), () => this.UpdateState()).AddTo(this);
-
 		}
 
 		private void UpdateState()
