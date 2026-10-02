@@ -15,11 +15,11 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 {
 	internal class PortalViewModel : INotifyPropertyChanged
 	{
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 
-		protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
 		{
-			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 		#region Categories 変更通知プロパティ
 
@@ -34,7 +34,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					this.OnPropertyChanged();
 				}
 			}
-		}
+		} = System.Array.Empty<string>();
 
 		#endregion
 
@@ -52,13 +52,13 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					this.UpdateItems();
 				}
 			}
-		}
+		} = System.String.Empty;
 
 		#endregion
 
 		#region Items 変更通知プロパティ
 
-		public IReadOnlyList<MasterDataItemViewModel> Items
+		public IReadOnlyList<MasterDataItemViewModel>? Items
 		{
 			get => field;
 			set
@@ -69,7 +69,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					this.OnPropertyChanged();
 				}
 			}
-		}
+		} = null;
 
 		#endregion
 
@@ -119,7 +119,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		/// <summary>
 		/// ポップアップウィンドウのインスタンスを保持します（多重起動防止用）。
 		/// </summary>
-		private Views.MasterDataWindow _popupWindow;
+		private Views.MasterDataWindow? _popupWindow;
 
 		public PortalViewModel()
 		{
@@ -187,7 +187,8 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		/// </summary>
 		public void ExportCsv()
 		{
-			if (this.Items == null || this.Items.Count == 0) return;
+			var items = this.Items;
+			if (items == null || items.Count == 0) return;
 
 			var dialog = new SaveFileDialog
 			{
@@ -208,7 +209,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					// BOM 付き UTF-8 で出力（Excel 対応）
 					writer.WriteLine("Id,Name,Detail");
 
-					foreach (var item in this.Items)
+					foreach (var item in items)
 					{
 						writer.WriteLine($"{item.Id},{EscapeCsvField(item.Name)},{EscapeCsvField(item.Detail)}");
 					}
@@ -225,7 +226,8 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		/// </summary>
 		public void ExportXml()
 		{
-			if (this.Items == null || this.Items.Count == 0) return;
+			var items = this.Items;
+			if (items == null || items.Count == 0) return;
 
 			var dialog = new SaveFileDialog
 			{
@@ -246,7 +248,7 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					new XElement("MasterData",
 						new XAttribute("Category", this.SelectedCategory ?? ""),
 						new XAttribute("ExportedAt", DateTime.Now.ToString("o")),
-						this.Items.Select(item =>
+						items.Select(item =>
 							new XElement("Item",
 								new XElement("Id", item.Id),
 								new XElement("Name", item.Name ?? ""),
