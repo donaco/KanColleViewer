@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -82,6 +83,9 @@ namespace Grabacr07.KanColleViewer.Models
 		}
 
 
+		private static byte ParseHexByte(ReadOnlySpan<char> hex)
+			=> byte.Parse(hex, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
+
 		public static Color StringToColor(string colorCode)
 		{
 			try
@@ -92,18 +96,18 @@ namespace Grabacr07.KanColleViewer.Models
 					{
 						// #rrggbb style
 						return Color.FromRgb(
-							Convert.ToByte(colorCode.Substring(1, 2), 16),
-							Convert.ToByte(colorCode.Substring(3, 2), 16),
-							Convert.ToByte(colorCode.Substring(5, 2), 16));
+							ParseHexByte(colorCode.AsSpan(1, 2)),
+							ParseHexByte(colorCode.AsSpan(3, 2)),
+							ParseHexByte(colorCode.AsSpan(5, 2)));
 					}
 					if (colorCode.Length == 9)
 					{
 						// #aarrggbb style
 						return Color.FromArgb(
-							Convert.ToByte(colorCode.Substring(1, 2), 16),
-							Convert.ToByte(colorCode.Substring(3, 2), 16),
-							Convert.ToByte(colorCode.Substring(5, 2), 16),
-							Convert.ToByte(colorCode.Substring(7, 2), 16));
+							ParseHexByte(colorCode.AsSpan(1, 2)),
+							ParseHexByte(colorCode.AsSpan(3, 2)),
+							ParseHexByte(colorCode.AsSpan(5, 2)),
+							ParseHexByte(colorCode.AsSpan(7, 2)));
 					}
 				}
 			}

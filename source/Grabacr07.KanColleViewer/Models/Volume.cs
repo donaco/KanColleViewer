@@ -126,12 +126,15 @@ namespace Grabacr07.KanColleViewer.Models.CoreAudio
 {
 	internal static class HResultExtensions
 	{
-		/// <summary>
-		/// HRESULT 値が S_OK (0) 以外の場合、<see cref="COMException"/> をスローします。
-		/// </summary>
-		public static void ThrowIfError(this int hResult, string message = "Session is not found.")
+		extension(int hResult)
 		{
-			if (hResult != 0) throw new COMException(message, hResult);
+			/// <summary>
+			/// HRESULT 値が S_OK (0) 以外の場合、<see cref="COMException"/> をスローします。
+			/// </summary>
+			public void ThrowIfError(string message = "Session is not found.")
+			{
+				if (hResult != 0) throw new COMException(message, hResult);
+			}
 		}
 	}
 }
