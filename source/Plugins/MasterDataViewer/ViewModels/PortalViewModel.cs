@@ -23,16 +23,14 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 		}
 		#region Categories 変更通知プロパティ
 
-		private string[] _Categories;
-
 		public string[] Categories
 		{
-			get { return this._Categories; }
+			get => field;
 			set
 			{
-				if (this._Categories != value)
+				if (field != value)
 				{
-					this._Categories = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
@@ -42,16 +40,14 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 		#region SelectedCategory 変更通知プロパティ
 
-		private string _SelectedCategory;
-
 		public string SelectedCategory
 		{
-			get { return this._SelectedCategory; }
+			get => field;
 			set
 			{
-				if (this._SelectedCategory != value)
+				if (field != value)
 				{
-					this._SelectedCategory = value;
+					field = value;
 					this.OnPropertyChanged();
 					this.UpdateItems();
 				}
@@ -62,16 +58,14 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 		#region Items 変更通知プロパティ
 
-		private IReadOnlyList<MasterDataItemViewModel> _Items;
-
 		public IReadOnlyList<MasterDataItemViewModel> Items
 		{
-			get { return this._Items; }
+			get => field;
 			set
 			{
-				if (this._Items != value)
+				if (field != value)
 				{
-					this._Items = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
@@ -81,16 +75,14 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 		#region IsLoaded 変更通知プロパティ
 
-		private bool _IsLoaded;
-
 		public bool IsLoaded
 		{
-			get { return this._IsLoaded; }
+			get => field;
 			set
 			{
-				if (this._IsLoaded != value)
+				if (field != value)
 				{
-					this._IsLoaded = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
@@ -100,19 +92,17 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 
 		#region IsTopMost 変更通知プロパティ
 
-		private bool _IsTopMost;
-
 		/// <summary>
 		/// ポップアップウィンドウを常に最前面に表示するかどうかを示す値を取得または設定します。
 		/// </summary>
 		public bool IsTopMost
 		{
-			get { return this._IsTopMost; }
+			get => field;
 			set
 			{
-				if (this._IsTopMost != value)
+				if (field != value)
 				{
-					this._IsTopMost = value;
+					field = value;
 					this.OnPropertyChanged();
 				}
 			}
