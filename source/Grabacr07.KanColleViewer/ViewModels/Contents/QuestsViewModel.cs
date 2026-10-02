@@ -21,81 +21,58 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 			protected set { throw new NotImplementedException(); }
 		}
 
-		#region Current 変更通知プロパティ
-
-		private QuestViewModel[] _Current;
-
 		public QuestViewModel[] Current
 		{
-			get { return this._Current; }
+			get => field;
 			set
 			{
-				if (this._Current != value)
+				if (field != value)
 				{
-					this._Current = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region Quests 変更通知プロパティ
-
-		private QuestViewModel[] _Quests;
 
 		public QuestViewModel[] Quests
 		{
-			get { return this._Quests; }
+			get => field;
 			set
 			{
-				if (this._Quests != value)
+				if (field != value)
 				{
-					this._Quests = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region IsUntaken 変更通知プロパティ
-
-		private bool _IsUntaken;
 
 		public bool IsUntaken
 		{
-			get { return this._IsUntaken; }
+			get => field;
 			set
 			{
-				if (this._IsUntaken != value)
+				if (field != value)
 				{
-					this._IsUntaken = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
-
-		#endregion
-
-		#region IsEmpty 変更通知プロパティ
-
-		private bool _IsEmpty;
 
 		public bool IsEmpty
 		{
-			get { return this._IsEmpty; }
+			get => field;
 			set
 			{
-				if (this._IsEmpty != value)
+				if (field != value)
 				{
-					this._IsEmpty = value;
+					field = value;
 					this.RaisePropertyChanged();
 				}
 			}
 		}
 
-		#endregion
 
 
 		public QuestsViewModel()
