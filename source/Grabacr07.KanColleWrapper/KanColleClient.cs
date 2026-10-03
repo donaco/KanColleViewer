@@ -421,6 +421,7 @@ namespace Grabacr07.KanColleWrapper
 				if (TryHandleClearItemGet(url, normalized)) return;
 				if (TryHandleDestroyItem2(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleDestroyShip(url, normalized, normalizedRequestBody)) return;
+				if (TryHandleMarriage(url, normalized)) return;
 				if (TryHandlePowerup(url, normalized, normalizedRequestBody)) return;
 				if (TryHandleMaterial(url, normalized)) return;
 				if (TryHandleUseItem(url, normalized)) return;
@@ -570,6 +571,12 @@ namespace Grabacr07.KanColleWrapper
 		/// </summary>
 		private bool TryHandlePowerup(string url, string normalized, string requestBody)
 			=> this.kaisouHandler.TryHandlePowerup(url, normalized, requestBody);
+
+		/// <summary>
+		/// ケッコンカッコカリ（KaisouHandler へ委譲）
+		/// </summary>
+		private bool TryHandleMarriage(string url, string normalized)
+			=> this.kaisouHandler.TryHandleMarriage(url, normalized);
 
 		/// <summary>
 		/// 任務一覧（BasicHandler へ委譲）

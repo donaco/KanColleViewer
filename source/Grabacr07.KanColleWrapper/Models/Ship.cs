@@ -335,6 +335,9 @@ namespace Grabacr07.KanColleWrapper.Models
 		internal void Update(kcsapi_ship2 rawData)
 		{
 			this.UpdateRawData(rawData);
+			this.RaisePropertyChanged(nameof(this.Level));
+			this.RaisePropertyChanged(nameof(this.Exp));
+			this.RaisePropertyChanged(nameof(this.ExpForNextLevel));
 
 			var master = KanColleClient.Current.Master;
 			this.Info = master?.Ships[rawData.api_ship_id] ?? ShipInfo.Dummy;
@@ -368,6 +371,21 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.TimeToRepair = TimeSpan.FromMilliseconds(this.RawData.api_ndock_time);
 
 			this.UpdateSlots();
+		}
+
+		internal void UpdateLevelAndExperience(int level, int experienceForNextLevel, int? totalExperience)
+		{
+			this.RawData.api_lv = level;
+
+			var experience = this.RawData.api_exp?.ToArray() ?? [];
+			if (experience.Length < 2) Array.Resize(ref experience, 2);
+			if (totalExperience.HasValue) experience[0] = totalExperience.Value;
+			experience[1] = experienceForNextLevel;
+			this.RawData.api_exp = experience;
+
+			this.RaisePropertyChanged(nameof(this.Level));
+			this.RaisePropertyChanged(nameof(this.Exp));
+			this.RaisePropertyChanged(nameof(this.ExpForNextLevel));
 		}
 
 		public void UpdateSlots()

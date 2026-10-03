@@ -27,6 +27,40 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			=> HandlerHelper.LogError(context, ex);
 
 		/// <summary>
+		/// ケッコンカッコカリ
+		/// </summary>
+		internal bool TryHandleMarriage(string url, string normalized)
+		{
+			if (!url.Contains("/kcsapi/api_req_kaisou/marriage")) return false;
+
+			try
+			{
+				var root = JToken.Parse(normalized);
+				var data = root["api_data"] ?? root;
+				var shipId = (int?)data?["api_id"] ?? 0;
+				if (shipId <= 0) return true;
+
+				var level = (int?)data?["api_lv"] ?? 100;
+				var experience = data?["api_exp"] as JArray;
+				var totalExperience = (int?)experience?.ElementAtOrDefault(0);
+				var experienceForNextLevel = (int?)experience?.ElementAtOrDefault(1) ?? 10000;
+
+				RunOnUi(() =>
+				{
+					try
+					{
+						var ship = this.client.Homeport?.Organization?.Ships[shipId];
+						ship?.UpdateLevelAndExperience(level, experienceForNextLevel, totalExperience);
+					}
+					catch (Exception ex) { LogError("TryHandleMarriage", ex); }
+				});
+			}
+			catch (Exception ex) { LogError("TryHandleMarriage", ex); }
+
+			return true;
+		}
+
+		/// <summary>
 		/// 近代化改修
 		/// </summary>
 		internal bool TryHandlePowerup(string url, string normalized, string requestBody)
