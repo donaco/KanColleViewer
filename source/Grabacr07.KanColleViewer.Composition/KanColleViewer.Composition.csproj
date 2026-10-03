@@ -8,7 +8,8 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{CC139E98-D847-41DA-B20F-8ACA4564F375}</ProjectGuid>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>

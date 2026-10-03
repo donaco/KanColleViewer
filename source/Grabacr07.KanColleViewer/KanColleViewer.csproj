@@ -16,10 +16,10 @@
   <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   <AppDesignerFolder>Properties</AppDesignerFolder>
   <ProjectGuid>{C5F0111F-3F68-4A74-BB20-BB762564D080}</ProjectGuid>
-  <Platforms>AnyCPU;x64</Platforms>
+  <Platforms>x64</Platforms>
+  <PlatformTarget>x64</PlatformTarget>
   <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
   <LangVersion>14.0</LangVersion>
   <Nullable>enable</Nullable>
   <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
