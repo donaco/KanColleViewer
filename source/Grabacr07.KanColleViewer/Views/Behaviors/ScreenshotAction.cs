@@ -75,7 +75,9 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 			Viewport? clip = null;
 			try
 			{
-				var rectResult = await browser.EvaluateScriptAsync(@"
+				if (browser.CanExecuteJavascriptInMainFrame)
+				{
+					var rectResult = await browser.EvaluateScriptAsync(@"
 (function() {
 	var iframe = document.querySelector('iframe');
 	if (!iframe) return null;
@@ -84,16 +86,17 @@ namespace Grabacr07.KanColleViewer.Views.Behaviors
 	var dpr = window.devicePixelRatio || 1;
 	return { x: r.left, y: r.top, width: r.width, height: r.height, scale: dpr };
 })();");
-				if (rectResult != null && rectResult.Success && rectResult.Result is IDictionary<string, object> rect)
-				{
-					clip = new Viewport
+					if (rectResult != null && rectResult.Success && rectResult.Result is IDictionary<string, object> rect)
 					{
-						X = Convert.ToDouble(rect["x"]),
-						Y = Convert.ToDouble(rect["y"]),
-						Width = Convert.ToDouble(rect["width"]),
-						Height = Convert.ToDouble(rect["height"]),
-						Scale = Convert.ToDouble(rect["scale"]),
-					};
+						clip = new Viewport
+						{
+							X = Convert.ToDouble(rect["x"]),
+							Y = Convert.ToDouble(rect["y"]),
+							Width = Convert.ToDouble(rect["width"]),
+							Height = Convert.ToDouble(rect["height"]),
+							Scale = Convert.ToDouble(rect["scale"]),
+						};
+					}
 				}
 			}
 			catch
