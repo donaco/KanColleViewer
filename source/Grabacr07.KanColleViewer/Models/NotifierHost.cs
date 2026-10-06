@@ -313,8 +313,10 @@ namespace Grabacr07.KanColleViewer.Models
 			if (Settings.KanColleSettings.NotifyNosakiTimer)
 			{
 				var organization = KanColleClient.Current?.Homeport?.Organization;
-				var fleet = organization?.Fleets?.Values?
-					.FirstOrDefault(x => x != null && x.Name == args.FleetName);
+				var fleet = sender is FleetCondition condition
+					? organization?.Fleets?.Values?
+						.FirstOrDefault(x => x != null && ReferenceEquals(x.State.Condition, condition))
+					: null;
 
 				if (fleet != null && this.IsNosakiTimerBlockedByOtherHighCondition(fleet))
 				{
