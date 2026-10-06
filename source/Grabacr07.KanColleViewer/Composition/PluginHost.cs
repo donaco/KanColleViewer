@@ -289,7 +289,9 @@ namespace Grabacr07.KanColleViewer.Composition
 
 			var baseDir = AppDomain.CurrentDomain.BaseDirectory;
 			searchDirectories.Add(Path.Combine(baseDir, PluginsDirectory));
+#if DEBUG
 			searchDirectories.Add(Path.GetFullPath(Path.Combine(baseDir, "..", "..", "Debug", PluginsDirectory)));
+#endif
 
 			foreach (var dir in searchDirectories.Distinct().Where(Directory.Exists))
 			{
