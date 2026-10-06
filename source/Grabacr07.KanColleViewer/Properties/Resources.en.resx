@@ -312,6 +312,12 @@
   <data name="Reparyard_Unused" xml:space="preserve">
     <value>Empty</value>
   </data>
+  <data name="NosakiTimer_NotificationMessage" xml:space="preserve">
+    <value>15 minutes have elapsed.</value>
+  </data>
+  <data name="NosakiTimer_NotificationMessage_Title" xml:space="preserve">
+    <value>Homeport Supply Ship System</value>
+  </data>
   <data name="ReSortie_NotificationMessage" xml:space="preserve">
     <value>All ships in 「{0}」 have fully recovered from fatigue.</value>
   </data>

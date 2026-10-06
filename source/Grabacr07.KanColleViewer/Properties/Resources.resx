@@ -312,6 +312,12 @@
   <data name="Reparyard_Unused" xml:space="preserve">
     <value>未使用</value>
   </data>
+  <data name="NosakiTimer_NotificationMessage" xml:space="preserve">
+    <value>15分経過しました。</value>
+  </data>
+  <data name="NosakiTimer_NotificationMessage_Title" xml:space="preserve">
+    <value>母港給糧艦システム</value>
+  </data>
   <data name="ReSortie_NotificationMessage" xml:space="preserve">
     <value>「{0}」の全艦娘の疲労が回復しました。</value>
   </data>

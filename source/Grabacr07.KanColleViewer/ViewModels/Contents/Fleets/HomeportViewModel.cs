@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleWrapper.Models;
@@ -14,7 +11,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 	public class HomeportViewModel : QuickStateViewViewModel
 	{
 		private readonly Fleet? fleet;
-		private static readonly int[] NosakiShipIds = { 996, 1002 };
 
 		// QuickStateView は ContentControl に対し型ごとの DataTemplate を適用する形で実現するので
 		// 状況に応じた型がそれぞれ必要。これはその 1 つ。
@@ -44,7 +40,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		private TimeSpan? GetNosakiTimerRemaining()
 		{
 			if (this.fleet == null) return null;
-			return NotifyService.Current.GetNosakiTimerRemaining(this.fleet);
+			return NotifyService.Current.GetNosakiTimerRemaining();
 		}
 	}
 }

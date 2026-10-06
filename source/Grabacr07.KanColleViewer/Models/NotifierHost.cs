@@ -224,11 +224,11 @@ namespace Grabacr07.KanColleViewer.Models
 					this.fleetCompositionSignatures.Remove(id);
 				}
 			}
- 		}
+		}
 
- 		private bool UpdateFleetCompositionSignature(Fleet fleet)
- 		{
- 			if (fleet == null) return false;
+		private bool UpdateFleetCompositionSignature(Fleet fleet)
+		{
+			if (fleet == null) return false;
 
 			// 並び順込みで編成をシグネチャ化
 			var signature = fleet.Ships == null
@@ -246,7 +246,7 @@ namespace Grabacr07.KanColleViewer.Models
 				this.fleetCompositionSignatures[fleet.Id] = signature;
 				return true;
 			}
-   		}
+		}
 
 		private bool HasNosakiInTop2(Fleet fleet)
 		{
@@ -326,8 +326,8 @@ namespace Grabacr07.KanColleViewer.Models
 
 			var notification = Notification.Create(
 				Notification.Types.FleetRejuvenated,
-				"疲労回復完了",
-				$"「{args.FleetName}」に編成されている艦娘の疲労が回復しました。",
+				Resources.ReSortie_NotificationMessage_Title,
+				string.Format(Resources.ReSortie_NotificationMessage, args.FleetName),
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
@@ -350,7 +350,7 @@ namespace Grabacr07.KanColleViewer.Models
 				{
 					this.nosakiSharedNextNotifyAt = null;
 				}
- 			}
+			}
 
 			this.nosakiTimerSubscription = Observable
 				.Interval(TimeSpan.FromSeconds(1))
@@ -366,7 +366,6 @@ namespace Grabacr07.KanColleViewer.Models
 						Debug.WriteLine($"[NosakiTimer] Timer check failed: {ex}");
 					}
 				});
-
 
 			this.nosakiTimerSubscription.AddTo(this);
 		}
@@ -452,8 +451,8 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 				var notification = Notification.Create(
 					Notification.Types.FleetRejuvenated,
-					"母港給糧艦システム",
-					"15分経過しました。",
+					Resources.NosakiTimer_NotificationMessage_Title,
+					Resources.NosakiTimer_NotificationMessage,
 					() => WindowService.Current.MainWindow.Activate());
 				this.Notify(notification);
 			}
@@ -461,7 +460,7 @@ namespace Grabacr07.KanColleViewer.Models
 			this.NosakiTimerUpdated?.Invoke(this, EventArgs.Empty);
 		}
 
-		public TimeSpan? GetNosakiTimerRemaining(Fleet fleet)
+		public TimeSpan? GetNosakiTimerRemaining()
 		{
 			lock (this.nosakiTimerSync)
 			{
@@ -469,7 +468,7 @@ namespace Grabacr07.KanColleViewer.Models
 				var remain = this.nosakiSharedNextNotifyAt.Value - DateTimeOffset.Now;
 				return remain < TimeSpan.Zero ? TimeSpan.Zero : remain;
 			}
- 		}
+		}
 
 		private bool IsNosakiConditionSatisfied(Ship ship)
 		{
@@ -520,12 +519,13 @@ namespace Grabacr07.KanColleViewer.Models
 				this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
 			}
 
- 			this.compositeDisposable.Dispose();
- 			this.dockyardDisposables?.Dispose();
- 			this.repairyardDisposables?.Dispose();
- 			this.organizationDisposables?.Dispose();
- 		}
+			this.compositeDisposable.Dispose();
+			this.dockyardDisposables?.Dispose();
+			this.repairyardDisposables?.Dispose();
+			this.organizationDisposables?.Dispose();
+		}
 		#endregion
+
 		private void SaveNosakiTimerCache(DateTimeOffset? nextNotifyAt)
 		{
 			var value = nextNotifyAt.HasValue ? nextNotifyAt.Value.ToUnixTimeMilliseconds() : 0L;
@@ -542,7 +542,7 @@ namespace Grabacr07.KanColleViewer.Models
 			{
 				Debug.WriteLine($"[NosakiTimer] Failed to save local settings. Value={value}, Error={ex}");
 			}
- 		}
+		}
 
 		public bool IsNosakiTimerDisplayActive(Fleet fleet)
 		{

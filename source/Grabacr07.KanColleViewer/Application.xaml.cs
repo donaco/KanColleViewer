@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -64,8 +63,6 @@ namespace Grabacr07.KanColleViewer
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			this.ChangeState(ApplicationState.Startup);
-
-			var commandLineArgs = Environment.GetCommandLineArgs();
 
 			// ★ SetDllDirectory を先に確立する（PrepareNativePaths は CefSharp 型を参照しないため安全）
 			CefBridge.PrepareNativePaths();
@@ -131,97 +128,96 @@ namespace Grabacr07.KanColleViewer
 
 				AppThemeService.Current.Register(this, AppAccent.Purple);
 
-							Helper.SetMMCSSTask();
-							Helper.DeleteCacheIfRequested();
+				Helper.SetMMCSSTask();
+				Helper.DeleteCacheIfRequested();
 
-							var startedWithFallback = false;
+				var startedWithFallback = false;
 
+				try
+				{
+					CefBridge.Initialize();
+				}
+				catch (Exception ex)
+				{
+					ReportRecoverableException("Startup.CefInitialize", this, ex);
+					this.startedInFallbackMode = true;
+					startedWithFallback = true;
+
+					try
+					{
+						// フォールバック起動時はブラウザーに依存しない最小構成で起動する
+						WindowService.Current.AddTo(this).Initialize(useInformationWindowAsMainWindow: true);
+
+						PluginService.Current.AddTo(this).Initialize();
+						NotifyService.Current.AddTo(this).Initialize();
+
+						this.MainWindow = WindowService.Current.GetMainWindow();
+						if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
+						{
+							fallbackMainWindowViewModel.CanClose = true;
+						}
+						this.MainWindow.Closed += (s, args) =>
+						{
 							try
 							{
-								CefBridge.Initialize();
+								Environment.Exit(0);
 							}
-							catch (Exception ex)
+							catch
 							{
-
-								ReportRecoverableException("Startup.CefInitialize", this, ex);
-								this.startedInFallbackMode = true;
-								startedWithFallback = true;
-
-								try
-								{
-									// フォールバック起動時はブラウザーに依存しない最小構成で起動する
-									WindowService.Current.AddTo(this).Initialize(useInformationWindowAsMainWindow: true);
-
-									PluginService.Current.AddTo(this).Initialize();
-									NotifyService.Current.AddTo(this).Initialize();
-
-									this.MainWindow = WindowService.Current.GetMainWindow();
-									if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
-									{
-										fallbackMainWindowViewModel.CanClose = true;
-									}
-									this.MainWindow.Closed += (s, args) =>
-									{
-										try
-										{
-											Environment.Exit(0);
-										}
-										catch
-										{
-										}
-									};
-									this.MainWindow.Show();
-								}
-								catch (Exception fallbackEx)
-								{
-									ReportException("StartupFallback", this, fallbackEx);
-									MessageBox.Show(
-										"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。cef.log を確認してください。",
-										ProductInfo.Title,
-										MessageBoxButton.OK,
-										MessageBoxImage.Error);
-									this.Shutdown();
-									return;
-								}
 							}
+						};
+						this.MainWindow.Show();
+					}
+					catch (Exception fallbackEx)
+					{
+						ReportException("StartupFallback", this, fallbackEx);
+						MessageBox.Show(
+							"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。cef.log を確認してください。",
+							ProductInfo.Title,
+							MessageBoxButton.OK,
+							MessageBoxImage.Error);
+						this.Shutdown();
+						return;
+					}
+				}
 
-							if (!startedWithFallback)
-							{
-								try
-								{
-									WindowService.Current.AddTo(this).Initialize();
-									this.MainWindow = WindowService.Current.GetMainWindow();
-									this.MainWindow.Show();
+				if (!startedWithFallback)
+				{
+					try
+					{
+						WindowService.Current.AddTo(this).Initialize();
+						this.MainWindow = WindowService.Current.GetMainWindow();
+						this.MainWindow.Show();
 
-									var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
-									if (navigator != null)
-									{
-										navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
-										navigator.Navigate();
-									}
-								}
-								catch (Exception windowEx)
-								{
-									ReportException("Startup.Window", this, windowEx);
-									MessageBox.Show(
-										"メインウィンドウの初期化でエラーが発生しました。ErrorReports を確認してください。",
-										ProductInfo.Title,
-										MessageBoxButton.OK,
-										MessageBoxImage.Error);
-									this.Shutdown();
-									return;
-								}
+						var navigator = (WindowService.Current.MainWindow as KanColleWindowViewModel)?.Navigator;
+						if (navigator != null)
+						{
+							navigator.Source = KanColleViewer.Properties.Settings.Default.KanColleUrl;
+							navigator.Navigate();
+						}
+					}
+					catch (Exception windowEx)
+					{
+						ReportException("Startup.Window", this, windowEx);
+						MessageBox.Show(
+							"メインウィンドウの初期化でエラーが発生しました。ErrorReports を確認してください。",
+							ProductInfo.Title,
+							MessageBoxButton.OK,
+							MessageBoxImage.Error);
+						this.Shutdown();
+						return;
+					}
 
-								try
-								{
-									PluginService.Current.AddTo(this).Initialize();
-									NotifyService.Current.AddTo(this).Initialize();
-								}
-								catch (Exception pluginEx)
-								{
-									ReportRecoverableException("Startup.PluginOrNotify", this, pluginEx);
-								}
-							}
+					try
+					{
+						PluginService.Current.AddTo(this).Initialize();
+						NotifyService.Current.AddTo(this).Initialize();
+					}
+					catch (Exception pluginEx)
+					{
+						ReportRecoverableException("Startup.PluginOrNotify", this, pluginEx);
+					}
+				}
 
 				// appMutex はアプリ終了まで保持（GC 対策でフィールドに保存）
 				_appMutex = appMutex;
@@ -355,15 +351,6 @@ namespace Grabacr07.KanColleViewer
 			this.State = value;
 			this.RaisePropertyChanged(nameof(this.State));
 		}
-
-		private void ProcessCommandLineParameter(string[] args)
-		{
-			Debug.WriteLine("多重起動検知: " + args.ToString(" "));
-
-			// コマンド ライン引数付きで多重起動されたときに何かできる
-			// けど今やることがない
-		}
-
 
 		#region INotifyPropertyChanged members
 
