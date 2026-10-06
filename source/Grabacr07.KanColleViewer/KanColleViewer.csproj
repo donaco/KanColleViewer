@@ -22,8 +22,6 @@
   <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   <LangVersion>14.0</LangVersion>
   <Nullable>enable</Nullable>
-  <!-- EnumerableEx が KanColleWrapper と衝突する CS0436 を抑制 -->
-  <NoWarn>0436</NoWarn>
 </PropertyGroup>
 
 <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -148,6 +146,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Infrastructure\Linq\" />
     <Folder Include="Themes\Accents\" />
   </ItemGroup>
 
@@ -164,18 +163,14 @@
   -->
   <Target Name="FilterUnusedLocaleResources" AfterTargets="AssignTargetPaths">
     <ItemGroup>
-      <ContentWithTargetPath Remove="@(ContentWithTargetPath)"
-                             Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
-      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)"
-                           Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
 
       <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
       <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
 
-      <ContentWithTargetPath Remove="@(ContentWithTargetPath)"
-                             Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
-      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)"
-                           Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
     </ItemGroup>
   </Target>
 
@@ -185,13 +180,10 @@
   -->
   <Target Name="FilterUnusedReferenceCopyLocalPaths" AfterTargets="ResolveReferences">
     <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
-                               Condition="'%(Extension)' == '.pak' and $([System.String]::Copy('%(FullPath)').Contains('\locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.pak' and $([System.String]::Copy('%(FullPath)').Contains('\locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.mui'" />
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
-                               Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging'))" />
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
-                               Condition="$([System.String]::Copy('%(FullPath)').Contains('\NpuDetect\')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging'))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FullPath)').Contains('\NpuDetect\')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
     </ItemGroup>
   </Target>
 

@@ -335,7 +335,12 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private void StartNosakiTimer(Organization organization)
 		{
-			this.nosakiTimerSubscription?.Dispose();
+			if (this.nosakiTimerSubscription != null)
+			{
+				this.compositeDisposable.Remove(this.nosakiTimerSubscription);
+				this.nosakiTimerSubscription.Dispose();
+			}
+
 			lock (this.nosakiTimerSync)
 			{
 				this.nosakiNextNotifyAt.Clear();
