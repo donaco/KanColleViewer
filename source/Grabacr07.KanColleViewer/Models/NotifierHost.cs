@@ -133,7 +133,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notification = Notification.Create(
 				Notification.Types.BuildingCompleted,
 				Resources.Dockyard_NotificationMessage_Title,
-				$"{Resources.Dockyard_NotificationMessage}(args.DockId, shipName)",
+				string.Format(Resources.Dockyard_NotificationMessage, args.DockId, shipName),
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
@@ -162,7 +162,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notification = Notification.Create(
 				Notification.Types.RepairingCompleted,
 				Resources.Repairyard_NotificationMessage_Title,
-				$"{Resources.Repairyard_NotificationMessage}(args.DockId, args.Ship.Info.Name)",
+				string.Format(Resources.Repairyard_NotificationMessage, args.DockId, args.Ship?.Info.Name ?? Resources.Common_ShipGirl),
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notification);
@@ -298,7 +298,7 @@ namespace Grabacr07.KanColleViewer.Models
 			var notify = Notification.Create(
 				Notification.Types.ExpeditionReturned,
 				Resources.Expedition_NotificationMessage_Title,
-				$"{Resources.Expedition_NotificationMessage}(args.FleetName)",
+				string.Format(Resources.Expedition_NotificationMessage, args.FleetName),
 				() => WindowService.Current.MainWindow.Activate());
 
 			this.Notify(notify);
