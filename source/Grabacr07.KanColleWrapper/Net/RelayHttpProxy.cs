@@ -1,9 +1,11 @@
 using System;
+using System.Buffers;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Grabacr07.KanColleWrapper.Net
@@ -19,6 +21,9 @@ namespace Grabacr07.KanColleWrapper.Net
 	/// </summary>
 	public sealed class RelayHttpProxy : IDisposable
 	{
+		private static readonly Regex ConnectRequestRegex = new(@"^CONNECT\s+([^\s:]+):(\d+)\s+HTTP", RegexOptions.IgnoreCase);
+		private static readonly byte[] ConnectionEstablishedResponse = Encoding.ASCII.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n");
+		private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(30);
 		private TcpListener? listener;
 		private bool running;
 
@@ -100,7 +105,7 @@ namespace Grabacr07.KanColleWrapper.Net
 					// CONNECT 以外のヘッダーも読み飛ばす（CONNECT 以外は艦これ通信では通常発生しない）
 					await ReadHeadersAsync(clientStream).ConfigureAwait(false);
 
-					var match = Regex.Match(requestLine, @"^CONNECT\s+([^\s:]+):(\d+)\s+HTTP", RegexOptions.IgnoreCase);
+					var match = ConnectRequestRegex.Match(requestLine);
 					if (!match.Success)
 					{
 						return;
@@ -138,15 +143,15 @@ namespace Grabacr07.KanColleWrapper.Net
 			{
 				try
 				{
-					await tcp.ConnectAsync(targetHost, targetPort).ConfigureAwait(false);
+					using var timeout = new CancellationTokenSource(ConnectTimeout);
+					await tcp.ConnectAsync(targetHost, targetPort, timeout.Token).ConfigureAwait(false);
 				}
 				catch
 				{
 					return;
 				}
 
-				var established = Encoding.ASCII.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n");
-				await clientStream.WriteAsync(established, 0, established.Length).ConfigureAwait(false);
+				await clientStream.WriteAsync(ConnectionEstablishedResponse, 0, ConnectionEstablishedResponse.Length).ConfigureAwait(false);
 
 				using (var serverStream = tcp.GetStream())
 				{
@@ -166,7 +171,8 @@ namespace Grabacr07.KanColleWrapper.Net
 			{
 				try
 				{
-				await upstreamTcp.ConnectAsync(this.UpstreamHost!, this.UpstreamPort).ConfigureAwait(false);
+					using var timeout = new CancellationTokenSource(ConnectTimeout);
+					await upstreamTcp.ConnectAsync(this.UpstreamHost!, this.UpstreamPort, timeout.Token).ConfigureAwait(false);
 				}
 				catch
 				{
@@ -191,8 +197,7 @@ namespace Grabacr07.KanColleWrapper.Net
 						return;
 					}
 
-					var established = Encoding.ASCII.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n");
-					await clientStream.WriteAsync(established, 0, established.Length).ConfigureAwait(false);
+					await clientStream.WriteAsync(ConnectionEstablishedResponse, 0, ConnectionEstablishedResponse.Length).ConfigureAwait(false);
 
 					await PipeBothWaysAsync(clientStream, upstreamStream).ConfigureAwait(false);
 				}
@@ -208,9 +213,9 @@ namespace Grabacr07.KanColleWrapper.Net
 
 		private static async Task CopyStreamAsync(Stream from, Stream to)
 		{
+			var buffer = ArrayPool<byte>.Shared.Rent(8192);
 			try
 			{
-				var buffer = new byte[8192];
 				int read;
 				while ((read = await from.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
 				{
@@ -220,6 +225,10 @@ namespace Grabacr07.KanColleWrapper.Net
 			catch
 			{
 				// 接続断は正常終了として扱う
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buffer);
 			}
 		}
 
