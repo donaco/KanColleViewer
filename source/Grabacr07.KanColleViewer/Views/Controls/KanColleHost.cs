@@ -62,6 +62,20 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 			if (newBrowser != null)
 			{
+				if (!(newBrowser.RequestHandler is CustomRequestHandler))
+				{
+					CefBridge.AttachRequestHandler(newBrowser, captured =>
+					{
+						try
+						{
+							KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody);
+						}
+						catch
+						{
+						}
+					});
+				}
+
 				// フレームレート モードに応じた WindowlessFrameRate を設定する
 				int fps;
 				if (GeneralSettings.FrameRateMode.Value == BrowserFrameRateMode.Low)
@@ -231,51 +245,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			if (e == null)
 			{
 				return;
-			}
-
-			try
-			{
-				// UI スレッドに処理を委譲して、WPF オブジェクトへのアクセス例外を防ぐ
-				this.Dispatcher.BeginInvoke(new Action(() =>
-				{
-					try
-					{
-						// WebBrowser が準備できていれば RequestHandler を割り当てる
-						// null チェックを厳密に（BeginInvoke 時点と実行時点の両方をチェック）
-						var browser = this.WebBrowser;
-						if (browser != null)
-						{
-							// AttachRequestHandler は CustomRequestHandler を割り当てます
-							// 既に CustomRequestHandler が設定されていなければアタッチ
-							try
-							{
-								if (!(browser.RequestHandler is CustomRequestHandler))
-								{
-									CefBridge.AttachRequestHandler(browser, captured =>
-									{
-										try
-										{
-											// 非 UI スレッドで処理する（CapturedProcessor 側でスレッド安全に扱う）
-											Grabacr07.KanColleWrapper.KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody);
-										}
-										catch
-										{
-										}
-									});
-								}
-							}
-							catch
-							{
-							}
-						}
-					}
-					catch
-					{
-					}
-				}));
-			}
-			catch
-			{
 			}
 
 			if (e.Frame != null && e.Frame.IsMain)

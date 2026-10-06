@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.Handler;
+using Grabacr07.KanColleViewer.Models.Settings;
 
 namespace Grabacr07.KanColleViewer.Models.Cef
 {
@@ -18,6 +19,27 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 		public CustomRequestHandler(Action<CapturedHttp> onCaptured)
 		{
 			this.onCaptured = onCaptured;
+		}
+
+		protected override bool OnCertificateError(IWebBrowser chromiumWebBrowser, IBrowser browser, CefErrorCode errorCode, string requestUrl, ISslInfo sslInfo, IRequestCallback callback)
+		{
+			var allow = false;
+
+			try
+			{
+				allow = CefBridge.IsRelayProxyRunning
+					&& NetworkSettings.Relay.IsEnabled.Value
+					&& Uri.TryCreate(requestUrl, UriKind.Absolute, out var uri)
+					&& uri.Scheme == Uri.UriSchemeHttps
+					&& Grabacr07.KanColleWrapper.KanColleServerOrigin.IsAllowedHost(uri.Host);
+			}
+			catch
+			{
+				// 判定できない場合は拒否します。
+			}
+
+			callback.Continue(allow);
+			return true;
 		}
 
 		/// <summary>

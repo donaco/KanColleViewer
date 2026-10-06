@@ -42,6 +42,8 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// </summary>
 		private static Grabacr07.KanColleWrapper.Net.RelayHttpProxy? relayProxy;
 
+		internal static bool IsRelayProxyRunning => relayProxy != null;
+
 		private static string FallbackLocalAppData => Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 			"Grabacr07", "KanColleViewer");
@@ -245,8 +247,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 			if (Settings.NetworkSettings.Relay.IsEnabled.Value && relayProxy != null)
 			{
 				settings.CefCommandLineArgs.Add("proxy-server", $"localhost:{relayProxy.ListeningPort}");
-				// 内蔵プロキシが発行する自己署名証明書エラーを無視する
-				settings.CefCommandLineArgs.Add("ignore-certificate-errors", "1");
 			}
 
 #if DEBUG
