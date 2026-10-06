@@ -545,7 +545,13 @@ namespace Grabacr07.KanColleViewer.Models
 		public bool IsNosakiTimerDisplayActive(Fleet fleet)
 		{
 			if (fleet?.Ships == null) return false;
-			if (!this.HasNosakiInTop2(fleet)) return false;
+			if (fleet.IsInSortie || fleet.Expedition?.IsInExecution == true) return false;
+
+			var nosakiInTop2 = fleet.Ships
+				.Take(2)
+				.Where(s => s != null && NosakiShipIds.Contains(s.Info?.Id ?? -1))
+				.ToArray();
+			if (nosakiInTop2.Length == 0) return false;
 
 			var hasNonNosakiShip = fleet.Ships
 				.Where(s => s != null)
@@ -554,7 +560,12 @@ namespace Grabacr07.KanColleViewer.Models
 
 			if (this.IsNosakiTimerBlockedByOtherHighCondition(fleet)) return false;
 
-			return this.GetNosakiTimerRemaining(fleet).HasValue;
+			lock (this.nosakiTimerSync)
+			{
+				return this.nosakiSharedNextNotifyAt.HasValue
+					&& nosakiInTop2.Any(ship => this.IsNosakiConditionSatisfied(ship)
+						&& this.nosakiNextNotifyAt.ContainsKey(ship.Id));
+			}
 		}
 	}
 }

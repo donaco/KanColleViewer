@@ -268,7 +268,24 @@ namespace Grabacr07.KanColleViewer
 			try
 			{
 				AppNotificationService.Shutdown();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: Notification shutdown error: {ex}");
+			}
 
+			try
+			{
+				System.Diagnostics.Debug.WriteLine("Application: Disposing resources...");
+				this.compositeDisposable.Dispose();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
+			}
+
+			try
+			{
 				// CefSharp の完全シャットダウンを待つ
 				System.Diagnostics.Debug.WriteLine("Application: Shutting down CefSharp...");
 				Cef.Shutdown();
@@ -285,17 +302,6 @@ namespace Grabacr07.KanColleViewer
 			{
 				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown error: {ex}");
 			}
-
-					try
-						{
-							// Dispose を先に実行してリソース解放
-							System.Diagnostics.Debug.WriteLine("Application: Disposing resources...");
-							this.compositeDisposable.Dispose();
-						}
-						catch (Exception ex)
-						{
-							System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
-						}
 
 			try
 			{
