@@ -11,6 +11,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 {
 	public abstract class SettingsHost
 	{
+		private static readonly object saveSync = new object();
 		private static readonly Dictionary<Type, SettingsHost> instances = new Dictionary<Type, SettingsHost>();
 		private readonly Dictionary<string, object> cachedProperties = new Dictionary<string, object>();
 
@@ -112,24 +113,36 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 			#endregion
 
-			try
+			lock (saveSync)
 			{
-				Providers.Local.Save();
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(string.Format(message, Providers.LocalFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-				throw;
-			}
+				try
+				{
+					Providers.Local.Save();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(string.Format(message, Providers.LocalFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+					throw;
+				}
 
-			try
-			{
-				Providers.Roaming.Save();
+				try
+				{
+					Providers.Roaming.Save();
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(string.Format(message, Providers.RoamingFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+					throw;
+				}
 			}
-			catch (Exception ex)
+		}
+
+		internal static void SaveLocal(Action updateSettings)
+		{
+			lock (saveSync)
 			{
-				MessageBox.Show(string.Format(message, Providers.RoamingFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-				throw;
+				updateSettings();
+				Providers.Local.Save();
 			}
 		}
 

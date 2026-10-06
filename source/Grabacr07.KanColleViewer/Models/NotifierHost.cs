@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Diagnostics;
 using Grabacr07.KanColleViewer.Composition;
+using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
@@ -352,7 +353,17 @@ namespace Grabacr07.KanColleViewer.Models
 			this.nosakiTimerSubscription = Observable
 				.Interval(TimeSpan.FromSeconds(1))
 				.StartWith(0L)
-				.Subscribe(_ => this.CheckNosakiTimer(organization));
+				.Subscribe(_ =>
+				{
+					try
+					{
+						this.CheckNosakiTimer(organization);
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine($"[NosakiTimer] Timer check failed: {ex}");
+					}
+				});
 
 
 			this.nosakiTimerSubscription.AddTo(this);
@@ -519,12 +530,11 @@ namespace Grabacr07.KanColleViewer.Models
 			if (this.lastSavedNosakiUnixMs == value) return;
 
 			this.lastSavedNosakiUnixMs = value;
-			Settings.KanColleSettings.NosakiSharedNextNotifyAtUnixTimeMs.Value = value;
 
 			try
 			{
 				// 設定ファイルへ即時永続化（アプリ強制終了でも引き継げるようにする）
-				Settings.Providers.Local.Save();
+				SettingsHost.SaveLocal(() => Settings.KanColleSettings.NosakiSharedNextNotifyAtUnixTimeMs.Value = value);
 			}
 			catch (Exception ex)
 			{
