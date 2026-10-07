@@ -11,6 +11,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 	internal class BalloonNotifier : NotifierBase
 	{
 		private NotifyIcon? notifyIcon;
+		private Icon? icon;
 		private EventHandler? activatedAction;
 
 		public override bool IsSupported => !Toast.IsSupported;
@@ -31,10 +32,11 @@ namespace Grabacr07.KanColleViewer.Plugins
 			{
 				using (var stream = streamResourceInfo.Stream)
 				{
+					this.icon = new Icon(stream);
 					this.notifyIcon = new NotifyIcon
 					{
 						Text = ProductInfo.Title,
-						Icon = new Icon(stream),
+						Icon = this.icon,
 						Visible = true,
 					};
 				}
@@ -47,13 +49,10 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 			System.Windows.Application.Current.Dispatcher.Invoke(() =>
 			{
-				if (activated != null)
-				{
-					this.notifyIcon.BalloonTipClicked -= this.activatedAction;
-
-					this.activatedAction = (sender, args) => activated();
+				this.notifyIcon.BalloonTipClicked -= this.activatedAction;
+				this.activatedAction = activated == null ? null : (sender, args) => activated();
+				if (this.activatedAction != null)
 					this.notifyIcon.BalloonTipClicked += this.activatedAction;
-				}
 
 				this.notifyIcon.ShowBalloonTip(1000, header, body, ToolTipIcon.None);
 			});
@@ -61,7 +60,15 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		public override void Dispose()
 		{
-			this.notifyIcon?.Dispose();
+			if (this.notifyIcon != null)
+			{
+				this.notifyIcon.Visible = false;
+				this.notifyIcon.Dispose();
+				this.notifyIcon = null;
+			}
+
+			this.icon?.Dispose();
+			this.icon = null;
 		}
 	}
 }
