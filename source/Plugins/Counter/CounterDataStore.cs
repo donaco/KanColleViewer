@@ -167,7 +167,28 @@ namespace Counter
 				}
 
 				var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-				File.WriteAllText(FilePath, json);
+				var tempFilePath = Path.Combine(
+					Path.GetDirectoryName(FilePath)!,
+					$"{Path.GetFileName(FilePath)}.{Guid.NewGuid():N}.tmp");
+				try
+				{
+					File.WriteAllText(tempFilePath, json);
+					if (File.Exists(FilePath))
+					{
+						File.Replace(tempFilePath, FilePath, null);
+					}
+					else
+					{
+						File.Move(tempFilePath, FilePath);
+					}
+				}
+				finally
+				{
+					if (File.Exists(tempFilePath))
+					{
+						File.Delete(tempFilePath);
+					}
+				}
 
 				System.Diagnostics.Debug.WriteLine($"[Counter] データ保存完了: {FilePath}");
 			}

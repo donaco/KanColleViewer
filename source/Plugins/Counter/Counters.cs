@@ -746,6 +746,7 @@ namespace Counter
 	{
 		private readonly int _maxHistory;
 		private readonly SortieInfo? _sortieInfo;
+		public event EventHandler? RecordAdded;
 
 		// 出撃中の海域・セル情報を一時保持
 		private int _currentMapAreaId;
@@ -1006,6 +1007,7 @@ namespace Counter
 						try
 						{
 							this.UpdateAreaCount(record, winRank, airResult, isDestruction, isLdAirbattle);
+							this.RecordAdded?.Invoke(this, EventArgs.Empty);
 						}
 						catch (System.Exception ex)
 						{

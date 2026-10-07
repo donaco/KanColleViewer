@@ -40,9 +40,10 @@ namespace Counter
 						new MissionCounter(),
 						new SortieCounter(),
 					},
-				// --- 直近12件を表示(表示数を指定) ---
+				// --- 直近を表示(表示数を指定) ---
 				SortieHistory = new SortieHistoryCounter(int.MaxValue),
 			};
+				this.viewModel.SortieHistory.RecordAdded += this.SortieHistory_RecordAdded;
 
 				// --- 保存データを復元 ---
 				this.RestoreSavedData();
@@ -166,6 +167,20 @@ namespace Counter
 					counter.Dispose();
 			}
 			this.viewModel?.SortieHistory?.Dispose();
+		}
+
+		private void SortieHistory_RecordAdded(object? sender, EventArgs e)
+		{
+			var viewModel = this.viewModel;
+			if (viewModel == null) return;
+
+			CounterDataStore.Save(
+				viewModel.Counters,
+				viewModel.SortieHistory,
+				viewModel.IsCounterEnabled,
+				viewModel.IsSortieHistoryEnabled,
+				viewModel.ShowAirSuperiority,
+				viewModel.IsTopMost);
 		}
 
 		public void RequestNotify(string type, string header, string body)
