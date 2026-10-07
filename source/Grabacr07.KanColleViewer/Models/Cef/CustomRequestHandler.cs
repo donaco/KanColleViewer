@@ -121,7 +121,6 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 	public class CustomResourceRequestHandler : ResourceRequestHandler
 	{
-		private const int MaxCapturedResponseBytes = 4 * 1024 * 1024;
 		private readonly Action<CapturedHttp> onCaptured;
 		private readonly bool isMainFrame;
 
@@ -154,10 +153,13 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			// ResponseFilter のコールバックは短くして、重い処理は Task.Run にオフロードする
 			return new ResponseFilter(bytes =>
 			{
+				if (bytes == null || bytes.Length == 0 || bytes.Length > ResponseFilter.MaxCapturedBodyBytes)
+					return;
+
 				// 受け取った bytes をそのまま Task に渡して非同期で処理する
 				try
 				{
-					var copy = bytes != null ? (byte[])bytes.Clone() : new byte[0];
+					var copy = (byte[])bytes.Clone();
 					Task.Run(() =>
 					{
 						string? responseBodyText = null;
@@ -228,7 +230,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private static bool ShouldDecompressGzip(IDictionary<string, string> headers, byte[] bytes)
 		{
-			if (bytes == null || bytes.Length < 2 || bytes.Length > MaxCapturedResponseBytes)
+			if (bytes == null || bytes.Length < 2 || bytes.Length > ResponseFilter.MaxCapturedBodyBytes)
 			{
 				return false;
 			}
@@ -255,7 +257,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 		private static string? TryDecompressGzip(byte[] bytes)
 		{
-			if (bytes == null || bytes.Length == 0 || bytes.Length > MaxCapturedResponseBytes)
+			if (bytes == null || bytes.Length == 0 || bytes.Length > ResponseFilter.MaxCapturedBodyBytes)
 			{
 				return null;
 			}
@@ -264,9 +266,19 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			{
 				using (var ms = new MemoryStream(bytes, writable: false))
 				using (var gz = new GZipStream(ms, CompressionMode.Decompress))
-				using (var sr = new StreamReader(gz, Encoding.UTF8, detectEncodingFromByteOrderMarks: true))
+			using (var decompressed = new MemoryStream())
 				{
-					return sr.ReadToEnd();
+					var readBuffer = new byte[8192];
+					int read;
+					while ((read = gz.Read(readBuffer, 0, readBuffer.Length)) > 0)
+					{
+						if (read > ResponseFilter.MaxCapturedBodyBytes - decompressed.Length)
+							return null;
+
+						decompressed.Write(readBuffer, 0, read);
+					}
+
+					return Encoding.UTF8.GetString(decompressed.GetBuffer(), 0, (int)decompressed.Length);
 				}
 			}
 			catch
@@ -294,7 +306,13 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 						if (element.Type == PostDataElementType.Bytes)
 						{
 							var bytes = element.Bytes;
-							if (bytes != null && bytes.Length > 0) bytesList.AddRange(bytes);
+							if (bytes != null && bytes.Length > 0)
+							{
+								if (bytes.Length > ResponseFilter.MaxCapturedBodyBytes - bytesList.Count)
+									return null;
+
+								bytesList.AddRange(bytes);
+							}
 						}
 					}
 					catch

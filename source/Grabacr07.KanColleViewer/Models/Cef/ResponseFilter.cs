@@ -8,8 +8,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 	// レスポンス本文をバッファして完了時にコールバックする IResponseFilter 実装
 	public class ResponseFilter : IResponseFilter
 	{
-		private readonly MemoryStream buffer = new MemoryStream();
+		internal const int MaxCapturedBodyBytes = 5 * 1024 * 1024;
+
+		private MemoryStream? buffer = new MemoryStream();
 		private readonly Action<byte[]> onCompleted;
+		private bool captureLimitExceeded;
 
 		public ResponseFilter(Action<byte[]> onCompleted)
 		{
@@ -26,7 +29,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 			if (dataIn == null)
 			{
-				try { onCompleted?.Invoke(buffer.ToArray()); } catch { }
+				if (!captureLimitExceeded && buffer != null)
+				{
+					try { onCompleted?.Invoke(buffer.ToArray()); } catch { }
+				}
+
 				return FilterStatus.Done;
 			}
 
@@ -61,7 +68,20 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			// 残容量に収まる範囲で読み取り・書き込みを行う
 			while (remaining > 0 && (read = dataIn.Read(readBuffer, 0, (int)Math.Min(readBuffer.Length, remaining))) > 0)
 			{
-				buffer.Write(readBuffer, 0, read);
+				if (buffer != null)
+				{
+					if (read > MaxCapturedBodyBytes - buffer.Length)
+					{
+						captureLimitExceeded = true;
+						buffer.Dispose();
+						buffer = null;
+					}
+					else
+					{
+						buffer.Write(readBuffer, 0, read);
+					}
+				}
+
 				dataInRead += read;
 
 				// パススルーしてブラウザへ返す（残容量を超えないよう制限済み）
@@ -75,7 +95,11 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 			return FilterStatus.NeedMoreData;
 		}
 
-		public void Dispose() => buffer?.Dispose();
+		public void Dispose()
+		{
+			buffer?.Dispose();
+			buffer = null;
+		}
 
 		// ヘルパー: バイト配列を可能な限り文字列化（UTF-8 → default → Base64）
 		public static string? TryDecode(byte[] bytes)
