@@ -73,13 +73,13 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 			foreach (var fleet in KanColleClient.Current.Homeport.Organization.Fleets.Values)
 			{
-				fleet.Subscribe(nameof(Fleet.Ships), () => _dispatcher.BeginInvoke((Action)this.UpdateFleets)).AddTo(this.fleetDisposable);
-				fleet.Subscribe(nameof(Fleet.IsInSortie), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(this.fleetDisposable);
+				fleet.Subscribe(nameof(Fleet.Ships), () => _dispatcher.BeginInvoke((Action)this.UpdateFleets), false).AddTo(this.fleetDisposable);
+				fleet.Subscribe(nameof(Fleet.IsInSortie), () => _dispatcher.BeginInvoke((Action)this.Update), false).AddTo(this.fleetDisposable);
 
 				foreach (var ship in fleet.Ships)
 				{
-					ship.Subscribe(nameof(Ship.HP), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(this.fleetDisposable);
-					ship.Subscribe(nameof(Ship.Situation), () => _dispatcher.BeginInvoke((Action)this.Update)).AddTo(this.fleetDisposable);
+					ship.Subscribe(nameof(Ship.HP), () => _dispatcher.BeginInvoke((Action)this.Update), false).AddTo(this.fleetDisposable);
+					ship.Subscribe(nameof(Ship.Situation), () => _dispatcher.BeginInvoke((Action)this.Update), false).AddTo(this.fleetDisposable);
 				}
 			}
 
