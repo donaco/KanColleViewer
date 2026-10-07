@@ -40,6 +40,8 @@ namespace Grabacr07.KanColleViewer.Models
 		private DateTimeOffset? nosakiSharedNextNotifyAt;
 		private long lastSavedNosakiUnixMs = -1;
 		private IDisposable? nosakiTimerSubscription;
+		private bool nosakiTimerRestorePending;
+		private bool hasObservedNosakiFleetData;
 		public event EventHandler? NosakiTimerUpdated;
 
 		// ﾉｻｷﾁｬﾝのID
@@ -344,6 +346,8 @@ namespace Grabacr07.KanColleViewer.Models
 			lock (this.nosakiTimerSync)
 			{
 				this.nosakiNextNotifyAt.Clear();
+				this.nosakiTimerRestorePending = true;
+				this.hasObservedNosakiFleetData = false;
 				// 前回終了時の共有タイマー終了時刻を復元
 				var cachedMs = Settings.KanColleSettings.NosakiSharedNextNotifyAtUnixTimeMs.Value;
 				if (cachedMs > 0)
@@ -383,6 +387,12 @@ namespace Grabacr07.KanColleViewer.Models
 
 			lock (this.nosakiTimerSync)
 			{
+				var hasFleetData = organization.Fleets.Count > 0;
+				if (hasFleetData)
+				{
+					this.hasObservedNosakiFleetData = true;
+				}
+				var restoreCachedTimer = this.nosakiTimerRestorePending && hasFleetData;
 				var validShipIds = new HashSet<int>();
 
 				foreach (var fleet in organization.Fleets.Values.Where(f => f != null))
@@ -413,10 +423,13 @@ namespace Grabacr07.KanColleViewer.Models
 
 						if (!this.nosakiNextNotifyAt.TryGetValue(ship.Id, out var nextNotifyAt))
 						{
-							// 起動時復元値が有効ならそれに合わせる
-							var seed = this.nosakiSharedNextNotifyAt.HasValue && this.nosakiSharedNextNotifyAt.Value > now
-								? this.nosakiSharedNextNotifyAt.Value
-								: now.Add(NosakiNotifyInterval);
+							var seed = now.Add(NosakiNotifyInterval);
+							if (restoreCachedTimer
+								&& this.nosakiSharedNextNotifyAt.HasValue
+								&& this.nosakiSharedNextNotifyAt.Value > now)
+							{
+								seed = this.nosakiSharedNextNotifyAt.Value;
+							}
 							this.nosakiNextNotifyAt[ship.Id] = seed;
 							continue;
 						}
@@ -434,6 +447,11 @@ namespace Grabacr07.KanColleViewer.Models
 					}
 				}
 
+				if (hasFleetData)
+				{
+					this.nosakiTimerRestorePending = false;
+				}
+
 				var staleIds = this.nosakiNextNotifyAt.Keys.Where(id => !validShipIds.Contains(id)).ToArray();
 				foreach (var shipId in staleIds)
 				{
@@ -444,11 +462,11 @@ namespace Grabacr07.KanColleViewer.Models
 				{
 					this.nosakiSharedNextNotifyAt = this.nosakiNextNotifyAt.Values.Max();
 				}
-				else if (this.nosakiSharedNextNotifyAt.HasValue && this.nosakiSharedNextNotifyAt.Value <= now)
+				else if (this.hasObservedNosakiFleetData)
 				{
 					this.nosakiSharedNextNotifyAt = null;
 				}
-				// 復元値が期限切れになった場合のみクリア（起動直後の未ロード状態では保持）
+				// 艦隊データ未ロード時は復元値を維持し、ロード後に有効な対象艦がいなければ期限を消去
 				this.SaveNosakiTimerCache(this.nosakiSharedNextNotifyAt);
 			}
 
