@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Grabacr07.KanColleViewer.Models;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
@@ -14,7 +13,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private Icon? icon;
 		private EventHandler? activatedAction;
 
-		public override bool IsSupported => !Toast.IsSupported;
+		public override bool IsSupported => !Toast.IsWindows10OrLater || !this.AppNotificationService.IsAvailable;
 
 		protected override void InitializeCore()
 		{
@@ -35,7 +34,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 					this.icon = new Icon(stream);
 					this.notifyIcon = new NotifyIcon
 					{
-						Text = ProductInfo.Title,
+						Text = this.AppNotificationService.ProductTitle,
 						Icon = this.icon,
 						Visible = true,
 					};

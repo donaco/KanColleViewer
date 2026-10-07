@@ -1,5 +1,5 @@
 using System;
-using Grabacr07.KanColleViewer.Services;
+using Grabacr07.KanColleViewer.Composition;
 
 namespace Grabacr07.KanColleViewer.Plugins
 {
@@ -8,15 +8,17 @@ namespace Grabacr07.KanColleViewer.Plugins
 	/// </summary>
 	public class Toast
 	{
-		private static readonly bool IsWindows10OrLater = Environment.OSVersion.Version.Major >= 10;
+		internal static bool IsWindows10OrLater => Environment.OSVersion.Version.Major >= 10;
+
+		private readonly IAppNotificationService appNotificationService;
 
 		/// <summary>
 		/// トースト通知機能をサポートしているかどうかを示す値を取得します。
 		/// </summary>
 		/// <returns>
-		/// 動作しているオペレーティング システムが Windows 10 以降の場合は true、それ以外の場合は false。
+		/// 動作しているオペレーティング システムが Windows 10 以降で、ホストのトースト通知が利用可能な場合は true。
 		/// </returns>
-		public static bool IsSupported => IsWindows10OrLater && AppNotificationService.IsAvailable;
+		public bool IsSupported => IsWindows10OrLater && this.appNotificationService.IsAvailable;
 
 		public event Action? Activated;
 
@@ -24,15 +26,16 @@ namespace Grabacr07.KanColleViewer.Plugins
 
 		private readonly string header;
 		private readonly string body;
-		public Toast(string header, string body)
+		public Toast(IAppNotificationService appNotificationService, string header, string body)
 		{
+			this.appNotificationService = appNotificationService;
 			this.header = header;
 			this.body = body;
 		}
 
 		public void Show()
 		{
-			AppNotificationService.Show(this.header, this.body, this.Activated ?? (() => { }), this.ToastFailed ?? (_ => { }));
+			this.appNotificationService.Show(this.header, this.body, this.Activated ?? (() => { }), this.ToastFailed);
 		}
 	}
 }

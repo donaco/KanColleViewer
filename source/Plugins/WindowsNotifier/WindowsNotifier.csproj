@@ -22,7 +22,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Grabacr07.KanColleViewer.Composition\KanColleViewer.Composition.csproj" />
     <ProjectReference Include="..\..\Grabacr07.KanColleViewer.Controls\KanColleViewer.Controls.csproj" />
-    <ProjectReference Include="..\..\Grabacr07.KanColleViewer\KanColleViewer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

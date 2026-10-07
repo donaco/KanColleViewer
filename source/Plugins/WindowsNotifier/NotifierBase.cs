@@ -11,6 +11,9 @@ namespace Grabacr07.KanColleViewer.Plugins
 	[ExportMetadata("Guid", "6EDE38C8-412D-4A73-8FE3-A9D20EB9F0D2")]
 	public abstract class NotifierBase : INotifier, IDisposable
 	{
+		[Import]
+		public IAppNotificationService AppNotificationService { get; set; } = null!;
+
 		public bool Initialized { get; private set; }
 
 		public abstract bool IsSupported { get; }
