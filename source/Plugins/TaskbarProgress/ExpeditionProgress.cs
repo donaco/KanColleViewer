@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private CompositeDisposable homeportDisposable = new CompositeDisposable();
 		private CompositeDisposable wrapperDisposable = new CompositeDisposable();
 		private ExpeditionWrapper[] wrappers = Array.Empty<ExpeditionWrapper>();
-		private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
+		private readonly Dispatcher _dispatcher = System.Windows.Application.Current.Dispatcher;
 
 		public string Id => guid + "-1";
 
@@ -132,7 +132,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 				var target = this.wrappers.Aggregate(Early);
 				if (target.Source.Remaining.HasValue
 					&& target.Source.ReturnTime is { } returnTime
-					&& target.Source.Mission is { } mission)
+					&& target.Source.Mission is { } mission
+					&& mission.RawData.api_time > 0)
 				{
 					var state = this.wrappers.Any(x => x.State == ExpeditionState.Waiting)
 						? TaskbarItemProgressState.Paused
@@ -141,7 +142,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 					var value = DateTimeOffset.Now.Subtract(start).TotalMinutes / mission.RawData.api_time;
 
 					this.State = state;
-					this.Value = value;
+					this.Value = Math.Clamp(value, 0.0, 1.0);
 				}
 				else
 				{

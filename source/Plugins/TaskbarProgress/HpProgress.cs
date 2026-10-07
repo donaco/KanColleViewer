@@ -28,7 +28,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 		private readonly CompositeDisposable compositDisposable = new CompositeDisposable();
 		private CompositeDisposable homeportDisposable = new CompositeDisposable();
 		private CompositeDisposable fleetDisposable = new CompositeDisposable();
-		private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
+		private readonly Dispatcher _dispatcher = System.Windows.Application.Current.Dispatcher;
 
 		public string Id => guid + "-1";
 
@@ -109,6 +109,8 @@ namespace Grabacr07.KanColleViewer.Plugins
 				}
 			}
 
+			ships = ships.Where(x => x.HP.Maximum > 0);
+
 			if (!ships.Any())
 			{
 				this.Value = .0;
@@ -117,7 +119,7 @@ namespace Grabacr07.KanColleViewer.Plugins
 				return;
 			}
 
-			this.Value = ships.Select(x => (x.HP.Maximum == 0 ? 0.0 : x.HP.Current / (double)x.HP.Maximum)).Min();
+			this.Value = ships.Select(x => x.HP.Current / (double)x.HP.Maximum).Min();
 
 			// 0.25 以下のとき、「大破」
 			if (this.Value <= 0.25)
