@@ -31,7 +31,8 @@ namespace Counter
 		public void Initialize()
 		{
 			try
-			{				this.viewModel = new CounterViewModel
+			{
+				this.viewModel = new CounterViewModel
 				{
 					Counters = new ObservableCollection<CounterBase>
 					{
@@ -40,9 +41,9 @@ namespace Counter
 						new MissionCounter(),
 						new SortieCounter(),
 					},
-				// --- 直近を表示(表示数を指定) ---
-				SortieHistory = new SortieHistoryCounter(int.MaxValue),
-			};
+					// --- 直近を表示(表示数を指定) ---
+					SortieHistory = new SortieHistoryCounter(int.MaxValue),
+				};
 				this.viewModel.SortieHistory.RecordAdded += this.SortieHistory_RecordAdded;
 
 				// --- 保存データを復元 ---

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -1198,7 +1199,12 @@ namespace Counter
 						data.IsLdAirbattle);
 
 					// リフレクションの代わりに、Timestamp プロパティに直接セット
-					if (DateTime.TryParse(data.Timestamp, out var ts))
+					if (DateTime.TryParseExact(
+						data.Timestamp,
+						"yyyy-MM-dd HH:mm:ss",
+						CultureInfo.InvariantCulture,
+						DateTimeStyles.None,
+						out var ts))
 					{
 						record.Timestamp = ts;
 					}

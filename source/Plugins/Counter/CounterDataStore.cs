@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
@@ -160,7 +161,7 @@ namespace Counter
 								AirResult = (int)record.AirResult,
 								IsDestruction = record.IsDestruction,
 								IsLdAirbattle = record.IsLdAirbattle,
-								Timestamp = record.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+								Timestamp = record.Timestamp.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
 							});
 						}
 					}
