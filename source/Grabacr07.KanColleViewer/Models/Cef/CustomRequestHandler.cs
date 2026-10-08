@@ -176,15 +176,15 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 									normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(decompressed);
 								}
 							}
-
-							if (string.IsNullOrEmpty(normalized))
-							{
-								normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
-							}
 						}
 						catch
 						{
 							normalized = null;
+						}
+
+						if (string.IsNullOrEmpty(normalized))
+						{
+							normalized = Grabacr07.KanColleWrapper.Internal.RetryObservableExtensions.NormalizeSvDataString(responseBodyText ?? string.Empty);
 						}
 
 						// 正常に正規化できたらアプリへ渡す（onCaptured は別スレッドで安全に呼ぶ)
@@ -202,10 +202,15 @@ namespace Grabacr07.KanColleViewer.Models.Cef
 
 							try
 							{
-								// onCaptured は軽量にする想定だが念のためも別スレッドで
-								Task.Run(() => { try { onCaptured?.Invoke(captured); } catch { } });
+								Task.Run(() =>
+								{
+									try { onCaptured?.Invoke(captured); } catch { }
+								});
 							}
-							catch { }
+							catch
+							{
+								// swallow
+							}
 						}
 					});
 				}
