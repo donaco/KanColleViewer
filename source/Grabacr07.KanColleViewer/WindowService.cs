@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,6 +47,7 @@ namespace Grabacr07.KanColleViewer
 		private KanColleWindowViewModel? kanColleWindow;
 		private InformationWindowViewModel? informationWindow;
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
+		private readonly PropertyChangedEventHandler cultureChangedHandler;
 
 		// 各艦隊の Situation 変化購読を管理する
 		private CompositeDisposable fleetStateListeners = new CompositeDisposable();
@@ -103,7 +105,17 @@ namespace Grabacr07.KanColleViewer
 		}
 
 
-		private WindowService() { }
+		private WindowService()
+		{
+			this.cultureChangedHandler = (_, e) =>
+			{
+				if (e.PropertyName == nameof(ResourceService.Resources) && this.Mode == WindowServiceMode.Started)
+				{
+					StatusService.Current.Set(Resources.StatusBar_Ready);
+				}
+			};
+			ResourceService.Current.PropertyChanged += this.cultureChangedHandler;
+		}
 
 		public void Initialize(bool useInformationWindowAsMainWindow = false)
 		{
@@ -304,6 +316,7 @@ namespace Grabacr07.KanColleViewer
 
 		public void Dispose()
 		{
+			ResourceService.Current.PropertyChanged -= this.cultureChangedHandler;
 			this.fleetStateListeners?.Dispose();
 			this.compositeDisposable.Dispose();
 		}
