@@ -10,6 +10,7 @@
 				   xmlns:kcvi="http://schemes.grabacr.net/winfx/2015/kancolleviewer/interactivity"
 				   xmlns:kcvv="http://schemes.grabacr.net/winfx/2015/kancolleviewer/converters"
 				   xmlns:properties="clr-namespace:Grabacr07.KanColleViewer.Properties"
+				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views"
 				   xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 				   mc:Ignorable="d"
@@ -31,7 +32,7 @@
 			<Rectangle Height="1"
 					   Style="{DynamicResource SeparatorRectangleStyleKey}"
 					   Margin="0,0,0,12" />
-			<metro2:CallMethodButton Content="閉じる"
+			<metro2:CallMethodButton Content="{Binding [Ui_Action_Close], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									 MethodName="Close"
 									 IsCancel="True"
 									 MinWidth="110"

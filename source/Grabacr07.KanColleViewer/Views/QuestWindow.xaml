@@ -9,9 +9,10 @@
 				   xmlns:views="clr-namespace:Grabacr07.KanColleViewer.Views.Contents"
 				   xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 				   xmlns:contentsVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
+				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:QuestWindowViewModel}"
-				   Title="{Binding Title}"
+				   Title="{Binding Resources.Quests, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   MinWidth ="500" Width="930"
 				   MinHeight="250" Height="500"
 				   FontSize="12"
@@ -52,7 +53,7 @@
 							  BandVisibility="Collapsed" />
 
 				<TextBlock Grid.Column="1"
-						   Text="任務一覧"
+						   Text="{Binding Resources.Quests, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						   Style="{DynamicResource CaptionTextStyleKey}"
 						   Margin="2,0,8,0" />
 
@@ -61,7 +62,7 @@
 							VerticalAlignment="Top"
 							WindowChrome.IsHitTestVisibleInChrome="True">
 					<metro:CaptionButton IsChecked="{Binding Settings.TopMost.Value, Mode=TwoWay}"
-										 ToolTip="常に最前面に表示"
+										 ToolTip="{Binding Resources.Settings_Window_TopMost, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 Style="{DynamicResource PinButtonStyleKey}" />
 					<metro:SystemButtons HorizontalAlignment="Right"
 										 VerticalAlignment="Top" />
@@ -75,7 +76,7 @@
 			  Margin="4">
 
 			<!-- 任務未取得時のメッセージ -->
-			<TextBlock Text="任務一覧は取得されていません"
+			<TextBlock Text="{Binding [Ui_Quests_NotTaken], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource EmphaticTextStyleKey}"
 					   FontSize="16"
 					   HorizontalAlignment="Center"
@@ -97,7 +98,7 @@
 						<RowDefinition Height="*" />
 					</Grid.RowDefinitions>
 
-					<TextBlock Text="現在遂行中の任務"
+					<TextBlock Text="{Binding Resources.Quests_CurrentQuestList, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource HeaderTextStyleKey}"
 							   Margin="10,6,10,10" />
 
@@ -121,7 +122,7 @@
 					</ScrollViewer>
 
 					<TextBlock Grid.Row="1"
-							   Text="遂行中の任務はありません"
+							   Text="{Binding [Ui_Quests_NoCurrent], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource DetailTextStyleKey}"
 							   HorizontalAlignment="Center"
 							   Margin="10"
@@ -214,7 +215,7 @@
 
 					<TabItem>
 						<TabItem.Header>
-							<TextBlock Text="デイリー任務"
+							<TextBlock Text="{Binding Resources.Quests_Daily, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									   Style="{DynamicResource HeaderTextStyleKey}"
 									   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Foreground}"
 									   Margin="10,6,10,10" />
@@ -227,7 +228,7 @@
 
 					<TabItem>
 						<TabItem.Header>
-							<TextBlock Text="ウィークリー任務"
+							<TextBlock Text="{Binding Resources.Quests_Weekly, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									   Style="{DynamicResource HeaderTextStyleKey}"
 									   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Foreground}"
 									   Margin="10,6,10,10" />
@@ -240,7 +241,7 @@
 
 					<TabItem>
 						<TabItem.Header>
-							<TextBlock Text="マンスリー任務"
+							<TextBlock Text="{Binding Resources.Quests_Monthly, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									   Style="{DynamicResource HeaderTextStyleKey}"
 									   Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Foreground}"
 									   Margin="10,6,10,10" />

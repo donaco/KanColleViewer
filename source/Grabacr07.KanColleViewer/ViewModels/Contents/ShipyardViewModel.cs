@@ -11,7 +11,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 	{
 		public override string Name
 		{
-			get { return "工廠"; }
+			get { return Grabacr07.KanColleViewer.Models.ResourceService.Current["Ui_Tab_Shipyard"]; }
 			protected set { throw new NotImplementedException(); }
 		}
 

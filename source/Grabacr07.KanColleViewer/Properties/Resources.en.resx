@@ -207,6 +207,30 @@
   <data name="Expedition_TimeRemaining" xml:space="preserve">
     <value>Remaining Time</value>
   </data>
+  <data name="Materials_Fuel" xml:space="preserve">
+    <value>Fuel</value>
+  </data>
+  <data name="Materials_Ammunition" xml:space="preserve">
+    <value>Ammunition</value>
+  </data>
+  <data name="Materials_Steel" xml:space="preserve">
+    <value>Steel</value>
+  </data>
+  <data name="Materials_Bauxite" xml:space="preserve">
+    <value>Bauxite</value>
+  </data>
+  <data name="Materials_DevelopmentMaterials" xml:space="preserve">
+    <value>Develop Mat</value>
+  </data>
+  <data name="Materials_InstantRepairMaterials" xml:space="preserve">
+    <value>Repair Mat</value>
+  </data>
+  <data name="Materials_InstantBuildMaterials" xml:space="preserve">
+    <value>Build Mat</value>
+  </data>
+  <data name="Materials_ImprovementMaterials" xml:space="preserve">
+    <value>Improv Mat</value>
+  </data>
   <data name="Fleets" xml:space="preserve">
     <value>Fleets</value>
   </data>
@@ -426,6 +450,33 @@
   <data name="StartContent_Welcom" xml:space="preserve">
     <value>Welcome</value>
   </data>
+  <data name="Fleets_AirSuperiorityPotential" xml:space="preserve">
+    <value>Air Power</value>
+  </data>
+  <data name="Fleets_Average" xml:space="preserve">
+    <value>Average</value>
+  </data>
+  <data name="Fleets_Speed_Fast" xml:space="preserve">
+    <value>Fast Fleet</value>
+  </data>
+  <data name="Fleets_Speed_Slow" xml:space="preserve">
+    <value>Slow Fleet</value>
+  </data>
+  <data name="Fleets_Speed_Mixed" xml:space="preserve">
+    <value>Mixed Speed Fleet</value>
+  </data>
+  <data name="Fleets_Speed_Fleet" xml:space="preserve">
+    <value>Fleet</value>
+  </data>
+  <data name="Fleets_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Fleets_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Fleets_ViewRange" xml:space="preserve">
+    <value>Line of Sight</value>
+  </data>
   <data name="StatusBar_NotStarted" xml:space="preserve">
     <value>Waiting for KanColle to start</value>
   </data>
@@ -453,6 +504,9 @@
   <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
     <value>are heavily damaged</value>
   </data>
+  <data name="AirBases_Untaken" xml:space="preserve">
+    <value>Please open the [Area Selection] screen in the game to load your land-based air unit data.</value>
+  </data>
   <data name="UpdateCheck_off" xml:space="preserve">
     <value>Auto Update Check OFF</value>
   </data>
@@ -470,5 +524,796 @@
   </data>
   <data name="StatusBar_Speed_Slow" xml:space="preserve">
     <value>Slow Fleet</value>
+  </data>
+  <data name="Ui_Action_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Ui_Action_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Ui_Action_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Ui_Action_RestoreDefaults" xml:space="preserve">
+    <value>Restore Defaults</value>
+  </data>
+  <data name="Ui_Action_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Ui_Action_Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Ui_AirBases_AirPower" xml:space="preserve">
+    <value>Air: </value>
+  </data>
+  <data name="Ui_AirBases_Details" xml:space="preserve">
+    <value>Air Base Details</value>
+  </data>
+  <data name="Ui_AirBases_AirPowerNote" xml:space="preserve">
+    <value>Note: Air power values are approximate.</value>
+  </data>
+  <data name="Ui_AirBases_MaintenanceLevel" xml:space="preserve">
+    <value>Maintenance Lv.</value>
+  </data>
+  <data name="Ui_AirBases_ProficiencyPrefix" xml:space="preserve">
+    <value>Proficiency: </value>
+  </data>
+  <data name="Ui_AirBases_Radius" xml:space="preserve">
+    <value>Radius: </value>
+  </data>
+  <data name="Ui_AirBases_Screenshot" xml:space="preserve">
+    <value>Save a screenshot of this window</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Sortie" xml:space="preserve">
+    <value>ATO</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_AirDefense" xml:space="preserve">
+    <value>ADF</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Retreat" xml:space="preserve">
+    <value>EVC</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Rest" xml:space="preserve">
+    <value>AFK</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Standby" xml:space="preserve">
+    <value>TBC</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
+    <value>The cache will be cleared the next time the application starts.</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
+    <value>Go back</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Forward" xml:space="preserve">
+    <value>Go forward</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Refresh" xml:space="preserve">
+    <value>Refresh page</value>
+  </data>
+  <data name="Ui_BrowserNavigator_UrlPrompt" xml:space="preserve">
+    <value>Enter a URL and press Enter to navigate.</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Description" xml:space="preserve">
+    <value>Enables developer features. Restart the application after disabling this option.</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Enable" xml:space="preserve">
+    <value>Enable developer options</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu" xml:space="preserve">
+    <value>Disable GPU acceleration</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
+    <value>Enable this option if you have display issues. Restart the application for the change to take effect.</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
+    <value>Choose a balance between rendering quality and GPU load. Restart the application for the change to take effect.</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
+    <value>High: {0} FPS (Auto-adjust)</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
+    <value>Low: 30 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
+    <value>Med: 60 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
+    <value>Select the display frame rate</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
+    <value>(Use if you zoom in accidentally)</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Prefix" xml:space="preserve">
+    <value>Reset game screen zoom to </value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Suffix" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools" xml:space="preserve">
+    <value>Show developer tools</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Description" xml:space="preserve">
+    <value>Opens the developer tools in a pop-up window.</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Hint" xml:space="preserve">
+    <value>(For developers; opens in a pop-up window)</value>
+  </data>
+  <data name="Ui_Browser_Zoom_Description" xml:space="preserve">
+    <value>Use the buttons at the top of the window to change the game display size. Screenshots are always captured at 100%, regardless of the display size setting.</value>
+  </data>
+  <data name="Ui_Fleet_First" xml:space="preserve">
+    <value>Fleet 1</value>
+  </data>
+  <data name="Ui_Fleet_Evacuated" xml:space="preserve">
+    <value>Evacuated</value>
+  </data>
+  <data name="Ui_Fleet_Repairing" xml:space="preserve">
+    <value>Repairing</value>
+  </data>
+  <data name="Ui_Fleet_Second" xml:space="preserve">
+    <value>Fleet 2</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy" xml:space="preserve">
+    <value>Healthy</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy_DamageControl" xml:space="preserve">
+    <value>Healthy (Damage Control Equipped)</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_SinkingPossible" xml:space="preserve">
+    <value>Heavily Damaged (Sinking Possible)</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_DamageControlAvailable" xml:space="preserve">
+    <value>Heavily Damaged (Damage Control Available)</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_Evacuated" xml:space="preserve">
+    <value>Heavily Damaged (Evacuated)</value>
+  </data>
+  <data name="Ui_FleetWindow_Retreated_EscortEvacuation" xml:space="preserve">
+    <value>Retreated (Escort Evacuation)</value>
+  </data>
+  <data name="Ui_FleetWindow_Repairing" xml:space="preserve">
+    <value>Repairing</value>
+  </data>
+  <data name="Ui_FleetWindow_DaytimeCutIn" xml:space="preserve">
+    <value>Daytime Cut-In Attack</value>
+  </data>
+  <data name="Ui_FleetWindow_NightBattleCutIn" xml:space="preserve">
+    <value>Night Battle Cut-In: 30%</value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleet" xml:space="preserve">
+    <value>Combined Fleet</value>
+  </data>
+  <data name="Ui_FleetWindow_TotalLevel" xml:space="preserve">
+    <value>Total Level</value>
+  </data>
+  <data name="Ui_FleetWindow_AverageLevel" xml:space="preserve">
+    <value>Average Level</value>
+  </data>
+  <data name="Ui_FleetWindow_LineOfSight" xml:space="preserve">
+    <value>Line of Sight</value>
+  </data>
+  <data name="Ui_FleetWindow_AirPower" xml:space="preserve">
+    <value>Air Power</value>
+  </data>
+  <data name="Ui_FleetWindow_Minimum" xml:space="preserve">
+    <value>(Min)</value>
+  </data>
+  <data name="Ui_FleetWindow_MinAirPowerTooltip" xml:space="preserve">
+    <value>Calculated using fighters only, with minimum internal proficiency.</value>
+  </data>
+  <data name="Ui_FleetWindow_Maximum" xml:space="preserve">
+    <value>(Max)</value>
+  </data>
+  <data name="Ui_FleetWindow_MaxAirPowerTooltip" xml:space="preserve">
+    <value>Calculated using all carrier-based aircraft, with maximum internal proficiency.</value>
+  </data>
+  <data name="Ui_FleetWindow_Transport" xml:space="preserve">
+    <value>Transport</value>
+  </data>
+  <data name="Ui_FleetWindow_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Ui_FleetWindow_NotSortie" xml:space="preserve">
+    <value>The fleet is not on a sortie</value>
+  </data>
+  <data name="Ui_FleetWindow_Sortie" xml:space="preserve">
+    <value>The fleet is on a sortie!</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieNotReady" xml:space="preserve">
+    <value>The fleet is not ready to sortie</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieReady" xml:space="preserve">
+    <value>Ready to sortie!</value>
+  </data>
+  <data name="Ui_FleetWindow_NotOnExpedition" xml:space="preserve">
+    <value>The fleet is not on an expedition</value>
+  </data>
+  <data name="Ui_FleetWindow_OnExpeditionPrefix" xml:space="preserve">
+    <value>The fleet is on an expedition: </value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleetCannotExpedition" xml:space="preserve">
+    <value>Combined fleets cannot go on expeditions</value>
+  </data>
+  <data name="Ui_FleetWindow_NoHeavilyDamagedShips" xml:space="preserve">
+    <value>There are no heavily damaged ships in the fleet</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips" xml:space="preserve">
+    <value>There are heavily damaged ships in the fleet</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips_Sortie" xml:space="preserve">
+    <value>There are heavily damaged ships in the fleet!</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsRepairing" xml:space="preserve">
+    <value>No ships in the fleet are being repaired</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsRepairing" xml:space="preserve">
+    <value>There are ships in the fleet being repaired</value>
+  </data>
+  <data name="Ui_FleetWindow_FleetSupplied" xml:space="preserve">
+    <value>The fleet is fully supplied</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsNeedResupply" xml:space="preserve">
+    <value>There are ships in the fleet that need resupply</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsFatigued" xml:space="preserve">
+    <value>No ships in the fleet are fatigued</value>
+  </data>
+  <data name="Ui_FleetWindow_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>Fatigue recovery in: </value>
+  </data>
+  <data name="Ui_FleetWindow_NormalFleetComposition" xml:space="preserve">
+    <value>Fleet composition is normal</value>
+  </data>
+  <data name="Ui_FleetWindow_RepairShipFlagship" xml:space="preserve">
+    <value>A repair ship is assigned as flagship</value>
+  </data>
+  <data name="Ui_Catalog_FilterSettings" xml:space="preserve">
+    <value>Filter Settings</value>
+  </data>
+  <data name="Ui_Catalog_SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Ui_Catalog_Refresh" xml:space="preserve">
+    <value>Refresh Display</value>
+  </data>
+  <data name="Ui_Catalog_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Ui_Catalog_GeneratingList" xml:space="preserve">
+    <value>Generating list...</value>
+  </data>
+  <data name="Ui_Catalog_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Ui_Catalog_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Ui_Catalog_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiAir" xml:space="preserve">
+    <value>Anti-Air</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiSubmarine" xml:space="preserve">
+    <value>Anti-Submarine</value>
+  </data>
+  <data name="Ui_ShipCatalog_Armor" xml:space="preserve">
+    <value>Armor</value>
+  </data>
+  <data name="Ui_ShipCatalog_Ascending" xml:space="preserve">
+    <value>Ascending</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition" xml:space="preserve">
+    <value>Condition</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition50OrMore" xml:space="preserve">
+    <value>50 or higher</value>
+  </data>
+  <data name="Ui_ShipCatalog_ConditionUnder50" xml:space="preserve">
+    <value>Under 50</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damaged" xml:space="preserve">
+    <value>Damaged</value>
+  </data>
+  <data name="Ui_ShipCatalog_Descending" xml:space="preserve">
+    <value>Descending</value>
+  </data>
+  <data name="Ui_ShipCatalog_Equipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="Ui_ShipCatalog_EquipmentBonusTooltip" xml:space="preserve">
+    <value>Values include bonuses from equipment.</value>
+  </data>
+  <data name="Ui_ShipCatalog_ExcludeExpeditionShips" xml:space="preserve">
+    <value>Exclude ships on expeditions</value>
+  </data>
+  <data name="Ui_ShipCatalog_Expedition" xml:space="preserve">
+    <value>Expedition</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fast" xml:space="preserve">
+    <value>Fast</value>
+  </data>
+  <data name="Ui_ShipCatalog_Faster" xml:space="preserve">
+    <value>Fast+</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fastest" xml:space="preserve">
+    <value>Fastest</value>
+  </data>
+  <data name="Ui_ShipCatalog_Firepower" xml:space="preserve">
+    <value>Firepower</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level1" xml:space="preserve">
+    <value>Level 1</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level2OrMore" xml:space="preserve">
+    <value>Level 2 or higher</value>
+  </data>
+  <data name="Ui_ShipCatalog_LineOfSight" xml:space="preserve">
+    <value>Line of Sight</value>
+  </data>
+  <data name="Ui_ShipCatalog_Lock" xml:space="preserve">
+    <value>Lock</value>
+  </data>
+  <data name="Ui_ShipCatalog_Locked" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="Ui_ShipCatalog_Luck" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernization" xml:space="preserve">
+    <value>Modernization</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernized" xml:space="preserve">
+    <value>Complete</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotModernized" xml:space="preserve">
+    <value>Incomplete</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AmphibiousTank" xml:space="preserve">
+    <value>Amphibious Tank</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AviationBattleshipCruiser" xml:space="preserve">
+    <value>Aviation BB/Cruiser</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Battleship" xml:space="preserve">
+    <value>Battleship</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Carrier" xml:space="preserve">
+    <value>Aircraft Carrier</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Daihatsu" xml:space="preserve">
+    <value>Landing Craft</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Destroyer" xml:space="preserve">
+    <value>Destroyer</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_HeavyCruiser" xml:space="preserve">
+    <value>Heavy/Aviation Cruiser</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_LightCruiser" xml:space="preserve">
+    <value>Light/Torpedo Cruiser</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Submarine" xml:space="preserve">
+    <value>Submarine</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeled" xml:space="preserve">
+    <value>Remodeled</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeling" xml:space="preserve">
+    <value>Remodeling</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotRemodeled" xml:space="preserve">
+    <value>Not remodeled</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTime" xml:space="preserve">
+    <value>Repair Time</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTimeTooltip" xml:space="preserve">
+    <value>Time required to repair the ship.</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipName" xml:space="preserve">
+    <value>Ship Name</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipType" xml:space="preserve">
+    <value>Ship Type</value>
+  </data>
+  <data name="Ui_ShipCatalog_Slow" xml:space="preserve">
+    <value>Slow</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortDescription" xml:space="preserve">
+    <value>Sort ships in the following order.</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortieArea" xml:space="preserve">
+    <value>Sortie Area</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortMethod" xml:space="preserve">
+    <value>Sort Method</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortSettings" xml:space="preserve">
+    <value>Sort Settings</value>
+  </data>
+  <data name="Ui_ShipCatalog_Speed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="Ui_ShipCatalog_Torpedo" xml:space="preserve">
+    <value>Torpedo</value>
+  </data>
+  <data name="Ui_ShipCatalog_Undamaged" xml:space="preserve">
+    <value>Undamaged</value>
+  </data>
+  <data name="Ui_ShipCatalog_Unlocked" xml:space="preserve">
+    <value>Unlocked</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Type" xml:space="preserve">
+    <value>Equipment Type</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquipmentName" xml:space="preserve">
+    <value>Equipment Name</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Improvement" xml:space="preserve">
+    <value>IMP</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Proficiency" xml:space="preserve">
+    <value>PL</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_OwnedCount" xml:space="preserve">
+    <value>Own</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Remainder" xml:space="preserve">
+    <value>(Res)</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
+    <value>Equipped Ships</value>
+  </data>
+  <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
+    <value>Transport Capacity</value>
+  </data>
+  <data name="Ui_Fleets_Details" xml:space="preserve">
+    <value>Fleet Details</value>
+  </data>
+  <data name="Ui_ExitDialog_Confirmation" xml:space="preserve">
+    <value>Are you sure you want to exit KanColleViewer?</value>
+  </data>
+  <data name="Ui_Notification_Advance" xml:space="preserve">
+    <value>Send notifications early</value>
+  </data>
+  <data name="Ui_Notification_Advance_Notice" xml:space="preserve">
+    <value>Due to game behavior, notifications can be advanced by up to one minute. We recommend setting this to 40–50 seconds to account for server time differences.</value>
+  </data>
+  <data name="Ui_Notification_FleetRejuvenated" xml:space="preserve">
+    <value>Notify when the fleet's ships have recovered from fatigue</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer" xml:space="preserve">
+    <value>Notify while the homeport supply ship timer is running</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer_Description" xml:space="preserve">
+    <value>Notifications are sent every 15 minutes after the timer starts and stop when the timer ends.</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition" xml:space="preserve">
+    <value>Condition value required before sortie</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition_Note" xml:space="preserve">
+    <value>Configure this under Settings &gt; Operation &gt; Sortie Condition.</value>
+  </data>
+  <data name="Ui_Notification_ResortieDescription" xml:space="preserve">
+    <value>You will be notified when every ship in the fleet reaches at least the condition value above. Condition recovers by 3 every 3 minutes. Notifications may be delayed by a few seconds, or up to about 3 minutes.</value>
+  </data>
+  <data name="Ui_Operation_AutoFleetSelection" xml:space="preserve">
+    <value>Automatic Fleet Selection</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnCompositionChange" xml:space="preserve">
+    <value>Automatically select a fleet when its composition changes</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnSortie" xml:space="preserve">
+    <value>Automatically select a fleet when it sorties</value>
+  </data>
+  <data name="Ui_Operation_CombinedFleet_ViewRange" xml:space="preserve">
+    <value>Fleets included in LoS calculation for a Combined Fleet</value>
+  </data>
+  <data name="Ui_Operation_Condition_Example" xml:space="preserve">
+    <value>e.g. 40</value>
+  </data>
+  <data name="Ui_Operation_FleetStatus" xml:space="preserve">
+    <value>Fleet Status</value>
+  </data>
+  <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
+    <value>Do not consider the fleet ready to sortie when a repair ship is the flagship</value>
+  </data>
+  <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
+    <value>Show air superiority information only for air battle and air defense nodes</value>
+  </data>
+  <data name="Ui_Operation_ShowNextCell" xml:space="preserve">
+    <value>Reveal the next destination (otherwise shown when battle starts)</value>
+  </data>
+  <data name="Ui_Operation_ShowSortieInfo" xml:space="preserve">
+    <value>Show map position and battle results during a sortie (e.g. 1-5-D [S][Air Supremacy])</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Description" xml:space="preserve">
+    <value>Consider the fleet ready to sortie when every ship's condition is at least this value</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Note" xml:space="preserve">
+    <value>Usually set this to 40 (when the Morale icon disappears) or 49 (the natural recovery cap).</value>
+  </data>
+  <data name="Ui_Operation_SortieInfo" xml:space="preserve">
+    <value>Sortie Information</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation" xml:space="preserve">
+    <value>Line of Sight Calculation</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
+    <value>Select the formula used to calculate the fleet's line of sight.</value>
+  </data>
+  <data name="Ui_Overview_Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Ui_Overview_ShipCatalog" xml:space="preserve">
+    <value>Ship List</value>
+  </data>
+  <data name="Ui_Overview_SlotItemCatalog" xml:space="preserve">
+    <value>Equip List</value>
+  </data>
+  <data name="Ui_PluginInfo_Functions" xml:space="preserve">
+    <value>Features: </value>
+  </data>
+  <data name="Ui_PluginInfo_Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Ui_PluginInfo_PluginNotifications" xml:space="preserve">
+    <value>Plugin notifications</value>
+  </data>
+  <data name="Ui_PluginInfo_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Ui_PluginInfo_TaskbarProgress" xml:space="preserve">
+    <value>Taskbar indicator</value>
+  </data>
+  <data name="Ui_PluginInfo_Test" xml:space="preserve">
+    <value>(Test)</value>
+  </data>
+  <data name="Ui_PluginInfo_ToolWindow" xml:space="preserve">
+    <value>Tool window</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed" xml:space="preserve">
+    <value>Plugins That Failed to Load</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed_Description" xml:space="preserve">
+    <value>The following plugins failed to load and are not running. You can review details about the errors.</value>
+  </data>
+  <data name="Ui_Plugins_Loaded" xml:space="preserve">
+    <value>Loaded Plugins</value>
+  </data>
+  <data name="Ui_Plugins_Loaded_Description" xml:space="preserve">
+    <value>The following plugins are loaded. You can change their settings.</value>
+  </data>
+  <data name="Ui_Quests_NoCurrent" xml:space="preserve">
+    <value>There are no quests currently in progress.</value>
+  </data>
+  <data name="Ui_Quests_List" xml:space="preserve">
+    <value>Quest List</value>
+  </data>
+  <data name="Ui_Quests_NotTaken" xml:space="preserve">
+    <value>The quest list has not been retrieved.</value>
+  </data>
+  <data name="Ui_Proxy_Direct" xml:space="preserve">
+    <value>Do not use a proxy server</value>
+  </data>
+  <data name="Ui_Proxy_Direct_Description" xml:space="preserve">
+    <value>Connect directly to the server without using a proxy for any protocol.</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Description" xml:space="preserve">
+    <value>KanColleViewer's built-in relay proxy forwards traffic to external tools.</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Enable" xml:space="preserve">
+    <value>Relay traffic to external tools</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Host" xml:space="preserve">
+    <value>Forward to</value>
+  </data>
+  <data name="Ui_Proxy_Specific" xml:space="preserve">
+    <value>Use a specified proxy server</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Description" xml:space="preserve">
+    <value>Connect through the specified proxy server.</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Host_Notice" xml:space="preserve">
+    <value>Using a host name may slow down operation; specifying an IP address is recommended.</value>
+  </data>
+  <data name="Ui_Proxy_System" xml:space="preserve">
+    <value>Use system proxy settings</value>
+  </data>
+  <data name="Ui_Proxy_System_Description" xml:space="preserve">
+    <value>Connect using the settings in Internet Options.</value>
+  </data>
+  <data name="Ui_Proxy_UseForAllProtocols" xml:space="preserve">
+    <value>Use this proxy server for all protocols</value>
+  </data>
+  <data name="Ui_Screenshot_PngRecommended" xml:space="preserve">
+    <value>PNG (Recommended)</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools" xml:space="preserve">
+    <value>Developer Tools Display Settings</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools_Description" xml:space="preserve">
+    <value>Open the developer tools in a pop-up window in the embedded browser.</value>
+  </data>
+  <data name="Ui_Settings_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Ui_Settings_RestartRequired" xml:space="preserve">
+    <value>Restart the application for the changes to take effect.</value>
+  </data>
+  <data name="Ui_Settings_UserStyleSheet" xml:space="preserve">
+    <value>User Style Sheet</value>
+  </data>
+  <data name="Ui_Shipyard_Development" xml:space="preserve">
+    <value>Equipment Development</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Failure" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Ui_Shipyard_Development_NoResult" xml:space="preserve">
+    <value>No Result</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Ui_Start_Description" xml:space="preserve">
+    <value>The game runs in the built-in Chromium-based web browser. KanColleViewer is designed not to burden the game servers; it does not alter communications, send information to the servers, or use macros or cheats.</value>
+  </data>
+  <data name="Ui_StateDetail_NosakiTimerPrefix" xml:space="preserve">
+    <value>Homeport Supply Ship - </value>
+  </data>
+  <data name="Ui_StateDetail_Expedition" xml:space="preserve">
+    <value>On an expedition</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecovered" xml:space="preserve">
+    <value>Fatigue recovered</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>Fatigue recovery in: </value>
+  </data>
+  <data name="Ui_StateDetail_HeavilyDamaged" xml:space="preserve">
+    <value>There are heavily damaged ships!!!</value>
+  </data>
+  <data name="Ui_StateDetail_NoShips" xml:space="preserve">
+    <value>No ships are assigned to the fleet.</value>
+  </data>
+  <data name="Ui_StateDetail_Sortie" xml:space="preserve">
+    <value>The fleet is on a sortie!</value>
+  </data>
+  <data name="Ui_Start_Introduction" xml:space="preserve">
+    <value>KanColleViewer makes Kantai Collection easier to play.</value>
+  </data>
+  <data name="Ui_Start_UpdateDescription" xml:space="preserve">
+    <value>Updates are released periodically. Please check for updates from time to time.</value>
+  </data>
+  <data name="Ui_Start_Welcome" xml:space="preserve">
+    <value>Welcome</value>
+  </data>
+  <data name="Ui_Tab_AirBases" xml:space="preserve">
+    <value>Air Bases</value>
+  </data>
+  <data name="Ui_Tab_Quest" xml:space="preserve">
+    <value>Quests</value>
+  </data>
+  <data name="Ui_Tab_Shipyard" xml:space="preserve">
+    <value>Shipyard</value>
+  </data>
+  <data name="Ui_Tab_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Ui_Unit_Seconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="Ui_UpdateCheck_Button" xml:space="preserve">
+    <value>Check for Updates</value>
+  </data>
+  <data name="Ui_UpdateCheck_OnStartup" xml:space="preserve">
+    <value>Check for updates when the application starts</value>
+  </data>
+  <data name="Ui_UpdateCheck_Title" xml:space="preserve">
+    <value>Update Check</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Checking" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Available" xml:space="preserve">
+    <value>An update is available ({0})</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_UpToDate" xml:space="preserve">
+    <value>You are up to date.</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Failed" xml:space="preserve">
+    <value>Failed to check for updates.</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Manual" xml:space="preserve">
+    <value>Check Manually</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Automatic" xml:space="preserve">
+    <value>Check Automatically</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Name" xml:space="preserve">
+    <value>Simple Sum</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Description" xml:space="preserve">
+    <value>Simple sum of the LoS values of ships and equipment</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Name" xml:space="preserve">
+    <value>2-5 Formula (Old)</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Description" xml:space="preserve">
+    <value>(Recon Aircraft × 2) + (Radar) + √(total fleet LoS including equipment - recon aircraft - radar)</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Name" xml:space="preserve">
+    <value>2-5 Formula (Autumn)</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Description" xml:space="preserve">
+    <value>(Carrier-based Dive Bombers × 1.04) + (Carrier-based Torpedo Bombers × 1.37) + (Carrier-based Reconnaissance Aircraft × 1.66)
++ (Seaplane Reconnaissance Aircraft × 2.00) + (Seaplane Bombers × 1.78) + (Searchlights × 0.91)
++ (Small Radars × 1.00) + (Large Radars × 0.99) + (√base LoS of each ship × 1.69)
++ (Admiral level rounded up to the next multiple of 5 × -0.61)</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Name" xml:space="preserve">
+    <value>33 Formula</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Description" xml:space="preserve">
+    <value>Sum of ((equipment LoS in each slot + improvement bonus) × equipment type coefficient) + sum of (√base LoS of each ship)
+- ceiling(Admiral level × 0.4) + number of empty fleet slots × 2
+* Evacuated ships are excluded when counting empty slots</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation" xml:space="preserve">
+    <value>Confirmation when Exiting the Application</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_Always" xml:space="preserve">
+    <value>Always</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_InSortieOnly" xml:space="preserve">
+    <value>During Sorties Only</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_None" xml:space="preserve">
+    <value>Don't Ask</value>
+  </data>
+  <data name="Ui_Window_Layout" xml:space="preserve">
+    <value>Window Layout</value>
+  </data>
+  <data name="Ui_Window_Layout_Game" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Ui_Window_Layout_Info" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="Ui_Window_Layout_Multiple" xml:space="preserve">
+    <value>Multiple Windows</value>
+  </data>
+  <data name="Ui_Window_Layout_Single" xml:space="preserve">
+    <value>Single Window</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress" xml:space="preserve">
+    <value>Indicator Behavior</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Expedition" xml:space="preserve">
+    <value>Expedition Progress</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_FleetHp" xml:space="preserve">
+    <value>HP of Most Damaged Ship in Fleet</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_None" xml:space="preserve">
+    <value>Do Not Use</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
+    <value>Indicator Behavior (During Sortie)</value>
+  </data>
+  <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
+    <value>Taskbar Settings</value>
   </data>
 </root>

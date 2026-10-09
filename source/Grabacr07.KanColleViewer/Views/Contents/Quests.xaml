@@ -62,7 +62,7 @@
 					</ItemsControl>
 
 					<TextBlock Grid.Row="1"
-							   Text="発生中の任務はありません"
+							   Text="{Binding [Ui_Quests_NoCurrent], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   HorizontalAlignment="Center"
 							   Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"
 							   Margin="10" />
@@ -192,7 +192,7 @@
 				<!-- 任務一覧ポップアップボタン (Fleets.xaml の艦隊詳細ボタンと同じパターン) -->
 				<metro2:CallMethodButton Grid.Row="0"
 										 Grid.Column="3"
-										 Content="任務一覧"
+										 Content="{Binding [Ui_Quests_List], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 Margin="0,0,10,3"
 										 Padding="12,16"
 										 VerticalAlignment="Top"

@@ -74,7 +74,7 @@
 		<metro2:CallMethodButton Grid.Row="0"
 								 Grid.RowSpan="2"
 								 Grid.Column="1"
-								 Content="基地詳細"
+								 Content="{Binding [Ui_AirBases_Details], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 								 Margin="10,-7,10,0"
 								 Padding="12,16,12,16"
 								 VerticalAlignment="Center"
@@ -110,7 +110,7 @@
 					</Style.Triggers>
 				</Style>
 			</StackPanel.Style>
-			<TextBlock Text="整備Lv."
+			<TextBlock Text="{Binding [Ui_AirBases_MaintenanceLevel], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Padding="8,4,0,4"
 					   Style="{DynamicResource DefaultTextStyleKey}" />
 			<TextBlock Text="{Binding MaintenanceLevel, Mode=OneWay}"
@@ -197,22 +197,26 @@
 										   Margin="0,0,10,0" />
 								<!-- 行動半径 -->
 								<TextBlock Grid.Column="2"
-										   Text="{Binding Distance, Mode=OneWay, StringFormat='半径:{0}'}"
 										   Style="{DynamicResource DefaultTextStyleKey}"
 										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 										   FontSize="12"
 										   Margin="10,0,10,15"
-										   VerticalAlignment="Center" />
+										   VerticalAlignment="Center">
+									<Run Text="{Binding [Ui_AirBases_Radius], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+									<Run Text="{Binding Distance, Mode=OneWay}" />
+								</TextBlock>
 
 								<!-- 制空 -->
 								<TextBlock Grid.Column="2"
-										   Text="{Binding AirPower, Mode=OneWay, StringFormat='制空:{0}'}"
 										   Style="{DynamicResource DefaultTextStyleKey}"
 										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 										   FontSize="12"
 										   Width="57"
 										   Margin="10,15,0,0"
-										   VerticalAlignment="Top" />
+										   VerticalAlignment="Top">
+									<Run Text="{Binding [Ui_AirBases_AirPower], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+									<Run Text="{Binding AirPower, Mode=OneWay}" />
+								</TextBlock>
 
 								<!-- Cond 表示（タイル + テキスト） -->
 								<StackPanel Grid.Column="3"

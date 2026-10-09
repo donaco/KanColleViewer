@@ -41,13 +41,15 @@
                     <TextBlock Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type metro2:CallMethodButton}}, Path=Foreground}"
 							   FontSize="13"
 							   HorizontalAlignment="Center">
-                        <TextBlock.Text>
-                            <Binding Path="BrowserZoomFactor.CurrentParcentage"
-									 StringFormat="ゲーム画面を {0} % に戻す"
-									 Mode="OneWay" />
-                        </TextBlock.Text>
+						<TextBlock.Text>
+							<MultiBinding StringFormat="{}{0}{1}{2}">
+								<Binding Source="{x:Static models:ResourceService.Current}" Path="[Ui_Browser_ResetZoom_Prefix]" />
+								<Binding Path="BrowserZoomFactor.CurrentParcentage" Mode="OneWay" />
+								<Binding Source="{x:Static models:ResourceService.Current}" Path="[Ui_Browser_ResetZoom_Suffix]" />
+							</MultiBinding>
+						</TextBlock.Text>
                     </TextBlock>
-                    <TextBlock Text="(誤ってズームしたとき用)"
+					<TextBlock Text="{Binding [Ui_Browser_ResetZoom_Hint], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   FontSize="11"
 							   HorizontalAlignment="Center" />
@@ -61,9 +63,9 @@
 				  Width="35"
 				  Height="30" />
 
-            <TextBlock Margin="8,0,10,0"
+			<TextBlock Margin="8,0,10,0"
 					   Style="{DynamicResource DefaultTextStyleKey}"
-					   Text="ウィンドウ上部のボタンでゲーム画面 (Internet Explorer) の表示サイズを変更できます。スクリーンショットは常に 100 % のサイズで撮影され、表示サイズ設定の影響を受けません。"
+					   Text="{Binding [Ui_Browser_Zoom_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
         </DockPanel>
 
@@ -80,10 +82,12 @@
 							   FontSize="13"
 							   HorizontalAlignment="Center">
 						<TextBlock.Text>
-							開発用ツールを表示する
+							<Binding Path="[Ui_Browser_ShowDevTools]"
+									 Source="{x:Static models:ResourceService.Current}"
+									 Mode="OneWay" />
 						</TextBlock.Text>
 					</TextBlock>
-					<TextBlock Text="(開発向け ・ポップアップで開きます)"
+					<TextBlock Text="{Binding [Ui_Browser_ShowDevTools_Hint], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   FontSize="11"
 							   HorizontalAlignment="Center" />
@@ -98,7 +102,7 @@
 			</Canvas>
 			<TextBlock Margin="8,0,10,0"
 					   Style="{DynamicResource DefaultTextStyleKey}"
-					   Text="埋め込みブラウザで DevTools をポップアップ表示させます。"
+					   Text="{Binding [Ui_Browser_ShowDevTools_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
 		</DockPanel>
 
@@ -111,9 +115,9 @@
 					  SelectedValuePath="Tag"
 					  Width="196"
 					  VerticalAlignment="Center">
-				<ComboBoxItem Content="低：30FPS"
+				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Low], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							  Tag="{x:Static models:BrowserFrameRateMode.Low}" />
-				<ComboBoxItem Content="中：60FPS"
+				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Medium], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							  Tag="{x:Static models:BrowserFrameRateMode.Medium}" />
 				<ComboBoxItem Content="{x:Static models:MonitorHelper.HighModeDisplayText}"
 						  Tag="{x:Static models:BrowserFrameRateMode.High}" />
@@ -121,10 +125,10 @@
 			<StackPanel Margin="24,0,0,0">
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-						   Text="表示フレームレートを選択する" />
+						   Text="{Binding [Ui_Browser_FrameRate_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   FontSize="11"
-						   Text="描画品質と GPU 負荷のバランスを選択します。変更後はアプリの再起動が必要です。" />
+						   Text="{Binding [Ui_Browser_FrameRate_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</DockPanel>
 
@@ -137,10 +141,10 @@
 			<StackPanel Margin="8,0,0,0">
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-						   Text="開発者向けオプションを有効にする" />
+						   Text="{Binding [Ui_Browser_DeveloperOptions_Enable], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   FontSize="11"
-						   Text="開発者向け機能を有効にします。無効に戻した後はアプリの再起動が必要です。" />
+						   Text="{Binding [Ui_Browser_DeveloperOptions_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</DockPanel>
 
@@ -154,10 +158,10 @@
 			<StackPanel Margin="8,0,0,0">
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
                            Foreground="{DynamicResource ActiveForegroundBrushKey}"
-                           Text="GPU アクセラレーションを無効にする" />
+							   Text="{Binding [Ui_Browser_DisableGpu], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
                            FontSize="11"
-                           Text="画面表示に問題がある場合に有効にしてください。変更後はアプリの再起動が必要です。" />
+							  Text="{Binding [Ui_Browser_DisableGpu_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</DockPanel>
 		
@@ -171,9 +175,9 @@
 			<StackPanel Margin="8,0,0,0">
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-						   Text="次回起動時にブラウザのキャッシュを削除する" />
+						   Text="{Binding Resources.StartContent_ClearCacheButton, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-						   Text="アプリの各設定は保持されます。ブラウザキャッシュの削除は再起動が必要です。" />
+						   Text="{Binding [Ui_Browser_ClearCache_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</DockPanel>
 

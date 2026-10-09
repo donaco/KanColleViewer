@@ -207,6 +207,30 @@
   <data name="Expedition_TimeRemaining" xml:space="preserve">
     <value>艦隊帰投まで</value>
   </data>
+  <data name="Materials_Fuel" xml:space="preserve">
+    <value>燃料</value>
+  </data>
+  <data name="Materials_Ammunition" xml:space="preserve">
+    <value>弾薬</value>
+  </data>
+  <data name="Materials_Steel" xml:space="preserve">
+    <value>鋼鉄</value>
+  </data>
+  <data name="Materials_Bauxite" xml:space="preserve">
+    <value>ボーキサイト</value>
+  </data>
+  <data name="Materials_DevelopmentMaterials" xml:space="preserve">
+    <value>開発資材</value>
+  </data>
+  <data name="Materials_InstantRepairMaterials" xml:space="preserve">
+    <value>高速修復材</value>
+  </data>
+  <data name="Materials_InstantBuildMaterials" xml:space="preserve">
+    <value>高速建造材</value>
+  </data>
+  <data name="Materials_ImprovementMaterials" xml:space="preserve">
+    <value>改修資材</value>
+  </data>
   <data name="Fleets" xml:space="preserve">
     <value>艦隊</value>
   </data>
@@ -444,6 +468,12 @@
   <data name="Fleets_Speed_Slow" xml:space="preserve">
     <value>低速艦隊</value>
   </data>
+  <data name="Fleets_Speed_Mixed" xml:space="preserve">
+    <value>速度混成艦隊</value>
+  </data>
+  <data name="Fleets_Speed_Fleet" xml:space="preserve">
+    <value>艦隊</value>
+  </data>
   <data name="ZoomAction_OutOfRange" xml:space="preserve">
     <value>ズーム {0} % はサポートされていません。</value>
   </data>
@@ -482,5 +512,796 @@
   </data>
   <data name="UpdateCheck_on" xml:space="preserve">
     <value>自動で確認する</value>
+  </data>
+  <data name="Ui_Action_Apply" xml:space="preserve">
+    <value>適用</value>
+  </data>
+  <data name="Ui_Action_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Ui_Action_Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Ui_Action_RestoreDefaults" xml:space="preserve">
+    <value>既定値に戻す</value>
+  </data>
+  <data name="Ui_Action_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Ui_Action_Show" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="Ui_AirBases_AirPower" xml:space="preserve">
+    <value>制空: </value>
+  </data>
+  <data name="Ui_AirBases_Details" xml:space="preserve">
+    <value>基地詳細</value>
+  </data>
+  <data name="Ui_AirBases_AirPowerNote" xml:space="preserve">
+    <value>※制空値は参考値です。</value>
+  </data>
+  <data name="Ui_AirBases_MaintenanceLevel" xml:space="preserve">
+    <value>整備Lv.</value>
+  </data>
+  <data name="Ui_AirBases_ProficiencyPrefix" xml:space="preserve">
+    <value>熟練度: </value>
+  </data>
+  <data name="Ui_AirBases_Radius" xml:space="preserve">
+    <value>半径: </value>
+  </data>
+  <data name="Ui_AirBases_Screenshot" xml:space="preserve">
+    <value>ウィンドウのスクリーンショットを保存</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Sortie" xml:space="preserve">
+    <value>出撃</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_AirDefense" xml:space="preserve">
+    <value>防空</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Retreat" xml:space="preserve">
+    <value>退避</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Rest" xml:space="preserve">
+    <value>休息</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Standby" xml:space="preserve">
+    <value>待機</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
+    <value>キャッシュの削除は次回起動時に行われます。</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
+    <value>前のページに戻る</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Forward" xml:space="preserve">
+    <value>次のページに進む</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Refresh" xml:space="preserve">
+    <value>ページを更新する</value>
+  </data>
+  <data name="Ui_BrowserNavigator_UrlPrompt" xml:space="preserve">
+    <value>URL を入力し、Enter キーで移動します。</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Description" xml:space="preserve">
+    <value>開発者向け機能を有効にします。無効に戻した後はアプリの再起動が必要です。</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Enable" xml:space="preserve">
+    <value>開発者向けオプションを有効にする</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu" xml:space="preserve">
+    <value>GPU アクセラレーションを無効にする</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
+    <value>画面表示に問題がある場合に有効にしてください。変更後はアプリの再起動が必要です。</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
+    <value>描画品質と GPU 負荷のバランスを選択します。変更後はアプリの再起動が必要です。</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
+    <value>高：{0}FPS　モニタの FPS に自動調整</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
+    <value>低：30 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
+    <value>中：60 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
+    <value>表示フレームレートを選択する</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
+    <value>(誤ってズームしたとき用)</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Prefix" xml:space="preserve">
+    <value>ゲーム画面を </value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Suffix" xml:space="preserve">
+    <value> % に戻す</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools" xml:space="preserve">
+    <value>開発用ツールを表示する</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Description" xml:space="preserve">
+    <value>埋め込みブラウザーで開発者ツールをポップアップ表示します。</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Hint" xml:space="preserve">
+    <value>(開発者向け・ポップアップで開きます)</value>
+  </data>
+  <data name="Ui_Browser_Zoom_Description" xml:space="preserve">
+    <value>ウィンドウ上部のボタンでゲーム画面の表示サイズを変更できます。スクリーンショットは常に 100% のサイズで撮影され、表示サイズ設定の影響を受けません。</value>
+  </data>
+  <data name="Ui_Fleet_First" xml:space="preserve">
+    <value>第1艦隊</value>
+  </data>
+  <data name="Ui_Fleet_Evacuated" xml:space="preserve">
+    <value>退避済</value>
+  </data>
+  <data name="Ui_Fleet_Repairing" xml:space="preserve">
+    <value>入渠中</value>
+  </data>
+  <data name="Ui_Fleet_Second" xml:space="preserve">
+    <value>第2艦隊</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy" xml:space="preserve">
+    <value>健在</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy_DamageControl" xml:space="preserve">
+    <value>健在・ダメコン搭載</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_SinkingPossible" xml:space="preserve">
+    <value>大破 (轟沈の可能性あり)</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_DamageControlAvailable" xml:space="preserve">
+    <value>大破 (ダメコン使用可能)</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_Evacuated" xml:space="preserve">
+    <value>大破 (退避済み)</value>
+  </data>
+  <data name="Ui_FleetWindow_Retreated_EscortEvacuation" xml:space="preserve">
+    <value>撤退 (護衛退避)</value>
+  </data>
+  <data name="Ui_FleetWindow_Repairing" xml:space="preserve">
+    <value>入渠中</value>
+  </data>
+  <data name="Ui_FleetWindow_DaytimeCutIn" xml:space="preserve">
+    <value>弾着観測射撃</value>
+  </data>
+  <data name="Ui_FleetWindow_NightBattleCutIn" xml:space="preserve">
+    <value>夜戦カットイン: 30 %</value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleet" xml:space="preserve">
+    <value>連合艦隊</value>
+  </data>
+  <data name="Ui_FleetWindow_TotalLevel" xml:space="preserve">
+    <value>合計レベル</value>
+  </data>
+  <data name="Ui_FleetWindow_AverageLevel" xml:space="preserve">
+    <value>平均レベル</value>
+  </data>
+  <data name="Ui_FleetWindow_LineOfSight" xml:space="preserve">
+    <value>索敵値</value>
+  </data>
+  <data name="Ui_FleetWindow_AirPower" xml:space="preserve">
+    <value>制空値</value>
+  </data>
+  <data name="Ui_FleetWindow_Minimum" xml:space="preserve">
+    <value>(最小)</value>
+  </data>
+  <data name="Ui_FleetWindow_MinAirPowerTooltip" xml:space="preserve">
+    <value>艦戦のみで、内部熟練度を最小として計算しています。</value>
+  </data>
+  <data name="Ui_FleetWindow_Maximum" xml:space="preserve">
+    <value>(最大)</value>
+  </data>
+  <data name="Ui_FleetWindow_MaxAirPowerTooltip" xml:space="preserve">
+    <value>全艦載機で、内部熟練度を最大として計算しています。</value>
+  </data>
+  <data name="Ui_FleetWindow_Transport" xml:space="preserve">
+    <value>輸送量</value>
+  </data>
+  <data name="Ui_FleetWindow_Status" xml:space="preserve">
+    <value>ステータス</value>
+  </data>
+  <data name="Ui_FleetWindow_NotSortie" xml:space="preserve">
+    <value>艦隊は出撃していません</value>
+  </data>
+  <data name="Ui_FleetWindow_Sortie" xml:space="preserve">
+    <value>艦隊は出撃中です！</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieNotReady" xml:space="preserve">
+    <value>艦隊の出撃準備は完了していません</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieReady" xml:space="preserve">
+    <value>出撃準備完了！</value>
+  </data>
+  <data name="Ui_FleetWindow_NotOnExpedition" xml:space="preserve">
+    <value>艦隊は遠征中ではありません</value>
+  </data>
+  <data name="Ui_FleetWindow_OnExpeditionPrefix" xml:space="preserve">
+    <value>艦隊は遠征中です: </value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleetCannotExpedition" xml:space="preserve">
+    <value>連合艦隊は遠征に参加できません</value>
+  </data>
+  <data name="Ui_FleetWindow_NoHeavilyDamagedShips" xml:space="preserve">
+    <value>艦隊の艦娘に大きなダメージはありません</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips" xml:space="preserve">
+    <value>艦隊に大破した艦娘がいます</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips_Sortie" xml:space="preserve">
+    <value>艦隊に大破した艦娘がいます！</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsRepairing" xml:space="preserve">
+    <value>艦隊の艦娘は入渠していません</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsRepairing" xml:space="preserve">
+    <value>艦隊に入渠中の艦娘がいます</value>
+  </data>
+  <data name="Ui_FleetWindow_FleetSupplied" xml:space="preserve">
+    <value>艦隊は補給済みです</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsNeedResupply" xml:space="preserve">
+    <value>艦隊に未補給の艦娘がいます</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsFatigued" xml:space="preserve">
+    <value>艦隊の艦娘は疲労していません</value>
+  </data>
+  <data name="Ui_FleetWindow_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>疲労回復まで: </value>
+  </data>
+  <data name="Ui_FleetWindow_NormalFleetComposition" xml:space="preserve">
+    <value>艦隊編成は正常です</value>
+  </data>
+  <data name="Ui_FleetWindow_RepairShipFlagship" xml:space="preserve">
+    <value>工作艦が旗艦として編成されています</value>
+  </data>
+  <data name="Ui_Catalog_FilterSettings" xml:space="preserve">
+    <value>フィルター設定</value>
+  </data>
+  <data name="Ui_Catalog_SelectAll" xml:space="preserve">
+    <value>すべて選択</value>
+  </data>
+  <data name="Ui_Catalog_Refresh" xml:space="preserve">
+    <value>表示の更新</value>
+  </data>
+  <data name="Ui_Catalog_Total" xml:space="preserve">
+    <value>合計</value>
+  </data>
+  <data name="Ui_Catalog_GeneratingList" xml:space="preserve">
+    <value>一覧を生成しています...</value>
+  </data>
+  <data name="Ui_Catalog_All" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="Ui_Catalog_Clear" xml:space="preserve">
+    <value>クリア</value>
+  </data>
+  <data name="Ui_Catalog_Reset" xml:space="preserve">
+    <value>リセット</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiAir" xml:space="preserve">
+    <value>対空</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiSubmarine" xml:space="preserve">
+    <value>対潜</value>
+  </data>
+  <data name="Ui_ShipCatalog_Armor" xml:space="preserve">
+    <value>装甲</value>
+  </data>
+  <data name="Ui_ShipCatalog_Ascending" xml:space="preserve">
+    <value>昇順</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition" xml:space="preserve">
+    <value>コンディション</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition50OrMore" xml:space="preserve">
+    <value>50 以上</value>
+  </data>
+  <data name="Ui_ShipCatalog_ConditionUnder50" xml:space="preserve">
+    <value>50 未満</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damage" xml:space="preserve">
+    <value>損傷</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damaged" xml:space="preserve">
+    <value>損傷あり</value>
+  </data>
+  <data name="Ui_ShipCatalog_Descending" xml:space="preserve">
+    <value>降順</value>
+  </data>
+  <data name="Ui_ShipCatalog_Equipment" xml:space="preserve">
+    <value>装備</value>
+  </data>
+  <data name="Ui_ShipCatalog_EquipmentBonusTooltip" xml:space="preserve">
+    <value>装備によるステータス上昇を含んだ値です</value>
+  </data>
+  <data name="Ui_ShipCatalog_ExcludeExpeditionShips" xml:space="preserve">
+    <value>遠征中の艦を除外する</value>
+  </data>
+  <data name="Ui_ShipCatalog_Expedition" xml:space="preserve">
+    <value>遠征</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fast" xml:space="preserve">
+    <value>高速</value>
+  </data>
+  <data name="Ui_ShipCatalog_Faster" xml:space="preserve">
+    <value>高速+</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fastest" xml:space="preserve">
+    <value>最速</value>
+  </data>
+  <data name="Ui_ShipCatalog_Firepower" xml:space="preserve">
+    <value>火力</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level" xml:space="preserve">
+    <value>レベル</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level1" xml:space="preserve">
+    <value>Lv.1</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level2OrMore" xml:space="preserve">
+    <value>Lv.2 以上</value>
+  </data>
+  <data name="Ui_ShipCatalog_LineOfSight" xml:space="preserve">
+    <value>索敵</value>
+  </data>
+  <data name="Ui_ShipCatalog_Lock" xml:space="preserve">
+    <value>ロック</value>
+  </data>
+  <data name="Ui_ShipCatalog_Locked" xml:space="preserve">
+    <value>ロックしている</value>
+  </data>
+  <data name="Ui_ShipCatalog_Luck" xml:space="preserve">
+    <value>運</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernization" xml:space="preserve">
+    <value>近代化改修</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernized" xml:space="preserve">
+    <value>改修完了</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotModernized" xml:space="preserve">
+    <value>改修未完</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AmphibiousTank" xml:space="preserve">
+    <value>内火艇</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AviationBattleshipCruiser" xml:space="preserve">
+    <value>航戦・航巡</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Battleship" xml:space="preserve">
+    <value>戦艦</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Carrier" xml:space="preserve">
+    <value>航空母艦</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Daihatsu" xml:space="preserve">
+    <value>大発</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Destroyer" xml:space="preserve">
+    <value>駆逐艦</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_HeavyCruiser" xml:space="preserve">
+    <value>重巡・航巡</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_LightCruiser" xml:space="preserve">
+    <value>軽巡・雷巡</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Submarine" xml:space="preserve">
+    <value>潜水艦</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeled" xml:space="preserve">
+    <value>改造完了</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeling" xml:space="preserve">
+    <value>改造</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotRemodeled" xml:space="preserve">
+    <value>改造未完</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTime" xml:space="preserve">
+    <value>修復時間</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTimeTooltip" xml:space="preserve">
+    <value>入渠にかかる時間です</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipName" xml:space="preserve">
+    <value>艦名</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipType" xml:space="preserve">
+    <value>艦種</value>
+  </data>
+  <data name="Ui_ShipCatalog_Slow" xml:space="preserve">
+    <value>低速</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortDescription" xml:space="preserve">
+    <value>艦娘を以下の順序で並べ替えます。</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortieArea" xml:space="preserve">
+    <value>出撃海域</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortMethod" xml:space="preserve">
+    <value>並べ替え方法</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortSettings" xml:space="preserve">
+    <value>並べ替え設定</value>
+  </data>
+  <data name="Ui_ShipCatalog_Speed" xml:space="preserve">
+    <value>速力</value>
+  </data>
+  <data name="Ui_ShipCatalog_Torpedo" xml:space="preserve">
+    <value>雷装</value>
+  </data>
+  <data name="Ui_ShipCatalog_Undamaged" xml:space="preserve">
+    <value>損傷なし</value>
+  </data>
+  <data name="Ui_ShipCatalog_Unlocked" xml:space="preserve">
+    <value>ロックしていない</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Type" xml:space="preserve">
+    <value>装備種別</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquipmentName" xml:space="preserve">
+    <value>装備名</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Improvement" xml:space="preserve">
+    <value>改修</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Proficiency" xml:space="preserve">
+    <value>熟練度</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_OwnedCount" xml:space="preserve">
+    <value>所持数</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Remainder" xml:space="preserve">
+    <value>(余り)</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
+    <value>装備している艦娘</value>
+  </data>
+  <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
+    <value>輸送能力</value>
+  </data>
+  <data name="Ui_Fleets_Details" xml:space="preserve">
+    <value>艦隊詳細</value>
+  </data>
+  <data name="Ui_ExitDialog_Confirmation" xml:space="preserve">
+    <value>「提督業も忙しい！」を終了します。よろしいですか？</value>
+  </data>
+  <data name="Ui_Notification_Advance" xml:space="preserve">
+    <value>通知を早める</value>
+  </data>
+  <data name="Ui_Notification_Advance_Notice" xml:space="preserve">
+    <value>艦これ本体の仕様により、最大 1 分間短縮できます。サーバー時刻とのずれを加味し、40 ～ 50 秒に設定することを推奨します。</value>
+  </data>
+  <data name="Ui_Notification_FleetRejuvenated" xml:space="preserve">
+    <value>艦隊に編成されている艦娘の疲労が回復したら通知する</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer" xml:space="preserve">
+    <value>母港給糧艦システムが動作時に通知する</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer_Description" xml:space="preserve">
+    <value>タイマー起動後、15分毎に通知します。タイマー終了後、通知も終了します。</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition" xml:space="preserve">
+    <value>再出撃可能とするコンディション値</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition_Note" xml:space="preserve">
+    <value>※[動作設定] &gt; [出撃コンディション] から設定できます。</value>
+  </data>
+  <data name="Ui_Notification_ResortieDescription" xml:space="preserve">
+    <value>艦隊に編成されているすべての艦娘のコンディション値が上記の値以上になると通知されます。コンディション値は3分間で3ずつ回復します。通知が数秒から最大3分程度遅れる場合があります。</value>
+  </data>
+  <data name="Ui_Operation_AutoFleetSelection" xml:space="preserve">
+    <value>艦隊自動選択</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnCompositionChange" xml:space="preserve">
+    <value>艦隊の編成を変更したとき、その艦隊を自動的に選択する</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnSortie" xml:space="preserve">
+    <value>艦隊が出撃したとき、その艦隊を自動的に選択する</value>
+  </data>
+  <data name="Ui_Operation_CombinedFleet_ViewRange" xml:space="preserve">
+    <value>連合艦隊時、索敵値計算の対象にする艦隊</value>
+  </data>
+  <data name="Ui_Operation_Condition_Example" xml:space="preserve">
+    <value>例: 40</value>
+  </data>
+  <data name="Ui_Operation_FleetStatus" xml:space="preserve">
+    <value>艦隊ステータス</value>
+  </data>
+  <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
+    <value>旗艦に工作艦が編成されているときは出撃可能と判断しない</value>
+  </data>
+  <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
+    <value>航空戦マス・防空戦のみ制空権の情報を表示する</value>
+  </data>
+  <data name="Ui_Operation_ShowNextCell" xml:space="preserve">
+    <value>次の行き先を表示する（チェックなし: 戦闘開始時に表示）</value>
+  </data>
+  <data name="Ui_Operation_ShowSortieInfo" xml:space="preserve">
+    <value>出撃中のマップ位置と戦闘結果を表示する（例: 1-5-D [S][確保]）</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Description" xml:space="preserve">
+    <value>艦隊内の全艦のコンディションが次の数値以上になったとき、出撃可能と判断する</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Note" xml:space="preserve">
+    <value>※通常は、間宮アイコンが消灯する40か、自然回復上限の49に設定します。</value>
+  </data>
+  <data name="Ui_Operation_SortieInfo" xml:space="preserve">
+    <value>出撃情報</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation" xml:space="preserve">
+    <value>索敵値計算</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
+    <value>艦隊の索敵値の算出に使用する計算式を選択します。</value>
+  </data>
+  <data name="Ui_Overview_Data" xml:space="preserve">
+    <value>データ</value>
+  </data>
+  <data name="Ui_Overview_ShipCatalog" xml:space="preserve">
+    <value>艦娘一覧</value>
+  </data>
+  <data name="Ui_Overview_SlotItemCatalog" xml:space="preserve">
+    <value>装備一覧</value>
+  </data>
+  <data name="Ui_PluginInfo_Functions" xml:space="preserve">
+    <value>機能: </value>
+  </data>
+  <data name="Ui_PluginInfo_Notifications" xml:space="preserve">
+    <value>通知機能</value>
+  </data>
+  <data name="Ui_PluginInfo_PluginNotifications" xml:space="preserve">
+    <value>プラグインからの通知</value>
+  </data>
+  <data name="Ui_PluginInfo_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Ui_PluginInfo_TaskbarProgress" xml:space="preserve">
+    <value>タスクバーインジケーター</value>
+  </data>
+  <data name="Ui_PluginInfo_Test" xml:space="preserve">
+    <value>(テスト)</value>
+  </data>
+  <data name="Ui_PluginInfo_ToolWindow" xml:space="preserve">
+    <value>ツール表示</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed" xml:space="preserve">
+    <value>読み込みに失敗したプラグイン</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed_Description" xml:space="preserve">
+    <value>以下のプラグインは読み込みに失敗し、動作していません。発生したエラーの詳細を確認できます。</value>
+  </data>
+  <data name="Ui_Plugins_Loaded" xml:space="preserve">
+    <value>読み込み済みのプラグイン</value>
+  </data>
+  <data name="Ui_Plugins_Loaded_Description" xml:space="preserve">
+    <value>以下のプラグインが読み込まれています。各プラグインの設定を変更できます。</value>
+  </data>
+  <data name="Ui_Quests_NoCurrent" xml:space="preserve">
+    <value>遂行中の任務はありません</value>
+  </data>
+  <data name="Ui_Quests_List" xml:space="preserve">
+    <value>任務一覧</value>
+  </data>
+  <data name="Ui_Quests_NotTaken" xml:space="preserve">
+    <value>任務一覧は取得されていません</value>
+  </data>
+  <data name="Ui_Proxy_Direct" xml:space="preserve">
+    <value>プロキシサーバーを使用しない</value>
+  </data>
+  <data name="Ui_Proxy_Direct_Description" xml:space="preserve">
+    <value>すべてのプロトコルでプロキシサーバーを経由せず、サーバーと直接通信します。</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Description" xml:space="preserve">
+    <value>KanColleViewer 内蔵の中継プロキシが外部ツールへ通信を転送します。</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Enable" xml:space="preserve">
+    <value>外部ツールへ通信を中継する</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Host" xml:space="preserve">
+    <value>転送先</value>
+  </data>
+  <data name="Ui_Proxy_Specific" xml:space="preserve">
+    <value>プロキシサーバーを指定する</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Description" xml:space="preserve">
+    <value>指定したプロキシサーバーを経由して通信します。</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Host_Notice" xml:space="preserve">
+    <value>サーバーをホスト名で指定すると動作が遅くなる場合があるため、IPアドレスでの指定を推奨します。</value>
+  </data>
+  <data name="Ui_Proxy_System" xml:space="preserve">
+    <value>システムのプロキシ設定を使用する</value>
+  </data>
+  <data name="Ui_Proxy_System_Description" xml:space="preserve">
+    <value>インターネット オプションの設定を使用して通信します。</value>
+  </data>
+  <data name="Ui_Proxy_UseForAllProtocols" xml:space="preserve">
+    <value>すべてのプロトコルでこのプロキシサーバーを使用する</value>
+  </data>
+  <data name="Ui_Screenshot_PngRecommended" xml:space="preserve">
+    <value>PNG (推奨)</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools" xml:space="preserve">
+    <value>開発者ツールの表示設定</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools_Description" xml:space="preserve">
+    <value>埋め込みブラウザーに開発者ツールをポップアップ表示します。</value>
+  </data>
+  <data name="Ui_Settings_Plugins" xml:space="preserve">
+    <value>プラグイン</value>
+  </data>
+  <data name="Ui_Settings_RestartRequired" xml:space="preserve">
+    <value>※変更を反映するにはアプリケーションの再起動が必要です。</value>
+  </data>
+  <data name="Ui_Settings_UserStyleSheet" xml:space="preserve">
+    <value>ユーザー スタイル シート</value>
+  </data>
+  <data name="Ui_Shipyard_Development" xml:space="preserve">
+    <value>装備開発</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Failure" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="Ui_Shipyard_Development_NoResult" xml:space="preserve">
+    <value>結果なし</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Ui_Start_Description" xml:space="preserve">
+    <value>ゲームは内蔵の Chromium ベース Web ブラウザーで動作します。ゲームサーバーに負荷をかけないよう設計されており、通信内容の変更、サーバーへの情報送信、マクロやチート行為は行いません。</value>
+  </data>
+  <data name="Ui_StateDetail_Expedition" xml:space="preserve">
+    <value>遠征中</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecovered" xml:space="preserve">
+    <value>疲労回復済み</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>疲労回復まで: </value>
+  </data>
+  <data name="Ui_StateDetail_HeavilyDamaged" xml:space="preserve">
+    <value>大破した艦娘がいます！！！</value>
+  </data>
+  <data name="Ui_StateDetail_NoShips" xml:space="preserve">
+    <value>艦隊に艦娘が編成されていません。</value>
+  </data>
+  <data name="Ui_StateDetail_NosakiTimerPrefix" xml:space="preserve">
+    <value>母港給糧艦 - </value>
+  </data>
+  <data name="Ui_StateDetail_Sortie" xml:space="preserve">
+    <value>艦隊は出撃中です！</value>
+  </data>
+  <data name="Ui_Start_Introduction" xml:space="preserve">
+    <value>「提督業も忙しい！」は、艦これを遊びやすくするためのツールです。</value>
+  </data>
+  <data name="Ui_Start_UpdateDescription" xml:space="preserve">
+    <value>ツールは不定期に更新されます。適宜、更新を確認してください。</value>
+  </data>
+  <data name="Ui_Start_Welcome" xml:space="preserve">
+    <value>ようこそ</value>
+  </data>
+  <data name="Ui_Tab_AirBases" xml:space="preserve">
+    <value>航空隊</value>
+  </data>
+  <data name="Ui_Tab_Quest" xml:space="preserve">
+    <value>任務</value>
+  </data>
+  <data name="Ui_Tab_Shipyard" xml:space="preserve">
+    <value>工廠</value>
+  </data>
+  <data name="Ui_Tab_Tools" xml:space="preserve">
+    <value>ツール</value>
+  </data>
+  <data name="Ui_Unit_Seconds" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="Ui_UpdateCheck_Button" xml:space="preserve">
+    <value>アップデートチェック</value>
+  </data>
+  <data name="Ui_UpdateCheck_OnStartup" xml:space="preserve">
+    <value>アプリケーション起動時のアップデートチェック</value>
+  </data>
+  <data name="Ui_UpdateCheck_Title" xml:space="preserve">
+    <value>アップデートチェック</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Checking" xml:space="preserve">
+    <value>確認中...</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Available" xml:space="preserve">
+    <value>アップデートがあります ({0})</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_UpToDate" xml:space="preserve">
+    <value>最新版です</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Failed" xml:space="preserve">
+    <value>確認に失敗しました</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Manual" xml:space="preserve">
+    <value>手動で確認する</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Automatic" xml:space="preserve">
+    <value>自動で確認する</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Name" xml:space="preserve">
+    <value>単純計算</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Description" xml:space="preserve">
+    <value>艦娘と装備の索敵値の単純な合計値</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Name" xml:space="preserve">
+    <value>2-5 式 (旧)</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Description" xml:space="preserve">
+    <value>(偵察機 × 2) + (電探) + √(装備込みの艦隊索敵値合計 - 偵察機 - 電探)</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Name" xml:space="preserve">
+    <value>2-5 式 (秋)</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Description" xml:space="preserve">
+    <value>(艦上爆撃機 × 1.04) + (艦上攻撃機 × 1.37) + (艦上偵察機 × 1.66)
++ (水上偵察機 × 2.00) + (水上爆撃機 × 1.78) + (探照灯 × 0.91)
++ (小型電探 × 1.00) + (大型電探 × .99) + (√各艦毎の素索敵 × 1.69)
++ (司令部レベルを 5 の倍数に切り上げ × -0.61)</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Name" xml:space="preserve">
+    <value>33 式</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Description" xml:space="preserve">
+    <value>((各スロットの装備の索敵値 + 改修効果) × 装備タイプ係数)の和 + (√各艦の素索敵値)の和
+- (司令部レベル × 0.4)の小数点以下切り上げ + 艦隊の空き数 × 2
+※艦隊の空き数は退避した艦を除いて算出</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation" xml:space="preserve">
+    <value>アプリケーション終了時の確認動作</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_Always" xml:space="preserve">
+    <value>常に確認する</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_InSortieOnly" xml:space="preserve">
+    <value>出撃中のみ確認する</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_None" xml:space="preserve">
+    <value>確認しない</value>
+  </data>
+  <data name="Ui_Window_Layout" xml:space="preserve">
+    <value>ウィンドウ レイアウト</value>
+  </data>
+  <data name="Ui_Window_Layout_Game" xml:space="preserve">
+    <value>艦これ</value>
+  </data>
+  <data name="Ui_Window_Layout_Info" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="Ui_Window_Layout_Multiple" xml:space="preserve">
+    <value>マルチ ウィンドウ</value>
+  </data>
+  <data name="Ui_Window_Layout_Single" xml:space="preserve">
+    <value>シングル ウィンドウ</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress" xml:space="preserve">
+    <value>インジケーターの動作</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Expedition" xml:space="preserve">
+    <value>遠征状況</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_FleetHp" xml:space="preserve">
+    <value>艦隊内の最大損害艦 HP</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_None" xml:space="preserve">
+    <value>使用しない</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
+    <value>インジケーターの動作 (出撃中)</value>
+  </data>
+  <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
+    <value>タスクバー設定</value>
   </data>
 </root>

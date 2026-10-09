@@ -67,7 +67,7 @@
 
 			<TabItem>
 				<TabItem.Header>
-					<TextBlock Text="通知設定"
+					<TextBlock Text="{Binding Resources.Common_Notifications_Title, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{StaticResource TabHeaderTextStyleKey}" />
 				</TabItem.Header>
 				<settings:Notification Margin="10,0" />
@@ -84,7 +84,7 @@
 
 			<TabItem>
 				<TabItem.Header>
-					<TextBlock Text="プラグイン"
+					<TextBlock Text="{Binding [Ui_Settings_Plugins], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{StaticResource TabHeaderTextStyleKey}" />
 				</TabItem.Header>
 				<settings:Plugins Margin="10,0" />

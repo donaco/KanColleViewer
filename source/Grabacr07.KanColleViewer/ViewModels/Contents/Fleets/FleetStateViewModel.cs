@@ -4,6 +4,7 @@ using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
 using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
+using Grabacr07.KanColleViewer.Models;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 {
 	public class FleetStateViewModel : ViewModelBase
@@ -23,8 +24,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 		public string ViewRange => (Math.Floor(this.Source.ViewRange * 100) / 100).ToString("##0.##");
 
 		public string Speed => this.Source.Speed.IsMixed
-			? $"速度混成艦隊 ({this.Source.Speed.Min.ToDisplayString()} ～ {this.Source.Speed.Max.ToDisplayString()})"
-			: $"{this.Source.Speed.Min.ToDisplayString()}艦隊";
+			? $"{ResourceService.Current["Fleets_Speed_Mixed"]} ({this.Source.Speed.Min.ToDisplayString()} ～ {this.Source.Speed.Max.ToDisplayString()})"
+			: $"{this.Source.Speed.Min.ToDisplayString()} {ResourceService.Current["Fleets_Speed_Fleet"]}";
 
 		public HomeportViewModel Homeport { get; }
 
@@ -37,6 +38,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 			System.ComponentModel.PropertyChangedEventHandler stateHandler = (s, e) => this.RaisePropertyChanged(e.PropertyName ?? string.Empty);
 			source.PropertyChanged += stateHandler;
 			this.CompositeDisposable.Add(new DelegateDisposable(() => source.PropertyChanged -= stateHandler));
+
+			System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+			{
+				if (e.PropertyName == nameof(ResourceService.Resources)) this.RaisePropertyChanged(nameof(this.Speed));
+			};
+			ResourceService.Current.PropertyChanged += cultureChangedHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
 
 			this.Sortie = new SortieViewModel(source);
 			this.CompositeDisposable.Add(this.Sortie);

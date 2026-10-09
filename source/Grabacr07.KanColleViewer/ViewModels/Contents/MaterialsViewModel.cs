@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
+using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Mvvm;
@@ -59,28 +61,28 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 		{
 			this.Model = KanColleClient.Current.Homeport.Materials;
 
-			var fuel = new MaterialViewModel(nameof(Materials.Fuel), "燃料").AddTo(this);
+			var fuel = new MaterialViewModel(nameof(Materials.Fuel), "Materials_Fuel").AddTo(this);
 			this.Model.Subscribe(fuel.Key, () => fuel.Value = this.Model.Fuel).AddTo(this);
 
-			var ammunition = new MaterialViewModel(nameof(Materials.Ammunition), "弾薬").AddTo(this);
+			var ammunition = new MaterialViewModel(nameof(Materials.Ammunition), "Materials_Ammunition").AddTo(this);
 			this.Model.Subscribe(ammunition.Key, () => ammunition.Value = this.Model.Ammunition).AddTo(this);
 
-			var steel = new MaterialViewModel(nameof(Materials.Steel), "鋼鉄").AddTo(this);
+			var steel = new MaterialViewModel(nameof(Materials.Steel), "Materials_Steel").AddTo(this);
 			this.Model.Subscribe(steel.Key, () => steel.Value = this.Model.Steel).AddTo(this);
 
-			var bauxite = new MaterialViewModel(nameof(Materials.Bauxite), "ボーキサイト").AddTo(this);
+			var bauxite = new MaterialViewModel(nameof(Materials.Bauxite), "Materials_Bauxite").AddTo(this);
 			this.Model.Subscribe(bauxite.Key, () => bauxite.Value = this.Model.Bauxite).AddTo(this);
 
-			var develop = new MaterialViewModel(nameof(Materials.DevelopmentMaterials), "開発資材").AddTo(this);
+			var develop = new MaterialViewModel(nameof(Materials.DevelopmentMaterials), "Materials_DevelopmentMaterials").AddTo(this);
 			this.Model.Subscribe(develop.Key, () => develop.Value = this.Model.DevelopmentMaterials).AddTo(this);
 
-			var repair = new MaterialViewModel(nameof(Materials.InstantRepairMaterials), "高速修復材").AddTo(this);
+			var repair = new MaterialViewModel(nameof(Materials.InstantRepairMaterials), "Materials_InstantRepairMaterials").AddTo(this);
 			this.Model.Subscribe(repair.Key, () => repair.Value = this.Model.InstantRepairMaterials).AddTo(this);
 
-			var build = new MaterialViewModel(nameof(Materials.InstantBuildMaterials), "高速建造材").AddTo(this);
+			var build = new MaterialViewModel(nameof(Materials.InstantBuildMaterials), "Materials_InstantBuildMaterials").AddTo(this);
 			this.Model.Subscribe(build.Key, () => build.Value = this.Model.InstantBuildMaterials).AddTo(this);
 
-			var improvement = new MaterialViewModel(nameof(Materials.ImprovementMaterials), "改修資材").AddTo(this);
+			var improvement = new MaterialViewModel(nameof(Materials.ImprovementMaterials), "Materials_ImprovementMaterials").AddTo(this);
 			this.Model.Subscribe(improvement.Key, () => improvement.Value = this.Model.ImprovementMaterials).AddTo(this);
 
 			this.Values = new List<MaterialViewModel>
@@ -101,9 +103,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public class MaterialViewModel : ViewModelBase
 		{
+			private readonly string resourceKey;
+
 			public string Key { get; }
 
-			public string Display { get; }
+			public string Display => ResourceService.Current[this.resourceKey];
 
 			#region Value 変更通知プロパティ
 
@@ -124,10 +128,17 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 			#endregion
 
-			public MaterialViewModel(string key, string display)
+			public MaterialViewModel(string key, string resourceKey)
 			{
 				this.Key = key;
-				this.Display = display;
+				this.resourceKey = resourceKey;
+
+				System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+				{
+					if (e.PropertyName == nameof(ResourceService.Resources)) this.RaisePropertyChanged(nameof(this.Display));
+				};
+				ResourceService.Current.PropertyChanged += cultureChangedHandler;
+				this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
 			}
 		}
 	}

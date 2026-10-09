@@ -14,6 +14,7 @@
 			 xmlns:converters="clr-namespace:Grabacr07.KanColleViewer.Views.Converters"
 			 xmlns:viewModels="clr-namespace:Grabacr07.KanColleViewer.ViewModels"
 			 xmlns:fleets="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.Fleets"
+			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 mc:Ignorable="d"
 			 d:DesignWidth="800"
 			 d:DesignHeight="400"
@@ -71,7 +72,7 @@
 			<metro2:CallMethodButton Grid.Row="0"
 									 Grid.RowSpan="2"
 									 Grid.Column="1"
-									 Content="艦隊詳細"
+									 Content="{Binding [Ui_Fleets_Details], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									 Margin="0,0,10,3"
 									 Padding="12,8"
 									 MethodName="ShowFleetWindow">
@@ -208,7 +209,7 @@
 										<Border Background="{DynamicResource FleetRepairingBrushKey}"
 												Opacity=".4"
 												Margin="5,0" />
-										<TextBlock Text="入渠中"
+										<TextBlock Text="{Binding [Ui_Fleet_Repairing], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 												   Style="{DynamicResource EmphaticTextStyleKey}"
 												   HorizontalAlignment="Center" />
 									</Grid>
@@ -221,7 +222,7 @@
 										<Border Background="{DynamicResource FleetRepairingBrushKey}"
 												Opacity=".4"
 												Margin="5,0" />
-										<TextBlock Text="退避済"
+										<TextBlock Text="{Binding [Ui_Fleet_Evacuated], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 												   Style="{DynamicResource EmphaticTextStyleKey}"
 												   HorizontalAlignment="Center" />
 									</Grid>

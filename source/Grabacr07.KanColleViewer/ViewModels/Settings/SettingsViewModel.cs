@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
@@ -42,7 +43,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public IReadOnlyCollection<BindableTextViewModel> Libraries { get; }
 
-		public IReadOnlyCollection<UpdateCheckModeItemViewModel> UpdateCheckModes { get; }
+		public IReadOnlyCollection<UpdateCheckModeItemViewModel> UpdateCheckModes { get; private set; } = Array.Empty<UpdateCheckModeItemViewModel>();
 
 		public List<PluginViewModel> LoadedPlugins => new List<PluginViewModel>(
 			PluginService.Current.Plugins.Select(x => new PluginViewModel(x)));
@@ -53,6 +54,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		#region UpdateStatusText 変更通知プロパティ
 
 		private string _UpdateStatusText = string.Empty;
+		private string? updateStatusResourceKey;
+		private string? updateStatusVersion;
 
 		public string UpdateStatusText
 		{
@@ -144,6 +147,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			get { return this._SelectedViewRangeCalcType; }
 			set
 			{
+				if (value == null) return;
+
 				if (this._SelectedViewRangeCalcType != value)
 				{
 					this._SelectedViewRangeCalcType = value;
@@ -190,15 +195,33 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 					return list;
 				});
 
+			this.ReloadLocalizedSettings();
+			System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+			{
+				if (e.PropertyName != nameof(ResourceService.Resources)) return;
+
+				this.ReloadLocalizedSettings();
+				this.RefreshUpdateStatus();
+			};
+			ResourceService.Current.PropertyChanged += cultureChangedHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
+		}
+
+		private void ReloadLocalizedSettings()
+		{
+			var selectedId = this.SelectedViewRangeCalcType?.Id ?? KanColleSettings.ViewRangeCalcType;
 			this.UpdateCheckModes = new[]
 			{
-				new UpdateCheckModeItemViewModel { Display = "手動で確認する", Value = false },
-				new UpdateCheckModeItemViewModel { Display = "自動で確認する", Value = true },
+				new UpdateCheckModeItemViewModel { Display = ResourceService.Current["Ui_UpdateCheck_Mode_Manual"], Value = false },
+				new UpdateCheckModeItemViewModel { Display = ResourceService.Current["Ui_UpdateCheck_Mode_Automatic"], Value = true },
 			};
+			this.RaisePropertyChanged(nameof(this.UpdateCheckModes));
 
-			this.ViewRangeSettingsCollection = ViewRangeCalcLogic.Logics.ToList();
+			this.ViewRangeSettingsCollection = ViewRangeCalcLogic.Logics
+				.Select(logic => (ICalcViewRange)new LocalizedViewRange(logic))
+				.ToList();
 			this.SelectedViewRangeCalcType = this.ViewRangeSettingsCollection
-				.FirstOrDefault(x => x.Id == KanColleSettings.ViewRangeCalcType)
+				.FirstOrDefault(x => x.Id == selectedId)
 				?? this.ViewRangeSettingsCollection.First();
 		}
 
@@ -216,7 +239,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		private async void CheckForUpdate()
 		{
 			this.IsUpdateAvailable = false;
-			this.UpdateStatusText = "確認中...";
+			this.SetUpdateStatus("Ui_UpdateCheck_Status_Checking");
 
 			try
 			{
@@ -225,7 +248,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 				if (result.IsUpdateAvailable)
 				{
 					this.IsUpdateAvailable = true;
-					this.UpdateStatusText = $"アップデートがあります ({result.LatestVersion})";
+					this.SetUpdateStatus("Ui_UpdateCheck_Status_Available", result.LatestVersion);
 
 					if (Uri.TryCreate(result.ReleaseUrl, UriKind.Absolute, out var uri))
 					{
@@ -234,14 +257,31 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 				}
 				else
 				{
-					this.UpdateStatusText = "最新版です";
+					this.SetUpdateStatus("Ui_UpdateCheck_Status_UpToDate");
 				}
 			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine(ex);
-				this.UpdateStatusText = "確認に失敗しました";
+				this.SetUpdateStatus("Ui_UpdateCheck_Status_Failed");
 			}
+		}
+
+		private void SetUpdateStatus(string resourceKey, string? version = null)
+		{
+			this.updateStatusResourceKey = resourceKey;
+			this.updateStatusVersion = version;
+			this.RefreshUpdateStatus();
+		}
+
+		private void RefreshUpdateStatus()
+		{
+			if (this.updateStatusResourceKey == null) return;
+
+			var format = ResourceService.Current[this.updateStatusResourceKey];
+			this.UpdateStatusText = this.updateStatusVersion == null
+				? format
+				: string.Format(format, this.updateStatusVersion);
 		}
 	}
 
@@ -250,5 +290,31 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		public string Display { get; set; } = string.Empty;
 
 		public bool Value { get; set; }
+	}
+
+	internal sealed class LocalizedViewRange : ICalcViewRange
+	{
+		private readonly ICalcViewRange source;
+		private readonly string? resourceKey;
+
+		public string Id => this.source.Id;
+		public string Name => this.resourceKey == null ? this.source.Name : ResourceService.Current[$"Ui_ViewRange_{this.resourceKey}_Name"];
+		public string Description => this.resourceKey == null ? this.source.Description : ResourceService.Current[$"Ui_ViewRange_{this.resourceKey}_Description"];
+		public bool HasCombinedSettings => this.source.HasCombinedSettings;
+
+		public LocalizedViewRange(ICalcViewRange source)
+		{
+			this.source = source;
+			this.resourceKey = source.Id switch
+			{
+				"KanColleViewer.Type1" => "Type1",
+				"KanColleViewer.Type2" => "Type2",
+				"KanColleViewer.Type3" => "Type3",
+				"KanColleViewer.Type4" => "Type4",
+				_ => null,
+			};
+		}
+
+		public double Calc(Fleet[] fleets) => this.source.Calc(fleets);
 	}
 }

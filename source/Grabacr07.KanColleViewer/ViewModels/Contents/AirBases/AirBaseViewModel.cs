@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models;
+using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
@@ -216,6 +217,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			System.ComponentModel.PropertyChangedEventHandler handler = (s, e) => this.UpdateProperties();
 			airBase.PropertyChanged += handler;
 			this.CompositeDisposable.Add(new DelegateDisposable(() => airBase.PropertyChanged -= handler));
+
+			System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+			{
+				if (e.PropertyName == nameof(ResourceService.Resources)) this.UpdateProperties();
+			};
+			ResourceService.Current.PropertyChanged += cultureChangedHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
 		}
 
 		private void UpdateProperties()
@@ -226,7 +234,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			this.BaseCount = this.source.BaseCount;
 			this.AirBaseNames = this.source.AirBaseNames;
 			this.ActionKind = this.source.ActionKind;
-			this.ActionKindText = GetActionKindText(this.source.ActionKind);
+			this.ActionKindText = AirBaseInfoViewModel.GetActionKindText(this.source.ActionKind);
 
 			// 各基地情報を ViewModel に変換
 			this.AirBaseInfos = this.source.AirBaseInfos?.Select(x => new AirBaseInfoViewModel(
@@ -251,19 +259,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 			// 追加: 集計値を更新
 			this.MaxDistance = this.AirBaseInfos.Length > 0 ? this.AirBaseInfos.Max(x => x.Distance) : 0;
 			this.TotalAirPower = this.AirBaseInfos.Length > 0 ? this.AirBaseInfos.Sum(x => x.AirPower) : 0;
-		}
-
-		private static string GetActionKindText(int actionKind)
-		{
-			switch (actionKind)
-			{
-				case 1: return "出撃";
-				case 2: return "防空";
-				case 3: return "退避";
-				case 4: return "休息";
-				case 0: return "待機";
-				default: return "不明";
-			}
 		}
 
 		public override string ToString()

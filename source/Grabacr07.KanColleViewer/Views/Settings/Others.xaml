@@ -71,7 +71,7 @@
 						Grid.Column="1"
 						Grid.ColumnSpan="3"
 						Orientation="Horizontal">
-				<RadioButton Content="PNG (推奨)"
+				<RadioButton Content="{Binding [Ui_Screenshot_PngRecommended], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							 IsChecked="{Binding Source={x:Static ms:ScreenshotSettings.Format}, Path=Value, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Png}" />
 				<RadioButton Content="JPG"
 							 Margin="16,0,0,0"
@@ -120,7 +120,7 @@
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
 
-		<TextBlock Text="ユーザー スタイル シート"
+		<TextBlock Text="{Binding [Ui_Settings_UserStyleSheet], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
@@ -150,27 +150,27 @@
 				<metro2:CallMethodButton DockPanel.Dock="Left"
 										 MethodTarget="{Binding}"
 										 MethodName="BackToDefaultValue"
-										 Content="既定値に戻す" />
+										 Content="{Binding [Ui_Action_RestoreDefaults], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<metro2:CallMethodButton DockPanel.Dock="Right"
 										 MethodTarget="{Binding}"
 										 MethodName="Cancel"
-										 Content="キャンセル"
+										 Content="{Binding [Ui_Action_Cancel], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 IsEnabled="{Binding IsEditing}" />
 				<metro2:CallMethodButton DockPanel.Dock="Right"
 										 MethodTarget="{Binding}"
 										 MethodName="Apply"
-										 Content="適用"
+										 Content="{Binding [Ui_Action_Apply], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 IsEnabled="{Binding IsEditing}" />
 			</DockPanel>
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="アップデートチェック"
+		<TextBlock Text="{Binding [Ui_UpdateCheck_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 		<StackPanel Orientation="Horizontal"
 					Margin="20,0,0,0">
-			<TextBlock Text="アプリケーション起動時のアップデートチェック"
+			<TextBlock Text="{Binding [Ui_UpdateCheck_OnStartup], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Margin="0,0,10,0" />
 			<controls:PromptComboBox ItemsSource="{Binding UpdateCheckModes}"
 							  DisplayMemberPath="Display"

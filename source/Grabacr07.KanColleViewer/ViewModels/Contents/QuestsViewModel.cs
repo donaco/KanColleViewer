@@ -17,7 +17,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public override string Name
 		{
-			get { return Resources.Quests; }
+			get { return Grabacr07.KanColleViewer.Models.ResourceService.Current["Ui_Tab_Quest"]; }
 			protected set { throw new NotImplementedException(); }
 		}
 

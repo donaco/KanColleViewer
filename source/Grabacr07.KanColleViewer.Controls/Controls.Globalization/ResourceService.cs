@@ -31,6 +31,8 @@ namespace Grabacr07.KanColleViewer.Controls.Globalization
 		/// </summary>
 		public Resources Resources { get; }
 
+		public string this[string key] => global::Grabacr07.KanColleViewer.Controls.Globalization.Resources.ResourceManager.GetString(key, Resources.Culture) ?? key;
+
 		/// <summary>
 		/// サポートされているカルチャを取得します。
 		/// </summary>
@@ -63,6 +65,7 @@ namespace Grabacr07.KanColleViewer.Controls.Globalization
 		{
 			Resources.Culture = this.SupportedCultures.SingleOrDefault(x => x.Name == name);
 			this.OnPropertyChanged(nameof(this.Resources));
+			this.OnPropertyChanged("Item[]");
 		}
 
 

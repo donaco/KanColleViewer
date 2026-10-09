@@ -32,7 +32,7 @@
 
 		<StackPanel Orientation="Horizontal"
 					Margin="20,0,0,00">
-			<TextBlock Text="アプリケーション終了時の確認動作"
+			<TextBlock Text="{Binding [Ui_Window_ExitConfirmation], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Margin="0,0,10,0" />
 			<controls:PromptComboBox ItemsSource="{Binding ExitConfirmationTypes}"
 								  DisplayMemberPath="Display"
@@ -44,7 +44,7 @@
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="タスクバー設定"
+		<TextBlock Text="{Binding [Ui_Window_TaskbarSettings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<Grid Margin="20,0,0,00">
@@ -60,7 +60,7 @@
 			</Grid.ColumnDefinitions>
 			<TextBlock Grid.Row="0"
 					   Grid.Column="0"
-					   Text="インジケーターの動作" />
+				   Text="{Binding [Ui_Window_TaskbarProgress], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			<controls:PromptComboBox Grid.Row="0"
 								  Grid.Column="2"
 								  ItemsSource="{Binding TaskbarProgressFeatures}"
@@ -70,7 +70,7 @@
 								  Prompt="" />
 			<TextBlock Grid.Row="2"
 					   Grid.Column="0"
-					   Text="インジケーターの動作 (出撃中)" />
+				   Text="{Binding [Ui_Window_TaskbarProgress_Sortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			<controls:PromptComboBox Grid.Row="2"
 								  Grid.Column="2"
 								  ItemsSource="{Binding TaskbarProgressFeatures}"
@@ -105,17 +105,25 @@
 		<StackPanel Visibility="{Binding Source={x:Static ms:GeneralSettings.IsProxyMode}, Path=Value, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter=Colappsed:Visible}">
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-			<TextBlock Text="ウィンドウ レイアウト"
+		<TextBlock Text="{Binding [Ui_Window_Layout], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 			<StackPanel HorizontalAlignment="Left">
 				<UniformGrid Rows="1"
 							 Margin="16,0,0,5">
 					<UniformGrid.Resources>
+						<DataTemplate x:Key="WindowLayoutInfoTemplate">
+							<TextBlock Text="{Binding [Ui_Window_Layout_Info], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+						</DataTemplate>
+						<DataTemplate x:Key="WindowLayoutGameTemplate">
+							<TextBlock Text="{Binding [Ui_Window_Layout_Game], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+						</DataTemplate>
 						<Style x:Key="LayoutButtonStyleKey"
 							   TargetType="{x:Type metro2:CallMethodButton}">
 							<Setter Property="Content"
-									Value="情報" />
+									Value=" " />
+							<Setter Property="ContentTemplate"
+									Value="{StaticResource WindowLayoutInfoTemplate}" />
 							<Setter Property="BorderThickness"
 									Value=".99" />
 							<Setter Property="Background"
@@ -159,8 +167,8 @@
 						<Style x:Key="KanColleMarkStyleKey"
 							   TargetType="{x:Type metro2:CallMethodButton}"
 							   BasedOn="{StaticResource LayoutButtonStyleKey}">
-							<Setter Property="Content"
-									Value="艦これ" />
+							<Setter Property="ContentTemplate"
+									Value="{StaticResource WindowLayoutGameTemplate}" />
 							<Setter Property="Background"
 									Value="{DynamicResource AccentBrushKey}" />
 							<Setter Property="BorderBrush"
@@ -276,7 +284,7 @@
 							<RadioButton x:Name="MergedCheckBox"
 										 DockPanel.Dock="Top"
 										 IsChecked="{Binding IsSplit, Mode=TwoWay, Converter={StaticResource ReverseBooleanConverter}}"
-										 Content="シングル ウィンドウ" />
+										 Content="{Binding [Ui_Window_Layout_Single], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<UniformGrid Margin="4"
 										 IsEnabled="{Binding ElementName=MergedCheckBox, Path=IsChecked}">
 								<Border Width="80"
@@ -332,7 +340,7 @@
 							<RadioButton x:Name="SplitCheckBox"
 										 DockPanel.Dock="Top"
 										 IsChecked="{Binding IsSplit, Mode=TwoWay}"
-										 Content="マルチ ウィンドウ" />
+										 Content="{Binding [Ui_Window_Layout_Multiple], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<Grid Margin="4"
 								  IsEnabled="{Binding ElementName=SplitCheckBox, Path=IsChecked}">
 								<Grid.ColumnDefinitions>
@@ -375,13 +383,13 @@
 							Margin="16,0,0,-2">
 					<metro2:CallMethodButton MethodTarget="{Binding}"
 											 MethodName="Apply"
-											 Content="適用"
+											 Content="{Binding [Ui_Action_Apply], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 											 MinWidth="110"
 											 Padding="16,6"
 											 Margin="4,2" />
 					<metro2:CallMethodButton MethodTarget="{Binding}"
 											 MethodName="Cancel"
-											 Content="キャンセル"
+											 Content="{Binding [Ui_Action_Cancel], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 											 MinWidth="110"
 											 Padding="16,6"
 											 Margin="4,2" />

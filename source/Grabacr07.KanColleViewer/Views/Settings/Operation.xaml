@@ -6,6 +6,7 @@
 			 xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
 				 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
 				 xmlns:kcvc="http://schemes.grabacr.net/winfx/2015/kancolleviewer/controls"
+			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:ms="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 mc:Ignorable="d"
@@ -21,11 +22,11 @@
 	</UserControl.Resources>
 
 	<StackPanel>
-		<TextBlock Text="艦隊ステータス"
+		<TextBlock Text="{Binding [Ui_Operation_FleetStatus], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<TextBlock Text="艦隊内の全艦のコンディションが次の数値以上になったとき、出撃可能と判断する" />
+			<TextBlock Text="{Binding [Ui_Operation_SortieCondition_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 
 			<Border Height="4" />
 			<Grid>
@@ -35,7 +36,7 @@
 					<ColumnDefinition />
 				</Grid.ColumnDefinitions>
 
-				<controls:PromptTextBox Prompt="例: 40"
+					<controls:PromptTextBox Prompt="{Binding [Ui_Operation_Condition_Example], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									 Width="60">
 					<controls:PromptTextBox.Text>
 						<Binding Source="{x:Static ms:KanColleSettings.ReSortieCondition}"
@@ -50,22 +51,22 @@
 				</controls:PromptTextBox>
 				<TextBlock Grid.Column="2"
 						   Style="{DynamicResource DetailTextStyleKey}">
-					<Run Text="※通常は、間宮アイコンが消灯する 40 か、自然回復上限の 49 に設定します。" />
+						<Run Text="{Binding [Ui_Operation_SortieCondition_Note], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				</TextBlock>
 			</Grid>
 
 			<Border Height="12" />
-			<CheckBox Content="旗艦に工作艦が編成されているときは出撃可能と判断しない"
+			<CheckBox Content="{Binding [Ui_Operation_RepairShipFlagship], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.CheckFlagshipIsNotRepairShip}, Path=Value}" />
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="索敵値計算"
+		<TextBlock Text="{Binding [Ui_Operation_ViewRangeCalculation], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<TextBlock Text="艦隊の索敵値の算出に使用する計算式は、以下を使用する" />
+			<TextBlock Text="{Binding [Ui_Operation_ViewRangeCalculation_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 
 			<controls:PromptComboBox ItemsSource="{Binding ViewRangeSettingsCollection}"
 								  Margin="0,5"
@@ -79,16 +80,16 @@
 					   Style="{DynamicResource DetailTextStyleKey}"/>
 
 
-			<TextBlock Text="連合艦隊時、以下の艦隊を索敵値計算の対象として使用する"
+			<TextBlock Text="{Binding [Ui_Operation_CombinedFleet_ViewRange], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Margin="0,12,0,5"
 					   Visibility="{Binding SelectedViewRangeCalcType.HasCombinedSettings, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 			
 			<StackPanel Orientation="Horizontal"
 						Visibility="{Binding SelectedViewRangeCalcType.HasCombinedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-				<CheckBox Content="第1艦隊"
+					<CheckBox Content="{Binding [Ui_Fleet_First], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						  IsChecked="{Binding Source={x:Static ms:KanColleSettings.IsViewRangeCalcIncludeFirstFleet}, Path=Value}"
 						  Margin="0,0,20,0"/>
-				<CheckBox Content="第2艦隊"
+					<CheckBox Content="{Binding [Ui_Fleet_Second], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						  IsChecked="{Binding Source={x:Static ms:KanColleSettings.IsViewRangeCalcIncludeSecondFleet}, Path=Value}"/>
 			</StackPanel>
 
@@ -96,34 +97,34 @@
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="艦隊自動選択"
+		<TextBlock Text="{Binding [Ui_Operation_AutoFleetSelection], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<CheckBox Content="艦隊が出撃したとき、その艦隊を自動的に選択する "
+			<CheckBox Content="{Binding [Ui_Operation_AutoSelectFleetOnSortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.AutoFleetSelectWhenSortie}, Path=Value}" />
 
 			<Border Height="8" />
-			<CheckBox Content="艦隊の編成を変更したとき、その艦隊を自動的に選択する"
+			<CheckBox Content="{Binding [Ui_Operation_AutoSelectFleetOnCompositionChange], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.AutoFleetSelectWhenShipsChanged}, Path=Value}" />
 		</StackPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="出撃情報"
+		<TextBlock Text="{Binding [Ui_Operation_SortieInfo], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
-			<CheckBox Content="出撃中のマップ位置、戦闘結果を表示する（例: 1-5-D [S][確保]）"
+			<CheckBox Content="{Binding [Ui_Operation_ShowSortieInfo], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 
 			<Border Height="8" />
-			<CheckBox Content="航空戦マス・防空戦のみ制空権の情報を表示する"
+			<CheckBox Content="{Binding [Ui_Operation_ShowAirSuperiority], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowAirSuperiority}, Path=Value}"
 					  IsEnabled="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 			
 			<Border Height="8" />
-			<CheckBox Content="次の行き先をネタバレする（チェックなし: 戦闘開始時に表示）"
+			<CheckBox Content="{Binding [Ui_Operation_ShowNextCell], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowCellOnArrival}, Path=Value}"
 					  IsEnabled="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 		</StackPanel>

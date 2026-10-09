@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
@@ -24,6 +25,8 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		#region UpdateStatusText 変更通知プロパティ
 
 		private string _UpdateStatusText = string.Empty;
+		private string? updateStatusResourceKey;
+		private string? updateStatusVersion;
 
 		public string UpdateStatusText
 		{
@@ -91,6 +94,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		public StartContentViewModel(NavigatorViewModel? navigator)
 		{
 			this.Navigator = navigator;
+			System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+			{
+				if (e.PropertyName == nameof(ResourceService.Resources)) this.RefreshUpdateStatus();
+			};
+			ResourceService.Current.PropertyChanged += cultureChangedHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
 
 			if (GeneralSettings.IsAutoUpdateCheckEnabled.Value)
 			{
@@ -102,7 +111,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		private async void CheckForUpdate()
 		{
 			this.IsUpdateAvailable = false;
-			this.UpdateStatusText = "確認中...";
+			this.SetUpdateStatus("Ui_UpdateCheck_Status_Checking");
 
 			try
 			{
@@ -111,7 +120,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				if (result.IsUpdateAvailable)
 				{
 					this.IsUpdateAvailable = true;
-					this.UpdateStatusText = $"アップデートがあります ({result.LatestVersion})";
+					this.SetUpdateStatus("Ui_UpdateCheck_Status_Available", result.LatestVersion);
 
 					if (Uri.TryCreate(result.ReleaseUrl, UriKind.Absolute, out var uri)
 						&& uri.Scheme == Uri.UriSchemeHttps
@@ -126,14 +135,31 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				}
 				else
 				{
-					this.UpdateStatusText = "最新版です";
+					this.SetUpdateStatus("Ui_UpdateCheck_Status_UpToDate");
 				}
 			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine(ex);
-				this.UpdateStatusText = "確認に失敗しました";
+				this.SetUpdateStatus("Ui_UpdateCheck_Status_Failed");
 			}
+		}
+
+		private void SetUpdateStatus(string resourceKey, string? version = null)
+		{
+			this.updateStatusResourceKey = resourceKey;
+			this.updateStatusVersion = version;
+			this.RefreshUpdateStatus();
+		}
+
+		private void RefreshUpdateStatus()
+		{
+			if (this.updateStatusResourceKey == null) return;
+
+			var format = ResourceService.Current[this.updateStatusResourceKey];
+			this.UpdateStatusText = this.updateStatusVersion == null
+				? format
+				: string.Format(format, this.updateStatusVersion);
 		}
 	}
 }

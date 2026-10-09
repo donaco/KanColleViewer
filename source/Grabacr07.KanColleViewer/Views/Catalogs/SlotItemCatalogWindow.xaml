@@ -85,7 +85,7 @@
 					  Margin="8,8,8,0"
 					  IsExpanded="True">
 				<Expander.Header>
-					<TextBlock Text="フィルター設定"
+					<TextBlock Text="{Binding [Ui_Catalog_FilterSettings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource HeaderTextStyleKey}"
 							   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
 				</Expander.Header>
@@ -106,13 +106,13 @@
 							</Grid.RowDefinitions>
 
 							<TextBlock Margin="0,2">
-								<Run Text="装備種別" />
+								<Run Text="{Binding [Ui_SlotItemCatalog_Type], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 								<Run Text=":" />
 							</TextBlock>
 
 							<CheckBox Grid.Row="0"
 									  Grid.Column="2"
-									  Content="すべて選択"
+									  Content="{Binding [Ui_Catalog_SelectAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									  IsChecked="{Binding CheckAllSlotItemTypes, Mode=TwoWay}"
 									  Margin="0,2" />
 
@@ -140,7 +140,7 @@
 
 			<Border DockPanel.Dock="Top"
 					Margin="8,8,8,0">
-				<metro2:CallMethodButton Content="表示の更新"
+				<metro2:CallMethodButton Content="{Binding [Ui_Catalog_Refresh], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 Padding="40,6"
 										 MethodName="Update"
 										 HorizontalAlignment="Left" />
@@ -200,7 +200,7 @@
 						<GridView>
 							<GridViewColumn Width="190">
 								<GridViewColumn.Header>
-									<TextBlock Text="装備名" />
+									<TextBlock Text="{Binding [Ui_SlotItemCatalog_EquipmentName], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 								</GridViewColumn.Header>
 								<GridViewColumn.CellTemplate>
 									<DataTemplate DataType="{x:Type viewModels:SlotItemCounter}">
@@ -220,7 +220,7 @@
 
 							<GridViewColumn Width="52">
 								<GridViewColumn.Header>
-									<TextBlock Text="合計" />
+									<TextBlock Text="{Binding [Ui_Catalog_Total], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 								</GridViewColumn.Header>
 								<GridViewColumn.CellTemplate>
 									<DataTemplate DataType="{x:Type viewModels:SlotItemCounter}">
@@ -237,24 +237,24 @@
 										<Border Width="52"
 												BorderThickness="0,0,1,0"
 												BorderBrush="{DynamicResource BorderBrushKey}">
-											<TextBlock Text="改修" />
+											<TextBlock Text="{Binding [Ui_SlotItemCatalog_Improvement], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 										</Border>
 										<Border Width="52"
 												BorderThickness="0,0,1,0"
 												BorderBrush="{DynamicResource BorderBrushKey}">
-											<TextBlock Text="熟練度" />
+											<TextBlock Text="{Binding [Ui_SlotItemCatalog_Proficiency], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 										</Border>
 										<Border Width="82"
 												BorderThickness="0,0,1,0"
 												BorderBrush="{DynamicResource BorderBrushKey}">
 											<TextBlock>
-												<Run Text="所持数" />
-												<Run Text="(余り)"
+												<Run Text="{Binding [Ui_SlotItemCatalog_OwnedCount], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+												<Run Text="{Binding [Ui_SlotItemCatalog_Remainder], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 													 FontSize="11" />
 											</TextBlock>
 										</Border>
 										<Border>
-											<TextBlock Text="装備している艦娘" />
+											<TextBlock Text="{Binding [Ui_SlotItemCatalog_EquippedOn], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 										</Border>
 									</DockPanel>
 								</GridViewColumn.Header>
@@ -375,7 +375,7 @@
 				Padding="20"
 				Visibility="{Binding IsReloading, Converter={StaticResource BooleanToVisibilityConverter}}"
 				d:IsHidden="True">
-			<TextBlock Text="一覧を生成しています..."
+			<TextBlock Text="{Binding [Ui_Catalog_GeneratingList], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource EmphaticTextStyleKey}"
 					   FontSize="16"
 					   Background="{DynamicResource ThemeBrushKey}"

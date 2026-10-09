@@ -29,7 +29,7 @@ namespace Grabacr07.KanColleViewer.Models
 		/// High モードの ComboBox 表示文字列を返します（検出した FPS を含む）。
 		/// </summary>
 		public static string HighModeDisplayText
-			=> string.Format("高：{0}FPS　モニタの FPS に自動調整", PrimaryRefreshRate);
+			=> string.Format(ResourceService.Current["Ui_Browser_FrameRate_High"], PrimaryRefreshRate);
 
 		private static int FetchRefreshRate()
 		{

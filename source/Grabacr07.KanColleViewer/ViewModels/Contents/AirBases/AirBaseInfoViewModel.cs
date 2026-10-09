@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grabacr07.KanColleWrapper.Models;
+using Grabacr07.KanColleViewer.Models;
 using System.Diagnostics;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
@@ -260,18 +261,22 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		public string ActionKindText
 		{
-			get
+			get { return GetActionKindText(this.ActionKind); }
+		}
+
+		internal static string GetActionKindText(int actionKind)
+		{
+			var key = actionKind switch
 			{
-				switch (this.ActionKind)
-				{
-					case 1: return "出撃";
-					case 2: return "防空";
-					case 3: return "退避";
-					case 4: return "休息";
-					case 0: return "待機";
-					default: return "不明";
-				}
-			}
+				1 => "Sortie",
+				2 => "AirDefense",
+				3 => "Retreat",
+				4 => "Rest",
+				0 => "Standby",
+				_ => "Unknown",
+			};
+
+			return ResourceService.Current[$"Ui_AirBases_ActionKind_{key}"];
 		}
 
 		public AirBaseInfoViewModel(

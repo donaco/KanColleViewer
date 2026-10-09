@@ -33,18 +33,25 @@
 									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 									   TextWrapping="NoWrap">
 								<TextBlock.Text>
-									<MultiBinding StringFormat="疲労回復まで: {0}">
-										<Binding Path="Condition.Remaining" />
+									<MultiBinding StringFormat="{}{0}{1}">
+										<Binding Source="{x:Static models:ResourceService.Current}" Path="[Ui_StateDetail_FatigueRecoveryPrefix]" Mode="OneWay" />
+										<Binding Path="Condition.Remaining" Mode="OneWay" />
 									</MultiBinding>
 								</TextBlock.Text>
 							</TextBlock>
-							<TextBlock x:Name="NosakiTimerText"
+							<TextBlock x:Name="NosakiTimerPrefix"
 									   Margin="8,0,0,0"
 									   Visibility="Collapsed"
- 									   Style="{DynamicResource DefaultTextStyleKey}"
- 									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
- 									   TextWrapping="NoWrap"
- 									   Text="{Binding NosakiTimerRemaining, StringFormat=母港給糧艦 - {0}}" />
+									   Style="{DynamicResource DefaultTextStyleKey}"
+									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   TextWrapping="NoWrap"
+									   Text="{Binding [Ui_StateDetail_NosakiTimerPrefix], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+							<TextBlock x:Name="NosakiTimerText"
+									   Visibility="Collapsed"
+									   Style="{DynamicResource DefaultTextStyleKey}"
+									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   TextWrapping="NoWrap"
+									   Text="{Binding NosakiTimerRemaining, Mode=OneWay}" />
 						</StackPanel>
 					</Border>
 				</Grid>
@@ -54,7 +61,7 @@
 								 Value="False">
 						<Setter TargetName="Text"
 								Property="Text"
-								Value="疲労回復済み" />
+								Value="{Binding [Ui_StateDetail_FatigueRecovered], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding State.IsReady}"
 								 Value="True">
@@ -63,10 +70,13 @@
 								Value="#FF286414" />
 						<Setter TargetName="Text"
 								Property="Text"
-								Value="出撃可能！" />
+								Value="{Binding Resources.MessageBar_ReSortie_CanReSortie, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding IsNosakiTimerActive}"
 								 Value="True">
+						<Setter TargetName="NosakiTimerPrefix"
+								Property="Visibility"
+								Value="Visible" />
 						<Setter TargetName="NosakiTimerText"
 								Property="Visibility"
 								Value="Visible" />
@@ -100,7 +110,7 @@
 									<ObjectAnimationUsingKeyFrames Storyboard.TargetName="WarningText"
 																   Storyboard.TargetProperty="Text">
 										<DiscreteObjectKeyFrame KeyTime="0"
-																Value="大破した艦娘がいます！！！" />
+																Value="{Binding [Ui_StateDetail_HeavilyDamaged], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 									</ObjectAnimationUsingKeyFrames>
 								</Storyboard>
 							</VisualState>
@@ -112,7 +122,7 @@
 							Padding="8,4">
 						<StackPanel Orientation="Horizontal">
 							<TextBlock x:Name="WarningText"
-									   Text="艦隊は出撃中です！"
+									   Text="{Binding [Ui_StateDetail_Sortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									   Style="{DynamicResource DefaultTextStyleKey}"
 									   Foreground="{DynamicResource ActiveForegroundBrushKey}">
 								<i:Interaction.Behaviors>
@@ -177,7 +187,7 @@
 						Background="#FF204080">
 					<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 							   Foreground="{DynamicResource ActiveForegroundBrushKey}">
-						<Run Text="遠征中" />
+						<Run Text="{Binding [Ui_StateDetail_Expedition], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=":" />
 						<Run Text="{Binding Mission.Title, Mode=OneWay}" />
 						<Run Text="-" />
@@ -189,7 +199,7 @@
 			<DataTemplate DataType="{x:Type vm:NullViewModel}">
 				<Border Padding="8,4"
 						Background="#FF3E3E42">
-					<TextBlock Text="艦隊に艦娘が編成されていません。"
+					<TextBlock Text="{Binding [Ui_StateDetail_NoShips], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource DefaultTextStyleKey}"
 							   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
 				</Border>

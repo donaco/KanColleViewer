@@ -7,6 +7,7 @@
 			 xmlns:metro2="clr-namespace:MetroTrilithon.UI.Controls;assembly=KanColleViewer.Controls"
 			 xmlns:composition="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Composition"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Views.Settings"
+			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 mc:Ignorable="d"
 			 d:DesignWidth="400"
 			 d:DataContext="{d:DesignInstance composition:PluginViewModel}">
@@ -29,7 +30,7 @@
 		<Border Height="4" />
 
 		<DockPanel>
-			<TextBlock Text="機能:　"
+			<TextBlock Text="{Binding [Ui_PluginInfo_Functions], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource DefaultTextStyleKey}" />
 
 			<metro2:RichTextView Source="{Binding Functions}">
@@ -45,7 +46,7 @@
 										<i:CallMethodAction MethodName="Click" TargetObject="{Binding}" />
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
-								<Run Text="設定" />
+								<Run Text="{Binding [Ui_PluginInfo_Settings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							</Hyperlink>
 							<Run Text="　" />
 						</Span>
@@ -57,7 +58,7 @@
 						<Span Foreground="{DynamicResource ForegroundBrushKey}"
 							  FontFamily="{DynamicResource DefaultFontFamilyKey}"
 							  FontSize="{DynamicResource DetailFontSizeKey}">
-							<Run Text="通知機能" />
+							<Run Text="{Binding [Ui_PluginInfo_Notifications], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<Hyperlink Foreground="{DynamicResource LinkForegroundBrushKey}"
 									   Cursor="Hand">
 								<i:Interaction.Triggers>
@@ -65,7 +66,7 @@
 										<i:CallMethodAction MethodName="Click" TargetObject="{Binding}" />
 									</i:EventTrigger>
 								</i:Interaction.Triggers>
-								<Run Text="(テスト)" />
+								<Run Text="{Binding [Ui_PluginInfo_Test], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							</Hyperlink>
 							<Run Text="　" />
 						</Span>
@@ -77,7 +78,7 @@
 						<Span Foreground="{DynamicResource ForegroundBrushKey}"
 							  FontFamily="{DynamicResource DefaultFontFamilyKey}"
 							  FontSize="{DynamicResource DetailFontSizeKey}">
-							<Run Text="プラグインからの通知" />
+							<Run Text="{Binding [Ui_PluginInfo_PluginNotifications], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<Run Text="　" />
 						</Span>
 					</metro2:RichTextInlinePresenter>
@@ -88,7 +89,7 @@
 						<Span Foreground="{DynamicResource ForegroundBrushKey}"
 							  FontFamily="{DynamicResource DefaultFontFamilyKey}"
 							  FontSize="{DynamicResource DetailFontSizeKey}">
-							<Run Text="ツール表示" />
+							<Run Text="{Binding [Ui_PluginInfo_ToolWindow], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<Run Text="　" />
 						</Span>
 					</metro2:RichTextInlinePresenter>
@@ -99,7 +100,7 @@
 						<Span Foreground="{DynamicResource ForegroundBrushKey}"
 							  FontFamily="{DynamicResource DefaultFontFamilyKey}"
 							  FontSize="{DynamicResource DetailFontSizeKey}">
-							<Run Text="タスク バー インジケーター" />
+							<Run Text="{Binding [Ui_PluginInfo_TaskbarProgress], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<Run Text="　" />
 						</Span>
 					</metro2:RichTextInlinePresenter>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.ViewModels.Contents;
 using Grabacr07.KanColleWrapper.Models;
@@ -28,6 +29,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Catalogs
 			this.Index = index;
 			this.Ship = ship;
 			this.SallyArea = sallyArea ?? SallyArea.Default;
+
+			System.ComponentModel.PropertyChangedEventHandler cultureChangedHandler = (s, e) =>
+			{
+				if (e.PropertyName == nameof(ResourceService.Resources)) this.RaisePropertyChanged(nameof(this.Speed));
+			};
+			ResourceService.Current.PropertyChanged += cultureChangedHandler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= cultureChangedHandler));
 		}
 	}
 }

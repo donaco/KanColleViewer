@@ -31,31 +31,31 @@
 		<StackPanel Margin="20,0,0,0">
 			<RadioButton x:Name="CheckDirectAccess"
 						 GroupName="ProxySettings"
-						 Content="プロキシサーバーを使用しない"
+						 Content="{Binding [Ui_Proxy_Direct], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						 IsChecked="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DirectAccess}" />
 
 			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 					   IsEnabled="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DirectAccess}"
 					   Margin="20,2,0,0">
-				<Run Text="全てのプロトコルでプロキシサーバーを中継せずに直接サーバーと通信を行います。" />
+					<Run Text="{Binding [Ui_Proxy_Direct_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</TextBlock>
 
 			<Border Height="8" />
 			<RadioButton x:Name="CheckUseSystemProxy"
 						 GroupName="ProxySettings"
-						 Content="Internet Explorer のプロキシ設定を使用する"
+						 Content="{Binding [Ui_Proxy_System], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						 IsChecked="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SystemProxy}" />
 
 			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 					   IsEnabled="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SystemProxy}"
 					   Margin="20,2,0,0">
-				<Run Text="「インターネット オプション」の設定を用いて通信を行います。" />
+					<Run Text="{Binding [Ui_Proxy_System_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</TextBlock>
 
 			<Border Height="8" />
 			<RadioButton x:Name="CheckUseSpecificProxy"
 						 GroupName="ProxySettings"
-						 Content="プロキシサーバーを指定する"
+						 Content="{Binding [Ui_Proxy_Specific], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						 IsChecked="{Binding ProxyType, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SpecificProxy}" />
 
 			<StackPanel IsEnabled="{Binding ProxyType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=SpecificProxy}"
@@ -70,9 +70,9 @@
 
 				<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="0,2">
-					<Run Text="指定したプロキシサーバーを中継して通信を行います。" />
+						<Run Text="{Binding [Ui_Proxy_Specific_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 					<LineBreak />
-					<Run Text="サーバーをホスト名で指定した場合、動作が遅くなることがあるため、IP アドレスでの指定を推奨します。" />
+						<Run Text="{Binding [Ui_Proxy_Specific_Host_Notice], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				</TextBlock>
 
 				<Grid>
@@ -126,7 +126,7 @@
 					<CheckBox Grid.Row="1"
 							  Grid.Column="1"
 							  Grid.ColumnSpan="3"
-							  Content="全てのプロトコルでこのプロキシ サーバーを使用する"
+							  Content="{Binding [Ui_Proxy_UseForAllProtocols], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							  Margin="-1,4"
 							  IsChecked="{Binding IsUseHttpProxyForAllProtocols, Mode=TwoWay}" />
 				</Grid>
@@ -244,13 +244,13 @@
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 			<Border Height="8" />
 			<CheckBox x:Name="CheckRelayEnabled"
-					  Content="外部ツールへ通信を中継する"
+					  Content="{Binding [Ui_Proxy_Relay_Enable], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding IsRelayEnabled, Mode=TwoWay}" />
 
 			<TextBlock Style="{DynamicResource DetailTextStyleKey}"
 					   IsEnabled="{Binding IsRelayEnabled}"
 					   Margin="20,2">
-				<Run Text="KanColleViewer 内蔵の中継プロキシが外部ツールへ通信を転送します。" />
+				<Run Text="{Binding [Ui_Proxy_Relay_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</TextBlock>
 
 			<Grid IsEnabled="{Binding IsRelayEnabled}"
@@ -266,7 +266,7 @@
 				<TextBlock Grid.Column="0"
 						   TextAlignment="Right"
 						   VerticalAlignment="Center">
-					<Run Text="転送先" />
+					<Run Text="{Binding [Ui_Proxy_Relay_Host], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 					<Run Text=": " />
 				</TextBlock>
 
@@ -276,7 +276,7 @@
 				<TextBlock Grid.Column="3"
 						   TextAlignment="Right"
 						   VerticalAlignment="Center">
-					<Run Text="ポート" />
+						<Run Text="{Binding Resources.Settings_Proxy_Port, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 					<Run Text=": " />
 				</TextBlock>
 
@@ -287,19 +287,19 @@
 			<Border Height="8" />
 			<StackPanel Orientation="Horizontal"
 						HorizontalAlignment="Right">
-				<TextBlock Text="※反映にはアプリケーションの再起動が必要です。"
+				<TextBlock Text="{Binding [Ui_Settings_RestartRequired], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="16,8" />
 
 				<metro2:CallMethodButton MethodTarget="{Binding}"
 										 MethodName="Apply"
-										 Content="保存"
+										 Content="{Binding [Ui_Action_Save], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MinWidth="110"
 										 Padding="16,6" />
 				<Border Width="8" />
 				<metro2:CallMethodButton MethodTarget="{Binding}"
 										 MethodName="Cancel"
-										 Content="キャンセル"
+										 Content="{Binding [Ui_Action_Cancel], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MinWidth="110"
 										 Padding="16,6" />
 			</StackPanel>
@@ -309,18 +309,18 @@
 		<StackPanel IsEnabled="{Binding Source={x:Static ms:GeneralSettings.IsRemoteDebuggingEnabled}, Path=Value, Mode=OneWay}">
 			<Border Height="4" />
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-			<TextBlock Text="開発者ツールの表示設定"
+			<TextBlock Text="{Binding [Ui_Settings_DeveloperTools], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 			<StackPanel Orientation="Horizontal"
 						HorizontalAlignment="Right">
-				<TextBlock Text="※埋め込みブラウザで 開発者ツールをポップアップ表示させます。"
+				<TextBlock Text="{Binding [Ui_Settings_DeveloperTools_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="16,8" />
 				<Border Width="5" />
 				<metro2:CallMethodButton MethodTarget="{Binding Source={x:Static root:WindowService.Current}}"
 										 MethodName="ShowDevTools"
-										 Content="表示"
+										 Content="{Binding [Ui_Action_Show], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MinWidth="110"
 										 Padding="16,6" />
 			</StackPanel>

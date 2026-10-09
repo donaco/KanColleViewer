@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 
 		public override string Name
 		{
-			get { return "航空隊"; }
+			get { return Grabacr07.KanColleViewer.Models.ResourceService.Current["Ui_Tab_AirBases"]; }
 			protected set { }
 		}
 

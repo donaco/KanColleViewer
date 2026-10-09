@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using MetroTrilithon.Linq;
@@ -15,7 +16,7 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 	{
 		private KanColleWindowSettings? settings;
 
-		public IReadOnlyCollection<DisplayViewModel<ExitConfirmationType>> ExitConfirmationTypes { get; }
+		public IReadOnlyCollection<DisplayViewModel<ExitConfirmationType>> ExitConfirmationTypes { get; private set; } = Array.Empty<DisplayViewModel<ExitConfirmationType>>();
 
 		private IReadOnlyCollection<DisplayViewModel<string>> _TaskbarProgressFeatures = Array.Empty<DisplayViewModel<string>>();
 
@@ -81,15 +82,30 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public WindowSettingsViewModel()
 		{
-			this.ExitConfirmationTypes = new List<DisplayViewModel<ExitConfirmationType>>
-			{
-				DisplayViewModel.Create(ExitConfirmationType.None, "確認しない"),
-				DisplayViewModel.Create(ExitConfirmationType.InSortieOnly, "出撃中のみ確認する"),
-				DisplayViewModel.Create(ExitConfirmationType.Always, "常に確認する"),
-			};
-
+			this.ReloadExitConfirmationTypes();
 			this.ReloadTaskbarProgressFeatures();
 			KanColleViewer.Composition.PluginService.Current.PluginsReloaded += this.ReloadTaskbarProgressFeatures;
+
+			System.ComponentModel.PropertyChangedEventHandler handler = (s, e) =>
+			{
+				if (e.PropertyName != nameof(ResourceService.Resources)) return;
+
+				this.ReloadExitConfirmationTypes();
+				this.ReloadTaskbarProgressFeatures();
+			};
+			ResourceService.Current.PropertyChanged += handler;
+			this.CompositeDisposable.Add(new DelegateDisposable(() => ResourceService.Current.PropertyChanged -= handler));
+		}
+
+		private void ReloadExitConfirmationTypes()
+		{
+			this.ExitConfirmationTypes = new List<DisplayViewModel<ExitConfirmationType>>
+			{
+				DisplayViewModel.Create(ExitConfirmationType.None, ResourceService.Current["Ui_Window_ExitConfirmation_None"]),
+				DisplayViewModel.Create(ExitConfirmationType.InSortieOnly, ResourceService.Current["Ui_Window_ExitConfirmation_InSortieOnly"]),
+				DisplayViewModel.Create(ExitConfirmationType.Always, ResourceService.Current["Ui_Window_ExitConfirmation_Always"]),
+			};
+			this.RaisePropertyChanged(nameof(this.ExitConfirmationTypes));
 		}
 
 		public void Initialize()
@@ -102,8 +118,13 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 		private void ReloadTaskbarProgressFeatures()
 		{
 			this.TaskbarProgressFeatures = EnumerableEx
-				.Return(GeneralSettings.TaskbarProgressSource.ToDefaultDisplay("使用しない"))
-				.Concat(TaskbarProgress.Features.ToDisplay(x => x.Id, x => x.DisplayName))
+				.Return(GeneralSettings.TaskbarProgressSource.ToDefaultDisplay(ResourceService.Current["Ui_Window_TaskbarProgress_None"]))
+				.Concat(TaskbarProgress.Features.ToDisplay(x => x.Id, x => x.Id switch
+				{
+					"C8BF00A6-9FD4-4CC4-8FC5-ECCC5675CDEB-1" => ResourceService.Current["Ui_Window_TaskbarProgress_Expedition"],
+					"DA0E7091-F4A6-4467-9812-3C3E0DF946EA-1" => ResourceService.Current["Ui_Window_TaskbarProgress_FleetHp"],
+					_ => x.DisplayName,
+				}))
 				.ToList();
 		}
 

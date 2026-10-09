@@ -68,7 +68,7 @@
 							VerticalAlignment="Top"
 							WindowChrome.IsHitTestVisibleInChrome="True">
 					<!-- スクリーンショット撮影ボタン -->
-					<metro:CaptionButton ToolTip="ウィンドウのスクリーンショットを保存">
+					<metro:CaptionButton ToolTip="{Binding [Ui_AirBases_Screenshot], Source={x:Static models:ResourceService.Current}, Mode=OneWay}">
 						<i:Interaction.Triggers>
 							<i:EventTrigger EventName="Click">
 								<i:CallMethodAction TargetObject="{Binding}" MethodName="TakeScreenshot" />
@@ -159,9 +159,11 @@
 				<!-- 追加表示: 選択海域の集計情報（ListBox の下に表示されます） -->
 				<Border Margin="4" Padding="8,6" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness=".99">
 					<Grid  HorizontalAlignment="Center">
-						<TextBlock Grid.Row="0" Grid.Column="0" Style="{DynamicResource DefaultTextStyleKey}" HorizontalAlignment="Right" Margin="1,2" FontSize="16">
-								<Run Text="※制空値は参考値です。" />
-						</TextBlock>
+						<TextBlock Text="{Binding [Ui_AirBases_AirPowerNote], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+								   Style="{DynamicResource DefaultTextStyleKey}"
+								   HorizontalAlignment="Right"
+								   Margin="1,2"
+								   FontSize="16" />
 					</Grid>
 				</Border>
 			</StackPanel>
@@ -210,19 +212,23 @@
 
 												<!-- 上段: 半径 -->
 												<TextBlock Grid.Row="0" Grid.Column="1"
-														   Text="{Binding Distance, StringFormat='半径: {0}'}" 
 														   FontSize="13" 
 														   Foreground="#c8c8c8"
 														   VerticalAlignment="Center"
-														   Margin="0,0,8,0" />
+											   Margin="0,0,8,0">
+									<Run Text="{Binding [Ui_AirBases_Radius], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+									<Run Text="{Binding Distance, Mode=OneWay}" />
+								</TextBlock>
 
 												<!-- 上段: 制空 -->
 												<TextBlock Grid.Row="0" Grid.Column="2"
-														   Text="{Binding AirPower, StringFormat='制空: {0}'}" 
 														   FontSize="13" 
 														   Foreground="#c8c8c8"
 														   VerticalAlignment="Center"
-														   Margin="0,0,20,0" />
+											   Margin="0,0,20,0">
+									<Run Text="{Binding [Ui_AirBases_AirPower], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+									<Run Text="{Binding AirPower, Mode=OneWay}" />
+								</TextBlock>
 
 												<!-- 右上: 装備スロット（rowspan=2） -->
 												<ItemsControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="3"
@@ -319,9 +325,14 @@
 																	<!-- 熟練度 -->
 																	<TextBlock Margin="6,0,0,0"
 																			   VerticalAlignment="Center"
-																			   Text="{Binding Alv, StringFormat=(熟練度 {0})}"
 																			   Foreground="#c8c8c8" 
-																			   FontSize="12">
+													   FontSize="12">
+													<TextBlock.Text>
+														<MultiBinding StringFormat="{}{0}{1}">
+															<Binding Source="{x:Static models:ResourceService.Current}" Path="[Ui_AirBases_ProficiencyPrefix]" Mode="OneWay" />
+															<Binding Path="Alv" Mode="OneWay" />
+														</MultiBinding>
+													</TextBlock.Text>
 																		<TextBlock.Style>
 																			<Style TargetType="TextBlock">
 																				<Setter Property="Visibility" Value="Visible" />
