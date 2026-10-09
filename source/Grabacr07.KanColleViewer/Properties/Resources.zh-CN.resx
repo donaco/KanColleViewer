@@ -139,10 +139,10 @@
     <value>Debug</value>
   </data>
   <data name="Debug_NotificationMessage" xml:space="preserve">
-    <value>これはテスト通知です。</value>
+    <value>这是一条测试通知。</value>
   </data>
   <data name="Debug_NotificationMessage_Title" xml:space="preserve">
-    <value>テスト</value>
+    <value>测试</value>
   </data>
   <data name="Dockyard" xml:space="preserve">
     <value>建造</value>
@@ -207,6 +207,30 @@
   <data name="Expedition_TimeRemaining" xml:space="preserve">
     <value>距离舰队返回还有</value>
   </data>
+  <data name="Materials_Fuel" xml:space="preserve">
+    <value>燃料</value>
+  </data>
+  <data name="Materials_Ammunition" xml:space="preserve">
+    <value>弹药</value>
+  </data>
+  <data name="Materials_Steel" xml:space="preserve">
+    <value>钢材</value>
+  </data>
+  <data name="Materials_Bauxite" xml:space="preserve">
+    <value>铝土</value>
+  </data>
+  <data name="Materials_DevelopmentMaterials" xml:space="preserve">
+    <value>开发资材</value>
+  </data>
+  <data name="Materials_InstantRepairMaterials" xml:space="preserve">
+    <value>高速修复材</value>
+  </data>
+  <data name="Materials_InstantBuildMaterials" xml:space="preserve">
+    <value>高速建造材</value>
+  </data>
+  <data name="Materials_ImprovementMaterials" xml:space="preserve">
+    <value>改修资材</value>
+  </data>
   <data name="Fleets" xml:space="preserve">
     <value>舰队</value>
   </data>
@@ -226,40 +250,40 @@
     <value>所持有的舰娘:</value>
   </data>
   <data name="IntegratedView" xml:space="preserve">
-    <value>総合</value>
+    <value>总览</value>
   </data>
   <data name="MessageBar_Expedition" xml:space="preserve">
-    <value>この艦隊は遠征中です。</value>
+    <value>这支舰队正在远征。</value>
   </data>
   <data name="MessageBar_Expedition_TimeCompletion" xml:space="preserve">
-    <value> 完了時刻:</value>
+    <value> 完成时间：</value>
   </data>
   <data name="MessageBar_Expedition_TimeRemaining" xml:space="preserve">
-    <value> 帰投まで:</value>
+    <value> 返回剩余时间：</value>
   </data>
   <data name="MessageBar_Repairing" xml:space="preserve">
-    <value>艦隊に入渠中の艦娘がいます。 完了時刻: {0:MM/dd HH\:mm} 完了まで: {1}:{2:mm\:ss}</value>
+    <value>舰队中有舰娘正在入渠。完成时间：{0:MM/dd HH\:mm} 还需：{1}:{2:mm\:ss}</value>
   </data>
   <data name="MessageBar_Repairing_Null" xml:space="preserve">
-    <value>艦隊に入渠中の艦娘がいます。</value>
+    <value>舰队中有舰娘正在入渠。</value>
   </data>
   <data name="MessageBar_ReSortie_BadCondition" xml:space="preserve">
-    <value>疲労中の艦娘</value>
+    <value>舰娘疲劳中</value>
   </data>
   <data name="MessageBar_ReSortie_CanNotReSortie" xml:space="preserve">
-    <value>艦隊に{0}がいます。</value>
+    <value>舰队中有{0}。</value>
   </data>
   <data name="MessageBar_ReSortie_CanReSortie" xml:space="preserve">
-    <value>出撃可能！</value>
+    <value>可以出击！</value>
   </data>
   <data name="MessageBar_ReSortie_LackForResources" xml:space="preserve">
-    <value>未補給の艦娘</value>
+    <value>舰娘尚未补给</value>
   </data>
   <data name="MessageBar_ReSortie_Remaining" xml:space="preserve">
-    <value>再出撃までの目安: </value>
+    <value>预计再次出击时间：</value>
   </data>
   <data name="MessageBar_ReSortie_Separator" xml:space="preserve">
-    <value>・</value>
+    <value>、</value>
   </data>
   <data name="Quests" xml:space="preserve">
     <value>任务</value>
@@ -274,10 +298,13 @@
     <value>※任务完成状况(50 %, 80 %) 和游戏内显示的相同。敌方舰队击破数和远征成功数等不能被显示</value>
   </data>
   <data name="Quests_Untaken" xml:space="preserve">
-    <value>请点击游戏中的 [任務 (クエスト)]，以便取得任务信息</value>
+    <value>请在游戏中打开“任务”菜单，以获取任务列表。</value>
   </data>
   <data name="Quests_Weekly" xml:space="preserve">
     <value>每周任务</value>
+  </data>
+  <data name="Quests_Monthly" xml:space="preserve">
+    <value>每月任务</value>
   </data>
   <data name="Repairyard" xml:space="preserve">
     <value>入渠</value>
@@ -412,16 +439,22 @@
     <value>永远保持在最前端</value>
   </data>
   <data name="StartContent_ClearCacheButton" xml:space="preserve">
-    <value>キャッシュの削除</value>
+    <value>清除缓存</value>
   </data>
   <data name="StartContent_ClearCacheButtonMessage" xml:space="preserve">
-    <value>キャッシュを削除しました</value>
+    <value>已清除缓存</value>
   </data>
   <data name="StartContent_Introduction1" xml:space="preserve">
     <value>“当海军上将真忙！”是一款让玩《舰队收藏》更轻松的工具</value>
   </data>
   <data name="StartContent_Welcom" xml:space="preserve">
-    <value>ようこそ</value>
+    <value>欢迎</value>
+  </data>
+  <data name="Fleets_AirSuperiorityPotential" xml:space="preserve">
+    <value>制空值</value>
+  </data>
+  <data name="Fleets_Average" xml:space="preserve">
+    <value>平均</value>
   </data>
   <data name="StatusBar_NotStarted" xml:space="preserve">
     <value>我在等《舰队Collection》上线。</value>
@@ -429,11 +462,29 @@
   <data name="StatusBar_Ready" xml:space="preserve">
     <value>准备完毕</value>
   </data>
+  <data name="Fleets_Speed_Fast" xml:space="preserve">
+    <value>高速舰队</value>
+  </data>
+  <data name="Fleets_Speed_Slow" xml:space="preserve">
+    <value>低速舰队</value>
+  </data>
+  <data name="Fleets_Speed_Mixed" xml:space="preserve">
+    <value>混速舰队</value>
+  </data>
+  <data name="Fleets_Speed_Fleet" xml:space="preserve">
+    <value>舰队</value>
+  </data>
   <data name="ZoomAction_OutOfRange" xml:space="preserve">
     <value>无法在 {0} %范围内缩放</value>
   </data>
   <data name="ZoomAction_ZoomFailed" xml:space="preserve">
     <value>缩放失败: {0}</value>
+  </data>
+  <data name="Fleets_Level" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="Fleets_Total" xml:space="preserve">
+    <value>合计</value>
   </data>
   <data name="ZoomFactorSelector" xml:space="preserve">
     <value>游戏屏幕显示尺寸</value>
@@ -441,14 +492,817 @@
   <data name="ZoomFactorSelector_Tooltip" xml:space="preserve">
     <value>调整游戏屏幕的显示尺寸</value>
   </data>
+  <data name="Settings_Logging" xml:space="preserve">
+    <value>日志记录</value>
+  </data>
+  <data name="Settings_Logging_Enable" xml:space="preserve">
+    <value>将掉落和装备开发结果记录到文件</value>
+  </data>
+  <data name="Fleets_ViewRange" xml:space="preserve">
+    <value>索敌值</value>
+  </data>
   <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
-    <value>中破以上の艦娘</value>
+    <value>中破及以上的舰娘</value>
+  </data>
+  <data name="AirBases_Untaken" xml:space="preserve">
+    <value>请在游戏中打开[海域选择]画面，以获取陆上航空队数据。</value>
   </data>
   <data name="UpdateCheck_off" xml:space="preserve">
     <value>手动检查</value>
   </data>
   <data name="UpdateCheck_on" xml:space="preserve">
     <value>自动检查</value>
+  </data>
+  <data name="Ui_Action_Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Ui_Action_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Ui_Action_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Ui_Action_RestoreDefaults" xml:space="preserve">
+    <value>恢复默认值</value>
+  </data>
+  <data name="Ui_Action_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Ui_Action_Show" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="Ui_AirBases_AirPower" xml:space="preserve">
+    <value>制空：</value>
+  </data>
+  <data name="Ui_AirBases_Details" xml:space="preserve">
+    <value>基地航空队详情</value>
+  </data>
+  <data name="Ui_AirBases_AirPowerNote" xml:space="preserve">
+    <value>注意：制空值为近似值。</value>
+  </data>
+  <data name="Ui_AirBases_MaintenanceLevel" xml:space="preserve">
+    <value>熟练度</value>
+  </data>
+  <data name="Ui_AirBases_ProficiencyPrefix" xml:space="preserve">
+    <value>熟练度：</value>
+  </data>
+  <data name="Ui_AirBases_Radius" xml:space="preserve">
+    <value>航程：</value>
+  </data>
+  <data name="Ui_AirBases_Screenshot" xml:space="preserve">
+    <value>保存此窗口的截图</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Sortie" xml:space="preserve">
+    <value>出击</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_AirDefense" xml:space="preserve">
+    <value>防空</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Retreat" xml:space="preserve">
+    <value>撤退</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Rest" xml:space="preserve">
+    <value>休息</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Standby" xml:space="preserve">
+    <value>待机</value>
+  </data>
+  <data name="Ui_AirBases_ActionKind_Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
+    <value>将在下次启动应用程序时清除缓存。</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
+    <value>后退</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Forward" xml:space="preserve">
+    <value>前进</value>
+  </data>
+  <data name="Ui_BrowserNavigator_Refresh" xml:space="preserve">
+    <value>刷新页面</value>
+  </data>
+  <data name="Ui_BrowserNavigator_UrlPrompt" xml:space="preserve">
+    <value>输入网址并按 Enter 键访问。</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Description" xml:space="preserve">
+    <value>启用开发者功能。关闭此选项后请重新启动应用程序。</value>
+  </data>
+  <data name="Ui_Browser_DeveloperOptions_Enable" xml:space="preserve">
+    <value>启用开发者选项</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu" xml:space="preserve">
+    <value>禁用 GPU 加速</value>
+  </data>
+  <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
+    <value>如果遇到显示问题，请启用此选项。更改后需要重新启动应用程序。</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
+    <value>选择画面质量与 GPU 负载之间的平衡。更改后需要重新启动应用程序。</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
+    <value>高：{0} FPS（自动调整）</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
+    <value>低：30 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
+    <value>中：60 FPS</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
+    <value>选择显示帧率</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
+    <value>（误操作放大时使用）</value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Prefix" xml:space="preserve">
+    <value>将游戏画面缩放比例重置为 </value>
+  </data>
+  <data name="Ui_Browser_ResetZoom_Suffix" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools" xml:space="preserve">
+    <value>显示开发者工具</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Description" xml:space="preserve">
+    <value>在弹出窗口中打开开发者工具。</value>
+  </data>
+  <data name="Ui_Browser_ShowDevTools_Hint" xml:space="preserve">
+    <value>（供开发者使用；在弹出窗口中打开）</value>
+  </data>
+  <data name="Ui_Browser_Zoom_Description" xml:space="preserve">
+    <value>使用窗口顶部的按钮调整游戏画面的显示尺寸。无论显示尺寸设置如何，截图始终以 100% 缩放比例保存。</value>
+  </data>
+  <data name="Ui_Fleet_First" xml:space="preserve">
+    <value>第一舰队</value>
+  </data>
+  <data name="Ui_Fleet_Evacuated" xml:space="preserve">
+    <value>已撤离</value>
+  </data>
+  <data name="Ui_Fleet_Repairing" xml:space="preserve">
+    <value>入渠中</value>
+  </data>
+  <data name="Ui_Fleet_Second" xml:space="preserve">
+    <value>第二舰队</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy" xml:space="preserve">
+    <value>状态良好</value>
+  </data>
+  <data name="Ui_FleetWindow_Healthy_DamageControl" xml:space="preserve">
+    <value>状态良好（已装备损管）</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_SinkingPossible" xml:space="preserve">
+    <value>大破（有沉没风险）</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_DamageControlAvailable" xml:space="preserve">
+    <value>大破（可使用损管）</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamaged_Evacuated" xml:space="preserve">
+    <value>大破（已撤退）</value>
+  </data>
+  <data name="Ui_FleetWindow_Retreated_EscortEvacuation" xml:space="preserve">
+    <value>已执行护卫撤退</value>
+  </data>
+  <data name="Ui_FleetWindow_Repairing" xml:space="preserve">
+    <value>入渠中</value>
+  </data>
+  <data name="Ui_FleetWindow_DaytimeCutIn" xml:space="preserve">
+    <value>昼战特殊攻击</value>
+  </data>
+  <data name="Ui_FleetWindow_NightBattleCutIn" xml:space="preserve">
+    <value>夜战特殊攻击：30%</value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleet" xml:space="preserve">
+    <value>联合舰队</value>
+  </data>
+  <data name="Ui_FleetWindow_TotalLevel" xml:space="preserve">
+    <value>等级总和</value>
+  </data>
+  <data name="Ui_FleetWindow_AverageLevel" xml:space="preserve">
+    <value>平均等级</value>
+  </data>
+  <data name="Ui_FleetWindow_LineOfSight" xml:space="preserve">
+    <value>索敌值</value>
+  </data>
+  <data name="Ui_FleetWindow_AirPower" xml:space="preserve">
+    <value>制空值</value>
+  </data>
+  <data name="Ui_FleetWindow_Minimum" xml:space="preserve">
+    <value>(最低)</value>
+  </data>
+  <data name="Ui_FleetWindow_MinAirPowerTooltip" xml:space="preserve">
+    <value>仅使用舰战，并按最低内部熟练度计算。</value>
+  </data>
+  <data name="Ui_FleetWindow_Maximum" xml:space="preserve">
+    <value>(最高)</value>
+  </data>
+  <data name="Ui_FleetWindow_MaxAirPowerTooltip" xml:space="preserve">
+    <value>使用所有舰载机，并按最高内部熟练度计算。</value>
+  </data>
+  <data name="Ui_FleetWindow_Transport" xml:space="preserve">
+    <value>运输量</value>
+  </data>
+  <data name="Ui_FleetWindow_Status" xml:space="preserve">
+    <value>舰队状态</value>
+  </data>
+  <data name="Ui_FleetWindow_NotSortie" xml:space="preserve">
+    <value>舰队未出击</value>
+  </data>
+  <data name="Ui_FleetWindow_Sortie" xml:space="preserve">
+    <value>舰队正在出击！</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieNotReady" xml:space="preserve">
+    <value>舰队尚未做好出击准备</value>
+  </data>
+  <data name="Ui_FleetWindow_SortieReady" xml:space="preserve">
+    <value>可以出击！</value>
+  </data>
+  <data name="Ui_FleetWindow_NotOnExpedition" xml:space="preserve">
+    <value>舰队未执行远征</value>
+  </data>
+  <data name="Ui_FleetWindow_OnExpeditionPrefix" xml:space="preserve">
+    <value>舰队正在远征：</value>
+  </data>
+  <data name="Ui_FleetWindow_CombinedFleetCannotExpedition" xml:space="preserve">
+    <value>联合舰队不能执行远征</value>
+  </data>
+  <data name="Ui_FleetWindow_NoHeavilyDamagedShips" xml:space="preserve">
+    <value>舰队中没有大破舰娘</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips" xml:space="preserve">
+    <value>舰队中有大破舰娘</value>
+  </data>
+  <data name="Ui_FleetWindow_HeavilyDamagedShips_Sortie" xml:space="preserve">
+    <value>舰队中有大破舰娘！</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsRepairing" xml:space="preserve">
+    <value>舰队中没有正在入渠的舰娘</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsRepairing" xml:space="preserve">
+    <value>舰队中有正在入渠的舰娘</value>
+  </data>
+  <data name="Ui_FleetWindow_FleetSupplied" xml:space="preserve">
+    <value>舰队补给完毕</value>
+  </data>
+  <data name="Ui_FleetWindow_ShipsNeedResupply" xml:space="preserve">
+    <value>舰队中有舰娘需要补给</value>
+  </data>
+  <data name="Ui_FleetWindow_NoShipsFatigued" xml:space="preserve">
+    <value>舰队中没有疲劳的舰娘</value>
+  </data>
+  <data name="Ui_FleetWindow_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>疲劳恢复剩余时间：</value>
+  </data>
+  <data name="Ui_FleetWindow_NormalFleetComposition" xml:space="preserve">
+    <value>舰队编成正常</value>
+  </data>
+  <data name="Ui_FleetWindow_RepairShipFlagship" xml:space="preserve">
+    <value>旗舰为维修舰</value>
+  </data>
+  <data name="Ui_Catalog_FilterSettings" xml:space="preserve">
+    <value>筛选设置</value>
+  </data>
+  <data name="Ui_Catalog_SelectAll" xml:space="preserve">
+    <value>全选</value>
+  </data>
+  <data name="Ui_Catalog_Refresh" xml:space="preserve">
+    <value>刷新显示</value>
+  </data>
+  <data name="Ui_Catalog_Total" xml:space="preserve">
+    <value>总计</value>
+  </data>
+  <data name="Ui_Catalog_GeneratingList" xml:space="preserve">
+    <value>正在生成列表……</value>
+  </data>
+  <data name="Ui_Catalog_All" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="Ui_Catalog_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="Ui_Catalog_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiAir" xml:space="preserve">
+    <value>对空</value>
+  </data>
+  <data name="Ui_ShipCatalog_AntiSubmarine" xml:space="preserve">
+    <value>对潜</value>
+  </data>
+  <data name="Ui_ShipCatalog_Armor" xml:space="preserve">
+    <value>装甲</value>
+  </data>
+  <data name="Ui_ShipCatalog_Ascending" xml:space="preserve">
+    <value>升序</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition" xml:space="preserve">
+    <value>疲劳度</value>
+  </data>
+  <data name="Ui_ShipCatalog_Condition50OrMore" xml:space="preserve">
+    <value>50 以上</value>
+  </data>
+  <data name="Ui_ShipCatalog_ConditionUnder50" xml:space="preserve">
+    <value>低于 50</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damage" xml:space="preserve">
+    <value>受损状态</value>
+  </data>
+  <data name="Ui_ShipCatalog_Damaged" xml:space="preserve">
+    <value>受损</value>
+  </data>
+  <data name="Ui_ShipCatalog_Descending" xml:space="preserve">
+    <value>降序</value>
+  </data>
+  <data name="Ui_ShipCatalog_Equipment" xml:space="preserve">
+    <value>装备</value>
+  </data>
+  <data name="Ui_ShipCatalog_EquipmentBonusTooltip" xml:space="preserve">
+    <value>数值包含装备加成…</value>
+  </data>
+  <data name="Ui_ShipCatalog_ExcludeExpeditionShips" xml:space="preserve">
+    <value>排除正在远征的舰娘</value>
+  </data>
+  <data name="Ui_ShipCatalog_Expedition" xml:space="preserve">
+    <value>远征</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fast" xml:space="preserve">
+    <value>高速</value>
+  </data>
+  <data name="Ui_ShipCatalog_Faster" xml:space="preserve">
+    <value>高速+</value>
+  </data>
+  <data name="Ui_ShipCatalog_Fastest" xml:space="preserve">
+    <value>最速</value>
+  </data>
+  <data name="Ui_ShipCatalog_Firepower" xml:space="preserve">
+    <value>火力</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level1" xml:space="preserve">
+    <value>1 级</value>
+  </data>
+  <data name="Ui_ShipCatalog_Level2OrMore" xml:space="preserve">
+    <value>2 级及以上</value>
+  </data>
+  <data name="Ui_ShipCatalog_LineOfSight" xml:space="preserve">
+    <value>索敌</value>
+  </data>
+  <data name="Ui_ShipCatalog_Lock" xml:space="preserve">
+    <value>锁定</value>
+  </data>
+  <data name="Ui_ShipCatalog_Locked" xml:space="preserve">
+    <value>已锁定</value>
+  </data>
+  <data name="Ui_ShipCatalog_Luck" xml:space="preserve">
+    <value>运</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernization" xml:space="preserve">
+    <value>近代化改修</value>
+  </data>
+  <data name="Ui_ShipCatalog_Modernized" xml:space="preserve">
+    <value>已完成</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotModernized" xml:space="preserve">
+    <value>未完成</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AmphibiousTank" xml:space="preserve">
+    <value>登陆战车</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_AviationBattleshipCruiser" xml:space="preserve">
+    <value>航空战舰／航空巡洋舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Battleship" xml:space="preserve">
+    <value>战舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Carrier" xml:space="preserve">
+    <value>航空母舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Daihatsu" xml:space="preserve">
+    <value>大发</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Destroyer" xml:space="preserve">
+    <value>驱逐舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_HeavyCruiser" xml:space="preserve">
+    <value>重巡洋舰／航空巡洋舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_LightCruiser" xml:space="preserve">
+    <value>轻巡洋舰／重雷装巡洋舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Quick_Submarine" xml:space="preserve">
+    <value>潜水舰</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeled" xml:space="preserve">
+    <value>已改装</value>
+  </data>
+  <data name="Ui_ShipCatalog_Remodeling" xml:space="preserve">
+    <value>改装中</value>
+  </data>
+  <data name="Ui_ShipCatalog_NotRemodeled" xml:space="preserve">
+    <value>未改装</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTime" xml:space="preserve">
+    <value>修理时间</value>
+  </data>
+  <data name="Ui_ShipCatalog_RepairTimeTooltip" xml:space="preserve">
+    <value>舰娘修理所需的时间。</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipName" xml:space="preserve">
+    <value>舰娘名称</value>
+  </data>
+  <data name="Ui_ShipCatalog_ShipType" xml:space="preserve">
+    <value>舰种</value>
+  </data>
+  <data name="Ui_ShipCatalog_Slow" xml:space="preserve">
+    <value>低速</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortDescription" xml:space="preserve">
+    <value>按以下顺序排列舰娘。</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortieArea" xml:space="preserve">
+    <value>出击海域</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortMethod" xml:space="preserve">
+    <value>排序方式</value>
+  </data>
+  <data name="Ui_ShipCatalog_SortSettings" xml:space="preserve">
+    <value>排序设置</value>
+  </data>
+  <data name="Ui_ShipCatalog_Speed" xml:space="preserve">
+    <value>航速</value>
+  </data>
+  <data name="Ui_ShipCatalog_Torpedo" xml:space="preserve">
+    <value>雷装</value>
+  </data>
+  <data name="Ui_ShipCatalog_Undamaged" xml:space="preserve">
+    <value>未受损</value>
+  </data>
+  <data name="Ui_ShipCatalog_Unlocked" xml:space="preserve">
+    <value>未锁定</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Type" xml:space="preserve">
+    <value>装备类型</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquipmentName" xml:space="preserve">
+    <value>装备名称</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Improvement" xml:space="preserve">
+    <value>改修</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Proficiency" xml:space="preserve">
+    <value>熟练度</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_OwnedCount" xml:space="preserve">
+    <value>持有数</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Remainder" xml:space="preserve">
+    <value>(余)</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
+    <value>装备舰娘</value>
+  </data>
+  <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
+    <value>运输量</value>
+  </data>
+  <data name="Ui_Fleets_Details" xml:space="preserve">
+    <value>舰队详情</value>
+  </data>
+  <data name="Ui_ExitDialog_Confirmation" xml:space="preserve">
+    <value>确定要退出 KanColleViewer 吗？</value>
+  </data>
+  <data name="Ui_Notification_Advance" xml:space="preserve">
+    <value>提前发送通知</value>
+  </data>
+  <data name="Ui_Notification_Advance_Notice" xml:space="preserve">
+    <value>根据游戏机制，通知最多可以提前 1 分钟。建议设置为 40～50 秒，以抵消服务器时间差。</value>
+  </data>
+  <data name="Ui_Notification_FleetRejuvenated" xml:space="preserve">
+    <value>舰队中所有舰娘疲劳恢复后通知</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer" xml:space="preserve">
+    <value>母港给粮舰计时器运行时发送通知</value>
+  </data>
+  <data name="Ui_Notification_NosakiTimer_Description" xml:space="preserve">
+    <value>计时开始后每隔 15 分钟发送一次通知，计时结束后停止。</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition" xml:space="preserve">
+    <value>出击所需的舰娘状态值</value>
+  </data>
+  <data name="Ui_Notification_ResortieCondition_Note" xml:space="preserve">
+    <value>请在“设置”&gt;“操作”&gt;“出击条件”中配置。</value>
+  </data>
+  <data name="Ui_Notification_ResortieDescription" xml:space="preserve">
+    <value>当舰队中所有舰娘的状态值达到上述数值时，将发送通知。状态值每 3 分钟恢复 3 点。通知可能延迟几秒，最长约 3 分钟。</value>
+  </data>
+  <data name="Ui_Operation_AutoFleetSelection" xml:space="preserve">
+    <value>自动选择舰队</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnCompositionChange" xml:space="preserve">
+    <value>舰队编成变更时自动选择该舰队</value>
+  </data>
+  <data name="Ui_Operation_AutoSelectFleetOnSortie" xml:space="preserve">
+    <value>舰队出击时自动选择该舰队</value>
+  </data>
+  <data name="Ui_Operation_CombinedFleet_ViewRange" xml:space="preserve">
+    <value>联合舰队索敌计算中包含的舰队</value>
+  </data>
+  <data name="Ui_Operation_Condition_Example" xml:space="preserve">
+    <value>例如：40</value>
+  </data>
+  <data name="Ui_Operation_FleetStatus" xml:space="preserve">
+    <value>舰队状态</value>
+  </data>
+  <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
+    <value>旗舰为维修舰时，不将舰队视为已做好出击准备</value>
+  </data>
+  <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
+    <value>仅在航空战和防空节点显示制空信息</value>
+  </data>
+  <data name="Ui_Operation_ShowNextCell" xml:space="preserve">
+    <value>显示下一目的地（否则将在战斗开始时显示）</value>
+  </data>
+  <data name="Ui_Operation_ShowSortieInfo" xml:space="preserve">
+    <value>出击时显示地图位置和战斗结果（例如 1-5-D [S][制空权确保]）</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Description" xml:space="preserve">
+    <value>当舰队中所有舰娘的状态值均达到此数值时，视为舰队已做好出击准备</value>
+  </data>
+  <data name="Ui_Operation_SortieCondition_Note" xml:space="preserve">
+    <value>通常建议设置为 40（士气图标消失时）或 49（自然恢复上限）。</value>
+  </data>
+  <data name="Ui_Operation_SortieInfo" xml:space="preserve">
+    <value>出击信息</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation" xml:space="preserve">
+    <value>索敌计算</value>
+  </data>
+  <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
+    <value>选择用于计算舰队索敌值的公式。</value>
+  </data>
+  <data name="Ui_Overview_Data" xml:space="preserve">
+    <value>数据</value>
+  </data>
+  <data name="Ui_Overview_ShipCatalog" xml:space="preserve">
+    <value>舰娘列表</value>
+  </data>
+  <data name="Ui_Overview_SlotItemCatalog" xml:space="preserve">
+    <value>装备列表</value>
+  </data>
+  <data name="Ui_PluginInfo_Functions" xml:space="preserve">
+    <value>功能:</value>
+  </data>
+  <data name="Ui_PluginInfo_Notifications" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Ui_PluginInfo_PluginNotifications" xml:space="preserve">
+    <value>插件通知</value>
+  </data>
+  <data name="Ui_PluginInfo_Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Ui_PluginInfo_TaskbarProgress" xml:space="preserve">
+    <value>任务栏指示器</value>
+  </data>
+  <data name="Ui_PluginInfo_Test" xml:space="preserve">
+    <value>（测试）</value>
+  </data>
+  <data name="Ui_PluginInfo_ToolWindow" xml:space="preserve">
+    <value>工具窗口</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed" xml:space="preserve">
+    <value>加载失败的插件</value>
+  </data>
+  <data name="Ui_Plugins_LoadFailed_Description" xml:space="preserve">
+    <value>以下插件加载失败，当前未运行。您可以查看错误详情。</value>
+  </data>
+  <data name="Ui_Plugins_Loaded" xml:space="preserve">
+    <value>已加载的插件</value>
+  </data>
+  <data name="Ui_Plugins_Loaded_Description" xml:space="preserve">
+    <value>以下插件已加载，您可以更改其设置。</value>
+  </data>
+  <data name="Ui_Quests_NoCurrent" xml:space="preserve">
+    <value>当前没有进行中的任务。</value>
+  </data>
+  <data name="Ui_Quests_List" xml:space="preserve">
+    <value>任务列表</value>
+  </data>
+  <data name="Ui_Quests_NotTaken" xml:space="preserve">
+    <value>尚未获取任务列表。</value>
+  </data>
+  <data name="Ui_Proxy_Direct" xml:space="preserve">
+    <value>不使用代理服务器</value>
+  </data>
+  <data name="Ui_Proxy_Direct_Description" xml:space="preserve">
+    <value>所有协议均不使用代理，直接连接服务器。</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Description" xml:space="preserve">
+    <value>KanColleViewer 内置的中继代理会将流量转发至外部工具。</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Enable" xml:space="preserve">
+    <value>将流量转发至外部工具</value>
+  </data>
+  <data name="Ui_Proxy_Relay_Host" xml:space="preserve">
+    <value>转发至</value>
+  </data>
+  <data name="Ui_Proxy_Specific" xml:space="preserve">
+    <value>使用指定的代理服务器</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Description" xml:space="preserve">
+    <value>通过指定的代理服务器连接。</value>
+  </data>
+  <data name="Ui_Proxy_Specific_Host_Notice" xml:space="preserve">
+    <value>使用主机名可能会降低运行速度，建议指定 IP 地址。</value>
+  </data>
+  <data name="Ui_Proxy_System" xml:space="preserve">
+    <value>使用系统代理设置</value>
+  </data>
+  <data name="Ui_Proxy_System_Description" xml:space="preserve">
+    <value>使用 Internet 选项中的设置连接。</value>
+  </data>
+  <data name="Ui_Proxy_UseForAllProtocols" xml:space="preserve">
+    <value>所有协议均使用此代理服务器</value>
+  </data>
+  <data name="Ui_Screenshot_PngRecommended" xml:space="preserve">
+    <value>PNG（推荐）</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools" xml:space="preserve">
+    <value>开发者工具显示设置</value>
+  </data>
+  <data name="Ui_Settings_DeveloperTools_Description" xml:space="preserve">
+    <value>在内嵌浏览器中以弹出窗口打开开发者工具。</value>
+  </data>
+  <data name="Ui_Settings_Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Ui_Settings_RestartRequired" xml:space="preserve">
+    <value>重新启动应用程序后更改才会生效。</value>
+  </data>
+  <data name="Ui_Settings_UserStyleSheet" xml:space="preserve">
+    <value>用户样式表</value>
+  </data>
+  <data name="Ui_Shipyard_Development" xml:space="preserve">
+    <value>装备开发</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Failure" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="Ui_Shipyard_Development_NoResult" xml:space="preserve">
+    <value>无结果</value>
+  </data>
+  <data name="Ui_Shipyard_Development_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Ui_Start_Description" xml:space="preserve">
+    <value>游戏运行于内置的 Chromium 浏览器中。KanColleViewer 旨在避免给游戏服务器造成负担；它不会更改通信内容、向服务器发送信息，也不使用宏或作弊程序。</value>
+  </data>
+  <data name="Ui_StateDetail_Expedition" xml:space="preserve">
+    <value>远征中</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecovered" xml:space="preserve">
+    <value>疲劳已恢复</value>
+  </data>
+  <data name="Ui_StateDetail_FatigueRecoveryPrefix" xml:space="preserve">
+    <value>疲劳恢复剩余时间：</value>
+  </data>
+  <data name="Ui_StateDetail_HeavilyDamaged" xml:space="preserve">
+    <value>舰队中有大破舰娘！！！</value>
+  </data>
+  <data name="Ui_StateDetail_NoShips" xml:space="preserve">
+    <value>舰队中没有编入任何舰娘。</value>
+  </data>
+  <data name="Ui_StateDetail_NosakiTimerPrefix" xml:space="preserve">
+    <value>母港给粮舰 - </value>
+  </data>
+  <data name="Ui_StateDetail_Sortie" xml:space="preserve">
+    <value>舰队正在出击！</value>
+  </data>
+  <data name="Ui_Start_Introduction" xml:space="preserve">
+    <value>KanColleViewer 让《舰队Collection》的游戏体验更加轻松。</value>
+  </data>
+  <data name="Ui_Start_UpdateDescription" xml:space="preserve">
+    <value>应用程序会不定期发布更新，请随时检查更新。</value>
+  </data>
+  <data name="Ui_Start_Welcome" xml:space="preserve">
+    <value>欢迎</value>
+  </data>
+  <data name="Ui_Tab_AirBases" xml:space="preserve">
+    <value>航空队</value>
+  </data>
+  <data name="Ui_Tab_Quest" xml:space="preserve">
+    <value>任务</value>
+  </data>
+  <data name="Ui_Tab_Shipyard" xml:space="preserve">
+    <value>工厂</value>
+  </data>
+  <data name="Ui_Tab_Tools" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="Ui_Unit_Seconds" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="Ui_UpdateCheck_Button" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="Ui_UpdateCheck_OnStartup" xml:space="preserve">
+    <value>应用程序启动时检查更新</value>
+  </data>
+  <data name="Ui_UpdateCheck_Title" xml:space="preserve">
+    <value>更新检查</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Checking" xml:space="preserve">
+    <value>正在检查更新……</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Available" xml:space="preserve">
+    <value>有可用更新（{0}）</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_UpToDate" xml:space="preserve">
+    <value>已是最新版本。</value>
+  </data>
+  <data name="Ui_UpdateCheck_Status_Failed" xml:space="preserve">
+    <value>检查更新失败。</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Manual" xml:space="preserve">
+    <value>手动检查</value>
+  </data>
+  <data name="Ui_UpdateCheck_Mode_Automatic" xml:space="preserve">
+    <value>自动检查</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Name" xml:space="preserve">
+    <value>简单合计</value>
+  </data>
+  <data name="Ui_ViewRange_Type1_Description" xml:space="preserve">
+    <value>舰娘与装备的索敌值简单相加</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Name" xml:space="preserve">
+    <value>2-5 公式 (旧版)</value>
+  </data>
+  <data name="Ui_ViewRange_Type2_Description" xml:space="preserve">
+    <value>(侦察机 × 2）+（雷达）+ √（包含装备在内的舰队总索敌值 - 侦察机 - 雷达）</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Name" xml:space="preserve">
+    <value>2-5 公式（秋季）</value>
+  </data>
+  <data name="Ui_ViewRange_Type3_Description" xml:space="preserve">
+    <value>舰载俯冲轰炸机 × 1.04 + 舰载鱼雷轰炸机 × 1.37 + 舰载侦察机 × 1.66
+水上侦察机 × 2.00 + 水上爆击机 × 1.78 + 探照灯 × 0.91
+小型电探 × 1.00 + 大型电探 × 0.99 + 各舰娘基础索敌值的平方根 × 1.69
+提督等级向上取整至 5 的倍数 × -0.61</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Name" xml:space="preserve">
+    <value>33 公式</value>
+  </data>
+  <data name="Ui_ViewRange_Type4_Description" xml:space="preserve">
+    <value>各装备栏索敌值与改修加成之和 × 装备类型系数 + 各舰娘基础索敌值平方根之和
+- 向上取整（提督等级 × 0.4）+ 舰队空位数 × 2
+* 计算空位数时不包括已撤退的舰娘。</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation" xml:space="preserve">
+    <value>退出应用程序确认</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_Always" xml:space="preserve">
+    <value>始终</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_InSortieOnly" xml:space="preserve">
+    <value>仅出击时</value>
+  </data>
+  <data name="Ui_Window_ExitConfirmation_None" xml:space="preserve">
+    <value>不询问</value>
+  </data>
+  <data name="Ui_Window_Layout" xml:space="preserve">
+    <value>窗口布局</value>
+  </data>
+  <data name="Ui_Window_Layout_Game" xml:space="preserve">
+    <value>游戏</value>
+  </data>
+  <data name="Ui_Window_Layout_Info" xml:space="preserve">
+    <value>信息</value>
+  </data>
+  <data name="Ui_Window_Layout_Multiple" xml:space="preserve">
+    <value>多窗口</value>
+  </data>
+  <data name="Ui_Window_Layout_Single" xml:space="preserve">
+    <value>单窗口</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress" xml:space="preserve">
+    <value>指示器行为</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Expedition" xml:space="preserve">
+    <value>远征进度</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_FleetHp" xml:space="preserve">
+    <value>舰队中受损最重舰娘的 HP</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_None" xml:space="preserve">
+    <value>不使用</value>
+  </data>
+  <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
+    <value>出击时的指示器行为</value>
+  </data>
+  <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
+    <value>任务栏设置</value>
   </data>
   <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
     <value>对空战斗力:</value>

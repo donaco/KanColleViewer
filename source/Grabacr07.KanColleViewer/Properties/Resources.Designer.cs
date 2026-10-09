@@ -385,6 +385,24 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   艦隊 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Fleets_Speed_Fleet {
+            get {
+                return ResourceManager.GetString("Fleets_Speed_Fleet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   速度混成艦隊 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Fleets_Speed_Mixed {
+            get {
+                return ResourceManager.GetString("Fleets_Speed_Mixed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   低速艦隊 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Fleets_Speed_Slow {
@@ -462,6 +480,78 @@ namespace Grabacr07.KanColleViewer.Properties {
         public static string IntegratedView {
             get {
                 return ResourceManager.GetString("IntegratedView", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   弾薬 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_Ammunition {
+            get {
+                return ResourceManager.GetString("Materials_Ammunition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ボーキサイト に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_Bauxite {
+            get {
+                return ResourceManager.GetString("Materials_Bauxite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   開発資材 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_DevelopmentMaterials {
+            get {
+                return ResourceManager.GetString("Materials_DevelopmentMaterials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   燃料 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_Fuel {
+            get {
+                return ResourceManager.GetString("Materials_Fuel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   改修資材 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_ImprovementMaterials {
+            get {
+                return ResourceManager.GetString("Materials_ImprovementMaterials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   高速建造材 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_InstantBuildMaterials {
+            get {
+                return ResourceManager.GetString("Materials_InstantBuildMaterials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   高速修復材 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_InstantRepairMaterials {
+            get {
+                return ResourceManager.GetString("Materials_InstantRepairMaterials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   鋼鉄 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Materials_Steel {
+            get {
+                return ResourceManager.GetString("Materials_Steel", resourceCulture);
             }
         }
         
@@ -1087,6 +1177,24 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   制空戦力: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string StatusBar_AirSuperiorityPotential {
+            get {
+                return ResourceManager.GetString("StatusBar_AirSuperiorityPotential", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   平均レベル: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string StatusBar_AverageLevel {
+            get {
+                return ResourceManager.GetString("StatusBar_AverageLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   艦これの起動を待っています に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string StatusBar_NotStarted {
@@ -1101,6 +1209,24 @@ namespace Grabacr07.KanColleViewer.Properties {
         public static string StatusBar_Ready {
             get {
                 return ResourceManager.GetString("StatusBar_Ready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   高速艦隊 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string StatusBar_Speed_Fast {
+            get {
+                return ResourceManager.GetString("StatusBar_Speed_Fast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   低速艦隊 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string StatusBar_Speed_Slow {
+            get {
+                return ResourceManager.GetString("StatusBar_Speed_Slow", resourceCulture);
             }
         }
         
