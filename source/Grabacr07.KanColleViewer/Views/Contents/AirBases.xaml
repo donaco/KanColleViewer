@@ -211,7 +211,7 @@
 										   Style="{DynamicResource DefaultTextStyleKey}"
 										   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 										   FontSize="12"
-										   Width="57"
+										   Width="64"
 										   Margin="10,15,0,0"
 										   VerticalAlignment="Top">
 									<Run Text="{Binding [Ui_AirBases_AirPower], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />

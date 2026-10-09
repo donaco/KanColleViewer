@@ -356,7 +356,7 @@
 														   HorizontalAlignment="Center"
 														   FontSize="14" 
 														   Margin="0,-38,18,0"
-														   Padding="38,5,38,5"
+														   Padding="40,5,40,5"
 														   MinWidth="30">
 													<TextBlock.Style>
 														<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">
