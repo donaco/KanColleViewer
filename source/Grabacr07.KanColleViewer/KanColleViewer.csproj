@@ -187,6 +187,34 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    Windows App SDK 1.8 の不具合回避 (microsoft/WindowsAppSDK#6071)
+    自己完結型 + Foundation のみの参照では Microsoft.WindowsAppRuntime.Insights.Resource.dll が出力されず、
+    AppNotificationManager.Register() が 0x8007007E で失敗するため、
+    Foundation と対になる Runtime パッケージの MSIX からこの DLL のみを取り出して出力に含めます。
+    Foundation のバージョンを変更した場合は WindowsAppSDKRuntimeVersion も合わせて変更してください。
+  -->
+  <PropertyGroup>
+    <WindowsAppSDKRuntimeVersion>1.8.250907003</WindowsAppSDKRuntimeVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="Microsoft.WindowsAppSDK.Runtime" Version="[$(WindowsAppSDKRuntimeVersion)]" />
+  </ItemGroup>
+
+  <Target Name="AddWindowsAppRuntimeInsightsResource" BeforeTargets="AssignTargetPaths">
+    <PropertyGroup>
+      <_InsightsResourceName>Microsoft.WindowsAppRuntime.Insights.Resource.dll</_InsightsResourceName>
+      <_InsightsResourceMsix>$(NuGetPackageRoot)microsoft.windowsappsdk.runtime\$(WindowsAppSDKRuntimeVersion)\tools\MSIX\win10-x64\Microsoft.WindowsAppRuntime.1.8.msix</_InsightsResourceMsix>
+      <_InsightsResourceDir>$(IntermediateOutputPath)WindowsAppRuntimeInsights\</_InsightsResourceDir>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_InsightsResourceMsix)')" Text="Windows App Runtime の MSIX が見つかりません: $(_InsightsResourceMsix)" />
+    <Unzip Condition="!Exists('$(_InsightsResourceDir)$(_InsightsResourceName)')" SourceFiles="$(_InsightsResourceMsix)" DestinationFolder="$(_InsightsResourceDir)" Include="$(_InsightsResourceName)" />
+    <ItemGroup>
+      <None Include="$(_InsightsResourceDir)$(_InsightsResourceName)" Link="$(_InsightsResourceName)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="TrimCefFiles" AfterTargets="Build">
     <MakeDir Directories="$(OutDir)json" />
     <Delete Files="$(OutDir)json\vk_swiftshader_icd.json" TreatErrorsAsWarnings="true" />
