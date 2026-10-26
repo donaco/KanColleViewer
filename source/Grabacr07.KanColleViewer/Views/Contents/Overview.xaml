@@ -319,24 +319,30 @@
 											<ItemsControl ItemsSource="{Binding Items}">
 												<ItemsControl.ItemTemplate>
 													<DataTemplate>
-														<CheckBox Content="{Binding Name, Mode=OneWay}"
-																  IsChecked="{Binding IsChecked, Mode=TwoWay}"
-																  IsEnabled="{Binding IsAvailable, Mode=OneWay}"
-																  Margin="0,3">
-															<CheckBox.Style>
-																<Style TargetType="{x:Type CheckBox}">
-																	<Setter Property="Foreground"
-																			Value="{DynamicResource ActiveForegroundBrushKey}" />
-																	<Style.Triggers>
-																		<Trigger Property="IsEnabled"
-																				 Value="False">
-																			<Setter Property="Foreground"
-																					Value="{DynamicResource InactiveForegroundBrushKey}" />
-																		</Trigger>
-																	</Style.Triggers>
-																</Style>
-															</CheckBox.Style>
-														</CheckBox>
+														<DockPanel Margin="0,1">
+															<CheckBox DockPanel.Dock="Left"
+																	  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+																	  IsEnabled="{Binding IsAvailable, Mode=OneWay}"
+																	  VerticalAlignment="Center"
+																	  Margin="0,0,6,0" />
+															<metro2:CallMethodButton Content="{Binding Name, Mode=OneWay}"
+																					 IsEnabled="{Binding IsAvailable, Mode=OneWay}"
+																					 MethodName="Open">
+																<metro2:CallMethodButton.Style>
+																	<Style TargetType="{x:Type metro2:CallMethodButton}"
+																		   BasedOn="{StaticResource {x:Type metro2:CallMethodButton}}">
+																		<Setter Property="Background"
+																				Value="Transparent" />
+																		<Setter Property="BorderThickness"
+																				Value="0" />
+																		<Setter Property="HorizontalContentAlignment"
+																				Value="Left" />
+																		<Setter Property="Padding"
+																				Value="6,3" />
+																	</Style>
+																</metro2:CallMethodButton.Style>
+															</metro2:CallMethodButton>
+														</DockPanel>
 													</DataTemplate>
 												</ItemsControl.ItemTemplate>
 											</ItemsControl>

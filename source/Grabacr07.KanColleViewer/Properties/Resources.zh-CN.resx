@@ -1045,7 +1045,7 @@
     <value>基地详情</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>全部关闭</value>
+    <value>全部隐藏</value>
   </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>舰队详情</value>

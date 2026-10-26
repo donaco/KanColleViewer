@@ -1045,7 +1045,7 @@
     <value>基地詳細</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>一括閉じる</value>
+    <value>一括非表示</value>
   </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>艦隊詳細</value>

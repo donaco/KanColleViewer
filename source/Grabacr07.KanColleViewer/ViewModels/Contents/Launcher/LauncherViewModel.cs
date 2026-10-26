@@ -146,11 +146,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 		}
 
 		/// <summary>
-		/// チェックされている項目のウィンドウをまとめて閉じます。
+		/// 開いている項目のウィンドウをすべて閉じます。
 		/// </summary>
 		public void CloseAll()
 		{
-			foreach (var item in this.Items.Where(x => x.IsChecked))
+			foreach (var item in this.Items)
 			{
 				item.Close();
 			}

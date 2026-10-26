@@ -1057,7 +1057,7 @@
     <value>기지 상세</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>모두 닫기</value>
+    <value>모두 숨기기</value>
   </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>함대 상세</value>

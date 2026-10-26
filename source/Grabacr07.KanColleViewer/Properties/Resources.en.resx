@@ -1057,7 +1057,7 @@
     <value>Air Base Details</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>Close All</value>
+    <value>Hide All</value>
   </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>Fleet Details</value>
