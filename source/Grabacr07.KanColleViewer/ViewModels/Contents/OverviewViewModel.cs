@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleViewer.ViewModels.Catalogs;
+using Grabacr07.KanColleViewer.ViewModels.Contents.Launcher;
 using Grabacr07.KanColleViewer.Views.Catalogs;
+using MetroTrilithon.Mvvm;
 
 namespace Grabacr07.KanColleViewer.ViewModels.Contents
 {
@@ -20,10 +22,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 		public InformationViewModel Content { get; }
 
+		/// <summary>
+		/// 別ウィンドウをまとめて開閉するウィンドウランチャーを取得します。
+		/// </summary>
+		public LauncherViewModel Launcher { get; }
+
 
 		public OverviewViewModel(InformationViewModel owner)
 		{
 			this.Content = owner;
+			this.Launcher = new LauncherViewModel(this).AddTo(this);
 		}
 
 
@@ -91,6 +99,22 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 			}
 			
 			this.slotItemCatalog.Activate();
+		}
+
+		public void CloseShipCatalog()
+		{
+			if (this.shipCatalog != null && !this.shipCatalog.IsClosed)
+			{
+				this.shipCatalog.Close();
+			}
+		}
+
+		public void CloseSlotItemCatalog()
+		{
+			if (this.slotItemCatalog != null && !this.slotItemCatalog.IsClosed)
+			{
+				this.slotItemCatalog.Close();
+			}
 		}
 	}
 }

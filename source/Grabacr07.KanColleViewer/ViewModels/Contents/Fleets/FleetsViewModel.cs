@@ -120,6 +120,24 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Fleets
 				System.Diagnostics.Debug.WriteLine($"Error in ShowFleetWindow: {ex}");
 			}
 		}
+
+		/// <summary>
+		/// 艦隊ウィンドウが開いていれば閉じる
+		/// </summary>
+		public void CloseFleetWindow()
+		{
+			try
+			{
+				if (fleetWindowInstance != null && fleetWindowInstance.IsLoaded)
+				{
+					fleetWindowInstance.Close();
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error in CloseFleetWindow: {ex}");
+			}
+		}
 		#endregion
 
 		private void UpdateFleets()

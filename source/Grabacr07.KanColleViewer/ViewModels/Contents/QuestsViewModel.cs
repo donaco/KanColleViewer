@@ -130,6 +130,24 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 				System.Diagnostics.Debug.WriteLine($"Error in ShowQuestWindow: {ex}");
 			}
 		}
+
+		/// <summary>
+		/// 任務一覧ウィンドウが開いていれば閉じる。
+		/// </summary>
+		public void CloseQuestWindow()
+		{
+			try
+			{
+				if (questWindowInstance != null && questWindowInstance.IsLoaded)
+				{
+					questWindowInstance.Close();
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error in CloseQuestWindow: {ex}");
+			}
+		}
 		#endregion
 	}
 }

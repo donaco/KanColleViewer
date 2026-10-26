@@ -1041,6 +1041,21 @@
   <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
     <value>艦隊の索敵値の算出に使用する計算式を選択します。</value>
   </data>
+  <data name="Ui_Launcher_AirBases" xml:space="preserve">
+    <value>基地詳細</value>
+  </data>
+  <data name="Ui_Launcher_CloseAll" xml:space="preserve">
+    <value>一括閉じる</value>
+  </data>
+  <data name="Ui_Launcher_Fleets" xml:space="preserve">
+    <value>艦隊詳細</value>
+  </data>
+  <data name="Ui_Launcher_Quests" xml:space="preserve">
+    <value>任務一覧</value>
+  </data>
+  <data name="Ui_Launcher_ShowAll" xml:space="preserve">
+    <value>一括表示</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>データ</value>
   </data>

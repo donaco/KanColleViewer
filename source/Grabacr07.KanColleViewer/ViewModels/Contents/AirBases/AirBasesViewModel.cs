@@ -278,5 +278,23 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 				System.Diagnostics.Debug.WriteLine($"Error in ShowAirBaseWindow: {ex}");
 			}
 		}
+
+		/// <summary>
+		/// 基地詳細ウィンドウが開いていれば閉じる
+		/// </summary>
+		public void CloseAirBaseWindow()
+		{
+			try
+			{
+				if (airBaseWindowInstance != null && airBaseWindowInstance.IsLoaded)
+				{
+					airBaseWindowInstance.Close();
+				}
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"Error in CloseAirBaseWindow: {ex}");
+			}
+		}
 	}
 }

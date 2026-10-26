@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +23,17 @@ namespace Grabacr07.KanColleViewer.Views.Contents
 		public Overview()
 		{
 			InitializeComponent();
+		}
+
+		/// <summary>
+		/// 「データ」にマウスを合わせたとき、ウィンドウランチャーを表示します。
+		/// </summary>
+		private void DataHeader_MouseEnter(object sender, MouseEventArgs e)
+		{
+			if (this.LauncherPopup.IsOpen) return;
+
+			(this.DataContext as ViewModels.Contents.OverviewViewModel)?.Launcher.RefreshAvailability();
+			this.LauncherPopup.IsOpen = true;
 		}
 	}
 }

@@ -1053,6 +1053,21 @@
   <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
     <value>함대 색적 계산에 사용할 공식을 선택합니다.</value>
   </data>
+  <data name="Ui_Launcher_AirBases" xml:space="preserve">
+    <value>기지 상세</value>
+  </data>
+  <data name="Ui_Launcher_CloseAll" xml:space="preserve">
+    <value>모두 닫기</value>
+  </data>
+  <data name="Ui_Launcher_Fleets" xml:space="preserve">
+    <value>함대 상세</value>
+  </data>
+  <data name="Ui_Launcher_Quests" xml:space="preserve">
+    <value>임무 목록</value>
+  </data>
+  <data name="Ui_Launcher_ShowAll" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>데이터</value>
   </data>

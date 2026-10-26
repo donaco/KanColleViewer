@@ -287,7 +287,77 @@
 				<Border Grid.Row="0"
 						Grid.Column="0">
 					<StackPanel>
-						<TextBlock Text="{Binding [Ui_Overview_Data], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+						<TextBlock x:Name="DataHeader"
+								   Text="{Binding [Ui_Overview_Data], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+								   Background="Transparent"
+								   Cursor="Hand"
+								   MouseEnter="DataHeader_MouseEnter" />
+
+						<Popup x:Name="LauncherPopup"
+							   PlacementTarget="{Binding ElementName=DataHeader}"
+							   Placement="Bottom"
+							   StaysOpen="False"
+							   PopupAnimation="Fade"
+							   AllowsTransparency="True">
+							<Border Background="Transparent"
+									BorderThickness="0"
+									Padding="0"
+									Margin="0">
+								<Grid Margin="9">
+									<Rectangle Stroke="{DynamicResource AccentBrushKey}"
+											   StrokeThickness="3">
+										<Rectangle.Effect>
+											<BlurEffect Radius="8" />
+										</Rectangle.Effect>
+									</Rectangle>
+									<Border Background="{DynamicResource ThemeBrushKey}"
+											BorderBrush="{DynamicResource AccentBrushKey}"
+											BorderThickness=".99"
+											Padding="8"
+											Margin="0">
+										<StackPanel DataContext="{Binding Launcher}">
+											<ItemsControl ItemsSource="{Binding Items}">
+												<ItemsControl.ItemTemplate>
+													<DataTemplate>
+														<CheckBox Content="{Binding Name, Mode=OneWay}"
+																  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+																  IsEnabled="{Binding IsAvailable, Mode=OneWay}"
+																  Margin="0,3">
+															<CheckBox.Style>
+																<Style TargetType="{x:Type CheckBox}">
+																	<Setter Property="Foreground"
+																			Value="{DynamicResource ActiveForegroundBrushKey}" />
+																	<Style.Triggers>
+																		<Trigger Property="IsEnabled"
+																				 Value="False">
+																			<Setter Property="Foreground"
+																					Value="{DynamicResource InactiveForegroundBrushKey}" />
+																		</Trigger>
+																	</Style.Triggers>
+																</Style>
+															</CheckBox.Style>
+														</CheckBox>
+													</DataTemplate>
+												</ItemsControl.ItemTemplate>
+											</ItemsControl>
+
+											<Rectangle Height=".99"
+													   Margin="0,7,0,3"
+													   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+
+											<metro2:CallMethodButton Content="{Binding [Ui_Launcher_ShowAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+																	 Padding="12,6"
+																	 Margin="0,5,0,5"
+																	 MethodName="ShowAll" />
+
+											<metro2:CallMethodButton Content="{Binding [Ui_Launcher_CloseAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+																	 Padding="12,6"
+																	 MethodName="CloseAll" />
+										</StackPanel>
+									</Border>
+								</Grid>
+							</Border>
+						</Popup>
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"

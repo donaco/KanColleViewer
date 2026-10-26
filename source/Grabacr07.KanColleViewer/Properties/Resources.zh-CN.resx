@@ -1041,6 +1041,21 @@
   <data name="Ui_Operation_ViewRangeCalculation_Description" xml:space="preserve">
     <value>选择用于计算舰队索敌值的公式。</value>
   </data>
+  <data name="Ui_Launcher_AirBases" xml:space="preserve">
+    <value>基地详情</value>
+  </data>
+  <data name="Ui_Launcher_CloseAll" xml:space="preserve">
+    <value>全部关闭</value>
+  </data>
+  <data name="Ui_Launcher_Fleets" xml:space="preserve">
+    <value>舰队详情</value>
+  </data>
+  <data name="Ui_Launcher_Quests" xml:space="preserve">
+    <value>任务列表</value>
+  </data>
+  <data name="Ui_Launcher_ShowAll" xml:space="preserve">
+    <value>全部显示</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>数据</value>
   </data>
