@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleViewer.ViewModels.Catalogs;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Launcher;
+using Grabacr07.KanColleViewer.ViewModels.Settings;
 using Grabacr07.KanColleViewer.Views.Catalogs;
 using MetroTrilithon.Mvvm;
 
@@ -75,6 +76,24 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents
 
 			target.IsSelected = true;
 			this.Content.SelectedItem = target;
+		}
+
+		public void ShowWindowLauncherSettings()
+		{
+			foreach (var tab in this.Content.TabItems)
+			{
+				tab.IsSelected = false;
+			}
+
+			foreach (var tab in this.Content.SystemTabItems)
+			{
+				tab.IsSelected = false;
+			}
+
+			var settings = SettingsViewModel.Instance;
+			settings.SelectWindowSettings();
+			settings.IsSelected = true;
+			this.Content.SelectedItem = settings;
 		}
 
 		public void ShowShipCatalog()

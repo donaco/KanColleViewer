@@ -31,6 +31,21 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public WindowSettingsViewModel WindowSettings { get; }
 
+		private int _SelectedTabIndex;
+
+		public int SelectedTabIndex
+		{
+			get { return this._SelectedTabIndex; }
+			set
+			{
+				if (this._SelectedTabIndex != value)
+				{
+					this._SelectedTabIndex = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
 		public NetworkSettingsViewModel NetworkSettings { get; }
 
 		public UserStyleSheetSettingsViewModel UserStyleSheetSettings { get; }
@@ -233,6 +248,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 			this.UserStyleSheetSettings.Initialize();
 			this.RaisePropertyChanged(nameof(this.LoadedPlugins));
 			this.RaisePropertyChanged(nameof(this.FailedPlugins));
+		}
+
+		public void SelectWindowSettings()
+		{
+			this.SelectedTabIndex = 1;
 		}
 
 

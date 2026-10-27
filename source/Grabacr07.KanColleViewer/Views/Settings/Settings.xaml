@@ -39,7 +39,8 @@
 		<i:Interaction.Behaviors>
 			<mti:ScrollBarThresholdBehavior Horizontal="600.0" />
 		</i:Interaction.Behaviors>
-		<TabControl Style="{DynamicResource VerticalTabControlStyleKey}">
+		<TabControl Style="{DynamicResource VerticalTabControlStyleKey}"
+					SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
 			<TabItem Visibility="{Binding Source={x:Static ms:GeneralSettings.IsProxyMode}, Path=Value, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter=Colappsed:Visible}">
 				<TabItem.Header>
 					<TextBlock Text="{Binding Resources.Settings_BrowserControl, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"

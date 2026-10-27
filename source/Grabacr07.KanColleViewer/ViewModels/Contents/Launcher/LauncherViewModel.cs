@@ -167,6 +167,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 			}
 		}
 
+		public void ShowWindowLauncherSettings()
+		{
+			this.owner.ShowWindowLauncherSettings();
+		}
+
 		private void TryShowWindowsOnStartup()
 		{
 			if (this.startupWindowsShown || this.startupWindowShowScheduled
