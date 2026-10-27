@@ -1059,14 +1059,23 @@
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
     <value>Hide All</value>
   </data>
+  <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
+    <value>Close all open windows</value>
+  </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>Fleet Details</value>
   </data>
   <data name="Ui_Launcher_Quests" xml:space="preserve">
     <value>Quest List</value>
   </data>
+  <data name="Ui_Launcher_SettingsTooltip" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
     <value>Show All</value>
+  </data>
+  <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
+    <value>Show all checked windows</value>
   </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>Data</value>

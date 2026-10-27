@@ -1059,14 +1059,23 @@
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
     <value>모두 숨기기</value>
   </data>
+  <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
+    <value>열려 있는 창을 모두 닫습니다</value>
+  </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>함대 상세</value>
   </data>
   <data name="Ui_Launcher_Quests" xml:space="preserve">
     <value>임무 목록</value>
   </data>
+  <data name="Ui_Launcher_SettingsTooltip" xml:space="preserve">
+    <value>설정으로 이동합니다</value>
+  </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
     <value>모두 표시</value>
+  </data>
+  <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
+    <value>체크한 창을 모두 표시합니다</value>
   </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>데이터</value>

@@ -1047,14 +1047,23 @@
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
     <value>一括非表示</value>
   </data>
+  <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
+    <value>表示しているウィンドウを全て閉じる</value>
+  </data>
   <data name="Ui_Launcher_Fleets" xml:space="preserve">
     <value>艦隊詳細</value>
   </data>
   <data name="Ui_Launcher_Quests" xml:space="preserve">
     <value>任務一覧</value>
   </data>
+  <data name="Ui_Launcher_SettingsTooltip" xml:space="preserve">
+    <value>設定へ移動する</value>
+  </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
     <value>一括表示</value>
+  </data>
+  <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
+    <value>チェックしたウィンドウを全て表示する</value>
   </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>データ</value>
