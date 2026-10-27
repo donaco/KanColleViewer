@@ -163,6 +163,11 @@ namespace Grabacr07.KanColleViewer.Plugins.ViewModels
 					return;
 				}
 
+				if (!this.IsLoaded)
+				{
+					this.UpdateItems();
+				}
+
 				this._popupWindow = new Views.MasterDataWindow
 				{
 					DataContext = this,
