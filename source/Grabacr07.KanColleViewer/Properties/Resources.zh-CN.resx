@@ -1045,7 +1045,7 @@
     <value>基地详情</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>全部隐藏</value>
+    <value>隐藏</value>
   </data>
   <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
     <value>关闭所有已打开的窗口</value>
@@ -1060,7 +1060,7 @@
     <value>前往设置</value>
   </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
-    <value>全部显示</value>
+    <value>显示</value>
   </data>
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>显示所有已勾选的窗口</value>

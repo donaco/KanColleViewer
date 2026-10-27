@@ -456,6 +456,12 @@
   <data name="Fleets_Average" xml:space="preserve">
     <value>Average</value>
   </data>
+  <data name="StatusBar_NotStarted" xml:space="preserve">
+    <value>Waiting for KanColle to start</value>
+  </data>
+  <data name="StatusBar_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
   <data name="Fleets_Speed_Fast" xml:space="preserve">
     <value>Fast Fleet</value>
   </data>
@@ -468,26 +474,17 @@
   <data name="Fleets_Speed_Fleet" xml:space="preserve">
     <value>Fleet</value>
   </data>
-  <data name="Fleets_Level" xml:space="preserve">
-    <value>Level</value>
-  </data>
-  <data name="Fleets_Total" xml:space="preserve">
-    <value>Total</value>
-  </data>
-  <data name="Fleets_ViewRange" xml:space="preserve">
-    <value>Line of Sight</value>
-  </data>
-  <data name="StatusBar_NotStarted" xml:space="preserve">
-    <value>Waiting for KanColle to start</value>
-  </data>
-  <data name="StatusBar_Ready" xml:space="preserve">
-    <value>Ready</value>
-  </data>
   <data name="ZoomAction_OutOfRange" xml:space="preserve">
     <value>{0}% zoom is not supported.</value>
   </data>
   <data name="ZoomAction_ZoomFailed" xml:space="preserve">
     <value>Zoom Failed: {0}</value>
+  </data>
+  <data name="Fleets_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Fleets_Total" xml:space="preserve">
+    <value>Total</value>
   </data>
   <data name="ZoomFactorSelector" xml:space="preserve">
     <value>Game screen display size</value>
@@ -501,6 +498,9 @@
   <data name="Settings_Logging_Enable" xml:space="preserve">
     <value>Log drops and crafting results to file</value>
   </data>
+  <data name="Fleets_ViewRange" xml:space="preserve">
+    <value>Line of Sight</value>
+  </data>
   <data name="MessageBar_ReSortie_Wounded" xml:space="preserve">
     <value>are heavily damaged</value>
   </data>
@@ -512,18 +512,6 @@
   </data>
   <data name="UpdateCheck_on" xml:space="preserve">
     <value>Auto Update Check ON</value>
-  </data>
-  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
-    <value>Air Superiority Potential:</value>
-  </data>
-  <data name="StatusBar_AverageLevel" xml:space="preserve">
-    <value>Average Level:</value>
-  </data>
-  <data name="StatusBar_Speed_Fast" xml:space="preserve">
-    <value>Fast Fleet</value>
-  </data>
-  <data name="StatusBar_Speed_Slow" xml:space="preserve">
-    <value>Slow Fleet</value>
   </data>
   <data name="Ui_Action_Apply" xml:space="preserve">
     <value>Apply</value>
@@ -1057,7 +1045,7 @@
     <value>Air Base Details</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>Hide All</value>
+    <value>Hide</value>
   </data>
   <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
     <value>Close all open windows</value>
@@ -1069,10 +1057,10 @@
     <value>Quest List</value>
   </data>
   <data name="Ui_Launcher_SettingsTooltip" xml:space="preserve">
-    <value>Open settings</value>
+    <value>Show Settings</value>
   </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
-    <value>Show All</value>
+    <value>Show</value>
   </data>
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>Show all checked windows</value>
@@ -1194,9 +1182,6 @@
   <data name="Ui_Start_Description" xml:space="preserve">
     <value>The game runs in the built-in Chromium-based web browser. KanColleViewer is designed not to burden the game servers; it does not alter communications, send information to the servers, or use macros or cheats.</value>
   </data>
-  <data name="Ui_StateDetail_NosakiTimerPrefix" xml:space="preserve">
-    <value>Homeport Supply Ship - </value>
-  </data>
   <data name="Ui_StateDetail_Expedition" xml:space="preserve">
     <value>On an expedition</value>
   </data>
@@ -1211,6 +1196,9 @@
   </data>
   <data name="Ui_StateDetail_NoShips" xml:space="preserve">
     <value>No ships are assigned to the fleet.</value>
+  </data>
+  <data name="Ui_StateDetail_NosakiTimerPrefix" xml:space="preserve">
+    <value>Homeport Supply Ship - </value>
   </data>
   <data name="Ui_StateDetail_Sortie" xml:space="preserve">
     <value>The fleet is on a sortie!</value>
@@ -1348,5 +1336,17 @@
   </data>
   <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
     <value>Taskbar Settings</value>
+  </data>
+  <data name="StatusBar_AirSuperiorityPotential" xml:space="preserve">
+    <value>Air Superiority Potential:</value>
+  </data>
+  <data name="StatusBar_AverageLevel" xml:space="preserve">
+    <value>Average Level:</value>
+  </data>
+  <data name="StatusBar_Speed_Fast" xml:space="preserve">
+    <value>Fast Fleet</value>
+  </data>
+  <data name="StatusBar_Speed_Slow" xml:space="preserve">
+    <value>Slow Fleet</value>
   </data>
 </root>

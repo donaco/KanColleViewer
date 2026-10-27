@@ -31,6 +31,23 @@ namespace Grabacr07.KanColleViewer.Views.Contents
 		/// </summary>
 		private void DataHeader_MouseEnter(object sender, MouseEventArgs e)
 		{
+			this.ShowLauncherPopup();
+		}
+
+		private void DataHeader_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (e.LeftButton != MouseButtonState.Released
+				|| e.MiddleButton != MouseButtonState.Released
+				|| e.RightButton != MouseButtonState.Released)
+			{
+				return;
+			}
+
+			this.ShowLauncherPopup();
+		}
+
+		private void ShowLauncherPopup()
+		{
 			if (!LauncherSettings.ShowWindowLauncher.Value)
 			{
 				this.LauncherPopup.IsOpen = false;

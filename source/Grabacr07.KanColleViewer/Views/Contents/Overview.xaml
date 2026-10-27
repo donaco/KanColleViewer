@@ -290,8 +290,8 @@
 						<TextBlock x:Name="DataHeader"
 								   Text="{Binding [Ui_Overview_Data], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 								   Background="Transparent"
-								   Cursor="Hand"
-								   MouseEnter="DataHeader_MouseEnter" />
+								   Cursor="Arrow"
+								   MouseMove="DataHeader_MouseMove" />
 						
 						<Popup x:Name="LauncherPopup"
 							   PlacementTarget="{Binding ElementName=DataHeader}"
@@ -313,29 +313,29 @@
 									<Border Background="{DynamicResource ThemeBrushKey}"
 											BorderBrush="{DynamicResource AccentBrushKey}"
 											BorderThickness=".99"
-											Padding="8"
+											Padding="6"
 											Margin="0">
 										<StackPanel DataContext="{Binding Launcher}">
 											<StackPanel Orientation="Horizontal">
 												<metro2:CallMethodButton Content="{Binding [Ui_Launcher_ShowAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="12,6"
+																		 Padding="8,6"
 																		 ToolTip="{Binding [Ui_Launcher_ShowAllTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="ShowAll" />
 
 												<metro2:CallMethodButton Content="{Binding [Ui_Launcher_CloseAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="12,6"
-																		 Margin="4,0"
+																		 Padding="8,6"
+																		 Margin="2,0"
 																		 ToolTip="{Binding [Ui_Launcher_CloseAllTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="CloseAll" />
 
 												<metro2:CallMethodButton Content="{Binding Resources.Settings, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="12,6"
+																		 Padding="8,6"
 																		 ToolTip="{Binding [Ui_Launcher_SettingsTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="ShowWindowLauncherSettings" />
 											</StackPanel>
 
 											<Rectangle Height=".99"
-													   Margin="0,7,0,3"
+													   Margin="0,6,0,3"
 													   Style="{DynamicResource SeparatorRectangleStyleKey}" />
 											
 											<ItemsControl ItemsSource="{Binding Items}">
@@ -369,7 +369,7 @@
 												</ItemsControl.ItemTemplate>
 											</ItemsControl>
 
-							</StackPanel>
+											</StackPanel>
 									</Border>
 								</Grid>
 							</Border>

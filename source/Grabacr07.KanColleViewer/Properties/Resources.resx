@@ -1045,7 +1045,7 @@
     <value>基地詳細</value>
   </data>
   <data name="Ui_Launcher_CloseAll" xml:space="preserve">
-    <value>一括非表示</value>
+    <value>消去</value>
   </data>
   <data name="Ui_Launcher_CloseAllTooltip" xml:space="preserve">
     <value>表示しているウィンドウを全て閉じる</value>
@@ -1060,7 +1060,7 @@
     <value>設定へ移動する</value>
   </data>
   <data name="Ui_Launcher_ShowAll" xml:space="preserve">
-    <value>一括表示</value>
+    <value>表示</value>
   </data>
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>チェックしたウィンドウを全て表示する</value>

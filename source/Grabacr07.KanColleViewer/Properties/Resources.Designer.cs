@@ -2077,11 +2077,20 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
-        ///   一括非表示 に類似しているローカライズされた文字列を検索します。
+        ///   消去 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Launcher_CloseAll {
             get {
                 return ResourceManager.GetString("Ui_Launcher_CloseAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   表示しているウィンドウを全て閉じる に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_CloseAllTooltip {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_CloseAllTooltip", resourceCulture);
             }
         }
         
@@ -2104,11 +2113,29 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
-        ///   一括表示 に類似しているローカライズされた文字列を検索します。
+        ///   設定へ移動する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_SettingsTooltip {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_SettingsTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   表示 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Launcher_ShowAll {
             get {
                 return ResourceManager.GetString("Ui_Launcher_ShowAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   チェックしたウィンドウを全て表示する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_ShowAllTooltip {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_ShowAllTooltip", resourceCulture);
             }
         }
         
