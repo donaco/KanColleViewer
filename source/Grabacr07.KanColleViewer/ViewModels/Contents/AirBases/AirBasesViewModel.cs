@@ -247,11 +247,6 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.AirBases
 		{
 			try
 			{
-				if (this.SelectedAirBase == null)
-				{
-					return;
-				}
-
 				// 既存のウィンドウがあり、閉じられていない場合はアクティブにする
 				if (airBaseWindowInstance != null && airBaseWindowInstance.IsLoaded)
 				{

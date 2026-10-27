@@ -67,11 +67,11 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 					() => this.owner.Content.Fleets.ShowFleetWindow(),
 					() => this.owner.Content.Fleets.CloseFleetWindow()),
 
-				// 基地詳細
+				// 基地詳細 (データ未取得でも表示可能)
 				new LauncherItemViewModel(
 					() => ResourceService.Current["Ui_Launcher_AirBases"],
 					LauncherSettings.AirBases,
-					() => IsStarted() && !this.owner.Content.AirBases.IsEmpty && this.owner.Content.AirBases.SelectedAirBase != null,
+					IsStarted,
 					() => this.owner.Content.AirBases.ShowAirBaseWindow(),
 					() => this.owner.Content.AirBases.CloseAirBaseWindow()),
 
@@ -84,35 +84,33 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 					() => PluginWindowInvoker.InvokeMethod(GetPluginViewModel(CounterToolName, "viewModel"), "OpenPopupWindow"),
 					() => PluginWindowInvoker.InvokeMethod(GetPluginViewModel(CounterToolName, "viewModel"), "ClosePopupWindow")),
 
-				// MapHP (攻略中の海域がない場合は表示しない)
+				// MapHP (データ未取得でも表示可能)
 				new LauncherItemViewModel(
 					() => MapHpToolName,
 					LauncherSettings.MapHp,
-					() => GetPluginViewModel(MapHpToolName, "toolVm") is { } vm
-						&& PluginWindowInvoker.HasMethod(vm, "OpenPopupWindow")
-						&& PluginWindowInvoker.GetProperty(vm, "Maps") is Array maps
-						&& maps.Length > 0,
+					() => IsStarted()
+						&& GetPluginViewModel(MapHpToolName, "toolVm") is { } vm
+						&& PluginWindowInvoker.HasMethod(vm, "OpenPopupWindow"),
 					() => PluginWindowInvoker.InvokeMethod(GetPluginViewModel(MapHpToolName, "toolVm"), "OpenPopupWindow"),
 					() => PluginWindowInvoker.InvokeMethod(GetPluginViewModel(MapHpToolName, "toolVm"), "ClosePopupWindow")),
 
-				// MasterView (マスター データ未取得の場合は表示しない)
+				// MasterView (データ未取得でも表示可能)
 				new LauncherItemViewModel(
 					() => MasterViewToolName,
 					LauncherSettings.MasterView,
 					() => IsStarted()
-						&& KanColleClient.Current.Master != null
 						&& GetPluginViewModel(MasterViewToolName, "portalViewModel") is { } vm
 						&& PluginWindowInvoker.HasMethod(vm, "ShowPopupWindow"),
 					() => PluginWindowInvoker.InvokeMethod(GetPluginViewModel(MasterViewToolName, "portalViewModel"), "ShowPopupWindow"),
 					() => PluginWindowInvoker.CloseWindows(GetPluginViewModel(MasterViewToolName, "portalViewModel"), "MasterDataWindow")),
 
-				// Material (資材データ未取得の場合は表示しない)
+				// Material (データ未取得でも表示可能)
 				new LauncherItemViewModel(
 					() => MaterialToolName,
 					LauncherSettings.Material,
-					() => GetPluginViewModel(MaterialToolName, "viewModel") is { } vm
-						&& PluginWindowInvoker.HasMethod(vm, "OpenPopupWindow")
-						&& PluginWindowInvoker.GetProperty(PluginWindowInvoker.GetProperty(vm, "materialManager"), "IsAvailable") is true,
+					() => IsStarted()
+						&& GetPluginViewModel(MaterialToolName, "viewModel") is { } vm
+						&& PluginWindowInvoker.HasMethod(vm, "OpenPopupWindow"),
 					OpenMaterialWindow,
 					() => PluginWindowInvoker.CloseWindows(GetPluginViewModel(MaterialToolName, "viewModel"), "MaterialWindow")),
 			};

@@ -52,6 +52,25 @@ namespace Grabacr07.KanColleViewer.ViewModels
 
 		#endregion
 
+		#region IsEmpty 変更通知プロパティ
+
+		private bool _IsEmpty;
+
+		public bool IsEmpty
+		{
+			get { return this._IsEmpty; }
+			set
+			{
+				if (this._IsEmpty != value)
+				{
+					this._IsEmpty = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		#endregion
+
 		// ウィンドウ個別設定 (TopMost 等)
 		public AirBaseWindowSettings Settings { get; }
 
@@ -73,6 +92,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 				.ThenBy(x => x.AreaId)
 				.ToList();
 			this.AirBases = new ObservableCollection<AirBaseViewModel>(sortedAirBases);
+			this.IsEmpty = this.AirBases.Count == 0;
 
 			// 初期選択: ウィンドウを開いた時点の選択状態をコピー（以後は連動しない）
 			this.SelectedAirBase = airBasesVM.SelectedAirBase;
@@ -95,7 +115,13 @@ namespace Grabacr07.KanColleViewer.ViewModels
 					// 現在の選択を保持
 					var currentSelectedAreaId = this.SelectedAirBase?.AreaId;
 
-					this.AirBases = new ObservableCollection<AirBaseViewModel>(airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>());
+					var sorted = (airBasesVM.AirBases ?? Enumerable.Empty<AirBaseViewModel>())
+						.OrderBy(x => GetAreaSortOrder(x.AreaId))
+						.ThenBy(x => x.AreaId)
+						.ToList();
+
+					this.AirBases = new ObservableCollection<AirBaseViewModel>(sorted);
+					this.IsEmpty = this.AirBases.Count == 0;
 
 					// AirBases が更新された場合、同じ AreaId の項目を再選択（なければ先頭）
 					if (currentSelectedAreaId.HasValue)

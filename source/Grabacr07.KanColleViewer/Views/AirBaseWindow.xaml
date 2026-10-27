@@ -94,8 +94,30 @@
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 
+			<!-- 未取得メッセージ（航空隊タブと同等） -->
+			<TextBlock Grid.Column="0"
+					   Grid.ColumnSpan="2"
+					   Text="{Binding Resources.AirBases_Untaken, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   FontSize="16"
+					   Margin="20,40"
+					   TextWrapping="Wrap"
+					   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+					   Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
 				<!-- 左側: 海域タブリスト -->
 				<StackPanel Grid.Column="0" Orientation="Vertical" Margin="0,0,0,4" MinWidth="228">
+					<StackPanel.Style>
+						<Style TargetType="StackPanel">
+							<Setter Property="Visibility" Value="Visible" />
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsEmpty}" Value="True">
+									<Setter Property="Visibility" Value="Collapsed" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</StackPanel.Style>
 				<ListBox Grid.Column="0"
 					  DockPanel.Dock="Top"
 								ItemsSource="{Binding AirBases, Mode=OneWay}"
@@ -171,6 +193,16 @@
 			<Border Grid.Column="1"
 					DataContext="{Binding SelectedAirBase}"
 					Margin="0,4,0,0">
+				<Border.Style>
+					<Style TargetType="Border">
+						<Setter Property="Visibility" Value="Visible" />
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding DataContext.IsEmpty, RelativeSource={RelativeSource AncestorType={x:Type metro:MetroWindow}}}" Value="True">
+								<Setter Property="Visibility" Value="Collapsed" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</Border.Style>
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
