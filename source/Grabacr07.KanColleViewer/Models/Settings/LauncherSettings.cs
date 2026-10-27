@@ -9,6 +9,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 	/// </summary>
 	public static class LauncherSettings
 	{
+		public static SerializableProperty<bool> ShowWindowsOnStartup { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+
+		public static SerializableProperty<bool> ShowWindowLauncher { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
+
 		public static SerializableProperty<bool> ShipCatalog { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 

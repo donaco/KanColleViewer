@@ -18,6 +18,32 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 		public IReadOnlyCollection<DisplayViewModel<ExitConfirmationType>> ExitConfirmationTypes { get; private set; } = Array.Empty<DisplayViewModel<ExitConfirmationType>>();
 
+		public bool ShowWindowLauncher
+		{
+			get { return LauncherSettings.ShowWindowLauncher.Value; }
+			set
+			{
+				if (LauncherSettings.ShowWindowLauncher.Value != value)
+				{
+					LauncherSettings.ShowWindowLauncher.Value = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
+		public bool ShowWindowsOnStartup
+		{
+			get { return LauncherSettings.ShowWindowsOnStartup.Value; }
+			set
+			{
+				if (LauncherSettings.ShowWindowsOnStartup.Value != value)
+				{
+					LauncherSettings.ShowWindowsOnStartup.Value = value;
+					this.RaisePropertyChanged();
+				}
+			}
+		}
+
 		private IReadOnlyCollection<DisplayViewModel<string>> _TaskbarProgressFeatures = Array.Empty<DisplayViewModel<string>>();
 
 		public IReadOnlyCollection<DisplayViewModel<string>> TaskbarProgressFeatures

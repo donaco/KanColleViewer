@@ -1316,6 +1316,15 @@
   <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
     <value>出击时的指示器行为</value>
   </data>
+  <data name="Ui_Window_ShowLauncher" xml:space="preserve">
+    <value>显示窗口启动器</value>
+  </data>
+  <data name="Ui_Window_LauncherSettings" xml:space="preserve">
+    <value>窗口启动器设置</value>
+  </data>
+  <data name="Ui_Window_ShowWindowsOnStartup" xml:space="preserve">
+    <value>登录后自动显示已勾选的窗口</value>
+  </data>
   <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
     <value>任务栏设置</value>
   </data>

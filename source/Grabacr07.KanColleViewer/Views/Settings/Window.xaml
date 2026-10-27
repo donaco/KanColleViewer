@@ -79,6 +79,17 @@
 								  SelectedValue="{Binding Source={x:Static ms:GeneralSettings.TaskbarProgressSourceWhenSortie}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 								  Prompt="" />
 		</Grid>
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+		
+		<TextBlock Text="{Binding [Ui_Window_LauncherSettings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
+
+		<CheckBox Content="{Binding [Ui_Window_ShowLauncher], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				  IsChecked="{Binding ShowWindowLauncher, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+				  Margin="20,4,0,0" />
+		<CheckBox Content="{Binding [Ui_Window_ShowWindowsOnStartup], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+		  IsChecked="{Binding ShowWindowsOnStartup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+		  Margin="20,4,0,0" />
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 

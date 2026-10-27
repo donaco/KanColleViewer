@@ -1328,6 +1328,15 @@
   <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
     <value>출격 중 작업 표시줄 표시 동작</value>
   </data>
+  <data name="Ui_Window_ShowLauncher" xml:space="preserve">
+    <value>창 런처 표시</value>
+  </data>
+  <data name="Ui_Window_LauncherSettings" xml:space="preserve">
+    <value>창 런처 설정</value>
+  </data>
+  <data name="Ui_Window_ShowWindowsOnStartup" xml:space="preserve">
+    <value>로그인 후 체크한 창 자동 표시</value>
+  </data>
   <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
     <value>작업 표시줄 설정</value>
   </data>

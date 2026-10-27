@@ -1328,6 +1328,15 @@
   <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
     <value>Indicator Behavior (During Sortie)</value>
   </data>
+  <data name="Ui_Window_ShowLauncher" xml:space="preserve">
+    <value>Show window launcher</value>
+  </data>
+  <data name="Ui_Window_LauncherSettings" xml:space="preserve">
+    <value>Window Launcher Settings</value>
+  </data>
+  <data name="Ui_Window_ShowWindowsOnStartup" xml:space="preserve">
+    <value>Automatically show checked windows after login</value>
+  </data>
   <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
     <value>Taskbar Settings</value>
   </data>

@@ -1316,6 +1316,15 @@
   <data name="Ui_Window_TaskbarProgress_Sortie" xml:space="preserve">
     <value>インジケーターの動作 (出撃中)</value>
   </data>
+  <data name="Ui_Window_ShowLauncher" xml:space="preserve">
+    <value>ウィンドウランチャーを表示する</value>
+  </data>
+  <data name="Ui_Window_LauncherSettings" xml:space="preserve">
+    <value>ウィンドウランチャー設定</value>
+  </data>
+  <data name="Ui_Window_ShowWindowsOnStartup" xml:space="preserve">
+    <value>ログイン後にチェックしたウィンドウを自動表示する</value>
+  </data>
   <data name="Ui_Window_TaskbarSettings" xml:space="preserve">
     <value>タスクバー設定</value>
   </data>

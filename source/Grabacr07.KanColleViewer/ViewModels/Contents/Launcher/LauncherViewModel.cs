@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Threading;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
 using Grabacr07.KanColleViewer.Models;
@@ -23,6 +24,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 		private const string MaterialToolName = "Material";
 
 		private readonly OverviewViewModel owner;
+		private bool startupWindowsShown;
+		private bool startupWindowShowScheduled;
 
 		/// <summary>
 		/// ランチャーに表示する項目一覧を取得します。
@@ -119,6 +122,16 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 			{
 				item.AddTo(this);
 			}
+
+			if (LauncherSettings.ShowWindowsOnStartup.Value
+				&& KanColleClient.Current.IsStarted
+				&& KanColleClient.Current.Homeport?.Organization is { } organization)
+			{
+				organization
+					.Subscribe(nameof(Organization.Fleets), this.TryShowWindowsOnStartup, false)
+					.AddTo(this);
+				this.TryShowWindowsOnStartup();
+			}
 		}
 
 		/// <summary>
@@ -152,6 +165,41 @@ namespace Grabacr07.KanColleViewer.ViewModels.Contents.Launcher
 			{
 				item.Close();
 			}
+		}
+
+		private void TryShowWindowsOnStartup()
+		{
+			if (this.startupWindowsShown || this.startupWindowShowScheduled
+				|| !LauncherSettings.ShowWindowsOnStartup.Value
+				|| !IsStarted()
+				|| KanColleClient.Current.Homeport?.Organization?.Fleets.Count is not > 0)
+			{
+				return;
+			}
+
+			var dispatcher = Application.Current?.Dispatcher;
+			if (dispatcher == null)
+			{
+				this.startupWindowsShown = true;
+				this.ShowAll();
+				return;
+			}
+
+			this.startupWindowShowScheduled = true;
+			dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+			{
+				this.startupWindowShowScheduled = false;
+				if (this.startupWindowsShown
+					|| !LauncherSettings.ShowWindowsOnStartup.Value
+					|| !IsStarted()
+					|| KanColleClient.Current.Homeport?.Organization?.Fleets.Count is not > 0)
+				{
+					return;
+				}
+
+				this.startupWindowsShown = true;
+				this.ShowAll();
+			}));
 		}
 
 

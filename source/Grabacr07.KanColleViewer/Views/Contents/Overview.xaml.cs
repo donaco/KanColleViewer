@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Grabacr07.KanColleViewer.Models.Settings;
 
 namespace Grabacr07.KanColleViewer.Views.Contents
 {
@@ -30,6 +31,12 @@ namespace Grabacr07.KanColleViewer.Views.Contents
 		/// </summary>
 		private void DataHeader_MouseEnter(object sender, MouseEventArgs e)
 		{
+			if (!LauncherSettings.ShowWindowLauncher.Value)
+			{
+				this.LauncherPopup.IsOpen = false;
+				return;
+			}
+
 			if (this.LauncherPopup.IsOpen) return;
 
 			(this.DataContext as ViewModels.Contents.OverviewViewModel)?.Launcher.RefreshAvailability();

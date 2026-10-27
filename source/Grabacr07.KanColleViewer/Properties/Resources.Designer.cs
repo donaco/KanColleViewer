@@ -2068,6 +2068,51 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   基地詳細 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_AirBases {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_AirBases", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   一括非表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_CloseAll {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_CloseAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   艦隊詳細 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_Fleets {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_Fleets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   任務一覧 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_Quests {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_Quests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   一括表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Launcher_ShowAll {
+            get {
+                return ResourceManager.GetString("Ui_Launcher_ShowAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   通知を早める に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Notification_Advance {
@@ -3495,6 +3540,15 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   ウィンドウランチャー設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Window_LauncherSettings {
+            get {
+                return ResourceManager.GetString("Ui_Window_LauncherSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ウィンドウ レイアウト に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Window_Layout {
@@ -3536,6 +3590,24 @@ namespace Grabacr07.KanColleViewer.Properties {
         public static string Ui_Window_Layout_Single {
             get {
                 return ResourceManager.GetString("Ui_Window_Layout_Single", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ウィンドウランチャーを表示する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Window_ShowLauncher {
+            get {
+                return ResourceManager.GetString("Ui_Window_ShowLauncher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン後にチェックしたウィンドウを自動表示する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Window_ShowWindowsOnStartup {
+            get {
+                return ResourceManager.GetString("Ui_Window_ShowWindowsOnStartup", resourceCulture);
             }
         }
         
