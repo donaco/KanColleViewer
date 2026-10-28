@@ -490,16 +490,15 @@
 										</Grid.ColumnDefinitions>
 										<Rectangle x:Name="CategoryIndicator"
 												   Width="14"
-												   Height="14"
-												   HorizontalAlignment="Center"
+												   Height="10"
+												   HorizontalAlignment="Right"
 												   VerticalAlignment="Center"
 												   Fill="Transparent"
-												   StrokeThickness="2"
+												   StrokeThickness="8"
 												   IsHitTestVisible="False" />
 										<Rectangle Width="10"
 												   Height="10"
-												   Margin="0"
-												   HorizontalAlignment="Center"
+												   HorizontalAlignment="Left"
 												   VerticalAlignment="Center">
 											<Rectangle.Fill>
 												<SolidColorBrush Color="{Binding Category, Converter={StaticResource QuestCategoryToColorConverterKey}, Mode=OneWay}" />
