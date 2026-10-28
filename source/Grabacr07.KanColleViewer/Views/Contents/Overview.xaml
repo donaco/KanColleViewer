@@ -287,14 +287,28 @@
 				<Border Grid.Row="0"
 						Grid.Column="0">
 					<StackPanel>
-						<TextBlock x:Name="DataHeader"
-								   Text="{Binding [Ui_Overview_Data], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-								   Background="Transparent"
-								   Cursor="Arrow"
-								   MouseMove="DataHeader_MouseMove" />
-						
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="{Binding [Ui_Overview_Data], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+									   Background="Transparent"
+									   Cursor="Arrow" />
+							<Border x:Name="LauncherMenu"
+									Background="Transparent"
+									BorderThickness="0"
+									Padding="4,2"
+									Margin="4,0,0,0"
+									VerticalAlignment="Center"
+									Cursor="Hand"
+									MouseEnter="LauncherMenu_MouseEnter">
+								<StackPanel Width="14" VerticalAlignment="Center">
+									<Rectangle Height="1" Margin="0,1" Fill="{DynamicResource ActiveForegroundBrushKey}" />
+									<Rectangle Height="1" Margin="0,1" Fill="{DynamicResource ActiveForegroundBrushKey}" />
+									<Rectangle Height="1" Margin="0,1" Fill="{DynamicResource ActiveForegroundBrushKey}" />
+								</StackPanel>
+							</Border>
+						</StackPanel>
+
 						<Popup x:Name="LauncherPopup"
-							   PlacementTarget="{Binding ElementName=DataHeader}"
+							   PlacementTarget="{Binding ElementName=LauncherMenu}"
 							   Placement="Bottom"
 							   StaysOpen="False"
 							   PopupAnimation="Fade"

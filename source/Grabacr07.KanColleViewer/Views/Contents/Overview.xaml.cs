@@ -27,14 +27,9 @@ namespace Grabacr07.KanColleViewer.Views.Contents
 		}
 
 		/// <summary>
-		/// 「データ」にマウスを合わせたとき、ウィンドウランチャーを表示します。
+		/// 「ウィンドウランチャー」にマウスを合わせたとき、ウィンドウランチャーを表示します。
 		/// </summary>
-		private void DataHeader_MouseEnter(object sender, MouseEventArgs e)
-		{
-			this.ShowLauncherPopup();
-		}
-
-		private void DataHeader_MouseMove(object sender, MouseEventArgs e)
+		private void LauncherMenu_MouseEnter(object sender, MouseEventArgs e)
 		{
 			if (e.LeftButton != MouseButtonState.Released
 				|| e.MiddleButton != MouseButtonState.Released
