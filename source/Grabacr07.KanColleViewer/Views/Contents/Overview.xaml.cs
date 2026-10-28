@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -27,32 +26,17 @@ namespace Grabacr07.KanColleViewer.Views.Contents
 		}
 
 		/// <summary>
-		/// 「ウィンドウランチャー」にマウスを合わせたとき、ウィンドウランチャーを表示します。
+		/// ウィンドウランチャーを開いたとき、項目の表示可否を更新します。
 		/// </summary>
-		private void LauncherMenu_MouseEnter(object sender, MouseEventArgs e)
-		{
-			if (e.LeftButton != MouseButtonState.Released
-				|| e.MiddleButton != MouseButtonState.Released
-				|| e.RightButton != MouseButtonState.Released)
-			{
-				return;
-			}
-
-			this.ShowLauncherPopup();
-		}
-
-		private void ShowLauncherPopup()
+		private void LauncherMenu_Checked(object sender, RoutedEventArgs e)
 		{
 			if (!LauncherSettings.ShowWindowLauncher.Value)
 			{
-				this.LauncherPopup.IsOpen = false;
+				this.LauncherMenu.IsChecked = false;
 				return;
 			}
 
-			if (this.LauncherPopup.IsOpen) return;
-
 			(this.DataContext as ViewModels.Contents.OverviewViewModel)?.Launcher.RefreshAvailability();
-			this.LauncherPopup.IsOpen = true;
 		}
 	}
 }
