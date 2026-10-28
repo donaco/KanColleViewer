@@ -15,6 +15,7 @@
 			 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
 			 xmlns:catalogs="clr-namespace:Grabacr07.KanColleViewer.Views.Catalogs"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
+			 xmlns:wrapper="clr-namespace:Grabacr07.KanColleWrapper.Models;assembly=KanColleWrapper"
 			 xmlns:behaviors="clr-namespace:Grabacr07.KanColleViewer.Views.Behaviors"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 mc:Ignorable="d"
@@ -487,9 +488,11 @@
 											<ColumnDefinition Width="Auto" />
 											<ColumnDefinition Width="*" />
 										</Grid.ColumnDefinitions>
-										<Rectangle Width="10"
+										<Rectangle x:Name="CategoryIndicator"
+												   Width="10"
 												   Height="10"
-												   VerticalAlignment="Center">
+												   VerticalAlignment="Center"
+												   StrokeThickness="2">
 											<Rectangle.Fill>
 												<SolidColorBrush Color="{Binding Category, Converter={StaticResource QuestCategoryToColorConverterKey}, Mode=OneWay}" />
 											</Rectangle.Fill>
@@ -501,6 +504,24 @@
 												   Margin="4,0,0,0" />
 									</Grid>
 									<DataTemplate.Triggers>
+										<DataTrigger Binding="{Binding Progress, Mode=OneWay}"
+													 Value="{x:Static wrapper:QuestProgress.Progress50}">
+											<Setter TargetName="CategoryIndicator"
+													Property="Stroke"
+													Value="#FF208040" />
+										</DataTrigger>
+										<DataTrigger Binding="{Binding Progress, Mode=OneWay}"
+													 Value="{x:Static wrapper:QuestProgress.Progress80}">
+											<Setter TargetName="CategoryIndicator"
+													Property="Stroke"
+													Value="#FF206040" />
+										</DataTrigger>
+										<DataTrigger Binding="{Binding State, Mode=OneWay}"
+													 Value="{x:Static wrapper:QuestState.Accomplished}">
+											<Setter TargetName="CategoryIndicator"
+													Property="Stroke"
+													Value="#FF326480" />
+										</DataTrigger>
 										<DataTrigger Binding="{Binding IsUntaken}"
 													 Value="True">
 											<Setter TargetName="Title"
