@@ -346,9 +346,11 @@
 																	  IsChecked="{Binding IsChecked, Mode=TwoWay}"
 																	  IsEnabled="{Binding IsAvailable, Mode=OneWay}"
 																	  VerticalAlignment="Center"
+																	  ToolTip="{Binding [Ui_Launcher_CheckWindowTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																	  Margin="0,0,6,0" />
 															<metro2:CallMethodButton Content="{Binding Name, Mode=OneWay}"
 																					 IsEnabled="{Binding IsAvailable, Mode=OneWay}"
+																					 ToolTip="{Binding [Ui_Launcher_OpenWindowTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																					 MethodName="Open">
 																<metro2:CallMethodButton.Style>
 																	<Style TargetType="{x:Type metro2:CallMethodButton}"

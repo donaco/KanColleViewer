@@ -1065,6 +1065,12 @@
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>显示所有已勾选的窗口</value>
   </data>
+  <data name="Ui_Launcher_CheckWindowTooltip" xml:space="preserve">
+    <value>勾选后，此窗口将加入“全部显示”和登录后自动显示</value>
+  </data>
+  <data name="Ui_Launcher_OpenWindowTooltip" xml:space="preserve">
+    <value>点击以打开窗口</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>数据</value>
   </data>

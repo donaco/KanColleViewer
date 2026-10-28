@@ -1065,6 +1065,12 @@
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>Show all checked windows</value>
   </data>
+  <data name="Ui_Launcher_CheckWindowTooltip" xml:space="preserve">
+    <value>Check to include this window in Show All and automatic display after login</value>
+  </data>
+  <data name="Ui_Launcher_OpenWindowTooltip" xml:space="preserve">
+    <value>Click to open the window</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>Data</value>
   </data>

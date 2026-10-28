@@ -1065,6 +1065,12 @@
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>チェックしたウィンドウを全て表示する</value>
   </data>
+  <data name="Ui_Launcher_CheckWindowTooltip" xml:space="preserve">
+    <value>チェックして一括表示/自動表示に登録</value>
+  </data>
+  <data name="Ui_Launcher_OpenWindowTooltip" xml:space="preserve">
+    <value>クリックしてウィンドウを開く</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>データ</value>
   </data>

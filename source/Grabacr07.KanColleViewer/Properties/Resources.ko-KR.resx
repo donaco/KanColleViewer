@@ -1065,6 +1065,12 @@
   <data name="Ui_Launcher_ShowAllTooltip" xml:space="preserve">
     <value>체크한 창을 모두 표시합니다</value>
   </data>
+  <data name="Ui_Launcher_CheckWindowTooltip" xml:space="preserve">
+    <value>체크하면 이 창이 모두 표시 및 로그인 후 자동 표시 대상에 포함됩니다</value>
+  </data>
+  <data name="Ui_Launcher_OpenWindowTooltip" xml:space="preserve">
+    <value>클릭하여 창을 엽니다</value>
+  </data>
   <data name="Ui_Overview_Data" xml:space="preserve">
     <value>데이터</value>
   </data>
