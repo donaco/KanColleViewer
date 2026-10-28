@@ -489,10 +489,18 @@
 											<ColumnDefinition Width="*" />
 										</Grid.ColumnDefinitions>
 										<Rectangle x:Name="CategoryIndicator"
-												   Width="10"
-												   Height="10"
+												   Width="14"
+												   Height="14"
+												   HorizontalAlignment="Center"
 												   VerticalAlignment="Center"
-												   StrokeThickness="2">
+												   Fill="Transparent"
+												   StrokeThickness="2"
+												   IsHitTestVisible="False" />
+										<Rectangle Width="10"
+												   Height="10"
+												   Margin="0"
+												   HorizontalAlignment="Center"
+												   VerticalAlignment="Center">
 											<Rectangle.Fill>
 												<SolidColorBrush Color="{Binding Category, Converter={StaticResource QuestCategoryToColorConverterKey}, Mode=OneWay}" />
 											</Rectangle.Fill>
@@ -508,7 +516,7 @@
 													 Value="{x:Static wrapper:QuestProgress.Progress50}">
 											<Setter TargetName="CategoryIndicator"
 													Property="Stroke"
-													Value="#FF208040" />
+													Value="#FF33cc33" />
 										</DataTrigger>
 										<DataTrigger Binding="{Binding Progress, Mode=OneWay}"
 													 Value="{x:Static wrapper:QuestProgress.Progress80}">
@@ -520,7 +528,7 @@
 													 Value="{x:Static wrapper:QuestState.Accomplished}">
 											<Setter TargetName="CategoryIndicator"
 													Property="Stroke"
-													Value="#FF326480" />
+													Value="#FF3399cc" />
 										</DataTrigger>
 										<DataTrigger Binding="{Binding IsUntaken}"
 													 Value="True">
