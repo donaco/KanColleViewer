@@ -318,24 +318,24 @@
 										<StackPanel DataContext="{Binding Launcher}">
 											<StackPanel Orientation="Horizontal">
 												<metro2:CallMethodButton Content="{Binding [Ui_Launcher_ShowAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="8,6"
+																		 Padding="6,4"
 																		 ToolTip="{Binding [Ui_Launcher_ShowAllTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="ShowAll" />
 
 												<metro2:CallMethodButton Content="{Binding [Ui_Launcher_CloseAll], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="8,6"
+																		 Padding="6,4"
 																		 Margin="2,0"
 																		 ToolTip="{Binding [Ui_Launcher_CloseAllTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="CloseAll" />
 
 												<metro2:CallMethodButton Content="{Binding Resources.Settings, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-																		 Padding="8,6"
+																		 Padding="6,4"
 																		 ToolTip="{Binding [Ui_Launcher_SettingsTooltip], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 																		 MethodName="ShowWindowLauncherSettings" />
 											</StackPanel>
 
 											<Rectangle Height=".99"
-													   Margin="0,6,0,3"
+													   Margin="0,6,0,4"
 													   Style="{DynamicResource SeparatorRectangleStyleKey}" />
 											
 											<ItemsControl ItemsSource="{Binding Items}">
