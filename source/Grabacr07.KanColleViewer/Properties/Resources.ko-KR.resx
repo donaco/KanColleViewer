@@ -963,6 +963,15 @@
   <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
     <value>장착 함선</value>
   </data>
+  <data name="Ui_SlotItemCatalog_Bomb" xml:space="preserve">
+    <value>폭장</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Hit" xml:space="preserve">
+    <value>명중</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Evade" xml:space="preserve">
+    <value>회피</value>
+  </data>
   <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
     <value>수송량</value>
   </data>

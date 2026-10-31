@@ -963,6 +963,15 @@
   <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
     <value>Equipped Ships</value>
   </data>
+  <data name="Ui_SlotItemCatalog_Bomb" xml:space="preserve">
+    <value>Bombing</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Hit" xml:space="preserve">
+    <value>Accuracy</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Evade" xml:space="preserve">
+    <value>Evasion</value>
+  </data>
   <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
     <value>Transport Capacity</value>
   </data>

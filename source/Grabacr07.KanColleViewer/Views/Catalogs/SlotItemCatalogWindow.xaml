@@ -212,7 +212,36 @@
 											</Border>
 											<TextBlock Text="{Binding Target.Name}"
 													   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-													   Margin="0,4" />
+													   Margin="0,4"
+													   ToolTipService.ShowDuration="60000">
+												<TextBlock.ToolTip>
+													<ToolTip DataContext="{Binding PlacementTarget.DataContext.Target, RelativeSource={RelativeSource Self}}"
+															 Background="{DynamicResource BackgroundBrushKey}"
+															 Foreground="{DynamicResource ActiveForegroundBrushKey}"
+															 BorderBrush="{DynamicResource BorderBrushKey}">
+														<StackPanel>
+															<TextBlock Text="{Binding Name, Mode=OneWay}"
+																	   FontWeight="Bold"
+																	   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+																	   Margin="0,0,0,4" />
+															<TextBlock Margin="0"
+																	   TextWrapping="NoWrap"
+																	   TextTrimming="None"
+																	   Foreground="{DynamicResource ActiveForegroundBrushKey}">
+																<Run Text="{Binding [Ui_ShipCatalog_Firepower], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Firepower, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_ShipCatalog_Torpedo], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Torpedo, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_ShipCatalog_AntiAir], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding AA, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_ShipCatalog_Armor], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Armer, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_SlotItemCatalog_Bomb], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Bomb, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_ShipCatalog_AntiSubmarine], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding ASW, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_SlotItemCatalog_Hit], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Hit, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_SlotItemCatalog_Evade], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding Evade, Mode=OneWay, StringFormat=:{0}}" />
+																<Run Text="{Binding [Ui_ShipCatalog_LineOfSight], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" /><Run Text="{Binding ViewRange, Mode=OneWay, StringFormat=:{0}}" />
+															</TextBlock>
+														</StackPanel>
+													</ToolTip>
+												</TextBlock.ToolTip>
+											</TextBlock>
 										</StackPanel>
 									</DataTemplate>
 								</GridViewColumn.CellTemplate>

@@ -963,6 +963,15 @@
   <data name="Ui_SlotItemCatalog_EquippedOn" xml:space="preserve">
     <value>装備している艦娘</value>
   </data>
+  <data name="Ui_SlotItemCatalog_Bomb" xml:space="preserve">
+    <value>爆装</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Hit" xml:space="preserve">
+    <value>命中</value>
+  </data>
+  <data name="Ui_SlotItemCatalog_Evade" xml:space="preserve">
+    <value>回避</value>
+  </data>
   <data name="Ui_Fleets_TransportCapacity" xml:space="preserve">
     <value>輸送能力</value>
   </data>
