@@ -429,6 +429,9 @@
   <data name="Settings_WindowControl" xml:space="preserve">
     <value>Window Controls</value>
   </data>
+  <data name="Settings_WindowControl_FollowMainWindow" xml:space="preserve">
+    <value>Move secondary windows with the main window</value>
+  </data>
   <data name="Settings_WindowControl_LocationLeftButton" xml:space="preserve">
     <value>Dock window to left of screen.</value>
   </data>

@@ -429,6 +429,9 @@
   <data name="Settings_WindowControl" xml:space="preserve">
     <value>窗口位置</value>
   </data>
+  <data name="Settings_WindowControl_FollowMainWindow" xml:space="preserve">
+    <value>移动主窗口时同步移动其他窗口</value>
+  </data>
   <data name="Settings_WindowControl_LocationLeftButton" xml:space="preserve">
     <value>将窗口放在屏幕左端</value>
   </data>

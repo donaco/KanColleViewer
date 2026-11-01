@@ -113,6 +113,11 @@
 			</StackPanel>
 		</metro2:CallMethodButton>
 
+
+		<CheckBox Content="{Binding [Settings_WindowControl_FollowMainWindow], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				  IsChecked="{Binding Source={x:Static ms:GeneralSettings.FollowWindowsWithMainWindow}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+				  Margin="20,8,0,0" />
+
 		<StackPanel Visibility="{Binding Source={x:Static ms:GeneralSettings.IsProxyMode}, Path=Value, Converter={StaticResource UniversalBooleanToVisibilityConverter}, ConverterParameter=Colappsed:Visible}">
 			<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 

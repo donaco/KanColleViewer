@@ -22,6 +22,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 
 		/// <summary>
+		/// メイン ウィンドウの移動にサブ ウィンドウを追従させるかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> FollowWindowsWithMainWindow { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
+
+		/// <summary>
 		/// アプリケーション終了時の確認動作を示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<ExitConfirmationType> ExitConfirmationType { get; }

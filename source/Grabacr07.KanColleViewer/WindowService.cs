@@ -46,6 +46,13 @@ namespace Grabacr07.KanColleViewer
 		private InformationViewModel? information;
 		private KanColleWindowViewModel? kanColleWindow;
 		private InformationWindowViewModel? informationWindow;
+		private Window? primaryWindow;
+		private readonly HashSet<Window> followedWindows = new HashSet<Window>();
+		private readonly Dictionary<Window, Point> relativeWindowLocations = new Dictionary<Window, Point>();
+		private Point? previousMainWindowLocation;
+		private bool isWindowTrackingInitialized;
+		private bool isMovingFollowedWindows;
+		private bool isDisposed;
 		private readonly CompositeDisposable compositeDisposable = new CompositeDisposable();
 		private readonly PropertyChangedEventHandler cultureChangedHandler;
 
@@ -119,6 +126,11 @@ namespace Grabacr07.KanColleViewer
 
 		public void Initialize(bool useInformationWindowAsMainWindow = false)
 		{
+			this.InitializeWindowTracking();
+			GeneralSettings.FollowWindowsWithMainWindow
+				.Subscribe(this.HandleFollowWindowsSettingChanged)
+				.AddTo(this);
+
 			if (GeneralSettings.IsProxyMode || useInformationWindowAsMainWindow)
 			{
 				// プロキシ モード (艦これのウィンドウを表示しないやつ)
@@ -267,6 +279,217 @@ namespace Grabacr07.KanColleViewer
 			return null;
 		}
 
+		private void InitializeWindowTracking()
+		{
+			if (!this.isWindowTrackingInitialized)
+			{
+				EventManager.RegisterClassHandler(
+					typeof(Window),
+					FrameworkElement.LoadedEvent,
+					new RoutedEventHandler(this.HandleWindowLoaded),
+					true);
+				this.isWindowTrackingInitialized = true;
+			}
+
+			this.TrackOpenWindows();
+		}
+
+		private void HandleWindowLoaded(object sender, RoutedEventArgs e)
+		{
+			if (this.isDisposed || sender is not Window window) return;
+
+			if (ReferenceEquals(window, this.primaryWindow))
+			{
+				this.RefreshRelativeWindowLocations();
+			}
+			else
+			{
+				this.TrackWindow(window);
+			}
+		}
+
+		private void TrackOpenWindows()
+		{
+			if (Application.Current == null) return;
+
+			foreach (Window window in Application.Current.Windows)
+			{
+				this.TrackWindow(window);
+			}
+		}
+
+		private void TrackWindow(Window window)
+		{
+			if (this.isDisposed || ReferenceEquals(window, this.primaryWindow) || window.DataContext is DialogViewModel) return;
+			if (!this.followedWindows.Add(window)) return;
+
+			window.LocationChanged += this.HandleFollowedWindowLocationChanged;
+			window.Closed += this.HandleFollowedWindowClosed;
+
+			if (GeneralSettings.FollowWindowsWithMainWindow.Value)
+			{
+				this.UpdateRelativeWindowLocation(window);
+			}
+		}
+
+		private void SetPrimaryWindow(Window window)
+		{
+			if (this.primaryWindow != null)
+			{
+				this.primaryWindow.LocationChanged -= this.HandleMainWindowLocationChanged;
+				this.primaryWindow.Loaded -= this.HandleMainWindowLoaded;
+				this.primaryWindow.Closed -= this.HandleMainWindowClosed;
+			}
+
+			this.UntrackWindow(window);
+			this.primaryWindow = window;
+			window.LocationChanged += this.HandleMainWindowLocationChanged;
+			window.Loaded += this.HandleMainWindowLoaded;
+			window.Closed += this.HandleMainWindowClosed;
+
+			this.TrackOpenWindows();
+			if (window.IsLoaded) this.RefreshRelativeWindowLocations();
+		}
+
+		private void HandleMainWindowLoaded(object sender, RoutedEventArgs e)
+		{
+			this.RefreshRelativeWindowLocations();
+		}
+
+		private void HandleMainWindowLocationChanged(object? sender, EventArgs e)
+		{
+			if (this.primaryWindow == null || !TryGetWindowLocation(this.primaryWindow, out var currentLocation))
+			{
+				this.previousMainWindowLocation = null;
+				this.relativeWindowLocations.Clear();
+				return;
+			}
+
+			var previousLocation = this.previousMainWindowLocation;
+			this.previousMainWindowLocation = currentLocation;
+			if (!GeneralSettings.FollowWindowsWithMainWindow.Value) return;
+
+			if (previousLocation == null)
+			{
+				this.RefreshRelativeWindowLocations();
+				return;
+			}
+
+			if (previousLocation.Value == currentLocation) return;
+
+			this.isMovingFollowedWindows = true;
+			try
+			{
+				foreach (var entry in this.relativeWindowLocations.ToArray())
+				{
+					var window = entry.Key;
+					if (!window.IsLoaded || !TryGetWindowLocation(window, out _))
+					{
+						this.relativeWindowLocations.Remove(window);
+						continue;
+					}
+
+					var left = currentLocation.X + entry.Value.X;
+					var top = currentLocation.Y + entry.Value.Y;
+					if (!double.IsFinite(left) || !double.IsFinite(top)) continue;
+
+					if (window.Left != left) window.Left = left;
+					if (window.IsLoaded && window.Top != top) window.Top = top;
+				}
+			}
+			finally
+			{
+				this.isMovingFollowedWindows = false;
+			}
+		}
+
+		private void HandleFollowedWindowLocationChanged(object? sender, EventArgs e)
+		{
+			if (this.isMovingFollowedWindows || !GeneralSettings.FollowWindowsWithMainWindow.Value || sender is not Window window) return;
+			this.UpdateRelativeWindowLocation(window);
+		}
+
+		private void HandleFollowedWindowClosed(object? sender, EventArgs e)
+		{
+			if (sender is Window window) this.UntrackWindow(window);
+		}
+
+		private void HandleMainWindowClosed(object? sender, EventArgs e)
+		{
+			if (sender is not Window window) return;
+
+			window.LocationChanged -= this.HandleMainWindowLocationChanged;
+			window.Loaded -= this.HandleMainWindowLoaded;
+			window.Closed -= this.HandleMainWindowClosed;
+			if (!ReferenceEquals(window, this.primaryWindow)) return;
+
+			this.primaryWindow = null;
+			this.previousMainWindowLocation = null;
+			this.relativeWindowLocations.Clear();
+		}
+
+		private void HandleFollowWindowsSettingChanged(bool followWindows)
+		{
+			if (followWindows)
+			{
+				this.TrackOpenWindows();
+				this.RefreshRelativeWindowLocations();
+			}
+			else
+			{
+				this.relativeWindowLocations.Clear();
+			}
+		}
+
+		private void RefreshRelativeWindowLocations()
+		{
+			this.relativeWindowLocations.Clear();
+			if (this.primaryWindow == null || !TryGetWindowLocation(this.primaryWindow, out var mainLocation))
+			{
+				this.previousMainWindowLocation = null;
+				return;
+			}
+
+			this.previousMainWindowLocation = mainLocation;
+			if (!GeneralSettings.FollowWindowsWithMainWindow.Value) return;
+
+			foreach (var window in this.followedWindows)
+			{
+				this.UpdateRelativeWindowLocation(window, mainLocation);
+			}
+		}
+
+		private void UpdateRelativeWindowLocation(Window window)
+		{
+			if (this.primaryWindow == null || !TryGetWindowLocation(this.primaryWindow, out var mainLocation)) return;
+			this.UpdateRelativeWindowLocation(window, mainLocation);
+		}
+
+		private void UpdateRelativeWindowLocation(Window window, Point mainLocation)
+		{
+			if (TryGetWindowLocation(window, out var windowLocation))
+			{
+				this.relativeWindowLocations[window] = new Point(
+					windowLocation.X - mainLocation.X,
+					windowLocation.Y - mainLocation.Y);
+			}
+		}
+
+		private void UntrackWindow(Window window)
+		{
+			if (!this.followedWindows.Remove(window)) return;
+
+			window.LocationChanged -= this.HandleFollowedWindowLocationChanged;
+			window.Closed -= this.HandleFollowedWindowClosed;
+			this.relativeWindowLocations.Remove(window);
+		}
+
+		private static bool TryGetWindowLocation(Window window, out Point location)
+		{
+			location = new Point(window.Left, window.Top);
+			return window.IsLoaded && double.IsFinite(location.X) && double.IsFinite(location.Y);
+		}
+
 		/// <summary>
 		/// アプリケーション内の最初の <see cref="ChromiumWebBrowser"/> を返します。
 		/// </summary>
@@ -299,11 +522,15 @@ namespace Grabacr07.KanColleViewer
 		{
 			if (this.MainWindow == this.kanColleWindow)
 			{
-				return new KanColleWindow { DataContext = this.kanColleWindow, };
+				var window = new KanColleWindow { DataContext = this.kanColleWindow, };
+				this.SetPrimaryWindow(window);
+				return window;
 			}
 			if (this.MainWindow == this.informationWindow)
 			{
-				return new InformationWindow { DataContext = this.informationWindow, };
+				var window = new InformationWindow { DataContext = this.informationWindow, };
+				this.SetPrimaryWindow(window);
+				return window;
 			}
 
 			throw new InvalidOperationException();
@@ -316,6 +543,18 @@ namespace Grabacr07.KanColleViewer
 
 		public void Dispose()
 		{
+			this.isDisposed = true;
+			if (this.primaryWindow != null)
+			{
+				this.primaryWindow.LocationChanged -= this.HandleMainWindowLocationChanged;
+				this.primaryWindow.Loaded -= this.HandleMainWindowLoaded;
+				this.primaryWindow.Closed -= this.HandleMainWindowClosed;
+				this.primaryWindow = null;
+			}
+			foreach (var window in this.followedWindows.ToArray()) this.UntrackWindow(window);
+			this.relativeWindowLocations.Clear();
+			this.previousMainWindowLocation = null;
+
 			ResourceService.Current.PropertyChanged -= this.cultureChangedHandler;
 			this.fleetStateListeners?.Dispose();
 			this.compositeDisposable.Dispose();

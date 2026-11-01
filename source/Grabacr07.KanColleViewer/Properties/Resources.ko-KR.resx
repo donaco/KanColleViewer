@@ -429,6 +429,9 @@
   <data name="Settings_WindowControl" xml:space="preserve">
     <value>창 조작</value>
   </data>
+  <data name="Settings_WindowControl_FollowMainWindow" xml:space="preserve">
+    <value>메인 창을 이동할 때 보조 창도 함께 이동</value>
+  </data>
   <data name="Settings_WindowControl_LocationLeftButton" xml:space="preserve">
     <value>창을 모니터의 왼쪽 가장자리로 이동</value>
   </data>
