@@ -27,6 +27,17 @@ namespace Grabacr07.KanColleWrapper.Models
 	}
 
 	/// <summary>
+	/// 戦闘時の交戦形態 api_formation[2]
+	/// </summary>
+	public enum BattleEngagement
+	{
+		SameCourse = 1,
+		OppositeCourse = 2,
+		TAdvantage = 3,
+		TDisadvantage = 4,
+	}
+
+	/// <summary>
 	/// 出撃中のマップ位置情報を保持します。
 	/// </summary>
 	public class SortieInfo : Notifier
@@ -133,6 +144,27 @@ namespace Grabacr07.KanColleWrapper.Models
 				}
 			}
 		} = AirSuperiority.None;
+
+		#endregion
+
+		#region Engagement 変更通知プロパティ
+
+		/// <summary>
+		/// 戦闘時の交戦形態を取得します。
+		/// </summary>
+		public BattleEngagement? Engagement
+		{
+			get => field;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					this.RaisePropertyChanged();
+					this.RaisePropertyChanged(nameof(this.DisplayText));
+				}
+			}
+		}
 
 		#endregion
 
@@ -256,6 +288,11 @@ namespace Grabacr07.KanColleWrapper.Models
 					baseText += $"[{GetAirSuperiorityText(this.AirResult)}]";
 				}
 
+				if (this.Engagement.HasValue)
+				{
+					baseText += $"[{GetBattleEngagementText(this.Engagement.Value)}]";
+				}
+
 				return baseText;
 			}
 		}
@@ -276,6 +313,18 @@ namespace Grabacr07.KanColleWrapper.Models
 			}
 		}
 
+		private static string GetBattleEngagementText(BattleEngagement value)
+		{
+			switch (value)
+			{
+				case BattleEngagement.SameCourse: return "同航";
+				case BattleEngagement.OppositeCourse: return "反航";
+				case BattleEngagement.TAdvantage: return "有利";
+				case BattleEngagement.TDisadvantage: return "不利";
+				default: return string.Empty;
+			}
+		}
+
 		/// <summary>
 		/// 出撃開始時に呼び出します (api_req_map/start)
 		/// start取得時は api_no を表示しません
@@ -287,6 +336,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = null;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.Engagement = null;
 			this.IsDestruction = false;
 			this.IsLdAirbattle = false;
 			this.IsActive = true;
@@ -294,13 +344,14 @@ namespace Grabacr07.KanColleWrapper.Models
 
 		/// <summary>
 		/// 戦闘開始時に呼び出します (api_req_sortie/battle など)
-		/// cellNo を表示開始し、WinRank と AirResult をクリアします
+		/// cellNo を表示開始し、戦闘結果・制空状態・交戦形態をクリアします
 		/// </summary>
 		public void EnterBattle(int cellNo)
 		{
 			this.CellNo = cellNo;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.Engagement = null;
 			this.IsDestruction = false;
 			this.IsLdAirbattle = false;
 		}
@@ -312,6 +363,14 @@ namespace Grabacr07.KanColleWrapper.Models
 		public void SetAirResult(AirSuperiority airResult)
 		{
 			this.AirResult = airResult;
+		}
+
+		/// <summary>
+		/// 戦闘時の交戦形態を設定します。
+		/// </summary>
+		public void SetEngagement(BattleEngagement engagement)
+		{
+			this.Engagement = engagement;
 		}
 
 		/// <summary>
@@ -330,6 +389,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = cellNo;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.Engagement = null;
 			this.IsDestruction = false;
 			this.IsLdAirbattle = false;
 		}
@@ -357,6 +417,7 @@ namespace Grabacr07.KanColleWrapper.Models
 			this.CellNo = null;
 			this.WinRank = null;
 			this.AirResult = AirSuperiority.None;
+			this.Engagement = null;
 			this.IsDestruction = false;
 			this.IsLdAirbattle = false;
 			this.IsActive = false;

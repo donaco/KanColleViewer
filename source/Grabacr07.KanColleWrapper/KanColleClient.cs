@@ -334,6 +334,9 @@ namespace Grabacr07.KanColleWrapper
 		internal AirSuperiority pendingAirResult = AirSuperiority.None;
 		internal bool hasPendingAirResult = false;
 
+		// 「次の行き先を表示する」が無効の場合、交戦形態を戦闘結果の受信まで保留する
+		internal BattleEngagement? pendingEngagement;
+
 		// goback_port のために battleresult から受け取った脱出艦・曳航艦IDを保持する
 		internal int[]? pendingEscapeShipIds;
 		internal int[]? pendingTowShipIds;

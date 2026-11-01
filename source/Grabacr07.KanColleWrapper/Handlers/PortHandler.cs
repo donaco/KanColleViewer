@@ -186,6 +186,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							{
 								this.client.hasPendingAirResult = false;
 								this.client.pendingAirResult = AirSuperiority.None;
+								this.client.pendingEngagement = null;
 							}
 						}
 						catch (Exception ex) { HandlerHelper.LogError("TryHandlePort", ex); }

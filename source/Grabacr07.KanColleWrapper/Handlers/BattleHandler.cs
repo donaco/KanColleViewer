@@ -135,6 +135,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										{
 											Client.hasPendingAirResult = false;
 											Client.pendingAirResult = AirSuperiority.None;
+											Client.pendingEngagement = null;
 										}
 									}
 									catch (Exception ex) { LogError("BattleHandler.TryHandleMapStart", ex); }
@@ -207,6 +208,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									{
 										Client.hasPendingAirResult = false;
 										Client.pendingAirResult = AirSuperiority.None;
+										Client.pendingEngagement = null;
 									}
 								});
 							}
@@ -216,6 +218,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 								{
 									Client.hasPendingAirResult = false;
 									Client.pendingAirResult = AirSuperiority.None;
+									Client.pendingEngagement = null;
 								}
 							}
 						}
@@ -280,6 +283,25 @@ namespace Grabacr07.KanColleWrapper.Handlers
 				|| url.Contains("/kcsapi/api_req_sortie/airbattle")
 				|| url.Contains("/kcsapi/api_req_combined_battle/airbattle");
 
+			BattleEngagement? engagement = null;
+			if (!string.IsNullOrEmpty(normalized))
+			{
+				try
+				{
+					var root = JToken.Parse(normalized);
+					var data = root["api_data"] ?? root;
+					var formation = data?["api_formation"] as JArray;
+					if (formation != null
+						&& formation.Count > 2
+						&& int.TryParse(formation[2]?.ToString(), out var engagementValue)
+						&& Enum.IsDefined(typeof(BattleEngagement), engagementValue))
+					{
+						engagement = (BattleEngagement)engagementValue;
+					}
+				}
+				catch (Exception ex) { LogError("BattleHandler.TryHandleBattle/formation", ex); }
+			}
+
 			lock (Client.BattleStateLock)
 			{
 				if (url.Contains("/kcsapi/api_req_sortie/ld_airbattle")
@@ -338,6 +360,19 @@ namespace Grabacr07.KanColleWrapper.Handlers
 
 					lock (Client.BattleStateLock)
 					{
+						if (engagement.HasValue)
+						{
+							if (showOnArrival)
+							{
+								Client.SortieInfo.SetEngagement(engagement.Value);
+								Client.pendingEngagement = null;
+							}
+							else
+							{
+								Client.pendingEngagement = engagement.Value;
+							}
+						}
+
 						if (shouldParseAir && parsedBattleAir)
 						{
 							Client.SortieInfo.SetAirResult(airResult);
@@ -573,6 +608,12 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							try { Client.SortieInfo.SetAirResult(Client.pendingAirResult); } catch { }
 							Client.hasPendingAirResult = false;
 							Client.pendingAirResult = AirSuperiority.None;
+						}
+
+						if (Client.pendingEngagement.HasValue)
+						{
+							Client.SortieInfo.SetEngagement(Client.pendingEngagement.Value);
+							Client.pendingEngagement = null;
 						}
 					}
 
