@@ -220,6 +220,11 @@ namespace Counter
 		public AirSuperiority AirResult { get; }
 
 		/// <summary>
+		/// 戦闘時の交戦形態
+		/// </summary>
+		public BattleEngagement? Engagement { get; }
+
+		/// <summary>
 		/// 防空戦かどうか
 		/// </summary>
 		public bool IsDestruction { get; }
@@ -322,13 +327,32 @@ namespace Counter
 			}
 		}
 
-		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false)
+		/// <summary>
+		/// 交戦形態の表示テキスト（例: "[同航]"）。交戦形態がなければ空文字。
+		/// </summary>
+		public string EngagementText
+		{
+			get
+			{
+				switch (this.Engagement)
+				{
+					case BattleEngagement.SameCourse: return "[同航]";
+					case BattleEngagement.OppositeCourse: return "[反航]";
+					case BattleEngagement.TAdvantage: return "[有利]";
+					case BattleEngagement.TDisadvantage: return "[不利]";
+					default: return string.Empty;
+				}
+			}
+		}
+
+		public SortieRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult = AirSuperiority.None, bool isDestruction = false, bool isLdAirbattle = false, BattleEngagement? engagement = null)
 		{
 			this.MapAreaId = mapAreaId;
 			this.MapInfoNo = mapInfoNo;
 			this.CellNo = cellNo;
 			this.WinRank = winRank;
 			this.AirResult = airResult;
+			this.Engagement = engagement;
 			this.IsDestruction = isDestruction;
 			this.IsLdAirbattle = isLdAirbattle;
 			this.Timestamp = DateTime.Now;
@@ -938,7 +962,8 @@ namespace Counter
 							cellNo,
 							sortieInfo.WinRank,
 							sortieInfo.AirResult,
-							isLdAirbattle: sortieInfo.IsLdAirbattle
+							isLdAirbattle: sortieInfo.IsLdAirbattle,
+							engagement: sortieInfo.Engagement
 						);
 					}
 					break;
@@ -977,14 +1002,14 @@ namespace Counter
 		/// <summary>
 		/// 履歴を1件追加し、海域ごとの出撃数を更新します。
 		/// </summary>
-		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false)
+		private void AddRecord(int mapAreaId, int mapInfoNo, int? cellNo, string? winRank, AirSuperiority airResult, bool isDestruction = false, bool isLdAirbattle = false, BattleEngagement? engagement = null)
 		{
 			try
 			{
 				SortieRecord record;
 				try
 				{
-					record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle);
+					record = new SortieRecord(mapAreaId, mapInfoNo, cellNo, winRank, airResult, isDestruction, isLdAirbattle, engagement);
 				}
 				catch (System.Exception ex)
 				{
@@ -1196,7 +1221,10 @@ namespace Counter
 						data.WinRank,
 						(AirSuperiority)data.AirResult,
 						data.IsDestruction,
-						data.IsLdAirbattle);
+						data.IsLdAirbattle,
+						data.Engagement.HasValue && Enum.IsDefined(typeof(BattleEngagement), data.Engagement.Value)
+							? (BattleEngagement?)data.Engagement.Value
+							: null);
 
 					// リフレクションの代わりに、Timestamp プロパティに直接セット
 					if (DateTime.TryParseExact(

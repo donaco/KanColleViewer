@@ -79,6 +79,7 @@ namespace Counter
 			public int? CellNo { get; set; }
 			public string? WinRank { get; set; }
 			public int AirResult { get; set; }
+			public int? Engagement { get; set; }
 			public bool IsDestruction { get; set; }
 			public bool IsLdAirbattle { get; set; }
 			public string? Timestamp { get; set; }
@@ -159,6 +160,7 @@ namespace Counter
 								CellNo = record.CellNo,
 								WinRank = record.WinRank,
 								AirResult = (int)record.AirResult,
+								Engagement = (int?)record.Engagement,
 								IsDestruction = record.IsDestruction,
 								IsLdAirbattle = record.IsLdAirbattle,
 								Timestamp = record.Timestamp.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),

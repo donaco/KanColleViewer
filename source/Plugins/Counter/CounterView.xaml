@@ -243,6 +243,7 @@
 													<ColumnDefinition Width="Auto" SharedSizeGroup="ColRank" />
 													<ColumnDefinition Width="Auto" SharedSizeGroup="ColAir" />
 													<ColumnDefinition Width="Auto" SharedSizeGroup="ColBoss" />
+													<ColumnDefinition Width="Auto" SharedSizeGroup="ColEngagement" />
 												</Grid.ColumnDefinitions>
 
 												<!-- 時刻 -->
@@ -318,6 +319,22 @@
 														</Style>
 													</TextBlock.Style>
 													<Run Text="{Binding AirSuperiorityText, Mode=OneWay}"
+														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
+												</TextBlock>
+
+												<!-- 交戦形態（例: [同航]）-->
+												<TextBlock Grid.Column="5"
+													   Margin="0,0,0,0">
+													<TextBlock.Style>
+														<Style TargetType="{x:Type TextBlock}">
+															<Style.Triggers>
+																<DataTrigger Binding="{Binding EngagementText}" Value="">
+																	<Setter Property="Visibility" Value="Collapsed" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+													</TextBlock.Style>
+													<Run Text="{Binding EngagementText, Mode=OneWay}"
 														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 												</TextBlock>
 											</Grid>
