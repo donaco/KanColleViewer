@@ -15,8 +15,6 @@ using Grabacr07.KanColleWrapper.Models;
 using MetroTrilithon.Lifetime;
 using MetroTrilithon.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CefSharp.Wpf;
-using CefSharp;
 
 namespace Grabacr07.KanColleViewer
 {
@@ -231,64 +229,19 @@ namespace Grabacr07.KanColleViewer
 		{
 			try
 			{
-				if (Models.WebView2.WebView2Migration.IsEnabled)
+				foreach (Window window in Application.Current.Windows)
 				{
-					foreach (Window window in Application.Current.Windows)
-					{
-						var host = this.FindChild<Views.Controls.WebView2KanColleHost>(window);
-						if (host is null) continue;
-						host.ShowDevTools();
-						return;
-					}
-					StatusService.Current.Notify("DevToolsを開けるWebView2が見つかりませんでした。");
+					var host = this.FindChild<Views.Controls.WebView2KanColleHost>(window);
+					if (host is null) continue;
+					host.ShowDevTools();
 					return;
 				}
-				// Application の開いているウィンドウを検索して ChromiumWebBrowser を探す
-				var browser = this.FindFirstChromiumWebBrowser();
-				if (browser == null)
-				{
-					// 見つからなければ通知だけ行う
-					StatusService.Current.Notify("DevTools を開けるブラウザが見つかりませんでした。");
-					return;
-				}
-
-				// UI スレッドで ShowDevTools を呼ぶ（フォールバックを含む）
-				browser.Dispatcher.BeginInvoke(new Action(() =>
-				{
-					try
-					{
-						browser.ShowDevTools();
-					}
-					catch (Exception)
-					{
-						try
-						{
-							browser.GetBrowser()?.GetHost()?.ShowDevTools();
-						}
-						catch (Exception ex)
-						{
-							StatusService.Current.Notify("DevTools の表示に失敗しました: " + ex.Message);
-						}
-					}
-				}));
+				StatusService.Current.Notify("DevToolsを開けるWebView2が見つかりませんでした。");
 			}
 			catch (Exception ex)
 			{
 				StatusService.Current.Notify("DevTools の表示に失敗しました: " + ex.Message);
 			}
-		}
-
-		private ChromiumWebBrowser? FindFirstChromiumWebBrowser()
-		{
-			if (Application.Current == null) return null;
-
-			foreach (Window w in Application.Current.Windows)
-			{
-				var found = FindChild<ChromiumWebBrowser>(w);
-				if (found != null) return found;
-			}
-
-			return null;
 		}
 
 		private void InitializeWindowTracking()
@@ -501,11 +454,6 @@ namespace Grabacr07.KanColleViewer
 			location = new Point(window.Left, window.Top);
 			return window.IsLoaded && double.IsFinite(location.X) && double.IsFinite(location.Y);
 		}
-
-		/// <summary>
-		/// アプリケーション内の最初の <see cref="ChromiumWebBrowser"/> を返します。
-		/// </summary>
-		public ChromiumWebBrowser? FindBrowser() => this.FindFirstChromiumWebBrowser();
 
 		private T? FindChild<T>(DependencyObject parent) where T : DependencyObject
 		{

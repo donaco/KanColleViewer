@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Grabacr07.KanColleViewer.Models.Cef
+namespace Grabacr07.KanColleViewer.Models.WebView2
 {
 	public class CapturedHttp
 	{

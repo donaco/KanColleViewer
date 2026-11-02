@@ -226,7 +226,7 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			{
 				case Dock.Left:
 				case Dock.Right:
-					return KanColleHost.KanColleSize.Width;
+					return WebView2KanColleHost.KanColleSize.Width;
 				default:
 					return double.PositiveInfinity;
 			}

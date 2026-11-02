@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Win32;
 
@@ -58,28 +57,6 @@ namespace Grabacr07.KanColleViewer.Models
 		{
 			var index = 0u;
 			NativeMethods.AvSetMmThreadCharacteristics("Games", ref index);
-		}
-
-		public static void DeleteCacheIfRequested()
-		{
-			if (GeneralSettings.ClearCacheOnNextStartup)
-			{
-				if (System.Diagnostics.Debugger.IsAttached)
-				{
-					System.Diagnostics.Debug.WriteLine("DeleteCacheIfRequested skipped during debugging.");
-					return;
-				}
-
-				try
-				{
-					Directory.Delete(CefBridge.CachePath, true);
-					GeneralSettings.ClearCacheOnNextStartup.Value = false;
-				}
-				catch (Exception ex)
-				{
-					System.Diagnostics.Debug.WriteLine(ex);
-				}
-			}
 		}
 
 

@@ -16,11 +16,8 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 		Unlimited,
 	}
 
-	public static class WebView2Migration
+	public static class WebView2Setup
 	{
-		public static bool IsEnabled { get; } = Environment.GetCommandLineArgs()
-			.Any(argument => string.Equals(argument, "--webview2", StringComparison.OrdinalIgnoreCase));
-
 		public static string UserDataFolder => Path.Combine(
 			Application.Instance?.LocalAppData.FullName
 				?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Grabacr07", "KanColleViewer"),
@@ -40,7 +37,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 			}
 			catch (WebView2RuntimeNotFoundException ex)
 			{
-				throw new InvalidOperationException("Evergreen WebView2 Runtimeが見つかりません。https://developer.microsoft.com/microsoft-edge/webview2/ から導入してください。自動インストールやCEFへの切替は行いません。", ex);
+				throw new InvalidOperationException("Evergreen WebView2 Runtimeが見つかりません。https://developer.microsoft.com/microsoft-edge/webview2/ から導入してください。自動インストールは行いません。", ex);
 			}
 
 			var arguments = new List<string>();

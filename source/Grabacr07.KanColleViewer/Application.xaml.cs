@@ -6,11 +6,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
-using CefSharp;
 using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
-using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Models.WebView2;
@@ -66,18 +64,6 @@ namespace Grabacr07.KanColleViewer
 		{
 			this.ChangeState(ApplicationState.Startup);
 
-			if (!WebView2Migration.IsEnabled)
-			{
-				// CEFの型を呼ぶ前にネイティブDLLの探索先を確立します。
-				CefBridge.PrepareNativePaths();
-				var cefSubprocessExitCode = CefBridge.ExecuteSubprocess();
-				if (cefSubprocessExitCode >= 0)
-				{
-					this.Shutdown(cefSubprocessExitCode);
-					return;
-				}
-			}
-
 			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
 			if (isFirstInstance)
 			{
@@ -129,26 +115,21 @@ namespace Grabacr07.KanColleViewer
 				AppThemeService.Current.Register(this, AppAccent.Purple);
 
 				Helper.SetMMCSSTask();
-				if (!WebView2Migration.IsEnabled) Helper.DeleteCacheIfRequested();
 
 				var startedWithFallback = false;
 
 				try
 				{
-					if (WebView2Migration.IsEnabled) WebView2Migration.Prepare();
-					else CefBridge.Initialize();
+					WebView2Setup.Prepare();
 				}
 				catch (Exception ex)
 				{
-					if (WebView2Migration.IsEnabled)
-					{
-						ReportRecoverableException("Startup.WebView2", this, ex);
-						MessageBox.Show(ex.Message, ProductInfo.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-						appMutex.Dispose();
-						this.Shutdown();
-						return;
-					}
-					ReportRecoverableException("Startup.CefInitialize", this, ex);
+					ReportRecoverableException("Startup.WebView2", this, ex);
+					MessageBox.Show(
+						$"{ex.Message}\r\n\r\nブラウザーを使わず、情報ウィンドウだけで起動します。上記の内容を確認・修正してから、アプリを再起動してください。\r\n（設定は情報ウィンドウの [設定] タブで変更できます）",
+						ProductInfo.Title,
+						MessageBoxButton.OK,
+						MessageBoxImage.Warning);
 					this.startedInFallbackMode = true;
 					startedWithFallback = true;
 
@@ -160,28 +141,21 @@ namespace Grabacr07.KanColleViewer
 						PluginService.Current.AddTo(this).Initialize();
 						NotifyService.Current.AddTo(this).Initialize();
 
+						// 通常は KanColleWindowViewModel が行う設定画面の初期化 (保存済み設定の読み込み) を、ここで行う
+						ViewModels.Settings.SettingsViewModel.Instance.Initialize();
+
 						this.MainWindow = WindowService.Current.GetMainWindow();
 						if (WindowService.Current.MainWindow is MainWindowViewModelBase fallbackMainWindowViewModel)
 						{
 							fallbackMainWindowViewModel.CanClose = true;
 						}
-						this.MainWindow.Closed += (s, args) =>
-						{
-							try
-							{
-								Environment.Exit(0);
-							}
-							catch
-							{
-							}
-						};
 						this.MainWindow.Show();
 					}
 					catch (Exception fallbackEx)
 					{
 						ReportException("StartupFallback", this, fallbackEx);
 						MessageBox.Show(
-							"起動中にブラウザーエンジン (Cef) の初期化に失敗し、代替モードでの起動にも失敗しました。cef.log を確認してください。",
+							"WebView2 の起動準備に失敗し、情報ウィンドウだけでの起動にも失敗しました。アプリを終了します。",
 							ProductInfo.Title,
 							MessageBoxButton.OK,
 							MessageBoxImage.Error);
@@ -289,32 +263,8 @@ namespace Grabacr07.KanColleViewer
 				System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
 			}
 
-			if (!WebView2Migration.IsEnabled) ShutdownCef();
 			RelayHttpProxyService.Stop();
 			this.CompleteExit(e);
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void ShutdownCef()
-		{
-			try
-			{
-				// CefSharp の完全シャットダウンを待つ
-				System.Diagnostics.Debug.WriteLine("Application: Shutting down CefSharp...");
-				Cef.Shutdown();
-
-				// CefSharp のシャットダウン完了を待機（最大5秒）
-				var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-				while (Cef.IsInitialized == true && stopwatch.ElapsedMilliseconds < 5000)
-				{
-					Thread.Sleep(100);
-				}
-				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown completed in {stopwatch.ElapsedMilliseconds}ms");
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown error: {ex}");
-			}
 		}
 
 		private void CompleteExit(ExitEventArgs e)
@@ -330,34 +280,6 @@ namespace Grabacr07.KanColleViewer
 			}
 
 			base.OnExit(e);
-			if (WebView2Migration.IsEnabled) return;
-
-			// 強制的にプロセスを終了（最終手段）
-			// 通常は必要ないが、バックグラウンドスレッドが残っている場合の保険
-#if !DEBUG
-			try
-			{
-				System.Diagnostics.Debug.WriteLine("Application: Forcing process exit...");
-				Environment.Exit(0);
-			}
-			catch (Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine($"Application: Force exit error: {ex}");
-			}
-#else
-			if (this.startedInFallbackMode)
-			{
-				try
-				{
-					System.Diagnostics.Debug.WriteLine("Application: Forcing process exit in fallback mode...");
-					Environment.Exit(0);
-				}
-				catch (Exception ex)
-				{
-					System.Diagnostics.Debug.WriteLine($"Application: Force exit error: {ex}");
-				}
-			}
-#endif
 		}
 		#endregion
 

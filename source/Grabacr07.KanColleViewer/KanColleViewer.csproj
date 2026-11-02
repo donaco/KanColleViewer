@@ -35,7 +35,6 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="145.0.260" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="InternalReservedAttributeGenerator" Version="0.1.2" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
@@ -151,22 +150,13 @@
     <Folder Include="Themes\Accents\" />
   </ItemGroup>
 
-  <!-- 出力に含める CEF ロケール (pak) の許可リスト -->
-  <PropertyGroup>
-    <KeepCefLocales>;en-US.pak;ja.pak;ko.pak;zh-CN.pak;</KeepCefLocales>
-  </PropertyGroup>
-
   <!--
     AssignTargetPaths の後に確定する項目から不要ファイルを除外します。
-    ・CEF の locales\*.pak は許可リスト以外を除外
     ・Windows App SDK (WinUI) の *.mui は全言語不要のため除外
     ・Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
   -->
   <Target Name="FilterUnusedLocaleResources" AfterTargets="AssignTargetPaths">
     <ItemGroup>
-      <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
-      <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="$([System.String]::Copy('%(TargetPath)').StartsWith('locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
-
       <ContentWithTargetPath Remove="@(ContentWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
       <_NoneWithTargetPath Remove="@(_NoneWithTargetPath)" Condition="'%(Extension)' == '.mui'" />
 
@@ -176,12 +166,11 @@
   </Target>
 
   <!--
-    CefSharp が ReferenceCopyLocalPaths 経由で追加する locales\*.pak / mui、
+    ReferenceCopyLocalPaths 経由で追加される *.mui (全言語不要)、
     および Windows App SDK の AI/NPU 関連ファイル (本プロジェクトでは未使用) を除外
   -->
   <Target Name="FilterUnusedReferenceCopyLocalPaths" AfterTargets="ResolveReferences">
     <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.pak' and $([System.String]::Copy('%(FullPath)').Contains('\locales\')) and !$(KeepCefLocales.Contains(';%(Filename)%(Extension);'))" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.mui'" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Windows.AI')) or $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Graphics.Imaging'))" />
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(FullPath)').Contains('\NpuDetect\')) or $([System.String]::Copy('%(Filename)').StartsWith('NPUDetect'))" />
@@ -214,12 +203,6 @@
     <ItemGroup>
       <None Include="$(_InsightsResourceDir)$(_InsightsResourceName)" Link="$(_InsightsResourceName)" CopyToOutputDirectory="PreserveNewest" Visible="false" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="TrimCefFiles" AfterTargets="Build">
-    <MakeDir Directories="$(OutDir)json" />
-    <Delete Files="$(OutDir)json\vk_swiftshader_icd.json" TreatErrorsAsWarnings="true" />
-    <Move SourceFiles="$(OutDir)vk_swiftshader_icd.json" DestinationFiles="$(OutDir)json\vk_swiftshader_icd.json" Condition="Exists('$(OutDir)vk_swiftshader_icd.json')" />
   </Target>
 
   <!--

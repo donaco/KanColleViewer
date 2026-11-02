@@ -11,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models;
-using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Models.WebView2;
@@ -28,6 +27,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 	public sealed class WebView2KanColleHost : ContentControl, IDisposable
 	{
 		private const string SuppressTabKeyScript = "window.addEventListener('keydown', e => { if (e.key === 'Tab') e.preventDefault(); }, true);";
+
+		public static Size KanColleSize { get; } = new Size(1200.0, 720.0);
 
 		private readonly WebView2Browser browser = new WebView2Browser();
 		private readonly HashSet<CoreWebView2Frame> trackedFrames = new();
@@ -164,17 +165,17 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private async Task InitializeAsync()
 		{
 			this.message.Text = "WebView2を初期化しています。";
-			var environment = await WebView2Migration.GetEnvironmentAsync();
+			var environment = await WebView2Setup.GetEnvironmentAsync();
 			if (this.disposed) return;
 			await this.browser.EnsureCoreWebView2Async(environment);
 			if (this.disposed) return;
-			this.runtimeVersion.Text = string.IsNullOrWhiteSpace(WebView2Migration.RuntimeVersion)
+			this.runtimeVersion.Text = string.IsNullOrWhiteSpace(WebView2Setup.RuntimeVersion)
 				? "WebView2 Runtimeのバージョンを取得できませんでした。"
-				: $"WebView2 Runtime バージョン: {WebView2Migration.RuntimeVersion}";
+				: $"WebView2 Runtime バージョン: {WebView2Setup.RuntimeVersion}";
 			var core = this.browser.CoreWebView2;
 			this.core = core;
 			core.FrameCreated += this.HandleFrameCreated;
-			core.Settings.AreDevToolsEnabled = WebView2Migration.IsDevToolsEnabled;
+			core.Settings.AreDevToolsEnabled = WebView2Setup.IsDevToolsEnabled;
 			core.Settings.AreDefaultContextMenusEnabled = false;
 			core.NavigationStarting += this.HandleNavigationStarting;
 			core.NavigationCompleted += this.HandleNavigationCompleted;
@@ -188,7 +189,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			// Tab は文字になるキーのため WPF のキーイベントへ転送されません。全フレームのページ側で既定動作を止めます。
 			await core.AddScriptToExecuteOnDocumentCreatedAsync(SuppressTabKeyScript);
 			if (this.disposed) return;
-			if (WebView2Migration.ClearCacheOnStartup)
+			if (WebView2Setup.ClearCacheOnStartup)
 			{
 				await core.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.DiskCache);
 				if (this.disposed) return;
@@ -723,10 +724,11 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			this.ReportError($"WebView2のプロセス障害: {e.ProcessFailedKind}。アプリを再起動してください。");
 		}
 
+		// AreDevToolsEnabled（起動時の設定）は F12 などのキー操作だけを制御し、OpenDevToolsWindow は制限しません。ボタンからの表示は現在の設定で判断します。
 		public void ShowDevTools() => this.RunBrowserAction(() =>
 		{
-			if (!this.browser.CoreWebView2.Settings.AreDevToolsEnabled)
-				throw new InvalidOperationException("開発者向けオプションを有効にして再起動してください。");
+			if (!GeneralSettings.IsRemoteDebuggingEnabled.Value)
+				throw new InvalidOperationException("開発者向けオプションを有効にしてください。");
 			this.browser.CoreWebView2.OpenDevToolsWindow();
 		});
 
@@ -744,7 +746,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.ReportError("表示倍率は10%～1000%で指定してください。");
 				return;
 			}
-			var browserSize = new Size(1200 * this.ZoomFactor, 720 * this.ZoomFactor);
+			var browserSize = new Size(KanColleSize.Width * this.ZoomFactor, KanColleSize.Height * this.ZoomFactor);
 			this.browser.Width = browserSize.Width;
 			this.browser.Height = browserSize.Height;
 			this.header.Measure(new Size(browserSize.Width, double.PositiveInfinity));

@@ -110,49 +110,7 @@
 
 		<!-- フレームレート設定 -->
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-		<DockPanel Margin="0,5,0,5">
-			<DockPanel.Style>
-				<Style TargetType="DockPanel">
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding Source={x:Static webview:WebView2Migration.IsEnabled}}" Value="True">
-							<Setter Property="Visibility" Value="Collapsed" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</DockPanel.Style>
-			<ComboBox DockPanel.Dock="Right"
-					  SelectedValue="{Binding Source={x:Static settings:GeneralSettings.FrameRateMode}, Path=Value, Mode=TwoWay}"
-					  SelectedValuePath="Tag"
-					  Width="196"
-					  VerticalAlignment="Center">
-				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Low], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-							  Tag="{x:Static models:BrowserFrameRateMode.Low}" />
-				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Medium], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-							  Tag="{x:Static models:BrowserFrameRateMode.Medium}" />
-				<ComboBoxItem Content="{x:Static models:MonitorHelper.HighModeDisplayText}"
-						  Tag="{x:Static models:BrowserFrameRateMode.High}" />
-			</ComboBox>
-			<StackPanel Margin="24,0,0,0">
-				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-						   Text="{Binding [Ui_Browser_FrameRate_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
-				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-						   FontSize="11"
-						   Text="{Binding [Ui_Browser_FrameRate_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
-			</StackPanel>
-		</DockPanel>
-
 		<StackPanel Margin="0,5,0,5">
-			<StackPanel.Style>
-				<Style TargetType="StackPanel">
-					<Setter Property="Visibility" Value="Collapsed" />
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding Source={x:Static webview:WebView2Migration.IsEnabled}}" Value="True">
-							<Setter Property="Visibility" Value="Visible" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</StackPanel.Style>
 			<TextBlock Text="WebView2検証用FPS設定（変更後は再起動が必要です）" TextWrapping="Wrap" />
 			<ComboBox SelectedValue="{Binding Source={x:Static settings:GeneralSettings.WebView2FrameRate}, Path=Value, Mode=TwoWay}"
 					  SelectedValuePath="Tag" HorizontalAlignment="Left" Width="250" Margin="0,6">

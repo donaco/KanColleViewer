@@ -30,32 +30,17 @@ namespace Grabacr07.KanColleViewer.Views
 
 		private void HandleBrowserHostLoaded(object sender, RoutedEventArgs e)
 		{
-			switch (sender)
-			{
-				case Controls.KanColleHost host:
-					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
-					host.OwnerSizeChangeRequested += this.HandleKanColleHostSizeChangeRequested;
-					host.ApplySize();
-					break;
-				case Controls.WebView2KanColleHost host:
-					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
-					host.OwnerSizeChangeRequested += this.HandleKanColleHostSizeChangeRequested;
-					host.ApplySize();
-					break;
-			}
+			if (sender is not Controls.WebView2KanColleHost host) return;
+
+			host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
+			host.OwnerSizeChangeRequested += this.HandleKanColleHostSizeChangeRequested;
+			host.ApplySize();
 		}
 
 		private void HandleBrowserHostUnloaded(object sender, RoutedEventArgs e)
 		{
-			switch (sender)
-			{
-				case Controls.KanColleHost host:
-					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
-					break;
-				case Controls.WebView2KanColleHost host:
-					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
-					break;
-			}
+			if (sender is Controls.WebView2KanColleHost host)
+				host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
 		}
 
 		private void HandleKanColleHostSizeChangeRequested(object? sender, Size size)

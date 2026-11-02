@@ -34,17 +34,6 @@ namespace Grabacr07.KanColleViewer.Models.Network
 			}
 		}
 
-		internal static void StartForCef()
-		{
-			if (!NetworkSettings.Relay.IsEnabled.Value)
-			{
-				Stop();
-				return;
-			}
-
-			Start(allowDirectFallback: true, failOnError: false);
-		}
-
 		internal static void StartForWebView2()
 		{
 			if (!NetworkSettings.Relay.IsEnabled.Value)
@@ -59,27 +48,20 @@ namespace Grabacr07.KanColleViewer.Models.Network
 				throw new InvalidOperationException("内蔵中継プロキシの上流ホストまたはポートが未設定です。WebView2では直接接続へ切り替えません。");
 			}
 
-			Start(allowDirectFallback: false, failOnError: true);
+			Start();
 		}
 
-		private static void Start(bool allowDirectFallback, bool failOnError)
+		private static void Start()
 		{
 			lock (SyncRoot)
 			{
-				if (relayProxy is not null)
-				{
-					if (relayProxy.AllowDirectFallback != allowDirectFallback)
-					{
-						throw new InvalidOperationException("内蔵中継プロキシが異なる通信モードです。アプリを再起動してください。");
-					}
-					return;
-				}
+				if (relayProxy is not null) return;
 
 				var proxy = new RelayHttpProxy
 				{
 					UpstreamHost = NetworkSettings.Relay.UpstreamHost.Value,
 					UpstreamPort = NetworkSettings.Relay.UpstreamPort.Value,
-					AllowDirectFallback = allowDirectFallback,
+					AllowDirectFallback = false,
 				};
 				proxy.UpstreamConnectionFailed += HandleUpstreamConnectionFailed;
 
@@ -92,11 +74,7 @@ namespace Grabacr07.KanColleViewer.Models.Network
 				{
 					proxy.UpstreamConnectionFailed -= HandleUpstreamConnectionFailed;
 					proxy.Dispose();
-					if (failOnError)
-					{
-						throw new InvalidOperationException("内蔵中継プロキシを起動できません。設定を確認してください。直接接続へは切り替えません。", ex);
-					}
-					Debug.WriteLine($"RelayHttpProxyService: CEF relay startup failed: {ex.GetType().Name}");
+					throw new InvalidOperationException("内蔵中継プロキシを起動できません。設定を確認してください。直接接続へは切り替えません。", ex);
 				}
 			}
 		}

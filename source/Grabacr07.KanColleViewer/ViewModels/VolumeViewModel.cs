@@ -1,4 +1,3 @@
-using System;
 using Grabacr07.KanColleViewer.Models.Settings;
 
 using Grabacr07.KanColleViewer.Infrastructure.Mvvm;
@@ -35,26 +34,6 @@ namespace Grabacr07.KanColleViewer.ViewModels
 		{
 			var newMute = !this.IsMute;
 			GeneralSettings.IsMuted.Value = newMute;
-
-			if (Models.WebView2.WebView2Migration.IsEnabled)
-			{
-				this.IsMute = newMute;
-				return;
-			}
-
-			var browser = WindowService.Current.FindBrowser();
-			if (browser != null)
-			{
-				try
-				{
-					browser.GetBrowser()?.GetHost()?.SetAudioMuted(newMute);
-				}
-				catch (Exception ex)
-				{
-					System.Diagnostics.Debug.WriteLine($"[VolumeViewModel.ToggleMute] {ex.Message}");
-				}
-			}
-
 			this.IsMute = newMute;
 		}
 	}
