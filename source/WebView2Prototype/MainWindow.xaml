@@ -1,0 +1,46 @@
+<Window x:Class="KanColleViewer.WebView2Prototype.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+		Title="KanColleViewer WebView2 比較試作"
+		Width="1280"
+		Height="900"
+		MinWidth="800"
+		MinHeight="600"
+		Loaded="Window_Loaded"
+		Closed="Window_Closed">
+	<DockPanel>
+		<StackPanel DockPanel.Dock="Top" Margin="8">
+			<WrapPanel Margin="0,0,0,6">
+				<TextBox x:Name="AddressBox"
+						 Width="540"
+						 MinWidth="260"
+						 VerticalContentAlignment="Center"
+						 Text="https://play.games.dmm.com/game/kancolle"
+						 KeyDown="AddressBox_KeyDown" />
+				<Button x:Name="StartButton" Content="初期化して移動" Margin="6,0" Padding="8,3" Click="StartButton_Click" />
+				<Button x:Name="BackButton" Content="戻る" IsEnabled="False" Margin="2,0" Padding="8,3" Click="BackButton_Click" />
+				<Button x:Name="ForwardButton" Content="進む" IsEnabled="False" Margin="2,0" Padding="8,3" Click="ForwardButton_Click" />
+				<Button x:Name="RefreshButton" Content="更新" IsEnabled="False" Margin="2,0" Padding="8,3" Click="RefreshButton_Click" />
+			</WrapPanel>
+			<WrapPanel Margin="0,0,0,6">
+				<TextBlock Text="FPS 試験:" VerticalAlignment="Center" Margin="0,0,4,0" />
+				<ComboBox x:Name="FrameRateModeBox" Width="250" SelectedIndex="0" VerticalContentAlignment="Center">
+					<ComboBoxItem Content="モニター同期（既定）" />
+					<ComboBoxItem Content="60 FPS 固定（未対応・検証のみ）" />
+					<ComboBoxItem Content="上限解除（起動引数を試験）" />
+				</ComboBox>
+				<CheckBox x:Name="DisableGpuBox" Content="GPU を無効化（起動引数）" VerticalAlignment="Center" Margin="12,0" />
+				<TextBlock Text="表示倍率:" VerticalAlignment="Center" Margin="10,0,4,0" />
+				<Slider x:Name="ZoomSlider" Width="150" Minimum="0.5" Maximum="1.5" Value="1.0" IsEnabled="False" />
+				<TextBlock x:Name="ZoomText" Text="100%" VerticalAlignment="Center" Margin="4,0" />
+				<Button x:Name="ScreenshotButton" Content="ゲーム画面を撮影" IsEnabled="False" Margin="10,0,0,0" Padding="8,3" Click="ScreenshotButton_Click" />
+				<Button x:Name="DevToolsButton" Content="開発者ツール" IsEnabled="False" Margin="4,0" Padding="8,3" Click="DevToolsButton_Click" />
+			</WrapPanel>
+			<TextBlock x:Name="StatusText" Text="FPS と GPU の起動条件を選び、「初期化して移動」を押してください。" TextWrapping="Wrap" />
+		</StackPanel>
+		<ListBox x:Name="CaptureLog" DockPanel.Dock="Bottom" Height="150" MaxHeight="220" Margin="8,4"
+				 FontFamily="Consolas" FontSize="12" />
+		<wv2:WebView2 x:Name="Browser" Visibility="Collapsed" />
+	</DockPanel>
+</Window>
