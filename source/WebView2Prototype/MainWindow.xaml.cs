@@ -99,9 +99,8 @@ public partial class MainWindow : Window
 			Browser.CoreWebView2.Navigate(uri.AbsoluteUri);
 			var frameRateMode = FrameRateModeBox.SelectedIndex switch
 			{
-				1 => "60 FPS 固定: 公開された標準 WebView2 の FPS 固定 API はないため、固定を保証しません",
-				2 => "上限解除: --disable-frame-rate-limit を適用",
-				_ => "モニター同期: 標準 WebView2 の既定動作を確認",
+				2 => "上限解除: --disable-frame-rate-limit を指定（効果未検証）",
+				_ => "既定動作: FPS・モニター同期は保証しません",
 			};
 			var gpuMode = DisableGpuBox.IsChecked == true ? "; --disable-gpu を適用" : string.Empty;
 			StatusText.Text = $"Runtime {runtimeVersion}; {frameRateMode}{gpuMode}; UDF は CEF と分離されています。";
@@ -526,6 +525,22 @@ public partial class MainWindow : Window
 	private void DevToolsButton_Click(object sender, RoutedEventArgs e)
 	{
 		Browser.CoreWebView2.OpenDevToolsWindow();
+	}
+
+	private void PopupTestButton_Click(object sender, RoutedEventArgs e)
+	{
+		if (!initialized)
+		{
+			StatusText.Text = "ゲームを表示してからPopup検証を行ってください。";
+			return;
+		}
+		TestPopup.IsOpen = true;
+	}
+
+	private void CloseTestPopupButton_Click(object sender, RoutedEventArgs e)
+	{
+		TestPopup.IsOpen = false;
+		Browser.Focus();
 	}
 
 	private sealed record BodyReadResult(int ByteCount, bool Truncated, string Availability);

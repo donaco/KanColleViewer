@@ -26,9 +26,9 @@
 			<WrapPanel Margin="0,0,0,6">
 				<TextBlock Text="FPS 試験:" VerticalAlignment="Center" Margin="0,0,4,0" />
 				<ComboBox x:Name="FrameRateModeBox" Width="250" SelectedIndex="0" VerticalContentAlignment="Center">
-					<ComboBoxItem Content="モニター同期（既定）" />
-					<ComboBoxItem Content="60 FPS 固定（未対応・検証のみ）" />
-					<ComboBoxItem Content="上限解除（起動引数を試験）" />
+					<ComboBoxItem Content="既定動作（FPS保証なし）" />
+					<ComboBoxItem Content="30 / 60 FPS 固定（未対応）" IsEnabled="False" />
+					<ComboBoxItem Content="上限解除（効果未検証）" />
 				</ComboBox>
 				<CheckBox x:Name="DisableGpuBox" Content="GPU を無効化（起動引数）" VerticalAlignment="Center" Margin="12,0" />
 				<TextBlock Text="表示倍率:" VerticalAlignment="Center" Margin="10,0,4,0" />
@@ -36,11 +36,28 @@
 				<TextBlock x:Name="ZoomText" Text="100%" VerticalAlignment="Center" Margin="4,0" />
 				<Button x:Name="ScreenshotButton" Content="ゲーム画面を撮影" IsEnabled="False" Margin="10,0,0,0" Padding="8,3" Click="ScreenshotButton_Click" />
 				<Button x:Name="DevToolsButton" Content="開発者ツール" IsEnabled="False" Margin="4,0" Padding="8,3" Click="DevToolsButton_Click" />
+				<Button Content="Popup検証" Margin="4,0" Padding="8,3" Click="PopupTestButton_Click" />
 			</WrapPanel>
 			<TextBlock x:Name="StatusText" Text="FPS と GPU の起動条件を選び、「初期化して移動」を押してください。" TextWrapping="Wrap" />
 		</StackPanel>
 		<ListBox x:Name="CaptureLog" DockPanel.Dock="Bottom" Height="150" MaxHeight="220" Margin="8,4"
 				 FontFamily="Consolas" FontSize="12" />
+		<Popup x:Name="TestPopup" PlacementTarget="{Binding ElementName=Browser}" Placement="Relative"
+			   HorizontalOffset="60" VerticalOffset="120" StaysOpen="False">
+			<Border Background="White" BorderBrush="SteelBlue" BorderThickness="2" Padding="12" Width="300">
+				<StackPanel>
+					<TextBlock Text="ゲーム上のWPF Popup検証" FontWeight="Bold" Margin="0,0,0,8" />
+					<TextBlock Text="日本語入力と項目選択を確認してください。" TextWrapping="Wrap" />
+					<TextBox Margin="0,8" />
+					<ComboBox SelectedIndex="0" Margin="0,0,0,8">
+						<ComboBoxItem Content="検証項目 A" />
+						<ComboBoxItem Content="検証項目 B" />
+						<ComboBoxItem Content="検証項目 C" />
+					</ComboBox>
+					<Button Content="閉じてゲームへ戻る" Padding="8,3" Click="CloseTestPopupButton_Click" />
+				</StackPanel>
+			</Border>
+		</Popup>
 		<wv2:WebView2 x:Name="Browser" Visibility="Collapsed" />
 	</DockPanel>
 </Window>
