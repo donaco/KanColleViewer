@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
@@ -14,14 +17,22 @@ using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Models.WebView2;
 using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Mvvm;
+using MetroTrilithon.UI.Interactivity;
 using Microsoft.Web.WebView2.Core;
-using WebView2Browser = Microsoft.Web.WebView2.Wpf.WebView2;
+using Microsoft.Xaml.Behaviors;
+using AppResources = Grabacr07.KanColleViewer.Properties.Resources;
+using WebView2Browser = Microsoft.Web.WebView2.Wpf.WebView2CompositionControl;
 
 namespace Grabacr07.KanColleViewer.Views.Controls
 {
 	public sealed class WebView2KanColleHost : ContentControl, IDisposable
 	{
+		private const string SuppressTabKeyScript = "window.addEventListener('keydown', e => { if (e.key === 'Tab') e.preventDefault(); }, true);";
+
 		private readonly WebView2Browser browser = new WebView2Browser();
+		private readonly HashSet<CoreWebView2Frame> trackedFrames = new();
+		private readonly HashSet<CoreWebView2Frame> loadedFrames = new();
+		private readonly Dictionary<CoreWebView2Frame, string> frameSources = new();
 		private readonly TextBlock message = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = Brushes.Black };
 		private readonly TextBlock runtimeVersion = new TextBlock
 		{
@@ -76,6 +87,16 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			nameof(ZoomFactor), typeof(double), typeof(WebView2KanColleHost),
 			new PropertyMetadata(1.0, (d, _) => ((WebView2KanColleHost)d).ApplySize()));
 
+		public string UserStyleSheet
+		{
+			get => (string)this.GetValue(UserStyleSheetProperty);
+			set => this.SetValue(UserStyleSheetProperty, value);
+		}
+
+		public static readonly DependencyProperty UserStyleSheetProperty = DependencyProperty.Register(
+			nameof(UserStyleSheet), typeof(string), typeof(WebView2KanColleHost),
+			new PropertyMetadata(string.Empty, (d, _) => ((WebView2KanColleHost)d).ApplyUserStyleSheetToCurrentDocuments()));
+
 		public event EventHandler<Size>? OwnerSizeChangeRequested;
 
 		public WebView2KanColleHost()
@@ -83,7 +104,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			var panel = new DockPanel();
 			var warning = new TextBlock
 			{
-				Text = "WebView2移行検証（段階3）: 通信キャプチャ・ゲーム情報更新・外部中継は実機未検証です。\n撮影・ゲーム専用CSSは段階4で対応します。検証中は通常利用・出撃にCEF版をご利用ください。",
+				Text = "WebView2移行検証（段階4）: 表示・入力・撮影・通信の基本動作は確認済みです。\n最終確認（段階5）が済むまでは、通常利用・出撃にCEF版をご利用ください。",
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = Brushes.Black,
 				Background = Brushes.LightGoldenrodYellow,
@@ -94,7 +115,15 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			this.header.Children.Add(this.message);
 			DockPanel.SetDock(this.header, Dock.Top);
 			panel.Children.Add(this.header);
-			panel.Children.Add(this.browser);
+			var browserViewport = new BrowserViewport
+			{
+				HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+				Content = this.browser,
+			};
+			panel.Children.Add(browserViewport);
+			// CEF版と同じく、タスクバーのプレビュー範囲をゲーム画面に合わせる設定を付けます。環境によってはウィンドウ全体が表示されます。
+			Interaction.GetBehaviors(this.browser).Add(new TaskbarThumbnailBehavior());
 			this.Content = panel;
 			this.Loaded += this.HandleLoaded;
 		}
@@ -144,6 +173,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				: $"WebView2 Runtime バージョン: {WebView2Migration.RuntimeVersion}";
 			var core = this.browser.CoreWebView2;
 			this.core = core;
+			core.FrameCreated += this.HandleFrameCreated;
 			core.Settings.AreDevToolsEnabled = WebView2Migration.IsDevToolsEnabled;
 			core.Settings.AreDefaultContextMenusEnabled = false;
 			core.NavigationStarting += this.HandleNavigationStarting;
@@ -155,6 +185,9 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			core.NewWindowRequested += this.HandleNewWindowRequested;
 			core.WebResourceResponseReceived += this.HandleWebResourceResponseReceived;
 			core.ServerCertificateErrorDetected += this.HandleServerCertificateErrorDetected;
+			// Tab は文字になるキーのため WPF のキーイベントへ転送されません。全フレームのページ側で既定動作を止めます。
+			await core.AddScriptToExecuteOnDocumentCreatedAsync(SuppressTabKeyScript);
+			if (this.disposed) return;
 			if (WebView2Migration.ClearCacheOnStartup)
 			{
 				await core.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.DiskCache);
@@ -233,14 +266,157 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.ReportError("ゲームAPIへのメイン画面の移動を拒否しました。");
 				return;
 			}
+			this.ResetTrackedFrames();
 			if (this.Navigator is not null) this.Navigator.IsNavigating = true;
 		}
 
-		private void HandleNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+		private void HandleFrameCreated(object? sender, CoreWebView2FrameCreatedEventArgs e) => this.TrackFrame(e.Frame);
+
+		private void HandleNestedFrameCreated(object? sender, CoreWebView2FrameCreatedEventArgs e) => this.TrackFrame(e.Frame);
+
+		private void TrackFrame(CoreWebView2Frame frame)
+		{
+			if (this.disposed || !this.trackedFrames.Add(frame)) return;
+			frame.FrameCreated += this.HandleNestedFrameCreated;
+			frame.NavigationStarting += this.HandleFrameNavigationStarting;
+			frame.DOMContentLoaded += this.HandleFrameDOMContentLoaded;
+			frame.Destroyed += this.HandleFrameDestroyed;
+		}
+
+		private void HandleFrameNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
+		{
+			if (sender is not CoreWebView2Frame frame) return;
+			this.loadedFrames.Remove(frame);
+			this.frameSources[frame] = e.Uri;
+		}
+
+		private async void HandleFrameDOMContentLoaded(object? sender, CoreWebView2DOMContentLoadedEventArgs e)
+		{
+			if (sender is not CoreWebView2Frame frame || this.disposed || !this.trackedFrames.Contains(frame) || frame.IsDestroyed() != 0) return;
+			this.loadedFrames.Add(frame);
+			try
+			{
+				if (!this.frameSources.TryGetValue(frame, out var source))
+				{
+					var sourceResult = await frame.ExecuteScriptAsync("location.href");
+					if (this.disposed || !this.trackedFrames.Contains(frame) || frame.IsDestroyed() != 0) return;
+					source = JsonSerializer.Deserialize<string>(sourceResult) ?? string.Empty;
+					this.frameSources[frame] = source;
+				}
+				if (this.ready && WebView2HttpCapture.IsGamePageUrl(source)) await this.ApplyUserStyleSheetToFrameAsync(frame);
+			}
+			catch (Exception ex)
+			{
+				this.loadedFrames.Remove(frame);
+				if (this.disposed || !this.trackedFrames.Contains(frame))
+				{
+					Debug.WriteLine($"WebView2 frame changed while applying CSS: {ex.GetType().Name}");
+					return;
+				}
+				this.ReportError($"ゲームiframeへのCSS適用に失敗しました: {ex.GetType().Name}: {ex.Message}");
+			}
+		}
+
+		private void HandleFrameDestroyed(object? sender, object e)
+		{
+			if (sender is not CoreWebView2Frame frame) return;
+			// Destroyed通知後はフレームを操作せず、管理情報だけを破棄します。
+			this.trackedFrames.Remove(frame);
+			this.loadedFrames.Remove(frame);
+			this.frameSources.Remove(frame);
+		}
+
+		private void ResetTrackedFrames()
+		{
+			foreach (var frame in this.trackedFrames.ToArray())
+			{
+				if (frame.IsDestroyed() != 0) continue;
+				frame.FrameCreated -= this.HandleNestedFrameCreated;
+				frame.NavigationStarting -= this.HandleFrameNavigationStarting;
+				frame.DOMContentLoaded -= this.HandleFrameDOMContentLoaded;
+				frame.Destroyed -= this.HandleFrameDestroyed;
+			}
+			this.trackedFrames.Clear();
+			this.loadedFrames.Clear();
+			this.frameSources.Clear();
+		}
+
+		private async void HandleNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
 			if (this.Navigator is not null) this.Navigator.IsNavigating = false;
 			this.UpdateNavigator();
-			if (!e.IsSuccess) this.ReportError($"ページの読み込みに失敗しました: {e.WebErrorStatus}");
+			if (!e.IsSuccess)
+			{
+				this.ReportError($"ページの読み込みに失敗しました: {e.WebErrorStatus}");
+				return;
+			}
+			await this.ApplyUserStyleSheetToCurrentDocumentsAsync();
+		}
+
+		private void ApplyUserStyleSheetToCurrentDocuments()
+		{
+			if (this.ready && !this.disposed) _ = this.ApplyUserStyleSheetToCurrentDocumentsAsync();
+		}
+
+		private async Task ApplyUserStyleSheetToCurrentDocumentsAsync()
+		{
+			if (this.disposed || !this.ready || this.core is null) return;
+			var script = CreateUserStyleSheetScript(this.UserStyleSheet ?? string.Empty);
+			try
+			{
+				var result = await this.core.ExecuteScriptAsync(script);
+				if (result != "true") throw new InvalidOperationException("スタイル要素を作成できませんでした。");
+			}
+			catch (Exception ex)
+			{
+				if (!this.disposed) this.ReportError($"メインページへのCSS適用に失敗しました: {ex.GetType().Name}: {ex.Message}");
+			}
+
+			foreach (var frame in this.loadedFrames.ToArray())
+			{
+				if (!this.trackedFrames.Contains(frame)
+					|| !this.loadedFrames.Contains(frame)
+					|| !this.frameSources.TryGetValue(frame, out var source)
+					|| !WebView2HttpCapture.IsGamePageUrl(source))
+				{
+					continue;
+				}
+				try
+				{
+					await this.ApplyUserStyleSheetToFrameAsync(frame);
+				}
+				catch (Exception ex)
+				{
+					if (!this.disposed && this.trackedFrames.Contains(frame))
+						this.ReportError($"ゲームiframeへのCSS適用に失敗しました: {ex.GetType().Name}: {ex.Message}");
+				}
+			}
+		}
+
+		private async Task ApplyUserStyleSheetToFrameAsync(CoreWebView2Frame frame)
+		{
+			if (this.disposed || !this.ready || !this.trackedFrames.Contains(frame) || frame.IsDestroyed() != 0) return;
+			var result = await frame.ExecuteScriptAsync(CreateUserStyleSheetScript(this.UserStyleSheet ?? string.Empty));
+			if (result != "true") throw new InvalidOperationException("スタイル要素を作成できませんでした。");
+		}
+
+		private static string CreateUserStyleSheetScript(string css)
+		{
+			var styleId = JsonSerializer.Serialize("kancolleviewer-user-style-sheet");
+			var serializedCss = JsonSerializer.Serialize(css);
+			return $$"""
+				(() => {
+					const id = {{styleId}};
+					document.getElementById(id)?.remove();
+					const css = {{serializedCss}};
+					if (!css) return true;
+					const style = document.createElement('style');
+					style.id = id;
+					style.textContent = css;
+					(document.head || document.documentElement).appendChild(style);
+					return document.getElementById(id) === style;
+				})()
+				""";
 		}
 
 		private void HandleWebResourceResponseReceived(object? sender, CoreWebView2WebResourceResponseReceivedEventArgs e)
@@ -263,6 +439,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				var method = request.Method ?? string.Empty;
 				var response = e.Response;
 				var statusCode = response.StatusCode;
+				// 204には本文がなく、リダイレクト応答の本文はWebView2から取得できません。
+				if (statusCode == 204 || (statusCode >= 300 && statusCode <= 399)) return;
 				var responseHeaders = WebView2HttpCapture.SnapshotResponseHeaders(response.Headers);
 				// WebView2 のイベント情報はUIスレッドで取得し、要求本文の読み取りはバックグラウンドへ移します。
 				var requestContent = request.Content;
@@ -494,7 +672,32 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleRefresh(object? sender, EventArgs e) => this.RunBrowserAction(() => this.browser.CoreWebView2.Reload());
 		private void HandleZoomRequested(object? sender, EventArgs e) => this.ApplySize();
-		private void HandleScreenshotRequested(object? sender, ScreenshotRequestedEventArgs e) => this.ReportError("WebView2検証起動の撮影は段階4まで未対応です。比較試作の撮影機能をご利用ください。");
+
+		private async void HandleScreenshotRequested(object? sender, ScreenshotRequestedEventArgs e)
+		{
+			if (this.disposed) return;
+			try
+			{
+				if (!this.ready || this.core is null)
+					throw new InvalidOperationException("WebView2が撮影可能な状態ではありません。");
+				if (!this.loadedFrames.Any(frame => this.frameSources.TryGetValue(frame, out var source)
+					&& WebView2HttpCapture.IsGamePageUrl(source)))
+				{
+					throw new InvalidOperationException("正規ゲームiframeの読み込み完了を待ってから撮影してください。");
+				}
+				await WebView2ScreenshotCapture.CaptureAndSaveAsync(
+					this.core,
+					this.loadedFrames,
+					e.Path,
+					(SupportedImageFormat)e.Format);
+				StatusService.Current.Notify(AppResources.Screenshot_Saved + Path.GetFileName(e.Path));
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex);
+				if (!this.disposed) StatusService.Current.Notify(AppResources.Screenshot_Failed + ex.Message);
+			}
+		}
 
 		private void HandleDownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
 		{
@@ -541,11 +744,13 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.ReportError("表示倍率は10%～1000%で指定してください。");
 				return;
 			}
-			this.Width = 1200 * this.ZoomFactor;
-			this.header.Measure(new Size(this.Width, double.PositiveInfinity));
-			this.Height = 720 * this.ZoomFactor + this.header.DesiredSize.Height;
+			var browserSize = new Size(1200 * this.ZoomFactor, 720 * this.ZoomFactor);
+			this.browser.Width = browserSize.Width;
+			this.browser.Height = browserSize.Height;
+			this.header.Measure(new Size(browserSize.Width, double.PositiveInfinity));
+			var contentSize = new Size(browserSize.Width, browserSize.Height + this.header.DesiredSize.Height);
 			if (this.ready) this.RunBrowserAction(() => this.browser.ZoomFactor = this.ZoomFactor);
-			if (this.IsLoaded) this.OwnerSizeChangeRequested?.Invoke(this, new Size(this.Width, this.Height));
+			if (this.IsLoaded) this.OwnerSizeChangeRequested?.Invoke(this, contentSize);
 		}
 
 		private void RunBrowserAction(Action action)
@@ -577,10 +782,12 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			this.captureCancellation.Cancel();
 			if (this.core is not null)
 			{
+				this.core.FrameCreated -= this.HandleFrameCreated;
 				this.core.WebResourceResponseReceived -= this.HandleWebResourceResponseReceived;
 				this.core.ServerCertificateErrorDetected -= this.HandleServerCertificateErrorDetected;
 				this.core = null;
 			}
+			this.ResetTrackedFrames();
 			this.pendingUri = null;
 			this.Loaded -= this.HandleLoaded;
 			if (this.owner is not null) this.owner.Closed -= this.HandleOwnerClosed;
@@ -588,6 +795,24 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			this.ChangeViewModel(this.ViewModel, null);
 			this.muteSubscription?.Dispose();
 			this.browser.Dispose();
+		}
+
+		// WebView2CompositionControl を通常の ScrollViewer に入れると、クリック時に ScrollViewer が焦点を奪って文字入力できず、
+		// 矢印・Home・End・PageUp・PageDown もスクロールや焦点移動に使われてゲームへ届きません。
+		// https://github.com/MicrosoftEdge/WebView2Feedback/issues/5057
+		private sealed class BrowserViewport : ScrollViewer
+		{
+			public BrowserViewport()
+			{
+				this.Focusable = false;
+				// PageUp/PageDown は OnKeyDown より先に ScrollViewer 既定のスクロールコマンドで処理されるため、割り当てを無効にします。
+				this.InputBindings.Add(new KeyBinding(ApplicationCommands.NotACommand, Key.PageUp, ModifierKeys.None));
+				this.InputBindings.Add(new KeyBinding(ApplicationCommands.NotACommand, Key.PageDown, ModifierKeys.None));
+			}
+
+			protected override void OnKeyDown(KeyEventArgs e)
+			{
+			}
 		}
 	}
 }

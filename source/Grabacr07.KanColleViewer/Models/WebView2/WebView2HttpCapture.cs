@@ -24,16 +24,24 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 				return false;
 			}
 
+			// CEF版と異なり、ゲーム本体ページ（/kcs2/index.php）は対象外です。
+			// 解析に使われず、WebView2では本文を取得できない場合があります。
 			var path = parsedUri.AbsolutePath;
 			if (path.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) < 0
-				&& path.IndexOf("/api/", StringComparison.OrdinalIgnoreCase) < 0
-				&& path.IndexOf("/kcs2/index.php", StringComparison.OrdinalIgnoreCase) < 0)
+				&& path.IndexOf("/api/", StringComparison.OrdinalIgnoreCase) < 0)
 			{
 				return false;
 			}
 
 			uri = parsedUri;
 			return true;
+		}
+
+		internal static bool IsGamePageUrl(string? url)
+		{
+			return KanColleServerOrigin.IsValid(url)
+				&& Uri.TryCreate(url, UriKind.Absolute, out var uri)
+				&& string.Equals(uri.AbsolutePath, "/kcs2/index.php", StringComparison.OrdinalIgnoreCase);
 		}
 
 		internal static bool IsMaintenanceImage(string? url)

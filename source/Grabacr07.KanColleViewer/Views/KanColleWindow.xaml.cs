@@ -58,7 +58,7 @@ namespace Grabacr07.KanColleViewer.Views
 			}
 		}
 
-		private void HandleKanColleHostSizeChangeRequested(object sender, Size size)
+		private void HandleKanColleHostSizeChangeRequested(object? sender, Size size)
 		{
 			this.ChangeSizeByBrowser(size);
 		}

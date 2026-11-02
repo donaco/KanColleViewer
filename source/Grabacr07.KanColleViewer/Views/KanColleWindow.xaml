@@ -55,6 +55,7 @@
 		<DataTemplate x:Key="WebView2BrowserTemplate">
 			<controls:WebView2KanColleHost Navigator="{Binding Navigator}" ViewModel="{Binding}"
 				ZoomFactor="{Binding ZoomFactor.Current}"
+				UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
 				Loaded="HandleBrowserHostLoaded" Unloaded="HandleBrowserHostUnloaded" />
 		</DataTemplate>
 	</metro:MetroWindow.Resources>
