@@ -11,6 +11,7 @@ using Grabacr07.KanColleViewer.Infrastructure.Lifetime;
 using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
+using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Models.WebView2;
 using Grabacr07.KanColleViewer.Services;
@@ -289,6 +290,7 @@ namespace Grabacr07.KanColleViewer
 			}
 
 			if (!WebView2Migration.IsEnabled) ShutdownCef();
+			RelayHttpProxyService.Stop();
 			this.CompleteExit(e);
 		}
 

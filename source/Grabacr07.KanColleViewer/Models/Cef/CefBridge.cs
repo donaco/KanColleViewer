@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using CefSharp;
 using CefSharp.Wpf;
+using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 
 namespace Grabacr07.KanColleViewer.Models.Cef {
@@ -37,12 +38,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		private const string CefInitFailedMarkerFileName = "cef-init-failed.marker";
 
 		/// <summary>
-		/// 外部ツール（公開日誌拡張版など）へ通信を中継するための内蔵 MITM プロキシです。
-		/// NetworkSettings.Relay.IsEnabled が true の場合のみ起動します。
+		/// 外部ツール（公開日誌拡張版など）へ通信を中継するための内蔵プロキシです。
 		/// </summary>
-		private static Grabacr07.KanColleWrapper.Net.RelayHttpProxy? relayProxy;
-
-		internal static bool IsRelayProxyRunning => relayProxy != null;
+		internal static bool IsRelayProxyRunning => RelayHttpProxyService.IsRunning;
 
 		private static string FallbackLocalAppData => Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -193,30 +191,7 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 		/// </summary>
 		private static void StartRelayProxyIfEnabled()
 		{
-			if (!Settings.NetworkSettings.Relay.IsEnabled.Value)
-			{
-				relayProxy?.Stop();
-				relayProxy = null;
-				return;
-			}
-
-			if (relayProxy != null) return;
-
-			try
-			{
-				var proxy = new Grabacr07.KanColleWrapper.Net.RelayHttpProxy
-				{
-					UpstreamHost = Settings.NetworkSettings.Relay.UpstreamHost.Value,
-					UpstreamPort = Settings.NetworkSettings.Relay.UpstreamPort.Value,
-				};
-				proxy.Start(0); // 0 を指定し、空いているポートを自動割り当て
-				relayProxy = proxy;
-			}
-			catch
-			{
-				// 中継プロキシの起動失敗は致命的にせず、通常の直接通信にフォールバックする
-				relayProxy = null;
-			}
+			RelayHttpProxyService.StartForCef();
 		}
 
 		/// <summary>
@@ -244,9 +219,9 @@ namespace Grabacr07.KanColleViewer.Models.Cef {
 			}
 
 			// 内蔵中継プロキシが有効な場合、CEF の通信をすべてこのプロキシへ向ける
-			if (Settings.NetworkSettings.Relay.IsEnabled.Value && relayProxy != null)
+			if (Settings.NetworkSettings.Relay.IsEnabled.Value && RelayHttpProxyService.IsRunning)
 			{
-				settings.CefCommandLineArgs.Add("proxy-server", $"localhost:{relayProxy.ListeningPort}");
+				settings.CefCommandLineArgs.Add("proxy-server", $"localhost:{RelayHttpProxyService.ListeningPort}");
 			}
 
 #if DEBUG

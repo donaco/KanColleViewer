@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 namespace Grabacr07.KanColleWrapper.Net
 {
 	/// <summary>
-	/// CEF (Chromium) からの HTTPS 通信を、外部ツール（例: 公開日誌拡張版）へ
+	/// CEF または WebView2 からの HTTPS 通信を、外部ツール（例: 公開日誌拡張版）へ
 	/// 透過的に中継するローカルプロキシです。
 	///
-	/// CEF は自身で TLS を終端して復号するため（CustomRequestHandler 参照）、
-	/// このプロキシ自体は TLS を一切復号せず、CONNECT トンネルのバイト列をそのまま転送するだけです。
+	/// ブラウザー側で TLS を終端するため、このプロキシ自体は TLS を一切復号せず、
+	/// CONNECT トンネルのバイト列をそのまま転送するだけです。
 	/// 外部ツールが本来の「上流プロキシ」として振る舞い、自分自身の MITM 証明書で
 	/// なりすましを行う前提を壊さないようにするため、KancolleSniffer と同じ「盲目的な中継」方式を採用します。
 	/// </summary>
@@ -33,8 +33,7 @@ namespace Grabacr07.KanColleWrapper.Net
 		public int ListeningPort { get; private set; }
 
 		/// <summary>
-		/// 転送先の外部ツール（上流プロキシ）のホスト名です。未設定 (null/空文字) の場合は
-		/// 実際の艦これサーバーへ直接転送します。
+		/// 転送先の外部ツール（上流プロキシ）のホスト名です。未設定の場合の動作は AllowDirectFallback に従います。
 		/// </summary>
 		public string? UpstreamHost { get; set; }
 
@@ -42,6 +41,13 @@ namespace Grabacr07.KanColleWrapper.Net
 		/// 転送先の外部ツール（上流プロキシ）のポート番号です。
 		/// </summary>
 		public int UpstreamPort { get; set; }
+
+		/// <summary>
+		/// 上流プロキシに接続できない場合、ゲームサーバーへの直接接続を許可するかどうかです。
+		/// </summary>
+		public bool AllowDirectFallback { get; set; } = true;
+
+		public event EventHandler? UpstreamConnectionFailed;
 
 		public RelayHttpProxy()
 		{
@@ -94,6 +100,7 @@ namespace Grabacr07.KanColleWrapper.Net
 
 		private async Task HandleClientAsync(TcpClient client)
 		{
+			string? targetHost = null;
 			try
 			{
 				using (client)
@@ -111,30 +118,34 @@ namespace Grabacr07.KanColleWrapper.Net
 						return;
 					}
 
-					var targetHost = match.Groups[1].Value;
+					targetHost = match.Groups[1].Value;
 					var targetPort = int.Parse(match.Groups[2].Value);
 
-					var hasExternalRelay = !string.IsNullOrEmpty(this.UpstreamHost)
-						&& KanColleServerOrigin.IsAllowedHost(targetHost);
+					var isGameServer = KanColleServerOrigin.IsAllowedHost(targetHost);
+					if (isGameServer && string.IsNullOrWhiteSpace(this.UpstreamHost))
+					{
+						if (this.AllowDirectFallback)
+							await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
+						else
+							this.ReportUpstreamConnectionFailure("上流プロキシが未設定です");
+						return;
+					}
 
-					if (hasExternalRelay)
-					{
+					if (isGameServer)
 						await RelayViaUpstreamAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
-					}
 					else
-					{
 						await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
-					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
-				// 個別接続の例外はゲーム全体を止めないよう握りつぶす
+				if (!this.AllowDirectFallback && targetHost is not null && KanColleServerOrigin.IsAllowedHost(targetHost))
+					this.ReportUpstreamConnectionFailure($"上流プロキシ通信に失敗しました ({ex.GetType().Name})");
 			}
 		}
 
 		/// <summary>
-		/// 艦これサーバー以外、または中継先が未設定の場合、実サーバーへ直接 TCP トンネルを張ります。
+		/// 指定されたホストへ直接 TCP トンネルを張ります。
 		/// TLS は一切解かず、バイト列をそのまま双方向に転送します。
 		/// </summary>
 		private async Task RelayDirectAsync(NetworkStream clientStream, string targetHost, int targetPort)
@@ -176,24 +187,31 @@ namespace Grabacr07.KanColleWrapper.Net
 				}
 				catch
 				{
-					// 上流（外部ツール）に接続できない場合は実サーバーへ直接フォールバックする
-					await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
+					if (this.AllowDirectFallback)
+						await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
+					else
+						this.ReportUpstreamConnectionFailure("上流プロキシへ接続できません");
 					return;
 				}
 
 				using (var upstreamStream = upstreamTcp.GetStream())
 				{
-					// 上流プロキシへ改めて CONNECT を発行する
-					var connectRequest = Encoding.ASCII.GetBytes($"CONNECT {targetHost}:{targetPort} HTTP/1.1\r\nHost: {targetHost}:{targetPort}\r\n\r\n");
-					await upstreamStream.WriteAsync(connectRequest, 0, connectRequest.Length).ConfigureAwait(false);
-
-					var upstreamStatusLine = await ReadLineAsync(upstreamStream).ConfigureAwait(false);
-					await ReadHeadersAsync(upstreamStream).ConfigureAwait(false);
+					string? upstreamStatusLine;
+					using (var handshakeTimeout = new CancellationTokenSource(ConnectTimeout))
+					{
+						// 上流プロキシへ改めて CONNECT を発行する
+						var connectRequest = Encoding.ASCII.GetBytes($"CONNECT {targetHost}:{targetPort} HTTP/1.1\r\nHost: {targetHost}:{targetPort}\r\n\r\n");
+						await upstreamStream.WriteAsync(connectRequest, 0, connectRequest.Length, handshakeTimeout.Token).ConfigureAwait(false);
+						upstreamStatusLine = await ReadLineAsync(upstreamStream, handshakeTimeout.Token).ConfigureAwait(false);
+						await ReadHeadersAsync(upstreamStream, handshakeTimeout.Token).ConfigureAwait(false);
+					}
 
 					if (upstreamStatusLine == null || !upstreamStatusLine.Contains(" 200"))
 					{
-						// 上流プロキシが CONNECT を拒否した場合は実サーバーへ直接フォールバックする
-						await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
+						if (this.AllowDirectFallback)
+							await RelayDirectAsync(clientStream, targetHost, targetPort).ConfigureAwait(false);
+						else
+							this.ReportUpstreamConnectionFailure("上流プロキシが CONNECT を拒否しました");
 						return;
 					}
 
@@ -201,6 +219,20 @@ namespace Grabacr07.KanColleWrapper.Net
 
 					await PipeBothWaysAsync(clientStream, upstreamStream).ConfigureAwait(false);
 				}
+			}
+		}
+
+		private void ReportUpstreamConnectionFailure(string reason)
+		{
+			if (this.AllowDirectFallback) return;
+			System.Diagnostics.Debug.WriteLine($"RelayHttpProxy: {reason}; direct fallback is disabled.");
+			try
+			{
+				this.UpstreamConnectionFailed?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine($"RelayHttpProxy: failure notification failed ({ex.GetType().Name}).");
 			}
 		}
 
@@ -232,7 +264,7 @@ namespace Grabacr07.KanColleWrapper.Net
 			}
 		}
 
-		private static async Task<string?> ReadLineAsync(Stream stream)
+		private static async Task<string?> ReadLineAsync(Stream stream, CancellationToken cancellationToken = default)
 		{
 			var sb = new StringBuilder();
 			var prevWasCr = false;
@@ -240,7 +272,7 @@ namespace Grabacr07.KanColleWrapper.Net
 
 			while (true)
 			{
-				var read = await stream.ReadAsync(buf, 0, 1).ConfigureAwait(false);
+				var read = await stream.ReadAsync(buf, 0, 1, cancellationToken).ConfigureAwait(false);
 				if (read == 0) return sb.Length > 0 ? sb.ToString() : null;
 
 				var c = (char)buf[0];
@@ -255,11 +287,11 @@ namespace Grabacr07.KanColleWrapper.Net
 			}
 		}
 
-		private static async Task ReadHeadersAsync(Stream stream)
+		private static async Task ReadHeadersAsync(Stream stream, CancellationToken cancellationToken = default)
 		{
 			while (true)
 			{
-				var line = await ReadLineAsync(stream).ConfigureAwait(false);
+				var line = await ReadLineAsync(stream, cancellationToken).ConfigureAwait(false);
 				if (line == null || line.Length == 0) break;
 			}
 		}

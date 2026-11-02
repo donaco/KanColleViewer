@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleWrapper;
 using Microsoft.Web.WebView2.Core;
@@ -33,11 +34,6 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 
 		public static void Prepare()
 		{
-			if (GeneralSettings.IsProxyMode.Value || NetworkSettings.Relay.IsEnabled.Value)
-			{
-				throw new InvalidOperationException("WebView2の検証起動ではプロキシ専用モード・内蔵中継プロキシは段階3まで未対応です。設定は変更していません。通常起動のCEF版をご利用ください。");
-			}
-
 			try
 			{
 				RuntimeVersion = CoreWebView2Environment.GetAvailableBrowserVersionString();
@@ -59,23 +55,31 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 					throw new InvalidOperationException("WebView2のFPS設定値が不正です。");
 			}
 			if (GeneralSettings.IsGpuDisabled.Value) arguments.Add("--disable-gpu");
-			switch (NetworkSettings.Proxy.Type.Value)
+			if (NetworkSettings.Relay.IsEnabled.Value)
 			{
-				case ProxyType.DirectAccess:
-					arguments.Add("--no-proxy-server");
-					break;
-				case ProxyType.SystemProxy:
-					break;
-				case ProxyType.SpecificProxy:
-					var proxy = NetworkSettings.LocalProxySettingsString;
-					if (string.IsNullOrWhiteSpace(proxy) || proxy.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == '"'))
-					{
-						throw new InvalidOperationException("指定プロキシの設定が不正です。直接通信には切り替えません。");
-					}
-					arguments.Add($"--proxy-server=\"{proxy}\"");
-					break;
-				default:
-					throw new InvalidOperationException("プロキシの設定値が不正です。");
+				RelayHttpProxyService.StartForWebView2();
+				arguments.Add($"--proxy-server=127.0.0.1:{RelayHttpProxyService.ListeningPort}");
+			}
+			else if (!GeneralSettings.IsProxyMode.Value)
+			{
+				switch (NetworkSettings.Proxy.Type.Value)
+				{
+					case ProxyType.DirectAccess:
+						arguments.Add("--no-proxy-server");
+						break;
+					case ProxyType.SystemProxy:
+						break;
+					case ProxyType.SpecificProxy:
+						var proxy = NetworkSettings.LocalProxySettingsString;
+						if (string.IsNullOrWhiteSpace(proxy) || proxy.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == '"'))
+						{
+							throw new InvalidOperationException("指定プロキシの設定が不正です。直接通信には切り替えません。");
+						}
+						arguments.Add($"--proxy-server=\"{proxy}\"");
+						break;
+					default:
+						throw new InvalidOperationException("プロキシの設定値が不正です。");
+				}
 			}
 
 			options = new CoreWebView2EnvironmentOptions

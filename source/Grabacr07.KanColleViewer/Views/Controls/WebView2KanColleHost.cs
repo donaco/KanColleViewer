@@ -1,12 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Grabacr07.KanColleViewer.Models;
+using Grabacr07.KanColleViewer.Models.Cef;
+using Grabacr07.KanColleViewer.Models.Network;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Models.WebView2;
+using Grabacr07.KanColleWrapper;
 using MetroTrilithon.Mvvm;
 using Microsoft.Web.WebView2.Core;
 using WebView2Browser = Microsoft.Web.WebView2.Wpf.WebView2;
@@ -30,6 +36,13 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private IDisposable? muteSubscription;
 		private Window? owner;
 		private Uri? pendingUri;
+		private CoreWebView2? core;
+		private readonly CancellationTokenSource captureCancellation = new();
+		private readonly object captureQueueLock = new();
+		private Task captureQueue = Task.CompletedTask;
+		private int capturedResponseCount;
+		private int captureFailureCount;
+		private bool maintenanceNavigationStarted;
 		private bool ready;
 		private bool disposed;
 
@@ -70,7 +83,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			var panel = new DockPanel();
 			var warning = new TextBlock
 			{
-				Text = "WebView2移行検証（段階2）: API解析・情報更新・出撃状態判定は未対応です。\n撮影・ゲーム専用CSSは段階4で対応します。通常利用・出撃にはCEF版をご利用ください。",
+				Text = "WebView2移行検証（段階3）: 通信キャプチャ・ゲーム情報更新・外部中継は実機未検証です。\n撮影・ゲーム専用CSSは段階4で対応します。検証中は通常利用・出撃にCEF版をご利用ください。",
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = Brushes.Black,
 				Background = Brushes.LightGoldenrodYellow,
@@ -130,6 +143,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				? "WebView2 Runtimeのバージョンを取得できませんでした。"
 				: $"WebView2 Runtime バージョン: {WebView2Migration.RuntimeVersion}";
 			var core = this.browser.CoreWebView2;
+			this.core = core;
 			core.Settings.AreDevToolsEnabled = WebView2Migration.IsDevToolsEnabled;
 			core.Settings.AreDefaultContextMenusEnabled = false;
 			core.NavigationStarting += this.HandleNavigationStarting;
@@ -139,6 +153,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			core.ProcessFailed += this.HandleProcessFailed;
 			core.DownloadStarting += this.HandleDownloadStarting;
 			core.NewWindowRequested += this.HandleNewWindowRequested;
+			core.WebResourceResponseReceived += this.HandleWebResourceResponseReceived;
+			core.ServerCertificateErrorDetected += this.HandleServerCertificateErrorDetected;
 			if (WebView2Migration.ClearCacheOnStartup)
 			{
 				await core.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.DiskCache);
@@ -210,7 +226,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
 		{
-			if (e.Uri.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0)
+			if (Uri.TryCreate(e.Uri, UriKind.Absolute, out var uri)
+				&& uri.AbsolutePath.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) >= 0)
 			{
 				e.Cancel = true;
 				this.ReportError("ゲームAPIへのメイン画面の移動を拒否しました。");
@@ -224,6 +241,233 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			if (this.Navigator is not null) this.Navigator.IsNavigating = false;
 			this.UpdateNavigator();
 			if (!e.IsSuccess) this.ReportError($"ページの読み込みに失敗しました: {e.WebErrorStatus}");
+		}
+
+		private void HandleWebResourceResponseReceived(object? sender, CoreWebView2WebResourceResponseReceivedEventArgs e)
+		{
+			if (this.disposed) return;
+			var cancellationToken = this.captureCancellation.Token;
+			var safePath = "/";
+			try
+			{
+				var request = e.Request;
+				var requestUrl = request.Uri;
+				if (WebView2HttpCapture.IsMaintenanceImage(requestUrl))
+				{
+					this.ShowMaintenanceImage(requestUrl);
+					return;
+				}
+				if (!WebView2HttpCapture.TryGetGameApiUri(requestUrl, out var uri)) return;
+
+				safePath = uri.AbsolutePath;
+				var method = request.Method ?? string.Empty;
+				var response = e.Response;
+				var statusCode = response.StatusCode;
+				var responseHeaders = WebView2HttpCapture.SnapshotResponseHeaders(response.Headers);
+				// WebView2 のイベント情報はUIスレッドで取得し、要求本文の読み取りはバックグラウンドへ移します。
+				var requestContent = request.Content;
+				var requestCaptureTask = this.CaptureRequestBodyAsync(requestContent, method, safePath, cancellationToken);
+				var responseContentTask = response.GetContentAsync();
+				var captureTask = this.CaptureResponseAsync(
+					responseContentTask, requestCaptureTask, requestUrl, method, statusCode, responseHeaders, safePath, cancellationToken);
+				this.QueueCapturedResponse(captureTask, safePath, cancellationToken);
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				Debug.WriteLine("WebView2 API capture was cancelled during shutdown.");
+			}
+			catch (Exception ex)
+			{
+				this.ReportCaptureIssue(safePath, $"通信イベントを取得できません ({ex.GetType().Name})", cancellationToken);
+			}
+		}
+
+		private async Task<WebView2HttpCapture.BodyCapture> CaptureRequestBodyAsync(
+			Stream? requestContent,
+			string method,
+			string safePath,
+			CancellationToken cancellationToken)
+		{
+			var requestCapture = await Task.Run(
+				() => WebView2HttpCapture.CaptureRequestBody(requestContent, cancellationToken), cancellationToken).ConfigureAwait(false);
+			if (requestCapture.Error is not null)
+				this.ReportCaptureIssue(safePath, $"要求本文を取得できません ({requestCapture.Error})", cancellationToken);
+			else if (requestCapture.IsTruncated)
+				this.ReportCaptureIssue(safePath, "要求本文が5 MiBを超えています", cancellationToken);
+			else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase)
+				&& (!requestCapture.HasStream || requestCapture.Bytes is { Length: 0 }))
+				this.ReportCaptureIssue(safePath, "POST要求本文を取得できませんでした（空またはストリームなし）", cancellationToken);
+
+			return requestCapture;
+		}
+
+		private async Task<CapturedHttp?> CaptureResponseAsync(
+			Task<Stream> responseContentTask,
+			Task<WebView2HttpCapture.BodyCapture> requestCaptureTask,
+			string url,
+			string method,
+			int statusCode,
+			IDictionary<string, string> responseHeaders,
+			string safePath,
+			CancellationToken cancellationToken)
+		{
+			Stream? responseStream = null;
+			try
+			{
+				responseStream = await responseContentTask.ConfigureAwait(false);
+				if (responseStream is null)
+				{
+					this.ReportCaptureIssue(safePath, "応答本文がありません", cancellationToken);
+					return null;
+				}
+				if (cancellationToken.IsCancellationRequested) return null;
+
+				var stream = responseStream;
+				// 応答ストリームはスレッドセーフなため、UIスレッド外で読み取ります。
+				var responseCapture = await Task.Run(
+					() => WebView2HttpCapture.ReadBoundedBodyAsync(stream, cancellationToken), cancellationToken).ConfigureAwait(false);
+				if (responseCapture.IsTruncated)
+				{
+					this.ReportCaptureIssue(safePath, "応答本文が5 MiBを超えています", cancellationToken);
+					return null;
+				}
+				if (responseCapture.Error is not null || responseCapture.Bytes is null)
+				{
+					this.ReportCaptureIssue(safePath, "応答本文を取得できません", cancellationToken);
+					return null;
+				}
+
+				var responseBytes = responseCapture.Bytes;
+				var responseBody = await Task.Run(
+					() => WebView2HttpCapture.DecodeResponseBody(responseBytes, responseHeaders), cancellationToken).ConfigureAwait(false);
+				if (string.IsNullOrEmpty(responseBody))
+				{
+					this.ReportCaptureIssue(safePath, "応答本文が空です", cancellationToken);
+					return null;
+				}
+
+				var requestCapture = await requestCaptureTask.ConfigureAwait(false);
+				var requestBody = requestCapture.Bytes is null
+					? string.Empty
+					: WebView2HttpCapture.DecodeRequestBody(requestCapture.Bytes);
+				return new CapturedHttp
+				{
+					Url = url,
+					Method = method,
+					StatusCode = statusCode,
+					RequestBody = requestBody,
+					ResponseBody = responseBody,
+					ResponseHeaders = responseHeaders,
+				};
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				Debug.WriteLine("WebView2 response capture was cancelled during shutdown.");
+				return null;
+			}
+			catch (Exception ex)
+			{
+				this.ReportCaptureIssue(safePath, $"応答本文を処理できません ({ex.GetType().Name})", cancellationToken);
+				return null;
+			}
+			finally
+			{
+				responseStream?.Dispose();
+			}
+		}
+
+		private void QueueCapturedResponse(Task<CapturedHttp?> captureTask, string safePath, CancellationToken cancellationToken)
+		{
+			lock (this.captureQueueLock)
+			{
+				this.captureQueue = this.ProcessCapturedInOrderAsync(this.captureQueue, captureTask, safePath, cancellationToken);
+			}
+		}
+
+		private async Task ProcessCapturedInOrderAsync(
+			Task previousCapture,
+			Task<CapturedHttp?> captureTask,
+			string safePath,
+			CancellationToken cancellationToken)
+		{
+			try
+			{
+				await previousCapture.ConfigureAwait(false);
+				var captured = await captureTask.ConfigureAwait(false);
+				if (captured is null || cancellationToken.IsCancellationRequested) return;
+
+				await Task.Run(
+					() => KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody),
+					cancellationToken).ConfigureAwait(false);
+				this.ReportCaptureSuccess(cancellationToken);
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				Debug.WriteLine("WebView2 ordered API processing was cancelled during shutdown.");
+			}
+			catch (Exception ex)
+			{
+				this.ReportCaptureIssue(safePath, $"APIデータを処理できません ({ex.GetType().Name})", cancellationToken);
+			}
+		}
+
+		private void ReportCaptureSuccess(CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested) return;
+			var capturedCount = Interlocked.Increment(ref this.capturedResponseCount);
+			var failureCount = Volatile.Read(ref this.captureFailureCount);
+			this.Dispatcher.BeginInvoke(new Action(() =>
+			{
+				if (this.disposed || cancellationToken.IsCancellationRequested) return;
+				this.message.Text = $"ゲーム通信: {capturedCount}件を解析へ配送しました（本文取得失敗 {failureCount}件）";
+			}));
+		}
+
+		private void ReportCaptureIssue(string safePath, string reason, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested) return;
+			var failureCount = Interlocked.Increment(ref this.captureFailureCount);
+			var text = $"WebView2のゲーム通信を取得できません: {safePath} ({reason})";
+			Debug.WriteLine(text);
+			this.Dispatcher.BeginInvoke(new Action(() =>
+			{
+				if (this.disposed || cancellationToken.IsCancellationRequested) return;
+				this.message.Text = $"ゲーム通信の取得に問題があります（{failureCount}件）: {safePath}";
+				if (failureCount == 1) StatusService.Current.Notify(text);
+			}));
+		}
+
+		private void ShowMaintenanceImage(string url)
+		{
+			if (this.disposed || this.maintenanceNavigationStarted) return;
+			this.maintenanceNavigationStarted = true;
+			this.Dispatcher.BeginInvoke(new Action(() =>
+			{
+				if (this.disposed || !this.ready) return;
+				try
+				{
+					this.browser.CoreWebView2.Navigate(url);
+				}
+				catch (Exception ex)
+				{
+					this.ReportError($"メンテナンス画像を表示できません: {ex.GetType().Name}");
+				}
+			}));
+		}
+
+		private void HandleServerCertificateErrorDetected(object? sender, CoreWebView2ServerCertificateErrorDetectedEventArgs e)
+		{
+			var allow = NetworkSettings.Relay.IsEnabled.Value
+				&& RelayHttpProxyService.IsRunning
+				&& KanColleServerOrigin.IsValid(e.RequestUri);
+			e.Action = allow
+				? CoreWebView2ServerCertificateErrorAction.AlwaysAllow
+				: CoreWebView2ServerCertificateErrorAction.Cancel;
+			if (!allow && Uri.TryCreate(e.RequestUri, UriKind.Absolute, out var uri)
+				&& KanColleServerOrigin.IsAllowedHost(uri.Host))
+			{
+				this.ReportError("中継プロキシの証明書エラーを許可できませんでした。設定を確認してください。");
+			}
 		}
 
 		private void HandleHistoryChanged(object? sender, object e) => this.UpdateNavigator();
@@ -330,6 +574,13 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			if (this.disposed) return;
 			this.disposed = true;
 			this.ready = false;
+			this.captureCancellation.Cancel();
+			if (this.core is not null)
+			{
+				this.core.WebResourceResponseReceived -= this.HandleWebResourceResponseReceived;
+				this.core.ServerCertificateErrorDetected -= this.HandleServerCertificateErrorDetected;
+				this.core = null;
+			}
 			this.pendingUri = null;
 			this.Loaded -= this.HandleLoaded;
 			if (this.owner is not null) this.owner.Closed -= this.HandleOwnerClosed;
