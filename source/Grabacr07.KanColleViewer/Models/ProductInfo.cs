@@ -21,7 +21,7 @@ namespace Grabacr07.KanColleViewer.Models
 			new Library("Newtonsoft.Json", new Uri("https://www.newtonsoft.com/json")),
 			new Library("Windows Community Toolkit", new Uri("https://github.com/CommunityToolkit/WindowsCommunityToolkit")),
 			new Library(".NET Core Audio APIs", new Uri("https://netcoreaudio.codeplex.com/")),
-			new Library("CefSharp.Wpf", new Uri("http://cefsharp.github.io/")),
+			new Library("Microsoft Edge WebView2", new Uri("https://developer.microsoft.com/microsoft-edge/webview2/")),
 			new Library("System.Reactive", new Uri("https://github.com/dotnet/reactive"))
 		});
 

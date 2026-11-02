@@ -16,10 +16,16 @@
 			 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
+			 xmlns:webview="clr-namespace:Grabacr07.KanColleViewer.Models.WebView2"
+			 xmlns:converters="clr-namespace:Grabacr07.KanColleViewer.Views.Converters"
 			 mc:Ignorable="d"
 			 d:DesignWidth="550"
 			 d:DesignHeight="300"
 			 d:DataContext="{d:DesignInstance settings:SettingsViewModel}">
+	<UserControl.Resources>
+		<converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+	</UserControl.Resources>
+
 	<Grid Margin="8,0">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
@@ -52,6 +58,10 @@
 					 FontSize="20"
 					 Foreground="{DynamicResource ActiveForegroundBrushKey}" />
 			</TextBlock>
+			<TextBlock Text="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, StringFormat=WebView2 Runtime {0}, Mode=OneWay}"
+					   Visibility="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, Converter={StaticResource StringToVisibilityConverter}, Mode=OneWay}"
+					   FontFamily="Segoe UI"
+					   Margin="0,6,0,0" />
 
 			<Rectangle Height=".99"
 					   Margin="0,10"

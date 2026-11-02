@@ -477,12 +477,6 @@
   <data name="Fleets_Speed_Fleet" xml:space="preserve">
     <value>舰队</value>
   </data>
-  <data name="ZoomAction_OutOfRange" xml:space="preserve">
-    <value>无法在 {0} %范围内缩放</value>
-  </data>
-  <data name="ZoomAction_ZoomFailed" xml:space="preserve">
-    <value>缩放失败: {0}</value>
-  </data>
   <data name="Fleets_Level" xml:space="preserve">
     <value>等级</value>
   </data>
@@ -574,7 +568,7 @@
     <value>未知</value>
   </data>
   <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
-    <value>将在下次启动应用程序时清除缓存。</value>
+    <value>将在下次启动应用程序时清除缓存。登录信息不会被删除。</value>
   </data>
   <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
     <value>后退</value>
@@ -600,20 +594,17 @@
   <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
     <value>如果遇到显示问题，请启用此选项。更改后需要重新启动应用程序。</value>
   </data>
+  <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>选择画面质量与 GPU 负载之间的平衡。更改后需要重新启动应用程序。</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
-    <value>高：{0} FPS（自动调整）</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
-    <value>低：30 FPS</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
-    <value>中：60 FPS</value>
+    <value>“解除上限”的效果因环境而异，并可能增加负载。不支持固定为 30 / 60 FPS。更改后需要重新启动应用程序。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>选择显示帧率</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
+    <value>解除上限</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>（误操作放大时使用）</value>

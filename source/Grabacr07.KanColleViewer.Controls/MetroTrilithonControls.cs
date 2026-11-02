@@ -238,7 +238,8 @@ namespace MetroTrilithon.UI.Controls
             base.OnClick();
             if (this.Uri != null)
             {
-                try { System.Diagnostics.Process.Start(this.Uri.ToString()); }
+                // .NET では UseShellExecute の既定値が false のため、指定しないと URL を既定のブラウザーで開けません。
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(this.Uri.ToString()) { UseShellExecute = true }); }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
         }

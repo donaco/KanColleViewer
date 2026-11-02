@@ -45,7 +45,7 @@ namespace Grabacr07.KanColleViewer.Models.Network
 			if (string.IsNullOrWhiteSpace(NetworkSettings.Relay.UpstreamHost.Value)
 				|| NetworkSettings.Relay.UpstreamPort.Value == 0)
 			{
-				throw new InvalidOperationException("内蔵中継プロキシの上流ホストまたはポートが未設定です。WebView2では直接接続へ切り替えません。");
+				throw new InvalidOperationException("内蔵中継プロキシの上流ホストまたはポートが未設定です。直接接続へは切り替えません。");
 			}
 
 			Start();
@@ -102,7 +102,7 @@ namespace Grabacr07.KanColleViewer.Models.Network
 				if (Interlocked.CompareExchange(ref lastFailureNotificationTicks, now, previous) == previous) break;
 			}
 
-			const string message = "中継先プロキシに接続できません。設定を確認してください。WebView2では直接接続へ切り替えていません。";
+			const string message = "中継先プロキシに接続できません。設定を確認してください。直接接続へは切り替えていません。";
 			Debug.WriteLine(message);
 
 			var dispatcher = Application.Current?.Dispatcher;

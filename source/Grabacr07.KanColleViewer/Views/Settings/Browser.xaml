@@ -110,17 +110,27 @@
 
 		<!-- フレームレート設定 -->
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-		<StackPanel Margin="0,5,0,5">
-			<TextBlock Text="WebView2検証用FPS設定（変更後は再起動が必要です）" TextWrapping="Wrap" />
-			<ComboBox SelectedValue="{Binding Source={x:Static settings:GeneralSettings.WebView2FrameRate}, Path=Value, Mode=TwoWay}"
-					  SelectedValuePath="Tag" HorizontalAlignment="Left" Width="250" Margin="0,6">
-				<ComboBoxItem Content="既定動作（FPS保証なし）" Tag="{x:Static webview:WebView2FrameRateMode.Default}" />
-				<ComboBoxItem Content="上限解除（効果未検証）" Tag="{x:Static webview:WebView2FrameRateMode.Unlimited}" />
+		<DockPanel Margin="0,5,0,5">
+			<ComboBox DockPanel.Dock="Right"
+					  SelectedValue="{Binding Source={x:Static settings:GeneralSettings.WebView2FrameRate}, Path=Value, Mode=TwoWay}"
+					  SelectedValuePath="Tag"
+					  Width="196"
+					  VerticalAlignment="Center">
+				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Default], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+							  Tag="{x:Static webview:WebView2FrameRateMode.Default}" />
+				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Unlimited], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+							  Tag="{x:Static webview:WebView2FrameRateMode.Unlimited}" />
 			</ComboBox>
-			<TextBlock Text="30 / 60 FPS固定は未対応です。旧CEFのLow / Medium / Highは保持し、別の設定として保存します。初期値は既定動作です。" TextWrapping="Wrap" />
-			<TextBlock Text="GPU無効も起動引数の指定のみで、負荷低減は未検証です。キャッシュ削除はWebView2のディスクキャッシュのみが対象で、ログイン情報とCEFの保存データは削除しません。" TextWrapping="Wrap" Margin="0,6,0,0" />
-			<TextBlock Text="開発者向けオプションはDevToolsの利用を許可します。外部接続用のリモートデバッグポートは開きません。" TextWrapping="Wrap" Margin="0,6,0,0" />
-		</StackPanel>
+			<StackPanel Margin="24,0,0,0">
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+						   Text="{Binding [Ui_Browser_FrameRate_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   FontSize="11"
+						   TextWrapping="Wrap"
+						   Text="{Binding [Ui_Browser_FrameRate_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+			</StackPanel>
+		</DockPanel>
 
 		<!-- 開発者向けオプション 有効/無効チェックボックス -->
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
@@ -167,6 +177,7 @@
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 						   Text="{Binding Resources.StartContent_ClearCacheButton, Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   TextWrapping="Wrap"
 						   Text="{Binding [Ui_Browser_ClearCache_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</DockPanel>

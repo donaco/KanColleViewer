@@ -477,12 +477,6 @@
   <data name="Fleets_Speed_Fleet" xml:space="preserve">
     <value>艦隊</value>
   </data>
-  <data name="ZoomAction_OutOfRange" xml:space="preserve">
-    <value>ズーム {0} % はサポートされていません。</value>
-  </data>
-  <data name="ZoomAction_ZoomFailed" xml:space="preserve">
-    <value>ズームに失敗しました: {0}</value>
-  </data>
   <data name="Fleets_Level" xml:space="preserve">
     <value>レベル</value>
   </data>
@@ -574,7 +568,7 @@
     <value>不明</value>
   </data>
   <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
-    <value>キャッシュの削除は次回起動時に行われます。</value>
+    <value>キャッシュの削除は次回起動時に行われます。ログイン情報は削除されません。</value>
   </data>
   <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
     <value>前のページに戻る</value>
@@ -600,20 +594,17 @@
   <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
     <value>画面表示に問題がある場合に有効にしてください。変更後はアプリの再起動が必要です。</value>
   </data>
+  <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
+    <value>既定</value>
+  </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>描画品質と GPU 負荷のバランスを選択します。変更後はアプリの再起動が必要です。</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
-    <value>高：{0}FPS　モニタの FPS に自動調整</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
-    <value>低：30 FPS</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
-    <value>中：60 FPS</value>
+    <value>「上限解除」は効果が環境によって異なり、負荷が上がる場合があります。30 / 60 FPS の固定には対応していません。変更後はアプリの再起動が必要です。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>表示フレームレートを選択する</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
+    <value>上限解除</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>(誤ってズームしたとき用)</value>

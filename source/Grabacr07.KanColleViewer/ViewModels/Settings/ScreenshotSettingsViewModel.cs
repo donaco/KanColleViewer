@@ -65,7 +65,8 @@ namespace Grabacr07.KanColleViewer.ViewModels.Settings
 
 			try
 			{
-				Process.Start(ScreenshotSettings.Destination);
+				// .NET では UseShellExecute の既定値が false のため、指定しないとフォルダーをエクスプローラーで開けません。
+				Process.Start(new ProcessStartInfo(ScreenshotSettings.Destination.Value) { UseShellExecute = true });
 			}
 			catch (Exception ex)
 			{

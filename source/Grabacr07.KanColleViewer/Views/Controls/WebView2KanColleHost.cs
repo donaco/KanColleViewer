@@ -34,16 +34,16 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private readonly HashSet<CoreWebView2Frame> trackedFrames = new();
 		private readonly HashSet<CoreWebView2Frame> loadedFrames = new();
 		private readonly Dictionary<CoreWebView2Frame, string> frameSources = new();
-		private readonly TextBlock message = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = Brushes.Black };
-		private readonly TextBlock runtimeVersion = new TextBlock
+		// アプリの再起動が必要な重大なエラーだけを、ゲーム画面の上に重ねて表示します。
+		private readonly TextBlock message = new TextBlock
 		{
 			TextWrapping = TextWrapping.Wrap,
 			Foreground = Brushes.Black,
-			Background = Brushes.LightGray,
+			Background = Brushes.LightGoldenrodYellow,
 			Padding = new Thickness(6),
-			FontWeight = FontWeights.SemiBold,
+			VerticalAlignment = VerticalAlignment.Top,
+			Visibility = Visibility.Collapsed,
 		};
-		private readonly StackPanel header = new StackPanel();
 		private Task? initialization;
 		private IDisposable? muteSubscription;
 		private Window? owner;
@@ -52,7 +52,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private readonly CancellationTokenSource captureCancellation = new();
 		private readonly object captureQueueLock = new();
 		private Task captureQueue = Task.CompletedTask;
-		private int capturedResponseCount;
 		private int captureFailureCount;
 		private bool maintenanceNavigationStarted;
 		private bool ready;
@@ -102,20 +101,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		public WebView2KanColleHost()
 		{
-			var panel = new DockPanel();
-			var warning = new TextBlock
-			{
-				Text = "WebView2移行検証（段階4）: 表示・入力・撮影・通信の基本動作は確認済みです。\n最終確認（段階5）が済むまでは、通常利用・出撃にCEF版をご利用ください。",
-				TextWrapping = TextWrapping.Wrap,
-				Foreground = Brushes.Black,
-				Background = Brushes.LightGoldenrodYellow,
-				Padding = new Thickness(6),
-			};
-			this.header.Children.Add(warning);
-			this.header.Children.Add(this.runtimeVersion);
-			this.header.Children.Add(this.message);
-			DockPanel.SetDock(this.header, Dock.Top);
-			panel.Children.Add(this.header);
+			var panel = new Grid();
 			var browserViewport = new BrowserViewport
 			{
 				HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -123,6 +109,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				Content = this.browser,
 			};
 			panel.Children.Add(browserViewport);
+			panel.Children.Add(this.message);
 			// CEF版と同じく、タスクバーのプレビュー範囲をゲーム画面に合わせる設定を付けます。環境によってはウィンドウ全体が表示されます。
 			Interaction.GetBehaviors(this.browser).Add(new TaskbarThumbnailBehavior());
 			this.Content = panel;
@@ -158,20 +145,16 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				}
 				this.ready = false;
 				if (this.Navigator is not null) this.Navigator.IsNavigating = false;
-				this.ReportError($"WebView2の初期化に失敗しました: {ex.GetType().Name}: {ex.Message}。アプリを再起動してください。");
+				this.ReportFatalError($"WebView2の初期化に失敗しました: {ex.GetType().Name}: {ex.Message}。アプリを再起動してください。");
 			}
 		}
 
 		private async Task InitializeAsync()
 		{
-			this.message.Text = "WebView2を初期化しています。";
 			var environment = await WebView2Setup.GetEnvironmentAsync();
 			if (this.disposed) return;
 			await this.browser.EnsureCoreWebView2Async(environment);
 			if (this.disposed) return;
-			this.runtimeVersion.Text = string.IsNullOrWhiteSpace(WebView2Setup.RuntimeVersion)
-				? "WebView2 Runtimeのバージョンを取得できませんでした。"
-				: $"WebView2 Runtime バージョン: {WebView2Setup.RuntimeVersion}";
 			var core = this.browser.CoreWebView2;
 			this.core = core;
 			core.FrameCreated += this.HandleFrameCreated;
@@ -197,7 +180,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 			core.IsMuted = GeneralSettings.IsMuted.Value;
 			this.ready = true;
-			this.message.Text = "初期化が完了しました。30 / 60 FPS固定は未対応です。";
 			this.ApplySize();
 			if (this.pendingUri is not null)
 			{
@@ -578,7 +560,6 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				await Task.Run(
 					() => KanColleClient.Current.ProcessCaptured(captured.Url, captured.ResponseBody, captured.RequestBody),
 					cancellationToken).ConfigureAwait(false);
-				this.ReportCaptureSuccess(cancellationToken);
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 			{
@@ -590,29 +571,18 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			}
 		}
 
-		private void ReportCaptureSuccess(CancellationToken cancellationToken)
-		{
-			if (cancellationToken.IsCancellationRequested) return;
-			var capturedCount = Interlocked.Increment(ref this.capturedResponseCount);
-			var failureCount = Volatile.Read(ref this.captureFailureCount);
-			this.Dispatcher.BeginInvoke(new Action(() =>
-			{
-				if (this.disposed || cancellationToken.IsCancellationRequested) return;
-				this.message.Text = $"ゲーム通信: {capturedCount}件を解析へ配送しました（本文取得失敗 {failureCount}件）";
-			}));
-		}
-
+		// 通知が続かないよう、ステータスバーには最初の1件だけを表示します。2件目以降はデバッグ出力だけに記録します。
 		private void ReportCaptureIssue(string safePath, string reason, CancellationToken cancellationToken)
 		{
 			if (cancellationToken.IsCancellationRequested) return;
 			var failureCount = Interlocked.Increment(ref this.captureFailureCount);
 			var text = $"WebView2のゲーム通信を取得できません: {safePath} ({reason})";
 			Debug.WriteLine(text);
+			if (failureCount != 1) return;
 			this.Dispatcher.BeginInvoke(new Action(() =>
 			{
 				if (this.disposed || cancellationToken.IsCancellationRequested) return;
-				this.message.Text = $"ゲーム通信の取得に問題があります（{failureCount}件）: {safePath}";
-				if (failureCount == 1) StatusService.Current.Notify(text);
+				StatusService.Current.Notify(text);
 			}));
 		}
 
@@ -709,7 +679,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 		private void HandleNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
 		{
 			e.Handled = true;
-			this.ReportError("新しいブラウザーウィンドウを開く要求は検証起動では未対応です。");
+			this.ReportError("新しいウィンドウを開く要求には対応していません。");
 		}
 
 		private void HandleProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
@@ -721,7 +691,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				this.Navigator.CanGoBack = false;
 				this.Navigator.CanGoForward = false;
 			}
-			this.ReportError($"WebView2のプロセス障害: {e.ProcessFailedKind}。アプリを再起動してください。");
+			this.ReportFatalError($"WebView2のプロセス障害: {e.ProcessFailedKind}。アプリを再起動してください。");
 		}
 
 		// AreDevToolsEnabled（起動時の設定）は F12 などのキー操作だけを制御し、OpenDevToolsWindow は制限しません。ボタンからの表示は現在の設定で判断します。
@@ -749,10 +719,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			var browserSize = new Size(KanColleSize.Width * this.ZoomFactor, KanColleSize.Height * this.ZoomFactor);
 			this.browser.Width = browserSize.Width;
 			this.browser.Height = browserSize.Height;
-			this.header.Measure(new Size(browserSize.Width, double.PositiveInfinity));
-			var contentSize = new Size(browserSize.Width, browserSize.Height + this.header.DesiredSize.Height);
 			if (this.ready) this.RunBrowserAction(() => this.browser.ZoomFactor = this.ZoomFactor);
-			if (this.IsLoaded) this.OwnerSizeChangeRequested?.Invoke(this, contentSize);
+			if (this.IsLoaded) this.OwnerSizeChangeRequested?.Invoke(this, browserSize);
 		}
 
 		private void RunBrowserAction(Action action)
@@ -769,9 +737,15 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void ReportError(string text)
 		{
-			this.message.Text = text;
 			StatusService.Current.Notify(text);
 			Debug.WriteLine(text);
+		}
+
+		private void ReportFatalError(string text)
+		{
+			this.message.Text = text;
+			this.message.Visibility = Visibility.Visible;
+			this.ReportError(text);
 		}
 
 		private void HandleOwnerClosed(object? sender, EventArgs e) => this.Dispose();

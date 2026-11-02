@@ -477,12 +477,6 @@
   <data name="Fleets_Speed_Fleet" xml:space="preserve">
     <value>Fleet</value>
   </data>
-  <data name="ZoomAction_OutOfRange" xml:space="preserve">
-    <value>{0}% zoom is not supported.</value>
-  </data>
-  <data name="ZoomAction_ZoomFailed" xml:space="preserve">
-    <value>Zoom Failed: {0}</value>
-  </data>
   <data name="Fleets_Level" xml:space="preserve">
     <value>Level</value>
   </data>
@@ -574,7 +568,7 @@
     <value>Unknown</value>
   </data>
   <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
-    <value>The cache will be cleared the next time the application starts.</value>
+    <value>The cache will be cleared the next time the application starts. Your login information will not be deleted.</value>
   </data>
   <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
     <value>Go back</value>
@@ -600,20 +594,17 @@
   <data name="Ui_Browser_DisableGpu_Description" xml:space="preserve">
     <value>Enable this option if you have display issues. Restart the application for the change to take effect.</value>
   </data>
+  <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>Choose a balance between rendering quality and GPU load. Restart the application for the change to take effect.</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_High" xml:space="preserve">
-    <value>High: {0} FPS (Auto-adjust)</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Low" xml:space="preserve">
-    <value>Low: 30 FPS</value>
-  </data>
-  <data name="Ui_Browser_FrameRate_Medium" xml:space="preserve">
-    <value>Med: 60 FPS</value>
+    <value>The effect of "Unlimited" depends on your environment, and it may increase the load. Fixed 30 / 60 FPS is not supported. Restart the application for the change to take effect.</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>Select the display frame rate</value>
+  </data>
+  <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
+    <value>Unlimited</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>(Use if you zoom in accidentally)</value>
