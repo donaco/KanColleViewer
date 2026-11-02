@@ -36,6 +36,12 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			var newMute = !this.IsMute;
 			GeneralSettings.IsMuted.Value = newMute;
 
+			if (Models.WebView2.WebView2Migration.IsEnabled)
+			{
+				this.IsMute = newMute;
+				return;
+			}
+
 			var browser = WindowService.Current.FindBrowser();
 			if (browser != null)
 			{

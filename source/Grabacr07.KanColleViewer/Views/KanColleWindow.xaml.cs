@@ -28,6 +28,36 @@ namespace Grabacr07.KanColleViewer.Views
 			this.settings.Dock.Subscribe(_ => this.ChangeSizeByDock()).AddTo(this);
 		}
 
+		private void HandleBrowserHostLoaded(object sender, RoutedEventArgs e)
+		{
+			switch (sender)
+			{
+				case Controls.KanColleHost host:
+					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
+					host.OwnerSizeChangeRequested += this.HandleKanColleHostSizeChangeRequested;
+					host.ApplySize();
+					break;
+				case Controls.WebView2KanColleHost host:
+					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
+					host.OwnerSizeChangeRequested += this.HandleKanColleHostSizeChangeRequested;
+					host.ApplySize();
+					break;
+			}
+		}
+
+		private void HandleBrowserHostUnloaded(object sender, RoutedEventArgs e)
+		{
+			switch (sender)
+			{
+				case Controls.KanColleHost host:
+					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
+					break;
+				case Controls.WebView2KanColleHost host:
+					host.OwnerSizeChangeRequested -= this.HandleKanColleHostSizeChangeRequested;
+					break;
+			}
+		}
+
 		private void HandleKanColleHostSizeChangeRequested(object sender, Size size)
 		{
 			this.ChangeSizeByBrowser(size);

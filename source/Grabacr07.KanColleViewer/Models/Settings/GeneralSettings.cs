@@ -98,6 +98,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<BrowserFrameRateMode> FrameRateMode { get; }
 			= new SerializableProperty<BrowserFrameRateMode>(GetKey(), Providers.Local, BrowserFrameRateMode.Medium) { AutoSave = true };
 
+		public static SerializableProperty<Models.WebView2.WebView2FrameRateMode> WebView2FrameRate { get; }
+			= new SerializableProperty<Models.WebView2.WebView2FrameRateMode>(GetKey(), Providers.Local, Models.WebView2.WebView2FrameRateMode.Default) { AutoSave = true };
+
 		private static string GetKey([CallerMemberName] string propertyName = "")
 		{
 			return nameof(GeneralSettings) + "." + propertyName;

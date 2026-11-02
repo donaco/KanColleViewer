@@ -17,6 +17,7 @@
 				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 				   xmlns:contents="clr-namespace:Grabacr07.KanColleViewer.Views.Contents"
 				   xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
+				   xmlns:webview="clr-namespace:Grabacr07.KanColleViewer.Models.WebView2"
 				   xmlns:cef="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:KanColleWindowViewModel}"
@@ -33,6 +34,30 @@
 				   SnapsToDevicePixels="True"
 				   TextOptions.TextFormattingMode="Display"
 				   UseLayoutRounding="True">
+
+	<metro:MetroWindow.Resources>
+		<DataTemplate x:Key="CefBrowserTemplate">
+			<controls:KanColleHost ZoomFactor="{Binding ZoomFactor.Current}"
+				UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
+				Loaded="HandleBrowserHostLoaded" Unloaded="HandleBrowserHostUnloaded">
+				<i:Interaction.Behaviors>
+					<behaviors:ZoomAction ViewModel="{Binding}" />
+				</i:Interaction.Behaviors>
+				<cef:ChromiumWebBrowser>
+					<i:Interaction.Behaviors>
+						<behaviors:NavigatorBehavior Navigator="{Binding Navigator}" />
+						<mtti:TaskbarThumbnailBehavior />
+						<behaviors:ScreenshotAction ViewModel="{Binding}" />
+					</i:Interaction.Behaviors>
+				</cef:ChromiumWebBrowser>
+			</controls:KanColleHost>
+		</DataTemplate>
+		<DataTemplate x:Key="WebView2BrowserTemplate">
+			<controls:WebView2KanColleHost Navigator="{Binding Navigator}" ViewModel="{Binding}"
+				ZoomFactor="{Binding ZoomFactor.Current}"
+				Loaded="HandleBrowserHostLoaded" Unloaded="HandleBrowserHostUnloaded" />
+		</DataTemplate>
+	</metro:MetroWindow.Resources>
 
 	<i:Interaction.Behaviors>
 		<behaviors:WindowCloseCancelBehavior ViewModel="{Binding}" />
@@ -89,25 +114,18 @@
 
 		<DockPanel Grid.Row="1">
 			<DockPanel DockPanel.Dock="{Binding BrowserDock}">
-				<controls:KanColleHost x:Name="kanColleHost"
-                       x:FieldModifier="private"
-                       DockPanel.Dock="{Binding BrowserDock2}"
-                       ZoomFactor="{Binding ZoomFactor.Current}"
-                       UserStyleSheet="{Binding Source={x:Static settings:GeneralSettings.UserStyleSheet}, Path=Value}"
-                       OwnerSizeChangeRequested="HandleKanColleHostSizeChangeRequested"
-                       Panel.ZIndex="1">
-					<i:Interaction.Behaviors>
-						<behaviors:ZoomAction ViewModel="{Binding}" />
-					</i:Interaction.Behaviors>
-
-					<cef:ChromiumWebBrowser>
-						<i:Interaction.Behaviors>
-							<behaviors:NavigatorBehavior Navigator="{Binding Navigator}" />
-							<mtti:TaskbarThumbnailBehavior />
-							<behaviors:ScreenshotAction ViewModel="{Binding}" />
-						</i:Interaction.Behaviors>
-					</cef:ChromiumWebBrowser>
-				</controls:KanColleHost>
+				<ContentControl DockPanel.Dock="{Binding BrowserDock2}" Content="{Binding}" Panel.ZIndex="1">
+					<ContentControl.Style>
+						<Style TargetType="ContentControl">
+							<Setter Property="ContentTemplate" Value="{StaticResource CefBrowserTemplate}" />
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding Source={x:Static webview:WebView2Migration.IsEnabled}}" Value="True">
+									<Setter Property="ContentTemplate" Value="{StaticResource WebView2BrowserTemplate}" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ContentControl.Style>
+				</ContentControl>
 
 				<DockPanel x:Name="toolbarArea"
 						   x:FieldModifier="private"

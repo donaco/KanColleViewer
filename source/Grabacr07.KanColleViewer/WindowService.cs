@@ -231,6 +231,18 @@ namespace Grabacr07.KanColleViewer
 		{
 			try
 			{
+				if (Models.WebView2.WebView2Migration.IsEnabled)
+				{
+					foreach (Window window in Application.Current.Windows)
+					{
+						var host = this.FindChild<Views.Controls.WebView2KanColleHost>(window);
+						if (host is null) continue;
+						host.ShowDevTools();
+						return;
+					}
+					StatusService.Current.Notify("DevToolsを開けるWebView2が見つかりませんでした。");
+					return;
+				}
 				// Application の開いているウィンドウを検索して ChromiumWebBrowser を探す
 				var browser = this.FindFirstChromiumWebBrowser();
 				if (browser == null)

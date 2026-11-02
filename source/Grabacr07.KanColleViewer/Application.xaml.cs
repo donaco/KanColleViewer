@@ -12,6 +12,7 @@ using Grabacr07.KanColleViewer.Composition;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Cef;
 using Grabacr07.KanColleViewer.Models.Settings;
+using Grabacr07.KanColleViewer.Models.WebView2;
 using Grabacr07.KanColleViewer.Services;
 using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleViewer.Views;
@@ -64,18 +65,16 @@ namespace Grabacr07.KanColleViewer
 		{
 			this.ChangeState(ApplicationState.Startup);
 
-			// ★ SetDllDirectory を先に確立する（PrepareNativePaths は CefSharp 型を参照しないため安全）
-			CefBridge.PrepareNativePaths();
-
-			// ★ Cef.ExecuteProcess() は CefBridge.ExecuteSubprocess() 経由で呼ぶ
-			// OnStartup メソッド内に直接 Cef 型の参照があると、このメソッドの JIT コンパイル時に
-			// CefSharp.Core.Runtime.dll (C++/CLI) が SetDllDirectory 呼び出し前にロードされ、
-			// libcef.dll が見つからないまま内部が null 状態で初期化されてしまう。
-			var cefSubprocessExitCode = CefBridge.ExecuteSubprocess();
-			if (cefSubprocessExitCode >= 0)
+			if (!WebView2Migration.IsEnabled)
 			{
-				this.Shutdown(cefSubprocessExitCode);
-				return;
+				// CEFの型を呼ぶ前にネイティブDLLの探索先を確立します。
+				CefBridge.PrepareNativePaths();
+				var cefSubprocessExitCode = CefBridge.ExecuteSubprocess();
+				if (cefSubprocessExitCode >= 0)
+				{
+					this.Shutdown(cefSubprocessExitCode);
+					return;
+				}
 			}
 
 			var appMutex = new Mutex(true, "KanColleViewer-{A3B4C5D6-E7F8-9012-ABCD-EF1234567890}", out var isFirstInstance);
@@ -129,16 +128,25 @@ namespace Grabacr07.KanColleViewer
 				AppThemeService.Current.Register(this, AppAccent.Purple);
 
 				Helper.SetMMCSSTask();
-				Helper.DeleteCacheIfRequested();
+				if (!WebView2Migration.IsEnabled) Helper.DeleteCacheIfRequested();
 
 				var startedWithFallback = false;
 
 				try
 				{
-					CefBridge.Initialize();
+					if (WebView2Migration.IsEnabled) WebView2Migration.Prepare();
+					else CefBridge.Initialize();
 				}
 				catch (Exception ex)
 				{
+					if (WebView2Migration.IsEnabled)
+					{
+						ReportRecoverableException("Startup.WebView2", this, ex);
+						MessageBox.Show(ex.Message, ProductInfo.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+						appMutex.Dispose();
+						this.Shutdown();
+						return;
+					}
 					ReportRecoverableException("Startup.CefInitialize", this, ex);
 					this.startedInFallbackMode = true;
 					startedWithFallback = true;
@@ -280,6 +288,13 @@ namespace Grabacr07.KanColleViewer
 				System.Diagnostics.Debug.WriteLine($"Application: Resource disposal error: {ex}");
 			}
 
+			if (!WebView2Migration.IsEnabled) ShutdownCef();
+			this.CompleteExit(e);
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void ShutdownCef()
+		{
 			try
 			{
 				// CefSharp の完全シャットダウンを待つ
@@ -298,7 +313,10 @@ namespace Grabacr07.KanColleViewer
 			{
 				System.Diagnostics.Debug.WriteLine($"Application: CefSharp shutdown error: {ex}");
 			}
+		}
 
+		private void CompleteExit(ExitEventArgs e)
+		{
 			try
 			{
 				this._appMutex?.ReleaseMutex();
@@ -310,6 +328,7 @@ namespace Grabacr07.KanColleViewer
 			}
 
 			base.OnExit(e);
+			if (WebView2Migration.IsEnabled) return;
 
 			// 強制的にプロセスを終了（最終手段）
 			// 通常は必要ないが、バックグラウンドスレッドが残っている場合の保険
