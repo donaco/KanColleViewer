@@ -5,7 +5,7 @@ branches:
   - develop
 os: Visual Studio 2026
 configuration: Release
-platform: Any CPU
+platform: x64
 init:
 - cmd: git config --global core.autocrlf true
 environment:
@@ -25,7 +25,7 @@ build:
   publish_nuget: true
   verbosity: minimal
 artifacts:
-- path: source\Grabacr07.KanColleViewer\bin\Release
+- path: source\Grabacr07.KanColleViewer\bin\x64\Release\win-x64
   name: KanColleViewer
 deploy:
 - provider: NuGet
