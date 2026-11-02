@@ -7,9 +7,13 @@
 		Height="900"
 		MinWidth="800"
 		MinHeight="600"
+		ResizeMode="CanResizeWithGrip"
 		Loaded="Window_Loaded"
 		Closed="Window_Closed">
 	<DockPanel>
+		<Border DockPanel.Dock="Bottom" Height="24" Background="WhiteSmoke">
+			<TextBlock Text="右下のグリップでサイズ変更（ゲーム領域とは重なりません）" Margin="8,0,24,0" VerticalAlignment="Center" />
+		</Border>
 		<StackPanel DockPanel.Dock="Top" Margin="8">
 			<WrapPanel Margin="0,0,0,6">
 				<TextBox x:Name="AddressBox"
@@ -38,11 +42,19 @@
 				<Button x:Name="DevToolsButton" Content="開発者ツール" IsEnabled="False" Margin="4,0" Padding="8,3" Click="DevToolsButton_Click" />
 				<Button Content="Popup検証" Margin="4,0" Padding="8,3" Click="PopupTestButton_Click" />
 			</WrapPanel>
+			<WrapPanel Margin="0,0,0,6">
+				<TextBlock Text="情報欄の配置:" VerticalAlignment="Center" Margin="0,0,4,0" />
+				<ComboBox x:Name="InfoDockBox" SelectedIndex="0" Width="100">
+					<ComboBoxItem Content="下" />
+					<ComboBoxItem Content="上" />
+					<ComboBoxItem Content="左" />
+					<ComboBoxItem Content="右" />
+				</ComboBox>
+				<Button x:Name="SplitInfoButton" Content="情報欄を分割" Margin="8,0" Padding="8,3" Click="SplitInfoButton_Click" />
+			</WrapPanel>
 			<TextBlock x:Name="StatusText" Text="FPS と GPU の起動条件を選び、「初期化して移動」を押してください。" TextWrapping="Wrap" />
 		</StackPanel>
-		<ListBox x:Name="CaptureLog" DockPanel.Dock="Bottom" Height="150" MaxHeight="220" Margin="8,4"
-				 FontFamily="Consolas" FontSize="12" />
-		<Popup x:Name="TestPopup" PlacementTarget="{Binding ElementName=Browser}" Placement="Relative"
+		<Popup x:Name="TestPopup"
 			   HorizontalOffset="60" VerticalOffset="120" StaysOpen="False">
 			<Border Background="White" BorderBrush="SteelBlue" BorderThickness="2" Padding="12" Width="300">
 				<StackPanel>
@@ -58,6 +70,11 @@
 				</StackPanel>
 			</Border>
 		</Popup>
-		<wv2:WebView2 x:Name="Browser" Visibility="Collapsed" />
+		<DockPanel x:Name="LayoutPanel">
+			<Border x:Name="InfoPanel" DockPanel.Dock="Bottom" Height="150" Margin="8,4" BorderBrush="Gray" BorderThickness="1">
+				<ListBox x:Name="CaptureLog" FontFamily="Consolas" FontSize="12" />
+			</Border>
+			<wv2:WebView2 x:Name="Browser" Visibility="Collapsed" />
+		</DockPanel>
 	</DockPanel>
 </Window>

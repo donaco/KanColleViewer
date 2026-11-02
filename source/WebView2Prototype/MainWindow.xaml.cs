@@ -22,12 +22,14 @@ public partial class MainWindow : Window
 	private CoreWebView2Environment? browserEnvironment;
 	private readonly HashSet<CoreWebView2Frame> loadedFrames = new();
 	private bool initialized;
+	private Window? infoWindow;
 
 	public MainWindow()
 	{
 		InitializeComponent();
 		ZoomText.Text = $"{ZoomSlider.Value:P0}";
 		ZoomSlider.ValueChanged += ZoomSlider_ValueChanged;
+		InfoDockBox.SelectionChanged += InfoDockBox_SelectionChanged;
 	}
 
 	private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -38,6 +40,8 @@ public partial class MainWindow : Window
 
 	private void Window_Closed(object? sender, EventArgs e)
 	{
+		TestPopup.IsOpen = false;
+		infoWindow?.Close();
 		Browser.Dispose();
 	}
 
@@ -541,6 +545,63 @@ public partial class MainWindow : Window
 	{
 		TestPopup.IsOpen = false;
 		Browser.Focus();
+	}
+
+	private void InfoDockBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+	{
+		ApplyInfoDock();
+	}
+
+	private void ApplyInfoDock()
+	{
+		var dock = InfoDockBox.SelectedIndex switch
+		{
+			1 => Dock.Top,
+			2 => Dock.Left,
+			3 => Dock.Right,
+			_ => Dock.Bottom,
+		};
+		DockPanel.SetDock(InfoPanel, dock);
+		var horizontal = dock is Dock.Top or Dock.Bottom;
+		InfoPanel.Width = horizontal ? double.NaN : 280;
+		InfoPanel.Height = horizontal ? 150 : double.NaN;
+	}
+
+	private void SplitInfoButton_Click(object sender, RoutedEventArgs e)
+	{
+		if (infoWindow is not null)
+		{
+			infoWindow.Close();
+			return;
+		}
+
+		TestPopup.IsOpen = false;
+		LayoutPanel.Children.Remove(InfoPanel);
+		InfoPanel.Width = double.NaN;
+		InfoPanel.Height = double.NaN;
+		var window = new Window
+		{
+			Title = "WebView2 比較試作 - 情報欄",
+			Owner = this,
+			Width = 600,
+			Height = 300,
+			MinWidth = 300,
+			MinHeight = 150,
+			Content = InfoPanel,
+		};
+		window.Closed += (_, _) =>
+		{
+			window.Content = null;
+			infoWindow = null;
+			LayoutPanel.Children.Insert(0, InfoPanel);
+			ApplyInfoDock();
+			InfoDockBox.IsEnabled = true;
+			SplitInfoButton.Content = "情報欄を分割";
+		};
+		infoWindow = window;
+		InfoDockBox.IsEnabled = false;
+		SplitInfoButton.Content = "情報欄を結合";
+		window.Show();
 	}
 
 	private sealed record BodyReadResult(int ByteCount, bool Truncated, string Availability);
