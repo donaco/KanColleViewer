@@ -37,7 +37,7 @@ Microsoft Edge WebView2 を使った内蔵ブラウザーで艦これを表示�
 * [.NET デスクトップ ランタイム 10.0.11](https://dotnet.microsoft.com/ja-jp/download/dotnet/thank-you/runtime-desktop-10.0.11-windows-x64-installer)
 * [Microsoft Edge WebView2 Evergreen Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)
 
-環境によっては .NET デスクトップ ランタイム 10.0.11, WebView2 Runtime のインストールが必要です。
+環境によっては .NET デスクトップ ランタイム 10.0.11 以降, WebView2 Runtime のインストールが必要です。
 現在、艦これ本体のセキュア化に伴い暫定対応しています。  
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 

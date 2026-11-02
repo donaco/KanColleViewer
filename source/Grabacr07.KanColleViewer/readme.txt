@@ -26,10 +26,13 @@ version 4.8.5 2026/09/02
 Windows 11
 Windows 10
   
-Microsoft Visual C++ 2015-2022 再頒布可能パッケージ
-https://aka.ms/vs/17/release/vc_redist.x64.exe
+.NET デスクトップ ランタイム 10.0.11
+https://dotnet.microsoft.com/ja-jp/download/dotnet/thank-you/runtime-desktop-10.0.11-windows-x64-installer
 
-環境によってはMicrosoft Visual C++ 2015-2022 再頒布可能パッケージのインストールが必要になる場合があります。
+Microsoft Edge WebView2 Evergreen Runtime
+https://developer.microsoft.com/microsoft-edge/webview2/
+
+環境によっては.NET デスクトップ ランタイム や WebView2 Runtime のインストールが必要になる場合があります。
 現在、艦これ本体のセキュア化に伴い暫定対応しています。  
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 
@@ -42,36 +45,6 @@ https://aka.ms/vs/17/release/vc_redist.x64.exe
 ■使用方法
 同梱の KanColleViewer.exe を起動してください。
 各画面の解説等は https://dona-co.art/?page_id=3534 を参照してください。
-
-■ブラウザーと保存データ
-・ゲーム画面には Microsoft Edge WebView2 を使用します。Evergreen WebView2 Runtime が必要です。
-  未導入の場合は理由と導入先を案内しますが、自動インストールは行いません。
-  Runtime の導入先: https://developer.microsoft.com/microsoft-edge/webview2/
-・WebView2 のユーザーデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\WebView2 に保存します。
-  旧版とは別の保存先のため、初回は再ログインが必要です。
-・旧 CefSharp 版のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\Chromium に残り、自動削除しません。
-  不要であれば、アプリ終了後に Chromium フォルダーだけを手動で削除できます。
-  削除すると旧版のログイン情報なども消えます。設定と現在のログイン状態を保つため、
-  親の KanColleViewer フォルダーや WebView2 フォルダーは削除しないでください。
-
-■通信・操作・撮影
-・通信解析は HTTPS の正規ゲームサーバー上にある API が対象です。リダイレクトと 204 応答を除き、
-  要求本文・応答本文をそれぞれ最大 5 MiB まで取得して解析します。本文は画面表示・ログ出力・ファイル保存しません。
-・ユーザー CSS はゲーム画面に適用されます。表示を縮小した場合はスクロールバーやホイールで移動できます。
-・ゲーム画面の撮影はゲーム領域を特定できた場合だけ行い、PNG/JPEG とも 1200×720 px で保存します。
-  対象を特定できない場合に、ページ全体を代わりに保存することはありません。
-・ダウンロードと新しいブラウザーウィンドウの要求は拒否し、理由を表示します。
-
-■プロキシと設定
-・Relay を有効にすると、外部ツールを経由して通信します。上流への接続に失敗した場合は通知し、
-  直接接続へ切り替えません。Relay を無効にした場合は、直接接続・システムプロキシ・指定プロキシを選べます。
-  指定プロキシの設定が不正、または接続できない場合も直接接続へは切り替えません。
-・FPS 設定は「既定」「上限解除」の 2 択です。30 / 60 FPS 固定には対応していません。
-  「上限解除」の効果は環境によって異なり、負荷が上がる場合があります。
-・GPU 無効化は WebView2 の起動時に --disable-gpu を指定します。実際の描画方式や負荷への効果は保証しません。
-・開発者向けオプションで DevTools を利用できますが、外部接続用のリモートデバッグポートは開きません。
-・キャッシュ削除の対象は WebView2 のディスクキャッシュだけです。ログイン情報は削除しません。
-・FPS、GPU、プロキシ設定は再起動後に反映されます。ミュートは即時反映され、再起動後も保存値を適用します。
 
 
 ■開発環境・言語
