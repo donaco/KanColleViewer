@@ -110,7 +110,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			};
 			panel.Children.Add(browserViewport);
 			panel.Children.Add(this.message);
-			// CEF版と同じく、タスクバーのプレビュー範囲をゲーム画面に合わせる設定を付けます。環境によってはウィンドウ全体が表示されます。
+			// タスクバーのプレビュー範囲をゲーム画面に合わせます。環境によってはウィンドウ全体が表示されます。
 			Interaction.GetBehaviors(this.browser).Add(new TaskbarThumbnailBehavior());
 			this.Content = panel;
 			this.Loaded += this.HandleLoaded;

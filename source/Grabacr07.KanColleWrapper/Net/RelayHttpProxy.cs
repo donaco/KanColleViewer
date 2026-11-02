@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Grabacr07.KanColleWrapper.Net
 {
 	/// <summary>
-	/// CEF または WebView2 からの HTTPS 通信を、外部ツール（例: 公開日誌拡張版）へ
+	/// ブラウザーからの HTTPS 通信を、外部ツール（例: 公開日誌拡張版）へ
 	/// 透過的に中継するローカルプロキシです。
 	///
 	/// ブラウザー側で TLS を終端するため、このプロキシ自体は TLS を一切復号せず、

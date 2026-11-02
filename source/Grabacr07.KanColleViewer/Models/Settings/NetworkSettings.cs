@@ -111,18 +111,17 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				switch (Proxy.Type.Value)
 				{
 					case ProxyType.SystemProxy:
-						// CEF 一本化後はシステムプロキシを CEF 自身に委ねる。
-						// proxy-server に空文字を渡すことで CEF がシステムプロキシ設定を自動適用する。
+						// WebView2 に個別のプロキシ引数を渡さず、システムプロキシを使用します。
 						return string.Empty;
 
 					case ProxyType.SpecificProxy:
-						// 指定プロキシの場合、CEF の proxy-server に指定プロキシ設定を渡す
+						// 指定プロキシを WebView2 の --proxy-server 引数に渡す形式へ変換します。
 						{
 							var settings = IEStyleProxySettingsBuilder.Parse(new Proxy());
 							return settings.ToIEStyleSettings();
 						}
 					case ProxyType.DirectAccess:
-						// プロキシを使用しない場合、CEF に対して空文字を返し proxy-server を設定しない
+						// 直接接続では個別のプロキシ文字列は不要です。
 						return string.Empty;
 					default:
 						throw new IndexOutOfRangeException();

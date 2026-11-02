@@ -492,7 +492,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 		/// <summary>
-		/// CEF 経由で受信した goback_port 時に、脱出艦・曳航艦を記録します。
+		/// goback_port の応答から脱出艦・曳航艦を記録します。
 		/// Ship.Situation への Evacuation/Tow フラグも即時反映します。
 		/// </summary>
 		internal void AddEvacuatedShips(int evacuatedShipId, int towShipId = -1)

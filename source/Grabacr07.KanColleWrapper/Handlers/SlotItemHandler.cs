@@ -66,7 +66,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									}
 								}
 
-								// requestBody に api_slotitem_ids があれば装備を削除（CEF 経路であれば Itemyard の更新が届かないケースに対応）
+								// 要求本文に api_slotitem_ids があれば装備を削除します（応答で Itemyard の更新が届かないケースに対応）。
 								if (!string.IsNullOrEmpty(requestBody))
 								{
 									try
@@ -246,7 +246,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 										var rawItems = slotTok.ToObject<kcsapi_slotitem[]>();
 										if (rawItems != null && rawItems.Length > 0)
 										{
-											// 既存ハンドラに倣い Update を呼ぶケースはあるが、ここでは差分追加で扱う（CEF経路のフォールバック）
+											// 応答に含まれる装備情報を差分として反映します。
 											foreach (var r in rawItems)
 											{
 												try
@@ -287,7 +287,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 							var createTok = data.ToObject<kcsapi_createitem>();
 							if (createTok != null)
 							{
-								// Dockyard 側で CreatedSlotItem 更新は proxy 経由で行われるが、CEF 経路ではここで生成情報を反映しておく
+								// kcsapi_createitem の応答から生成情報を反映します。
 								var dockyard = this.client.Homeport?.Dockyard;
 								if (dockyard != null)
 								{

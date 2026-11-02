@@ -65,15 +65,15 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 
 		/// <summary>
 		/// GPU アクセラレーションを無効にするかどうかを示す設定値を取得します。
-		/// true の場合、CefSharp の GPU アクセラレーションを無効にします。
+		/// true の場合、WebView2 のブラウザー プロセスに --disable-gpu 起動引数を指定します。
 		/// 設定変更後はアプリケーションの再起動が必要です。
 		/// </summary>
 		public static SerializableProperty<bool> IsGpuDisabled { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
 
 		/// <summary>
-		/// 開発者向けオプション（リモートデバッグ等）を有効にするかどうかを示す設定値を取得します。
-		/// true の場合、CefSharp のリモートデバッグポートを開放します。
+		/// 開発者向けオプションを有効にするかどうかを示す設定値を取得します。
+		/// true の場合、WebView2 の DevTools を有効にします。リモートデバッグポートは開きません。
 		/// 設定変更後はアプリケーションの再起動が必要です。
 		/// </summary>
 		public static SerializableProperty<bool> IsRemoteDebuggingEnabled { get; }

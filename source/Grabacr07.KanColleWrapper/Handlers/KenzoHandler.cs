@@ -407,8 +407,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 									{
 									}
 
-									// Organization.Update が新規追加を行わないケースに備え、
-									// Ships に存在しなければ明示的に追加して通知する（CEF 経路用フォールバック）
+									// Organization.Update で追加されなかった新規艦を明示的に追加して通知します。
 									try
 									{
 										var exists = org?.Ships?[ship.api_id];

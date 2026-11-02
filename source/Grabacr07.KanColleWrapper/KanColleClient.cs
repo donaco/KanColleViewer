@@ -344,7 +344,7 @@ namespace Grabacr07.KanColleWrapper
 		#endregion
 
 		/// <summary>
-		/// CefSharp によって捕捉した HTTP を外部から受け取るエントリ（従来の公開 API を維持）
+		/// ブラウザーから捕捉した HTTP 通信を外部から受け取る入口です。
 		/// リファクタ: 各処理を TryHandle* 系に分割して可読性を向上
 		/// </summary>
 		public void ProcessCaptured(string url, string responseBody, string? requestBody = null)
@@ -409,7 +409,7 @@ namespace Grabacr07.KanColleWrapper
 				}
 
 				// （ProcessCaptured 内のハンドラ呼び出し群を以下に置換）
-				// 先に map/start を判定して出撃フラグや該当艦隊の Sortie を行う（CEF 経路でのフォールバック）
+				// map/start を先に判定し、出撃フラグや該当艦隊の状態を反映します。
 				if (TryHandleMapStart(url, normalizedRequestBody, normalized)) return;
 				if (TryHandleBattle(url, normalized)) return;
 				if (TryHandleMapNext(url, normalized)) return;

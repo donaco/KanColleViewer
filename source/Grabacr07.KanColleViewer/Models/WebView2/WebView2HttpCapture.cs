@@ -24,8 +24,8 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 				return false;
 			}
 
-			// CEF版と異なり、ゲーム本体ページ（/kcs2/index.php）は対象外です。
-			// 解析に使われず、WebView2では本文を取得できない場合があります。
+			// ゲーム本体ページ（/kcs2/index.php）は API 解析に使わないため対象外です。
+			// WebView2 では本文を取得できない場合もあります。
 			var path = parsedUri.AbsolutePath;
 			if (path.IndexOf("kcsapi", StringComparison.OrdinalIgnoreCase) < 0
 				&& path.IndexOf("/api/", StringComparison.OrdinalIgnoreCase) < 0)

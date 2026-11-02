@@ -89,7 +89,7 @@ namespace Grabacr07.KanColleWrapper.Handlers
 			}
 			catch (Exception ex) { slotTok = null; LogError("TryHandlePowerup", ex); }
 
-			// requestBody から api_id_items を取り出して削除対象ID配列を用意する（CEF 経路で使う）
+			// 要求本文から api_id_items を取り出して削除対象 ID 配列を用意します。
 			// 注: powerup の api_id_items は「改修素材にした艦のID」の場合があるため、実行時に艦テーブルに存在するかで判定
 			int[]? apiIdItemsRaw = null;
 			if (!string.IsNullOrEmpty(requestBody))
