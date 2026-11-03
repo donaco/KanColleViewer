@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-version 4.8.5 2026/09/02
+version 5.0.0.b4 2026/11/03
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -46,6 +46,35 @@ https://developer.microsoft.com/microsoft-edge/webview2/
 同梱の KanColleViewer.exe を起動してください。
 各画面の解説等は https://dona-co.art/?page_id=3534 を参照してください。
 
+■保存データ
+・Ver5以降のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\WebView2 に保存します。
+・Ver5以前のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\Chromium に保存され、自動では削除しません。
+・不要な場合はアプリを終了してから Chromium フォルダーだけを手動で削除してください。削除すると旧版のログイン情報なども失われます。
+・設定と現在のログイン状態を保つため、親フォルダーや WebView2 フォルダーは削除しないでください。
+
+■スクリーンショット撮影
+・ゲーム画面の撮影はゲーム領域を特定できた場合だけ行い、PNG/JPEG とも 1200×720 px で保存します。
+  対象を特定できない場合に、ページ全体を代わりに保存することはありません。
+
+■表示フレームレート
+・FPS 設定は「自動調整」「上限解除」の 2 択です。60 FPS 固定には対応していません。
+  「上限解除」の効果は環境によって異なり、負荷が上がる場合があります。
+
+■GPU無効化
+・GPU 無効化は WebView2 の起動時に --disable-gpu を指定します。実際の描画方式や負荷への効果は保証しません。
+
+■プロキシと通信
+・Relay を有効にすると、外部ツールを経由して通信します。上流への接続に失敗した場合は通知し、直接接続へ切り替えません。
+・Relay を無効にした場合は、直接接続・システムプロキシ・指定プロキシを選べます。
+・指定プロキシの設定が不正、または接続できない場合も直接接続へは切り替えません。
+・ダウンロードと新しいブラウザーウィンドウの要求は拒否し、理由を表示します。
+
+■キャッシュ削除
+・キャッシュ削除の対象は WebView2 のディスクキャッシュだけです。ログイン情報は削除しません。
+
+■開発向けオプション
+・開発者向けオプションで DevTools を利用できますが、外部接続用のリモートデバッグポートは開きません。
+
 
 ■開発環境・言語
 C# + WPF で開発しています。
@@ -63,14 +92,6 @@ Newtonsoft.Json
     ・用途 : JSON デシリアライズ
     ・ライセンス : The MIT License (MIT)
     ・ライセンス全文 : licenses/Newtonsoft.Json.txt
-
-Desktop Toast
-(https://github.com/emoacht/DesktopToast)
-    The MIT License (MIT)
-    Copyright (c) 2014-2015 EMO
-    ・用途 : トースト通知
-    ・ライセンス : The MIT License (MIT)
-    ・ライセンス全文 : Licenses/DesktopToast.txt
 
 .NET Core Audio APIs (archived source)
 (https://github.com/dorba/netcoreaudio)
@@ -103,6 +124,8 @@ System.Reactive (Reactive Extensions for .NET)
 
 
 ■更新履歴
+2026/11/11 - version 5.0.0
+2026/10/06 - version 4.8.6
 2026/09/02 - version 4.8.5
 2026/08/08 - version 4.8.4
 2026/07/19 - version 4.8.3

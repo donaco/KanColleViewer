@@ -41,15 +41,17 @@ Microsoft Edge WebView2 を使った内蔵ブラウザーで艦これを表示�
 現在、艦これ本体のセキュア化に伴い暫定対応しています。  
 未検証の通信内容も多く、意図しない挙動となる可能性があることにご注意ください。
 
+
 ### 開発環境・言語
 C# + WPF で開発しています。  
 GitHub Copilot を使用しています。  
 開発環境は Windows 11 Pro + Visual Studio 2026 + Adobe Creative Cloud です。
 
+
 ### ライセンス
+MIT ライセンスの下で公開する、オープンソース / フリーソフトウェアです。
 * [The MIT License (MIT)](LICENSE.txt)
 
-MIT ライセンスの下で公開する、オープンソース / フリーソフトウェアです。
 
 ### 使用ライブラリ
 以下のライブラリを使用しています。
@@ -62,14 +64,6 @@ MIT ライセンスの下で公開する、オープンソース / フリーソ�
 * **用途 :** JSON デシリアライズ
 * **ライセンス :** The MIT License (MIT)
 * **ライセンス全文 :** [licenses/Newtonsoft.Json.txt](licenses/Newtonsoft.Json.txt)
-
-#### [Desktop Toast](https://github.com/emoacht/DesktopToast)
-> The MIT License (MIT)
->
-> Copyright (c) 2014-2015 EMO
-* **用途 :** トースト通知
-* **ライセンス :** The MIT License (MIT)
-* **ライセンス全文 :** [licenses/DesktopToast.txt](licenses/DesktopToast.txt)
 
 #### [.NET Core Audio APIs (archived source)](https://github.com/dorba/netcoreaudio)
 > The MIT License (MIT)
