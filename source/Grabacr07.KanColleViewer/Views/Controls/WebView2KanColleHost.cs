@@ -709,6 +709,22 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
 		{
+			if (this.disposed) return;
+
+			switch (e.ProcessFailedKind)
+			{
+				case CoreWebView2ProcessFailedKind.BrowserProcessExited:
+				case CoreWebView2ProcessFailedKind.RenderProcessExited:
+				case CoreWebView2ProcessFailedKind.FrameRenderProcessExited:
+					break;
+				case CoreWebView2ProcessFailedKind.RenderProcessUnresponsive:
+					this.ReportError("WebView2が応答していません。応答が戻るまでお待ちください。改善しない場合はアプリを再起動してください。");
+					return;
+				default:
+					this.ReportError($"WebView2のプロセス障害: {e.ProcessFailedKind}。WebView2の自動復旧をお待ちください。");
+					return;
+			}
+
 			this.ready = false;
 			if (this.Navigator is not null)
 			{
