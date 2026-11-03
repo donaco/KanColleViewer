@@ -11,6 +11,7 @@
 			 xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Models.Settings"
 			 xmlns:webview="clr-namespace:Grabacr07.KanColleViewer.Models.WebView2"
+			 xmlns:controls="clr-namespace:Grabacr07.KanColleViewer.Views.Controls"
 			 xmlns:vms="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 mc:Ignorable="d"
 			 d:DesignWidth="700"
@@ -111,16 +112,17 @@
 		<!-- フレームレート設定 -->
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 		<DockPanel Margin="0,5,0,5">
-			<ComboBox DockPanel.Dock="Right"
-					  SelectedValue="{Binding Source={x:Static settings:GeneralSettings.WebView2FrameRate}, Path=Value, Mode=TwoWay}"
-					  SelectedValuePath="Tag"
-					  Width="196"
-					  VerticalAlignment="Center">
+			<controls:PromptComboBox DockPanel.Dock="Right"
+									SelectedValue="{Binding Source={x:Static settings:GeneralSettings.WebView2FrameRate}, Path=Value, Mode=TwoWay}"
+									SelectedValuePath="Tag"
+									Width="196"
+									VerticalAlignment="Center"
+									Prompt="">
 				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Default], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							  Tag="{x:Static webview:WebView2FrameRateMode.Default}" />
 				<ComboBoxItem Content="{Binding [Ui_Browser_FrameRate_Unlimited], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							  Tag="{x:Static webview:WebView2FrameRateMode.Unlimited}" />
-			</ComboBox>
+			</controls:PromptComboBox>
 			<StackPanel Margin="24,0,0,0">
 				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
 						   Foreground="{DynamicResource ActiveForegroundBrushKey}"

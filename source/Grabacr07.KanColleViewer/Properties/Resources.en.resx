@@ -595,16 +595,16 @@
     <value>Enable this option if you have display issues. Restart the application for the change to take effect.</value>
   </data>
   <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
-    <value>Default</value>
+    <value>Medium: Match monitor refresh rate</value>
   </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>The effect of "Unlimited" depends on your environment, and it may increase the load. Fixed 30 / 60 FPS is not supported. Restart the application for the change to take effect.</value>
+    <value>Medium matches the monitor's refresh rate. High removes the FPS cap and may increase GPU load depending on your environment. Restart the application for the change to take effect.</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>Select the display frame rate</value>
   </data>
   <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
-    <value>Unlimited</value>
+    <value>High: Uncap FPS</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>(Use if you zoom in accidentally)</value>

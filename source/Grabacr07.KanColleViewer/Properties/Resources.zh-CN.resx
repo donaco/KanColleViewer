@@ -595,16 +595,16 @@
     <value>如果遇到显示问题，请启用此选项。更改后需要重新启动应用程序。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
-    <value>默认</value>
+    <value>中：自动匹配显示器刷新率</value>
   </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>“解除上限”的效果因环境而异，并可能增加负载。不支持固定为 30 / 60 FPS。更改后需要重新启动应用程序。</value>
+    <value>中档会匹配显示器刷新率。高档会解除 FPS 上限，可能因环境而增加 GPU 负载。更改后需要重新启动应用程序。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>选择显示帧率</value>
   </data>
   <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
-    <value>解除上限</value>
+    <value>高：解除 FPS 上限</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>（误操作放大时使用）</value>

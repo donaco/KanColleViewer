@@ -595,16 +595,16 @@
     <value>画面表示に問題がある場合に有効にしてください。変更後はアプリの再起動が必要です。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Default" xml:space="preserve">
-    <value>既定</value>
+    <value>中：自動調整</value>
   </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>「上限解除」は効果が環境によって異なり、負荷が上がる場合があります。30 / 60 FPS の固定には対応していません。変更後はアプリの再起動が必要です。</value>
+    <value>中はモニタのリフレッシュレートに合わせて動作します。高は FPS 上限を解除し、環境によって GPU 負荷が高くなる場合があります。変更後はアプリの再起動が必要です。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>表示フレームレートを選択する</value>
   </data>
   <data name="Ui_Browser_FrameRate_Unlimited" xml:space="preserve">
-    <value>上限解除</value>
+    <value>高：上限解除</value>
   </data>
   <data name="Ui_Browser_ResetZoom_Hint" xml:space="preserve">
     <value>(誤ってズームしたとき用)</value>
