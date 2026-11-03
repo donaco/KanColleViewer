@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Grabacr07.KanColleViewer.Models;
 using Microsoft.Web.WebView2.Core;
@@ -24,65 +26,19 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 		{
 			if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("保存先が指定されていません。", nameof(path));
 
-			var captureFormat = format switch
-			{
-				SupportedImageFormat.Png => "png",
-				SupportedImageFormat.Jpeg => "jpeg",
-				_ => throw new ArgumentOutOfRangeException(nameof(format), format, "PNGまたはJPEGを指定してください。"),
-			};
-			var styleId = JsonSerializer.Serialize($"webview2-screenshot-{Guid.NewGuid():N}");
-			byte[] imageBytes;
-			(int Width, int Height) dimensions;
+			if (format != SupportedImageFormat.Png && format != SupportedImageFormat.Jpeg)
+				throw new ArgumentOutOfRangeException(nameof(format), format, "PNGまたはJPEGを指定してください。");
 
-			try
-			{
-				var prepareResult = await core.ExecuteScriptAsync($$"""
-					(() => {
-						const style = document.createElement('style');
-						style.id = {{styleId}};
-						style.textContent = 'html { scrollbar-gutter: auto !important; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; }';
-						document.documentElement.appendChild(style);
-						return document.documentElement.getBoundingClientRect().width > 0;
-					})()
-					""");
-				if (prepareResult != "true")
-					throw new InvalidOperationException("撮影用CSSを適用できませんでした。");
-
-				var clip = CreateScreenshotClip(await FindGameFrameAsync(core, loadedFrames));
-				var screenshotParameters = new Dictionary<string, object>
-				{
-					["format"] = captureFormat,
-					["clip"] = new { x = clip.X, y = clip.Y, width = clip.Width, height = clip.Height, scale = clip.Scale },
-					["fromSurface"] = true,
-					["captureBeyondViewport"] = true,
-				};
-				if (format == SupportedImageFormat.Jpeg) screenshotParameters["quality"] = 90;
-
-				await core.CallDevToolsProtocolMethodAsync("Page.enable", "{}");
-				var responseJson = await core.CallDevToolsProtocolMethodAsync(
-					"Page.captureScreenshot",
-					JsonSerializer.Serialize(screenshotParameters));
-				var response = JsonSerializer.Deserialize<ScreenshotResponse>(responseJson, jsonOptions)
-					?? throw new InvalidOperationException("DevTools Protocolから撮影データが返りませんでした。");
-				if (string.IsNullOrEmpty(response.Data))
-					throw new InvalidOperationException("撮影データが空です。");
-
-				imageBytes = Convert.FromBase64String(response.Data);
-				dimensions = ReadImageDimensions(imageBytes);
-				if (dimensions.Width != TargetScreenshotWidth || dimensions.Height != TargetScreenshotHeight)
-					throw new InvalidOperationException($"撮影寸法が要件と異なります: {dimensions.Width}×{dimensions.Height} px (期待値 1200×720 px)");
-			}
-			finally
-			{
-				var restoreResult = await core.ExecuteScriptAsync($$"""
-					(() => {
-						document.getElementById({{styleId}})?.remove();
-						return !document.getElementById({{styleId}});
-					})()
-					""");
-				if (restoreResult != "true")
-					throw new InvalidOperationException("撮影用CSSを解除できませんでした。ページを更新してください。");
-			}
+			var frame = await FindGameFrameAsync(core, loadedFrames);
+			var metricsJson = await core.ExecuteScriptAsync(
+				"({ pixelRatio: window.devicePixelRatio, scrollX: window.scrollX, scrollY: window.scrollY })");
+			var metrics = JsonSerializer.Deserialize<CaptureMetrics>(metricsJson, jsonOptions)
+				?? throw new InvalidOperationException("撮影用の表示情報を取得できませんでした。");
+			using var capture = new MemoryStream();
+			// CDP の clip 指定は描画領域を一時変更するため、表示を変えない撮影後に画像側で切り抜きます。
+			await core.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, capture);
+			var capturedBytes = capture.ToArray();
+			var imageBytes = await Task.Run(() => CreateGameImage(capturedBytes, frame, metrics, format));
 
 			var directory = Path.GetDirectoryName(path);
 			if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
@@ -91,7 +47,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 
 		private static async Task<FrameBounds> FindGameFrameAsync(CoreWebView2 core, ISet<CoreWebView2Frame> loadedFrames)
 		{
-			// CDP uses main-document coordinates; nested-frame coordinates are composed below.
+			// Use main-document coordinates; nested-frame coordinates are composed below.
 			const string gameFrameScript = """
 				(() => {
 					const frames = Array.from(document.querySelectorAll('iframe')).filter(item =>
@@ -163,7 +119,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 				: throw new InvalidOperationException("game_frame内の正規ゲームiframeを一意に特定できません。読み込み完了後に再試行してください。ページ全体は代替撮影しません。");
 		}
 
-		private static ScreenshotClip CreateScreenshotClip(FrameBounds frame)
+		private static byte[] CreateGameImage(byte[] capturedBytes, FrameBounds frame, CaptureMetrics metrics, SupportedImageFormat format)
 		{
 			if (!double.IsFinite(frame.X) || !double.IsFinite(frame.Y)
 				|| !double.IsFinite(frame.Width) || !double.IsFinite(frame.Height)
@@ -171,35 +127,41 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 			{
 				throw new InvalidOperationException("ゲームiframeの表示領域を取得できませんでした。");
 			}
+			if (!double.IsFinite(metrics.PixelRatio) || metrics.PixelRatio <= 0
+				|| !double.IsFinite(metrics.ScrollX) || !double.IsFinite(metrics.ScrollY))
+				throw new InvalidOperationException("撮影用の表示情報が不正です。");
 
+			using var input = new MemoryStream(capturedBytes, writable: false);
+			var decoder = BitmapDecoder.Create(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+			if (decoder.Frames.Count == 0) throw new InvalidOperationException("画像データをデコードできませんでした。");
+			var source = decoder.Frames[0];
 			var targetRatio = (double)TargetScreenshotWidth / TargetScreenshotHeight;
-			if (frame.Width / frame.Height > targetRatio)
+			var width = Math.Min(frame.Width, frame.Height * targetRatio);
+			var height = width / targetRatio;
+			var left = Math.Round((frame.X - metrics.ScrollX + (frame.Width - width) / 2) * metrics.PixelRatio);
+			var top = Math.Round((frame.Y - metrics.ScrollY + (frame.Height - height) / 2) * metrics.PixelRatio);
+			var right = Math.Round((frame.X - metrics.ScrollX + (frame.Width + width) / 2) * metrics.PixelRatio);
+			var bottom = Math.Round((frame.Y - metrics.ScrollY + (frame.Height + height) / 2) * metrics.PixelRatio);
+			if (!double.IsFinite(left) || !double.IsFinite(top) || !double.IsFinite(right) || !double.IsFinite(bottom)
+				|| left < 0 || top < 0 || right > source.PixelWidth || bottom > source.PixelHeight
+				|| right <= left || bottom <= top)
 			{
-				var croppedWidth = frame.Height * targetRatio;
-				return new ScreenshotClip(
-					frame.X + (frame.Width - croppedWidth) / 2,
-					frame.Y,
-					croppedWidth,
-					frame.Height,
-					TargetScreenshotWidth / croppedWidth);
+				throw new InvalidOperationException("ゲーム領域全体が撮影範囲に収まっていません。ゲーム画面全体を表示してから再試行してください。");
 			}
 
-			var croppedHeight = frame.Width / targetRatio;
-			return new ScreenshotClip(
-					frame.X,
-					frame.Y + (frame.Height - croppedHeight) / 2,
-					frame.Width,
-					croppedHeight,
-					TargetScreenshotWidth / frame.Width);
-		}
+			var cropped = new CroppedBitmap(source, new Int32Rect((int)left, (int)top, (int)(right - left), (int)(bottom - top)));
+			var resized = new TransformedBitmap(cropped, new ScaleTransform(
+				(double)TargetScreenshotWidth / cropped.PixelWidth, (double)TargetScreenshotHeight / cropped.PixelHeight));
+			if (resized.PixelWidth != TargetScreenshotWidth || resized.PixelHeight != TargetScreenshotHeight)
+				throw new InvalidOperationException($"撮影寸法が要件と異なります: {resized.PixelWidth}×{resized.PixelHeight} px (期待値 1200×720 px)");
 
-		private static (int Width, int Height) ReadImageDimensions(byte[] imageBytes)
-		{
-			using var stream = new MemoryStream(imageBytes, writable: false);
-			var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-			if (decoder.Frames.Count == 0) throw new InvalidOperationException("画像データをデコードできませんでした。");
-			var frame = decoder.Frames[0];
-			return (frame.PixelWidth, frame.PixelHeight);
+			BitmapEncoder encoder = format == SupportedImageFormat.Jpeg
+				? new JpegBitmapEncoder { QualityLevel = 90 }
+				: new PngBitmapEncoder();
+			encoder.Frames.Add(BitmapFrame.Create(resized));
+			using var output = new MemoryStream();
+			encoder.Save(output);
+			return output.ToArray();
 		}
 
 		private sealed record FrameBounds(
@@ -211,7 +173,6 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 			string? ParentUrl = null);
 
 		private sealed record FrameContainer(double X, double Y, double ScaleX, double ScaleY, string Url);
-		private sealed record ScreenshotClip(double X, double Y, double Width, double Height, double Scale);
-		private sealed record ScreenshotResponse(string? Data);
+		private sealed record CaptureMetrics(double PixelRatio, double ScrollX, double ScrollY);
 	}
 }
