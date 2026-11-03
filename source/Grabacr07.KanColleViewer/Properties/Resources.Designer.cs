@@ -122,6 +122,7 @@ namespace Grabacr07.KanColleViewer.Properties {
                 return ResourceManager.GetString("Common_ShipGirl", resourceCulture);
             }
         }
+        
         /// <summary>
         ///   これはテスト通知です。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
@@ -1073,6 +1074,33 @@ namespace Grabacr07.KanColleViewer.Properties {
         public static string Settings_Screenshot_OpenFolderButton {
             get {
                 return ResourceManager.GetString("Settings_Screenshot_OpenFolderButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   テーマ設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Settings_Theme {
+            get {
+                return ResourceManager.GetString("Settings_Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ダーク(一式) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Settings_Theme_Dark {
+            get {
+                return ResourceManager.GetString("Settings_Theme_Dark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ライト(三式) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Settings_Theme_Light {
+            get {
+                return ResourceManager.GetString("Settings_Theme_Light", resourceCulture);
             }
         }
         

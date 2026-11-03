@@ -381,6 +381,15 @@
   <data name="Settings_Other" xml:space="preserve">
     <value>その他</value>
   </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>テーマ設定</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>ダーク(一式)</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>ライト(三式)</value>
+  </data>
   <data name="Settings_Proxy" xml:space="preserve">
     <value>プロキシ設定</value>
   </data>

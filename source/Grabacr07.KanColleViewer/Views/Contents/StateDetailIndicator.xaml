@@ -30,7 +30,7 @@
 						<StackPanel Orientation="Horizontal">
 							<TextBlock x:Name="Text"
 									   Style="{DynamicResource DefaultTextStyleKey}"
-									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   Foreground="White"
 									   TextWrapping="NoWrap">
 								<TextBlock.Text>
 									<MultiBinding StringFormat="{}{0}{1}">
@@ -43,13 +43,13 @@
 									   Margin="8,0,0,0"
 									   Visibility="Collapsed"
 									   Style="{DynamicResource DefaultTextStyleKey}"
-									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   Foreground="White"
 									   TextWrapping="NoWrap"
 									   Text="{Binding [Ui_StateDetail_NosakiTimerPrefix], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 							<TextBlock x:Name="NosakiTimerText"
 									   Visibility="Collapsed"
 									   Style="{DynamicResource DefaultTextStyleKey}"
-									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   Foreground="White"
 									   TextWrapping="NoWrap"
 									   Text="{Binding NosakiTimerRemaining, Mode=OneWay}" />
 						</StackPanel>
@@ -124,7 +124,7 @@
 							<TextBlock x:Name="WarningText"
 									   Text="{Binding [Ui_StateDetail_Sortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 									   Style="{DynamicResource DefaultTextStyleKey}"
-									   Foreground="{DynamicResource ActiveForegroundBrushKey}">
+									   Foreground="White">
 								<i:Interaction.Behaviors>
 									<i:DataStateBehavior Binding="{Binding State.Situation, Converter={StaticResource HasFlagConverter}, ConverterParameter=Sortie|HeavilyDamaged}"
 														  Value="True"
@@ -186,7 +186,7 @@
 				<Border Padding="8,4"
 						Background="#FF204080">
 					<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
-							   Foreground="{DynamicResource ActiveForegroundBrushKey}">
+							   Foreground="White">
 						<Run Text="{Binding [Ui_StateDetail_Expedition], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 						<Run Text=":" />
 						<Run Text="{Binding Mission.Title, Mode=OneWay}" />
@@ -201,7 +201,7 @@
 						Background="#FF3E3E42">
 					<TextBlock Text="{Binding [Ui_StateDetail_NoShips], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 							   Style="{DynamicResource DefaultTextStyleKey}"
-							   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+							   Foreground="White" />
 				</Border>
 			</DataTemplate>
 		</ContentControl.Resources>

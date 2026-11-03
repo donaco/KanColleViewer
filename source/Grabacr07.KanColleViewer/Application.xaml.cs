@@ -112,7 +112,8 @@ namespace Grabacr07.KanColleViewer
 				GeneralSettings.Culture.Subscribe(x => ResourceService.Current.ChangeCulture(x)).AddTo(this);
 				KanColleClient.Current.Settings = new KanColleSettings();
 
-				AppThemeService.Current.Register(this, AppAccent.Purple);
+				AppThemeService.Current.Register(this, AppAccent.Purple, GeneralSettings.Theme.Value);
+				GeneralSettings.Theme.Subscribe(x => AppThemeService.Current.ChangeTheme(x)).AddTo(this);
 
 				Helper.SetMMCSSTask();
 

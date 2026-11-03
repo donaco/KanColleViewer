@@ -92,7 +92,7 @@
 		<Setter Property="Background"
 				Value="Transparent" />
 		<Setter Property="Foreground"
-				Value="#FFFFFFFF" />
+				Value="{DynamicResource ActiveForegroundBrushKey}" />
 		<Setter Property="BorderBrush"
 				Value="#FFFFFFFF" />
 		<Setter Property="BorderThickness"

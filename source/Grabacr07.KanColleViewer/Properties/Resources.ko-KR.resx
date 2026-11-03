@@ -381,6 +381,15 @@
   <data name="Settings_Other" xml:space="preserve">
     <value>기타</value>
   </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>테마</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>다크</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>라이트</value>
+  </data>
   <data name="Settings_Proxy" xml:space="preserve">
     <value>프록시설정</value>
   </data>

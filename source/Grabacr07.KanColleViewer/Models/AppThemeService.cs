@@ -27,16 +27,52 @@ namespace Grabacr07.KanColleViewer.Models
 
         private Application? _app;
         private AppAccent _currentAccent = AppAccent.Purple;
+        private AppTheme? _currentTheme;
 
         private AppThemeService() { }
 
         /// <summary>
         /// テーマサービスを初期化します。
         /// </summary>
-        public void Register(Application app, AppAccent accent = AppAccent.Purple)
+        public void Register(Application app, AppAccent accent = AppAccent.Purple, AppTheme theme = AppTheme.Dark)
         {
             this._app = app ?? throw new ArgumentNullException(nameof(app));
             this._currentAccent = accent;
+            this._currentTheme = null;
+            this.ChangeTheme(theme);
+        }
+
+        /// <summary>
+        /// アプリケーションの表示テーマを変更します。
+        /// </summary>
+        public void ChangeTheme(AppTheme theme)
+        {
+            var app = this._app;
+            if (app == null || this._currentTheme == theme) return;
+
+            var fileName = theme switch
+            {
+                AppTheme.Dark => "Dark.xaml",
+                AppTheme.Light => "Light.xaml",
+                _ => throw new ArgumentOutOfRangeException(nameof(theme), theme, "未対応のテーマです。"),
+            };
+            var dictionary = new ResourceDictionary { Source = new Uri(_baseUri, $"Accents/{fileName}") };
+
+            app.Dispatcher.Invoke(() =>
+            {
+                var dictionaries = app.Resources.MergedDictionaries;
+                var existing = dictionaries.FirstOrDefault(x =>
+                    x.Source != null &&
+                    (x.Source.OriginalString.EndsWith("/Accents/Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
+                     x.Source.OriginalString.EndsWith("/Accents/Light.xaml", StringComparison.OrdinalIgnoreCase)));
+
+                if (existing == null)
+                    dictionaries.Insert(0, dictionary);
+                else
+                    dictionaries[dictionaries.IndexOf(existing)] = dictionary;
+            });
+
+            this._currentTheme = theme;
         }
 
         /// <summary>
@@ -141,5 +177,14 @@ namespace Grabacr07.KanColleViewer.Models
         Orange,
         /// <summary>任意の Color を使う場合は AppThemeService.ChangeAccent(Color) を使用します。</summary>
         Custom,
+    }
+
+    /// <summary>
+    /// アプリケーションの表示テーマを表します。
+    /// </summary>
+    public enum AppTheme
+    {
+        Dark,
+        Light,
     }
 }

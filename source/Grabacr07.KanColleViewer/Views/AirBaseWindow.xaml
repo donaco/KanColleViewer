@@ -244,9 +244,9 @@
 
 												<!-- 上段: 半径 -->
 												<TextBlock Grid.Row="0" Grid.Column="1"
-														   FontSize="13" 
-														   Foreground="#c8c8c8"
-														   VerticalAlignment="Center"
+													   FontSize="13"
+													   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+													   VerticalAlignment="Center"
 											   Margin="0,0,8,0">
 									<Run Text="{Binding [Ui_AirBases_Radius], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 									<Run Text="{Binding Distance, Mode=OneWay}" />
@@ -254,9 +254,9 @@
 
 												<!-- 上段: 制空 -->
 												<TextBlock Grid.Row="0" Grid.Column="2"
-														   FontSize="13" 
-														   Foreground="#c8c8c8"
-														   VerticalAlignment="Center"
+													   FontSize="13"
+													   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+													   VerticalAlignment="Center"
 											   Margin="0,0,20,0">
 									<Run Text="{Binding [Ui_AirBases_AirPower], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 									<Run Text="{Binding AirPower, Mode=OneWay}" />
@@ -275,9 +275,9 @@
 														<DataTemplate>
 															<StackPanel Orientation="Horizontal" Margin="2,0" VerticalAlignment="Center">
 																<!-- 搭載数 -->
-																<TextBlock VerticalAlignment="Center" Margin="2,0,6,0" 
-																		Foreground="#c8c8c8" 
-																		FontSize="12">
+																<TextBlock VerticalAlignment="Center" Margin="2,0,6,0"
+																	Foreground="{DynamicResource ActiveForegroundBrushKey}"
+																	FontSize="12">
 																	<TextBlock.Text>
 																		<MultiBinding StringFormat="[{0:00} / {1:00}]">
 																			<Binding Path="Count" />
@@ -356,9 +356,9 @@
 
 																	<!-- 熟練度 -->
 																	<TextBlock Margin="6,0,0,0"
-																			   VerticalAlignment="Center"
-																			   Foreground="#c8c8c8" 
-													   FontSize="12">
+																		   VerticalAlignment="Center"
+																		   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+																		   FontSize="12">
 													<TextBlock.Text>
 														<MultiBinding StringFormat="{}{0}{1}">
 															<Binding Source="{x:Static models:ResourceService.Current}" Path="[Ui_AirBases_ProficiencyPrefix]" Mode="OneWay" />

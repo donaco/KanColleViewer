@@ -16,6 +16,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			= new SerializableProperty<string>(GetKey(), Providers.Roaming) { AutoSave = true };
 
 		/// <summary>
+		/// アプリケーションの表示テーマを取得します。
+		/// </summary>
+		public static SerializableProperty<AppTheme> Theme { get; }
+			= new SerializableProperty<AppTheme>(GetKey(), Providers.Roaming, AppTheme.Dark) { AutoSave = true };
+
+		/// <summary>
 		/// アプリケーションがプロキシ モード (ブラウザーを表示せず、プロキシとしてのみ使用するモード) で動作するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> IsProxyMode { get; }

@@ -58,7 +58,7 @@
 				<Setter Property="HasDropShadow"
 						Value="True" />
 				<Setter Property="Foreground"
-						Value="{DynamicResource AccentForegroundBrushKey}" />
+						Value="{DynamicResource ActiveForegroundBrushKey}" />
 				<Setter Property="Template">
 					<Setter.Value>
 						<ControlTemplate TargetType="ToolTip">
