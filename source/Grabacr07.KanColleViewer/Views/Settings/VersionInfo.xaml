@@ -57,11 +57,7 @@
 					 FontFamily="Segoe UI Light"
 					 FontSize="20"
 					 Foreground="{DynamicResource ActiveForegroundBrushKey}" />
-			</TextBlock>
-			<TextBlock Text="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, StringFormat=WebView2 Runtime {0}, Mode=OneWay}"
-					   Visibility="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, Converter={StaticResource StringToVisibilityConverter}, Mode=OneWay}"
-					   FontFamily="Segoe UI"
-					   Margin="0,6,0,0" />
+			</TextBlock>			
 
 			<Rectangle Height=".99"
 					   Margin="0,10"
@@ -164,6 +160,11 @@
 				</TextBlock>
 			</StackPanel>
 		</StackPanel>
+
+		<TextBlock Text="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, StringFormat=WebView2 Runtime {0}, Mode=OneWay}"
+		   Visibility="{Binding Source={x:Static webview:WebView2Setup.RuntimeVersion}, Converter={StaticResource StringToVisibilityConverter}, Mode=OneWay}"
+		   FontFamily="Segoe UI"
+		   Margin="0,6,0,0" />
 
 		<TextBlock Grid.Row="1"
 				   Grid.Column="0"

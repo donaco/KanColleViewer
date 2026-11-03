@@ -161,6 +161,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			core.Settings.AreDevToolsEnabled = WebView2Setup.IsDevToolsEnabled;
 			core.Settings.AreDefaultContextMenusEnabled = false;
 			core.NavigationStarting += this.HandleNavigationStarting;
+			core.DOMContentLoaded += this.HandleDOMContentLoaded;
 			core.NavigationCompleted += this.HandleNavigationCompleted;
 			core.HistoryChanged += this.HandleHistoryChanged;
 			core.SourceChanged += this.HandleSourceChanged;
@@ -322,6 +323,12 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			this.trackedFrames.Clear();
 			this.loadedFrames.Clear();
 			this.frameSources.Clear();
+		}
+
+		private async void HandleDOMContentLoaded(object? sender, CoreWebView2DOMContentLoadedEventArgs e)
+		{
+			// 中継先や子フレームの読み込み完了を待たずに、周辺のページ要素を非表示にします。
+			await this.ApplyUserStyleSheetToCurrentDocumentsAsync();
 		}
 
 		private async void HandleNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -759,6 +766,7 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 			if (this.core is not null)
 			{
 				this.core.FrameCreated -= this.HandleFrameCreated;
+				this.core.DOMContentLoaded -= this.HandleDOMContentLoaded;
 				this.core.WebResourceResponseReceived -= this.HandleWebResourceResponseReceived;
 				this.core.ServerCertificateErrorDetected -= this.HandleServerCertificateErrorDetected;
 				this.core = null;

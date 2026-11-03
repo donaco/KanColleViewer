@@ -19,6 +19,7 @@
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:KanColleWindowViewModel}"
 				   Title="{Binding Title}"
+				   Icon="pack://application:,,,/KanColleViewer;component/Assets/app.ico"
 				   Width="960"
 				   Height="600"
 				   FontSize="12"

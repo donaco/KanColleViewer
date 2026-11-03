@@ -16,6 +16,7 @@
 				   mc:Ignorable="d"
 				   d:DataContext="{d:DesignInstance viewModels:InformationWindowViewModel}"
 				   Title="{Binding Title}"
+				   Icon="pack://application:,,,/KanColleViewer;component/Assets/app.ico"
 				   Width="960"
 				   Height="659"
 				   Topmost="{Binding Settings.TopMost.Value, Mode=TwoWay}"
