@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<ResourceDictionary.MergedDictionaries>
+		<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Themes/Accents/Dark.xaml" />
+	</ResourceDictionary.MergedDictionaries>
+
+	<Color x:Key="ThemeColorKey">#FF666d6f</Color>
+	<SolidColorBrush x:Key="ThemeBrushKey" Color="#FF666d6f" />
+
+	<Color x:Key="BackgroundColorKey">#FF666d6f</Color>
+	<SolidColorBrush x:Key="BackgroundBrushKey" Color="#FF666d6f" />
+
+	<Color x:Key="ChromeBackgroundColorKey">#FF666d6f</Color>
+	<SolidColorBrush x:Key="ChromeBackgroundBrushKey" Color="#FF666d6f" />
+
+</ResourceDictionary>

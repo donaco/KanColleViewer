@@ -81,18 +81,6 @@
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 
-		<TextBlock Text="{Binding [Settings_Theme], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
-		<WrapPanel Margin="20,0,0,10">
-			<RadioButton Content="{Binding [Settings_Theme_Dark], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-						 Margin="0,0,24,0"
-						 IsChecked="{Binding Source={x:Static ms:GeneralSettings.Theme}, Path=Value, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark}" />
-			<RadioButton Content="{Binding [Settings_Theme_Light], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-						 IsChecked="{Binding Source={x:Static ms:GeneralSettings.Theme}, Path=Value, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light}" />
-		</WrapPanel>
-
-		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-
 		<TextBlock Text="{Binding Resources.Settings_Language, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 

@@ -390,6 +390,9 @@
   <data name="Settings_Theme_Light" xml:space="preserve">
     <value>라이트</value>
   </data>
+  <data name="Settings_Theme_Gray" xml:space="preserve">
+    <value>그레이</value>
+  </data>
   <data name="Settings_Proxy" xml:space="preserve">
     <value>프록시설정</value>
   </data>

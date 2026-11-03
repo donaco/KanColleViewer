@@ -390,6 +390,9 @@
   <data name="Settings_Theme_Light" xml:space="preserve">
     <value>浅色</value>
   </data>
+  <data name="Settings_Theme_Gray" xml:space="preserve">
+    <value>灰色</value>
+  </data>
   <data name="Settings_Proxy" xml:space="preserve">
     <value>代理设置</value>
   </data>

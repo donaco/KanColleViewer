@@ -54,6 +54,7 @@ namespace Grabacr07.KanColleViewer.Models
             {
                 AppTheme.Dark => "Dark.xaml",
                 AppTheme.Light => "Light.xaml",
+                AppTheme.Gray => "Gray.xaml",
                 _ => throw new ArgumentOutOfRangeException(nameof(theme), theme, "未対応のテーマです。"),
             };
             var dictionary = new ResourceDictionary { Source = new Uri(_baseUri, $"Accents/{fileName}") };
@@ -64,7 +65,8 @@ namespace Grabacr07.KanColleViewer.Models
                 var existing = dictionaries.FirstOrDefault(x =>
                     x.Source != null &&
                     (x.Source.OriginalString.EndsWith("/Accents/Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
-                     x.Source.OriginalString.EndsWith("/Accents/Light.xaml", StringComparison.OrdinalIgnoreCase)));
+                     x.Source.OriginalString.EndsWith("/Accents/Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+                     x.Source.OriginalString.EndsWith("/Accents/Gray.xaml", StringComparison.OrdinalIgnoreCase)));
 
                 if (existing == null)
                     dictionaries.Insert(0, dictionary);
@@ -186,5 +188,6 @@ namespace Grabacr07.KanColleViewer.Models
     {
         Dark,
         Light,
+        Gray,
     }
 }

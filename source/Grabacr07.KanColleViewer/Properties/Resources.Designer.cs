@@ -1096,6 +1096,15 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   グレー(二式) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Settings_Theme_Gray {
+            get {
+                return ResourceManager.GetString("Settings_Theme_Gray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ライト(三式) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Settings_Theme_Light {

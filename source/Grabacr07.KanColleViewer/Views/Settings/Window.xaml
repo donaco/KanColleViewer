@@ -31,7 +31,7 @@
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Orientation="Horizontal"
-					Margin="20,0,0,00">
+					Margin="20,0,0,0">
 			<TextBlock Text="{Binding [Ui_Window_ExitConfirmation], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Margin="0,0,10,0" />
 			<controls:PromptComboBox ItemsSource="{Binding ExitConfirmationTypes}"
@@ -47,7 +47,7 @@
 		<TextBlock Text="{Binding [Ui_Window_TaskbarSettings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
-		<Grid Margin="20,0,0,00">
+		<Grid Margin="20,0,0,0">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="4" />
@@ -79,6 +79,20 @@
 								  SelectedValue="{Binding Source={x:Static ms:GeneralSettings.TaskbarProgressSourceWhenSortie}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 								  Prompt="" />
 		</Grid>
+
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+
+		<TextBlock Text="{Binding [Settings_Theme], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
+		<WrapPanel Margin="20,0,0,0">
+			<RadioButton Content="{Binding [Settings_Theme_Dark], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+						 Margin="0,0,24,0"
+						 IsChecked="{Binding Source={x:Static ms:GeneralSettings.Theme}, Path=Value, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark}" />
+			<RadioButton Content="{Binding [Settings_Theme_Light], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+						 Margin="0,0,24,0"
+						 IsChecked="{Binding Source={x:Static ms:GeneralSettings.Theme}, Path=Value, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light}" />
+		</WrapPanel>
+
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 		
 		<TextBlock Text="{Binding [Ui_Window_LauncherSettings], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
@@ -88,8 +102,8 @@
 				  IsChecked="{Binding ShowWindowLauncher, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 				  Margin="20,4,0,0" />
 		<CheckBox Content="{Binding [Ui_Window_ShowWindowsOnStartup], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
-		  IsChecked="{Binding ShowWindowsOnStartup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-		  Margin="20,4,0,0" />
+				  IsChecked="{Binding ShowWindowsOnStartup, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+				  Margin="20,4,0,0" />
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
 

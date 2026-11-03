@@ -9,6 +9,7 @@
 
 	<Color x:Key="BorderColorKey">#FFD6D6D6</Color>
 	<SolidColorBrush x:Key="BorderBrushKey" Color="#FFD6D6D6" />
+	<SolidColorBrush x:Key="CircleButtonBorderBrushKey" Color="#FF333333" />
 
 	<Color x:Key="ForegroundColorKey">#FF333333</Color>
 	<SolidColorBrush x:Key="ForegroundBrushKey" Color="#FF333333" />

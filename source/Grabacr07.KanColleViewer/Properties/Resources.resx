@@ -387,6 +387,9 @@
   <data name="Settings_Theme_Dark" xml:space="preserve">
     <value>ダーク(一式)</value>
   </data>
+  <data name="Settings_Theme_Gray" xml:space="preserve">
+    <value>グレー(二式)</value>
+  </data>
   <data name="Settings_Theme_Light" xml:space="preserve">
     <value>ライト(三式)</value>
   </data>

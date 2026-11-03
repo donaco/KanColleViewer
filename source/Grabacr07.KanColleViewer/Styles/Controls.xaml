@@ -94,7 +94,7 @@
 		<Setter Property="Foreground"
 				Value="{DynamicResource ActiveForegroundBrushKey}" />
 		<Setter Property="BorderBrush"
-				Value="#FFFFFFFF" />
+				Value="{DynamicResource CircleButtonBorderBrushKey}" />
 		<Setter Property="BorderThickness"
 				Value="1" />
 		<Setter Property="HorizontalContentAlignment"
@@ -126,7 +126,7 @@
 									Value="{DynamicResource ActiveBackgroundBrushKey}" />
 							<Setter TargetName="border"
 									Property="BorderBrush"
-									Value="#FFFFFFFF" />
+									Value="{DynamicResource CircleButtonBorderBrushKey}" />
 							<Setter Property="Foreground"
 									Value="{DynamicResource ActiveForegroundBrushKey}" />
 						</Trigger>
