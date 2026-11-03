@@ -2,14 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Grabacr07.KanColleViewer.Models;
 using Grabacr07.KanColleViewer.Models.Settings;
 using Grabacr07.KanColleViewer.Properties;
 using Grabacr07.KanColleViewer.ViewModels;
 using Grabacr07.KanColleViewer.Views;
+using Grabacr07.KanColleViewer.Win32;
 using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models;
 using MetroTrilithon.Lifetime;
@@ -47,6 +51,12 @@ namespace Grabacr07.KanColleViewer
 		private Window? primaryWindow;
 		private readonly HashSet<Window> followedWindows = new HashSet<Window>();
 		private readonly Dictionary<Window, Point> relativeWindowLocations = new Dictionary<Window, Point>();
+		private readonly HashSet<Window> adjustedTopmostWindows = new HashSet<Window>();
+		private static readonly DependencyPropertyDescriptor topmostDescriptor =
+			DependencyPropertyDescriptor.FromProperty(Window.TopmostProperty, typeof(Window));
+		private HwndSource? primaryWindowSource;
+		private bool isWindowZOrderUpdatePending;
+		private bool isUpdatingWindowZOrder;
 		private Point? previousMainWindowLocation;
 		private bool isWindowTrackingInitialized;
 		private bool isMovingFollowedWindows;
@@ -271,6 +281,7 @@ namespace Grabacr07.KanColleViewer
 			{
 				this.TrackWindow(window);
 			}
+			this.RequestWindowZOrderUpdate();
 		}
 
 		private void TrackOpenWindows()
@@ -290,30 +301,44 @@ namespace Grabacr07.KanColleViewer
 
 			window.LocationChanged += this.HandleFollowedWindowLocationChanged;
 			window.Closed += this.HandleFollowedWindowClosed;
+			this.ObserveWindowZOrder(window);
 
 			if (GeneralSettings.FollowWindowsWithMainWindow.Value)
 			{
 				this.UpdateRelativeWindowLocation(window);
 			}
+			this.RequestWindowZOrderUpdate();
 		}
 
 		private void SetPrimaryWindow(Window window)
 		{
-			if (this.primaryWindow != null)
-			{
-				this.primaryWindow.LocationChanged -= this.HandleMainWindowLocationChanged;
-				this.primaryWindow.Loaded -= this.HandleMainWindowLoaded;
-				this.primaryWindow.Closed -= this.HandleMainWindowClosed;
-			}
-
+			this.DetachPrimaryWindow();
 			this.UntrackWindow(window);
 			this.primaryWindow = window;
 			window.LocationChanged += this.HandleMainWindowLocationChanged;
 			window.Loaded += this.HandleMainWindowLoaded;
 			window.Closed += this.HandleMainWindowClosed;
+			window.SourceInitialized += this.HandleMainWindowSourceInitialized;
+			this.ObserveWindowZOrder(window);
+			this.AttachMainWindowSource();
 
 			this.TrackOpenWindows();
 			if (window.IsLoaded) this.RefreshRelativeWindowLocations();
+			this.RequestWindowZOrderUpdate();
+		}
+
+		private void DetachPrimaryWindow()
+		{
+			this.primaryWindowSource?.RemoveHook(this.HandleMainWindowMessage);
+			this.primaryWindowSource = null;
+			if (this.primaryWindow == null) return;
+
+			this.primaryWindow.LocationChanged -= this.HandleMainWindowLocationChanged;
+			this.primaryWindow.Loaded -= this.HandleMainWindowLoaded;
+			this.primaryWindow.Closed -= this.HandleMainWindowClosed;
+			this.primaryWindow.SourceInitialized -= this.HandleMainWindowSourceInitialized;
+			this.UnobserveWindowZOrder(this.primaryWindow);
+			this.primaryWindow = null;
 		}
 
 		private void HandleMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -376,21 +401,22 @@ namespace Grabacr07.KanColleViewer
 
 		private void HandleFollowedWindowClosed(object? sender, EventArgs e)
 		{
-			if (sender is Window window) this.UntrackWindow(window);
+			if (sender is Window window)
+			{
+				this.adjustedTopmostWindows.Remove(window);
+				this.UntrackWindow(window);
+			}
+			this.RequestWindowZOrderUpdate();
 		}
 
 		private void HandleMainWindowClosed(object? sender, EventArgs e)
 		{
-			if (sender is not Window window) return;
+			if (!ReferenceEquals(sender, this.primaryWindow)) return;
 
-			window.LocationChanged -= this.HandleMainWindowLocationChanged;
-			window.Loaded -= this.HandleMainWindowLoaded;
-			window.Closed -= this.HandleMainWindowClosed;
-			if (!ReferenceEquals(window, this.primaryWindow)) return;
-
-			this.primaryWindow = null;
+			this.DetachPrimaryWindow();
 			this.previousMainWindowLocation = null;
 			this.relativeWindowLocations.Clear();
+			this.RequestWindowZOrderUpdate();
 		}
 
 		private void HandleFollowWindowsSettingChanged(bool followWindows)
@@ -404,6 +430,171 @@ namespace Grabacr07.KanColleViewer
 			{
 				this.relativeWindowLocations.Clear();
 			}
+			this.RequestWindowZOrderUpdate();
+		}
+
+		private void ObserveWindowZOrder(Window window)
+		{
+			window.Activated += this.HandleWindowZOrderChanged;
+			window.StateChanged += this.HandleWindowZOrderChanged;
+			window.IsVisibleChanged += this.HandleWindowVisibilityChanged;
+			topmostDescriptor.AddValueChanged(window, this.HandleWindowZOrderChanged);
+		}
+
+		private void UnobserveWindowZOrder(Window window)
+		{
+			window.Activated -= this.HandleWindowZOrderChanged;
+			window.StateChanged -= this.HandleWindowZOrderChanged;
+			window.IsVisibleChanged -= this.HandleWindowVisibilityChanged;
+			topmostDescriptor.RemoveValueChanged(window, this.HandleWindowZOrderChanged);
+		}
+
+		private void HandleWindowZOrderChanged(object? sender, EventArgs e) => this.RequestWindowZOrderUpdate();
+
+		private void HandleWindowVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e) => this.RequestWindowZOrderUpdate();
+
+		private void HandleMainWindowSourceInitialized(object? sender, EventArgs e) => this.AttachMainWindowSource();
+
+		private void AttachMainWindowSource()
+		{
+			if (this.primaryWindow == null || this.primaryWindowSource != null) return;
+
+			var handle = new WindowInteropHelper(this.primaryWindow).Handle;
+			if (handle == IntPtr.Zero) return;
+
+			this.primaryWindowSource = HwndSource.FromHwnd(handle);
+			this.primaryWindowSource?.AddHook(this.HandleMainWindowMessage);
+		}
+
+		private IntPtr HandleMainWindowMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+		{
+			if (message == NativeMethods.WM_WINDOWPOSCHANGED) this.RequestWindowZOrderUpdate();
+			return IntPtr.Zero;
+		}
+
+		private void RequestWindowZOrderUpdate()
+		{
+			if (this.isDisposed || this.isUpdatingWindowZOrder || this.isWindowZOrderUpdatePending || Application.Current == null) return;
+
+			this.isWindowZOrderUpdatePending = true;
+			// 表示・アクティブ化に伴う Windows 側の重なり順変更が終わってから補正する。
+			Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+			{
+				this.isWindowZOrderUpdatePending = false;
+				if (this.isDisposed) return;
+
+				this.isUpdatingWindowZOrder = true;
+				try
+				{
+					this.UpdateWindowZOrder();
+				}
+				finally
+				{
+					this.isUpdatingWindowZOrder = false;
+				}
+			}));
+		}
+
+		private void UpdateWindowZOrder()
+		{
+			var keepInFront = GeneralSettings.FollowWindowsWithMainWindow.Value
+				&& this.primaryWindow is { Topmost: true, IsVisible: true, WindowState: not WindowState.Minimized };
+			var windows = Application.Current.Windows.Cast<Window>()
+				.Where(window => keepInFront && window.IsVisible && window.WindowState != WindowState.Minimized
+					&& !ReferenceEquals(window, this.primaryWindow) && this.IsRelatedWindow(window))
+				.ToHashSet();
+
+			this.RestoreWindowTopmost(this.adjustedTopmostWindows.Except(windows).ToArray());
+			if (windows.Count == 0) return;
+
+			var handles = windows.ToDictionary(window => new WindowInteropHelper(window).Handle);
+			var orderedWindows = new List<Window>();
+			if (!NativeMethods.EnumWindows((handle, _) =>
+			{
+				if (handles.TryGetValue(handle, out var window)) orderedWindows.Add(window);
+				return true;
+			}, IntPtr.Zero))
+			{
+				NotifyWindowZOrderError();
+				return;
+			}
+
+			// 既存のサブウィンドウ同士・所有ダイアログの重なり順を保ち、入力フォーカスは移さない。
+			for (var index = orderedWindows.Count - 1; index >= 0; index--)
+			{
+				var window = orderedWindows[index];
+				if (SetWindowTopmost(window, true)) this.adjustedTopmostWindows.Add(window);
+			}
+		}
+
+		private bool IsRelatedWindow(Window window)
+		{
+			for (Window? current = window; current != null; current = current.Owner)
+			{
+				if (ReferenceEquals(current, this.primaryWindow) || this.followedWindows.Contains(current)) return true;
+			}
+			return false;
+		}
+
+		private static bool HasTopmostSetting(Window window)
+		{
+			for (Window? current = window; current != null; current = current.Owner)
+			{
+				if (current.Topmost) return true;
+			}
+			return false;
+		}
+
+		private void RestoreWindowTopmost(Window[] windows)
+		{
+			if (windows.Length == 0) return;
+
+			var restoreWindows = windows.ToHashSet();
+			if (Application.Current != null)
+			{
+				foreach (Window window in Application.Current.Windows)
+				{
+					for (var owner = window.Owner; owner != null; owner = owner.Owner)
+					{
+						if (!restoreWindows.Contains(owner)) continue;
+						restoreWindows.Add(window);
+						break;
+					}
+				}
+			}
+
+			// 最前面解除は非表示の所有ウィンドウにも及ぶため、ON のウィンドウは後で復元する。
+			foreach (var window in restoreWindows.OrderBy(HasTopmostSetting))
+			{
+				if (new WindowInteropHelper(window).Handle == IntPtr.Zero || SetWindowTopmost(window, HasTopmostSetting(window)))
+				{
+					this.adjustedTopmostWindows.Remove(window);
+				}
+				else
+				{
+					this.adjustedTopmostWindows.Add(window);
+				}
+			}
+		}
+
+		private static bool SetWindowTopmost(Window window, bool topmost)
+		{
+			// WPF の Topmost は設定に双方向バインドされているので変更しない。
+			var handle = new WindowInteropHelper(window).Handle;
+			if (handle == IntPtr.Zero) return false;
+			if (NativeMethods.SetWindowPos(handle, topmost ? NativeMethods.HWND_TOPMOST : NativeMethods.HWND_NOTOPMOST,
+				0, 0, 0, 0, NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE
+				| NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_NOOWNERZORDER)) return true;
+
+			NotifyWindowZOrderError();
+			return false;
+		}
+
+		private static void NotifyWindowZOrderError()
+		{
+			var error = new Win32Exception(Marshal.GetLastWin32Error());
+			System.Diagnostics.Trace.TraceError($"Window Z-order update failed: {error}");
+			StatusService.Current.Notify("ウィンドウの重なり順を変更できませんでした: " + error.Message);
 		}
 
 		private void RefreshRelativeWindowLocations()
@@ -446,6 +637,8 @@ namespace Grabacr07.KanColleViewer
 
 			window.LocationChanged -= this.HandleFollowedWindowLocationChanged;
 			window.Closed -= this.HandleFollowedWindowClosed;
+			this.UnobserveWindowZOrder(window);
+			if (this.adjustedTopmostWindows.Contains(window)) this.RestoreWindowTopmost(new[] { window });
 			this.relativeWindowLocations.Remove(window);
 		}
 
@@ -504,13 +697,8 @@ namespace Grabacr07.KanColleViewer
 		public void Dispose()
 		{
 			this.isDisposed = true;
-			if (this.primaryWindow != null)
-			{
-				this.primaryWindow.LocationChanged -= this.HandleMainWindowLocationChanged;
-				this.primaryWindow.Loaded -= this.HandleMainWindowLoaded;
-				this.primaryWindow.Closed -= this.HandleMainWindowClosed;
-				this.primaryWindow = null;
-			}
+			this.DetachPrimaryWindow();
+			this.RestoreWindowTopmost(this.adjustedTopmostWindows.ToArray());
 			foreach (var window in this.followedWindows.ToArray()) this.UntrackWindow(window);
 			this.relativeWindowLocations.Clear();
 			this.previousMainWindowLocation = null;
