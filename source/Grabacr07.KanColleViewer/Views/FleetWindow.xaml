@@ -203,8 +203,10 @@
 											   BasedOn="{StaticResource DefaultTextStyleKey}">
 											<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_Healthy], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+											<Setter Property="Foreground"
+														Value="{DynamicResource FleetHealthyStatusForegroundBrushKey}" />
 											<Setter Property="Background"
-													Value="{DynamicResource BackgroundBrushKey}" />
+														Value="{DynamicResource FleetHealthyStatusBackgroundBrushKey}" />
 											<Style.Triggers>
 												<MultiDataTrigger>
 													<MultiDataTrigger.Conditions>
@@ -780,7 +782,7 @@
 											<ColorAnimationUsingKeyFrames Storyboard.TargetName="DamageIndicator"
 																		  Storyboard.TargetProperty="Background.(SolidColorBrush.Color)">
 												<EasingColorKeyFrame KeyTime="0"
-																	 Value="{DynamicResource ThemeColorKey}" />
+																	 Value="{DynamicResource FleetDamageBlinkColorKey}" />
 												<EasingColorKeyFrame KeyTime="0:0:0.3"
 																	 Value="#FFB40000" />
 											</ColorAnimationUsingKeyFrames>
@@ -809,7 +811,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_Sortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="#FF5A2020" />
 											</DataTrigger>
@@ -830,7 +832,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_SortieReady], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetReSortieBrushKey}" />
 											</DataTrigger>
@@ -869,7 +871,7 @@
 																</Setter.Value>
 															</Setter>
 															<Setter Property="Foreground"
-																	Value="{DynamicResource ActiveForegroundBrushKey}" />
+															Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 															<Setter Property="Background"
 																	Value="{DynamicResource FleetExpeditionBrushKey}" />
 														</MultiDataTrigger>
@@ -914,7 +916,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_HeavilyDamagedShips], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetRepairingBrushKey}" />
 											</MultiDataTrigger>
@@ -926,7 +928,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_HeavilyDamagedShips_Sortie], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 											</MultiDataTrigger>
 										</Style.Triggers>
 									</Style>
@@ -948,7 +950,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_ShipsRepairing], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetRepairingBrushKey}" />
 											</MultiDataTrigger>
@@ -972,7 +974,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_ShipsNeedResupply], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetRepairingBrushKey}" />
 											</MultiDataTrigger>
@@ -1004,7 +1006,7 @@
 													</Setter.Value>
 												</Setter>
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetRepairingBrushKey}" />
 											</MultiDataTrigger>
@@ -1028,7 +1030,7 @@
 												<Setter Property="Text"
 														Value="{Binding [Ui_FleetWindow_RepairShipFlagship], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
 												<Setter Property="Foreground"
-														Value="{DynamicResource ActiveForegroundBrushKey}" />
+														Value="{DynamicResource FleetIndicatorForegroundBrushKey}" />
 												<Setter Property="Background"
 														Value="{DynamicResource FleetRepairingBrushKey}" />
 											</MultiDataTrigger>

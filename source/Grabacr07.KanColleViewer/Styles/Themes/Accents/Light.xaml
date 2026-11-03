@@ -7,6 +7,8 @@
 
 	<Color x:Key="BackgroundColorKey">#FFF4EEE5</Color>
 	<SolidColorBrush x:Key="BackgroundBrushKey" Color="#FFF4EEE5" />
+	<SolidColorBrush x:Key="EquipmentLevelOverlayBrushKey" Color="#66000000" />
+	<SolidColorBrush x:Key="EquipmentProficiencyOverlayBrushKey" Color="#99000000" />
 
 	<Color x:Key="BorderColorKey">#FFA8A3A0</Color>
 	<SolidColorBrush x:Key="BorderBrushKey" Color="#FFA8A3A0" />
@@ -19,6 +21,8 @@
 
 	<Color x:Key="ForegroundColorKey">#FF333333</Color>
 	<SolidColorBrush x:Key="ForegroundBrushKey" Color="#FF333333" />
+	<SolidColorBrush x:Key="FleetHealthyStatusForegroundBrushKey" Color="#FF222222" />
+	<SolidColorBrush x:Key="FleetHealthyStatusBackgroundBrushKey" Color="#FFa8a3a0" />
 
 	<Color x:Key="SemiactiveBackgroundColorKey">#FFF5F5F5</Color>
 	<SolidColorBrush x:Key="SemiactiveBackgroundBrushKey" Color="#FFF5F5F5" />
@@ -37,6 +41,9 @@
 
 	<Color x:Key="ActiveForegroundColorKey">#FF222222</Color>
 	<SolidColorBrush x:Key="ActiveForegroundBrushKey" Color="#FF222222" />
+	<SolidColorBrush x:Key="AirBaseMaintenanceLabelForegroundBrushKey" Color="#FFFFFFFF" />
+	<SolidColorBrush x:Key="FleetIndicatorForegroundBrushKey" Color="White" />
+	<Color x:Key="FleetDamageBlinkColorKey">#FF5A2020</Color>
 
 	<Color x:Key="InactiveBackgroundColorKey">#FFF0F0F0</Color>
 	<SolidColorBrush x:Key="InactiveBackgroundBrushKey" Color="#FFF0F0F0" />

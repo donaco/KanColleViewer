@@ -112,8 +112,10 @@
 			</StackPanel.Style>
 			<TextBlock Text="{Binding [Ui_AirBases_MaintenanceLevel], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Padding="8,4,0,4"
+					   Foreground="{DynamicResource AirBaseMaintenanceLabelForegroundBrushKey}"
 					   Style="{DynamicResource DefaultTextStyleKey}" />
 			<TextBlock Text="{Binding MaintenanceLevel, Mode=OneWay}"
+					   Foreground="{DynamicResource AirBaseMaintenanceLabelForegroundBrushKey}"
 					   Style="{StaticResource MaintenanceLevelTextStyle}"
 					   Margin="2,-3,0,0" />
 		</StackPanel>
@@ -264,10 +266,10 @@
 												   VerticalAlignment="Center"
 												   Margin="4,-2,0,0" />
 									</StackPanel>
-									<!-- 下段: condition ラベル -->
+									<!-- 下段: conditions ラベル -->
 									<TextBlock Text="condition"
 											   Style="{DynamicResource DefaultTextStyleKey}"
-											   Foreground="#c8c8c8"
+								   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 											   FontSize="9"
 											   HorizontalAlignment="Left"
 											   Margin="0,0,0,0" />
@@ -290,13 +292,14 @@
 												  ToolTip="{Binding ToolTipText, Mode=OneWay}"
 												  Background="Transparent"
 												  Margin="2,0">
-												<kcvc:SlotItemIcon Type="{Binding IconType, Mode=OneWay}"
-																   Width="30"
-																   Height="30" />
+												<kcvc:SlotItemIcon x:Name="EmptySlotIcon"
+																 Type="{Binding IconType, Mode=OneWay}"
+																 Width="30"
+																 Height="30" />
 
 												<!-- 熟練度を右上に表示 -->
 												<Grid x:Name="ItemProficiencyBlock"
-													  Background="#66000000"
+													  Background="{DynamicResource EquipmentProficiencyOverlayBrushKey}"
 													  VerticalAlignment="Top"
 													  HorizontalAlignment="Right"
 													  Panel.ZIndex="1"
@@ -346,7 +349,7 @@
 												</Grid>
 
 												<!-- 改修値を下端に表示 -->
-												<Border Background="#33000000"
+												<Border Background="{DynamicResource EquipmentLevelOverlayBrushKey}"
 														VerticalAlignment="Bottom"
 														HorizontalAlignment="Right"
 														Panel.ZIndex="1"
@@ -359,6 +362,9 @@
 												</Border>
 											</Grid>
 											<DataTemplate.Triggers>
+												<DataTrigger Binding="{Binding IconType, Mode=OneWay}" Value="Empty">
+													<Setter TargetName="EmptySlotIcon" Property="Visibility" Value="Hidden" />
+												</DataTrigger>
 												<DataTrigger Binding="{Binding LevelText, Mode=OneWay}" Value="">
 													<Setter TargetName="ItemLevelBlock" Property="Visibility" Value="Collapsed" />
 												</DataTrigger>
