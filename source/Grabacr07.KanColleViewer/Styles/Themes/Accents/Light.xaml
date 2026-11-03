@@ -33,8 +33,9 @@
 	<Color x:Key="SemiActiveForegroundColorKey">#FF777777</Color>
 	<SolidColorBrush x:Key="SemiActiveForegroundBrushKey" Color="#FF777777" />
 
-	<Color x:Key="ActiveBackgroundColorKey">#FFe5e5e5</Color>
-	<SolidColorBrush x:Key="ActiveBackgroundBrushKey" Color="#FFe5e5e5" />
+	<Color x:Key="ActiveBackgroundColorKey">#FFA8A3A0</Color>
+	<SolidColorBrush x:Key="ActiveBackgroundBrushKey" Color="#FFA8A3A0" />
+	<SolidColorBrush x:Key="WindowLayoutBackgroundBrushKey" Color="#FFA8A3A0" />
 
 	<Color x:Key="ActiveBorderColorKey">#FFA8A3A0</Color>
 	<SolidColorBrush x:Key="ActiveBorderBrushKey" Color="#FFA8A3A0" />

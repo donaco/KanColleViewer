@@ -161,7 +161,7 @@
 							<Setter Property="BorderBrush"
 									Value="{DynamicResource SemiactiveBorderBrushKey}" />
 							<Setter Property="Foreground"
-									Value="{DynamicResource SemiActiveForegroundBrushKey}" />
+									Value="{DynamicResource ForegroundBrushKey}" />
 							<Setter Property="HorizontalContentAlignment"
 									Value="Center" />
 							<Setter Property="VerticalContentAlignment"
@@ -251,7 +251,7 @@
 
 						<Style TargetType="{x:Type RadioButton}">
 							<Setter Property="Background"
-									Value="{DynamicResource ActiveBackgroundBrushKey}" />
+									Value="{DynamicResource WindowLayoutBackgroundBrushKey}" />
 							<Setter Property="Foreground"
 									Value="{DynamicResource ActiveForegroundBrushKey}" />
 							<Setter Property="Padding"
@@ -295,7 +295,7 @@
 								<Setter Property="BorderThickness"
 										Value=".99" />
 								<Setter Property="BorderBrush"
-										Value="{DynamicResource ActiveBackgroundBrushKey}" />
+										Value="{DynamicResource WindowLayoutBackgroundBrushKey}" />
 								<Style.Triggers>
 									<DataTrigger Binding="{Binding ElementName=MergedCheckBox, Path=IsChecked}"
 												 Value="True">
@@ -351,7 +351,7 @@
 								<Setter Property="BorderThickness"
 										Value=".99" />
 								<Setter Property="BorderBrush"
-										Value="{DynamicResource ActiveBackgroundBrushKey}" />
+										Value="{DynamicResource WindowLayoutBackgroundBrushKey}" />
 								<Style.Triggers>
 									<DataTrigger Binding="{Binding ElementName=SplitCheckBox, Path=IsChecked}"
 												 Value="True">

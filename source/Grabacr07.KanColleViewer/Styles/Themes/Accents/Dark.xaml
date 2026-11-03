@@ -36,6 +36,7 @@
 
 	<Color x:Key="ActiveBackgroundColorKey">#FF3F3F46</Color>
 	<SolidColorBrush x:Key="ActiveBackgroundBrushKey" Color="#FF3F3F46" />
+	<SolidColorBrush x:Key="WindowLayoutBackgroundBrushKey" Color="#FF3F3F46" />
 
 	<Color x:Key="ActiveBorderColorKey">#FF3F3F46</Color>
 	<SolidColorBrush x:Key="ActiveBorderBrushKey" Color="#FF3F3F46" />
