@@ -598,7 +598,7 @@
     <value>中：自動調整</value>
   </data>
   <data name="Ui_Browser_FrameRate_Description" xml:space="preserve">
-    <value>中はモニタのリフレッシュレートに合わせて動作します。高は FPS 上限を解除し、環境によって GPU 負荷が高くなる場合があります。変更後はアプリの再起動が必要です。</value>
+    <value>中はモニタのリフレッシュレートに合わせて動作します。高は FPS 上限を解除します。変更後はアプリの再起動が必要です。</value>
   </data>
   <data name="Ui_Browser_FrameRate_Title" xml:space="preserve">
     <value>表示フレームレートを選択する</value>

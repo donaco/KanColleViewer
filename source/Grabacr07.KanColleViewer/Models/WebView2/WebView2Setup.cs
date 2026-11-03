@@ -14,6 +14,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 	{
 		Default,
 		Unlimited,
+		Fixed60,
 	}
 
 	public static class WebView2Setup
@@ -44,6 +45,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 			switch (GeneralSettings.WebView2FrameRate.Value)
 			{
 				case WebView2FrameRateMode.Default:
+				case WebView2FrameRateMode.Fixed60:
 					break;
 				case WebView2FrameRateMode.Unlimited:
 					arguments.Add("--disable-frame-rate-limit");

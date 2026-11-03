@@ -1465,7 +1465,7 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
-        ///   中はモニタのリフレッシュレートに合わせて動作します。高は FPS 上限を解除し、環境によって GPU 負荷が高くなる場合があります。変更後はアプリの再起動が必要です。 に類似しているローカライズされた文字列を検索します。
+        ///   中はモニタのリフレッシュレートに合わせて動作します。高は FPS 上限を解除します。変更後はアプリの再起動が必要です。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Browser_FrameRate_Description {
             get {
