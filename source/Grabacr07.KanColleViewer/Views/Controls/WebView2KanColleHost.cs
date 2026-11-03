@@ -269,9 +269,27 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleFrameNavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
 		{
+			if (IsBlockedFrameUri(e.Uri))
+			{
+				e.Cancel = true;
+				return;
+			}
 			if (sender is not CoreWebView2Frame frame) return;
 			this.loadedFrames.Remove(frame);
 			this.frameSources[frame] = e.Uri;
+		}
+
+		private static bool IsBlockedFrameUri(string address)
+		{
+			if (!Uri.TryCreate(address, UriKind.Absolute, out var uri)) return false;
+			var host = uri.Host;
+			return IsHostOrSubdomain(host, "twitter.com") || IsHostOrSubdomain(host, "adsrvr.org");
+		}
+
+		private static bool IsHostOrSubdomain(string host, string domain)
+		{
+			return host.Equals(domain, StringComparison.OrdinalIgnoreCase)
+				|| host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase);
 		}
 
 		private async void HandleFrameDOMContentLoaded(object? sender, CoreWebView2DOMContentLoadedEventArgs e)
