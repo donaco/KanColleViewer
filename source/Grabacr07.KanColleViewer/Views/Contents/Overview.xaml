@@ -28,7 +28,7 @@
 
 			<Style TargetType="{x:Type Border}">
 				<Setter Property="BorderBrush"
-						Value="{DynamicResource BorderBrushKey}" />
+						Value="{DynamicResource OverviewBorderBrushKey}" />
 				<Setter Property="BorderThickness"
 						Value=".99" />
 				<Setter Property="Padding"
@@ -37,11 +37,22 @@
 						Value="5,0,5,10" />
 			</Style>
 
+			<Style x:Key="OverviewSeparatorRectangleStyleKey"
+				   TargetType="{x:Type Rectangle}"
+				   BasedOn="{StaticResource SeparatorRectangleStyleKey}">
+				<Setter Property="Fill"
+						Value="{DynamicResource SeparatorBrushKey}" />
+				<Setter Property="Opacity"
+						Value="{DynamicResource SeparatorOpacityKey}" />
+			</Style>
+
 			<Style x:Key="JumbButtonStyleKey"
 				   TargetType="{x:Type metro2:CallMethodButton}"
 				   BasedOn="{StaticResource {x:Type metro2:CallMethodButton}}">
 				<Setter Property="Background"
 						Value="Transparent" />
+				<Setter Property="BorderBrush"
+						Value="{DynamicResource OverviewBorderBrushKey}" />
 				<Setter Property="Padding"
 						Value="8" />
 				<Setter Property="HorizontalContentAlignment"
@@ -236,7 +247,7 @@
 										</Grid>
 										<Rectangle Height=".99"
 												   Margin="0,4,0,0"
-												   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+											   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 									</StackPanel>
 
 									<DataTemplate.Triggers>
@@ -359,7 +370,7 @@
 
 											<Rectangle Height=".99"
 													   Margin="0,6,0,4"
-													   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+													   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 											
 											<ItemsControl ItemsSource="{Binding Items}">
 												<ItemsControl.ItemTemplate>
@@ -402,14 +413,16 @@
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"
-								   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+								   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 
 						<metro2:CallMethodButton Content="{Binding [Ui_Overview_ShipCatalog], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+												 BorderBrush="{DynamicResource OverviewBorderBrushKey}"
 												 Padding="12,8"
 												 Margin="0,5,0,8"
 												 MethodName="ShowShipCatalog" />
 
 						<metro2:CallMethodButton Content="{Binding [Ui_Overview_SlotItemCatalog], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+												 BorderBrush="{DynamicResource OverviewBorderBrushKey}"
 												 Padding="12,8"
 												 MethodName="ShowSlotItemCatalog" />
 					</StackPanel>
@@ -425,7 +438,7 @@
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"
-								   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+								   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 
 						<ItemsControl ItemsSource="{Binding Fleets.Fleets}">
 							<ItemsControl.ItemTemplate>
@@ -469,7 +482,7 @@
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"
-								   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+								   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 
 						<TextBlock Text="{Binding Resources.Quests_Untaken, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 								   Visibility="{Binding IsUntaken, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -552,7 +565,7 @@
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"
-								   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+								   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 
 						<ItemsControl ItemsSource="{Binding RepairingDocks}">
 							<ItemsControl.ItemTemplate>
@@ -596,7 +609,7 @@
 
 						<Rectangle Height=".99"
 								   Margin="0,7,0,3"
-								   Style="{DynamicResource SeparatorRectangleStyleKey}" />
+								   Style="{DynamicResource OverviewSeparatorRectangleStyleKey}" />
 
 						<ItemsControl ItemsSource="{Binding BuildingDocks}">
 							<ItemsControl.ItemTemplate>

@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:s="clr-namespace:System;assembly=mscorlib">
 
 	<!-- Phase 4: MetroRadiance/Themes/Dark.xaml から内製化 -->
 	<Color x:Key="ThemeColorKey">#FF2D2D30</Color>
@@ -10,7 +11,12 @@
 
 	<Color x:Key="BorderColorKey">#FF3F3F46</Color>
 	<SolidColorBrush x:Key="BorderBrushKey" Color="#FF3F3F46" />
+	<SolidColorBrush x:Key="ButtonBorderBrushKey" Color="#FF3F3F46" />
+	<SolidColorBrush x:Key="OverviewBorderBrushKey" Color="#FF3F3F46" />
 	<SolidColorBrush x:Key="CircleButtonBorderBrushKey" Color="#FFFFFFFF" />
+	<SolidColorBrush x:Key="DevToolsIconStrokeBrushKey" Color="#FF2F2F32" />
+	<SolidColorBrush x:Key="SeparatorBrushKey" Color="#FF787878" />
+	<s:Double x:Key="SeparatorOpacityKey">0.6</s:Double>
 
 	<Color x:Key="ForegroundColorKey">#FFC8C8C8</Color>
 	<SolidColorBrush x:Key="ForegroundBrushKey" Color="#FFC8C8C8" />

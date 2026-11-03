@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:s="clr-namespace:System;assembly=mscorlib">
 
 	<Color x:Key="ThemeColorKey">#FFF4EEE5</Color>
 	<SolidColorBrush x:Key="ThemeBrushKey" Color="#FFF4EEE5" />
@@ -7,9 +8,14 @@
 	<Color x:Key="BackgroundColorKey">#FFF4EEE5</Color>
 	<SolidColorBrush x:Key="BackgroundBrushKey" Color="#FFF4EEE5" />
 
-	<Color x:Key="BorderColorKey">#FFD6D6D6</Color>
-	<SolidColorBrush x:Key="BorderBrushKey" Color="#FFD6D6D6" />
+	<Color x:Key="BorderColorKey">#FFA8A3A0</Color>
+	<SolidColorBrush x:Key="BorderBrushKey" Color="#FFA8A3A0" />
+	<SolidColorBrush x:Key="ButtonBorderBrushKey" Color="#FFA8A3A0" />
+	<SolidColorBrush x:Key="OverviewBorderBrushKey" Color="#FFA8A3A0" />
 	<SolidColorBrush x:Key="CircleButtonBorderBrushKey" Color="#FF333333" />
+	<SolidColorBrush x:Key="DevToolsIconStrokeBrushKey" Color="#FFF4EEE5" />
+	<SolidColorBrush x:Key="SeparatorBrushKey" Color="#FFA8A3A0" />
+	<s:Double x:Key="SeparatorOpacityKey">1</s:Double>
 
 	<Color x:Key="ForegroundColorKey">#FF333333</Color>
 	<SolidColorBrush x:Key="ForegroundBrushKey" Color="#FF333333" />
@@ -23,11 +29,11 @@
 	<Color x:Key="SemiActiveForegroundColorKey">#FF777777</Color>
 	<SolidColorBrush x:Key="SemiActiveForegroundBrushKey" Color="#FF777777" />
 
-	<Color x:Key="ActiveBackgroundColorKey">#FFE5E5E5</Color>
-	<SolidColorBrush x:Key="ActiveBackgroundBrushKey" Color="#FFE5E5E5" />
+	<Color x:Key="ActiveBackgroundColorKey">#FFe5e5e5</Color>
+	<SolidColorBrush x:Key="ActiveBackgroundBrushKey" Color="#FFe5e5e5" />
 
-	<Color x:Key="ActiveBorderColorKey">#FFC8C8C8</Color>
-	<SolidColorBrush x:Key="ActiveBorderBrushKey" Color="#FFC8C8C8" />
+	<Color x:Key="ActiveBorderColorKey">#FFA8A3A0</Color>
+	<SolidColorBrush x:Key="ActiveBorderBrushKey" Color="#FFA8A3A0" />
 
 	<Color x:Key="ActiveForegroundColorKey">#FF222222</Color>
 	<SolidColorBrush x:Key="ActiveForegroundBrushKey" Color="#FF222222" />
