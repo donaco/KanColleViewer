@@ -135,9 +135,6 @@
   <data name="Common_ShipGirl" xml:space="preserve">
     <value>Shipgirl</value>
   </data>
-  <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
-  </data>
   <data name="Debug_NotificationMessage" xml:space="preserve">
     <value>This is a test notification.</value>
   </data>

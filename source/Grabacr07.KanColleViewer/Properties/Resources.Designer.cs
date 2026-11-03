@@ -122,16 +122,6 @@ namespace Grabacr07.KanColleViewer.Properties {
                 return ResourceManager.GetString("Common_ShipGirl", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Debug に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        public static string Debug {
-            get {
-                return ResourceManager.GetString("Debug", resourceCulture);
-            }
-        }
-        
         /// <summary>
         ///   これはテスト通知です。 に類似しているローカライズされた文字列を検索します。
         /// </summary>

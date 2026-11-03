@@ -135,9 +135,6 @@
   <data name="Common_ShipGirl" xml:space="preserve">
     <value>舰娘</value>
   </data>
-  <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
-  </data>
   <data name="Debug_NotificationMessage" xml:space="preserve">
     <value>这是一条测试通知。</value>
   </data>

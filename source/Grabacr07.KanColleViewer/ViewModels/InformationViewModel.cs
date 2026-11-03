@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Grabacr07.KanColleViewer.ViewModels.Contents;
 using Grabacr07.KanColleViewer.ViewModels.Contents.AirBases;
 using Grabacr07.KanColleViewer.ViewModels.Contents.Fleets;
-using Grabacr07.KanColleViewer.ViewModels.Dev;
 using Grabacr07.KanColleViewer.ViewModels.Settings;
 using MetroTrilithon.Mvvm;
 
@@ -70,11 +69,6 @@ namespace Grabacr07.KanColleViewer.ViewModels
 			this.SystemTabItems = new List<TabItemViewModel>
 			{
 				SettingsViewModel.Instance,
-				#region DEBUG
-#if DEBUG
-				new DebugTabViewModel().AddTo(this),
-#endif
-				#endregion
 			};
 			this.SelectedItem = this.TabItems.FirstOrDefault();
 

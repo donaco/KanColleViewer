@@ -135,9 +135,6 @@
   <data name="Common_ShipGirl" xml:space="preserve">
     <value>艦娘</value>
   </data>
-  <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
-  </data>
   <data name="Debug_NotificationMessage" xml:space="preserve">
     <value>これはテスト通知です。</value>
   </data>

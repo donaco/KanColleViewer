@@ -10,8 +10,6 @@
 			 xmlns:vmContents="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents"
 			 xmlns:vmFleets="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.Fleets"
 			 xmlns:settings="clr-namespace:Grabacr07.KanColleViewer.Views.Settings"
-			 xmlns:devVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Dev"
-			 xmlns:dev="clr-namespace:Grabacr07.KanColleViewer.Views.Dev"
 			 xmlns:vm1="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Settings"
 			 xmlns:airBasesVm="clr-namespace:Grabacr07.KanColleViewer.ViewModels.Contents.AirBases"
 			 mc:Ignorable="d"
@@ -116,9 +114,6 @@
 				</DataTemplate>
 				<DataTemplate DataType="{x:Type vm1:SettingsViewModel}">
 					<settings:Settings />
-				</DataTemplate>
-				<DataTemplate DataType="{x:Type devVm:DebugTabViewModel}">
-					<dev:DebugTab />
 				</DataTemplate>
 			</Grid.Resources>
 		</Grid>

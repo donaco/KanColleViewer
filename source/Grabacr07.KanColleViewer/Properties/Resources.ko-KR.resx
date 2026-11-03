@@ -135,9 +135,6 @@
   <data name="Common_ShipGirl" xml:space="preserve">
     <value>칸무스</value>
   </data>
-  <data name="Debug" xml:space="preserve">
-    <value>디버그</value>
-  </data>
   <data name="Debug_NotificationMessage" xml:space="preserve">
     <value>테스트 알림입니다.</value>
   </data>
