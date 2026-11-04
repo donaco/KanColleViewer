@@ -97,6 +97,9 @@ namespace Grabacr07.KanColleViewer.Models
             var app = this._app;
             if (app == null) return;
 
+            // 定義済みアクセントへ戻す際に「変更なし」と誤判定しないよう、現在値を Custom にします。
+            this._currentAccent = AppAccent.Custom;
+
             // ハイライト（+20%明度）・アクティブ（-10%明度）を自動算出
             var highlight = LightenColor(color, 0.2f);
             var active    = LightenColor(color, -0.1f);
