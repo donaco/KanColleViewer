@@ -703,8 +703,24 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 
 		private void HandleNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
 		{
+			Uri.TryCreate(e.Uri, UriKind.Absolute, out var uri);
+			if (!this.disposed
+				&& uri is not null
+				&& uri.Scheme == Uri.UriSchemeHttps
+				&& (uri.Host.Equals("artemis.games.dmm.com", StringComparison.OrdinalIgnoreCase)
+					|| uri.Host.Equals("point.dmm.com", StringComparison.OrdinalIgnoreCase))
+				&& uri.IsDefaultPort)
+			{
+				// NewWindow を指定せず、WebView2 標準のポップアップでチャージ画面を開きます。
+				e.Handled = false;
+				return;
+			}
 			e.Handled = true;
-			this.ReportError("新しいウィンドウを開く要求には対応していません。");
+			// 認証情報を含むパス・クエリ・ユーザー情報は通知にもログにも出しません。
+			var destination = uri is null ? "不明なURL"
+				: string.IsNullOrEmpty(uri.Host) ? uri.Scheme + ":"
+				: uri.GetComponents(UriComponents.SchemeAndServer, UriFormat.UriEscaped);
+			this.ReportError($"新しいウィンドウを開く要求を拒否しました（要求先: {destination}）。");
 		}
 
 		private void HandleProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)

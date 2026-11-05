@@ -31,7 +31,6 @@ Microsoft Edge WebView2 を使った内蔵ブラウザーで艦これを表示�
 * ミュート
 * テーマ変更
 
-
 ### 動作環境
 * Windows 11
 * Windows 10
