@@ -206,10 +206,9 @@
 														 Style="{DynamicResource EmphaticTextElementStyleKey}" />
 													<Run Text="{Binding Ship.HP.Maximum, StringFormat=/{0}, Mode=OneWay}" />
 												</TextBlock>
-												<kcvc:ColorIndicator Grid.Row="1"
-																	 Height="6"
-																	 LimitedValue="{Binding Ship.HP, Mode=OneWay}"
-																	 Margin="0,2,0,0" />
+												<Border Grid.Row="1" BorderBrush="{DynamicResource BorderBrushKey}" BorderThickness="1" Height="6" Margin="0,2,0,0">
+													<kcvc:ColorIndicator Height="4" LimitedValue="{Binding Ship.HP, Mode=OneWay}" />
+												</Border>
 											</Grid>
 
 											<Grid x:Name="RepairIndicator"

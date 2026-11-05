@@ -8,6 +8,7 @@
 
 	<Color x:Key="BackgroundColorKey">#FF1B1B1C</Color>
 	<SolidColorBrush x:Key="BackgroundBrushKey" Color="#FF1B1B1C" />
+	<SolidColorBrush x:Key="ColorIndicatorDividerBrushKey" Color="#FF1B1B1C" />
 	<SolidColorBrush x:Key="EquipmentLevelOverlayBrushKey" Color="#33000000" />
 	<SolidColorBrush x:Key="EquipmentProficiencyOverlayBrushKey" Color="#66000000" />
 

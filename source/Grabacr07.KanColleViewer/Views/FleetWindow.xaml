@@ -180,10 +180,13 @@
 									<Run Text="/" />
 									<Run Text="{Binding HP.Maximum, Mode=OneWay}" />
 								</TextBlock>
-								<kcvc:ColorIndicator Height="7"
-													 VerticalAlignment="Bottom"
-													 Margin="1,4,0,2"
-													 LimitedValue="{Binding HP, Mode=OneWay}" />
+								<Border Height="7"
+										BorderBrush="{DynamicResource BorderBrushKey}"
+										BorderThickness="1"
+										VerticalAlignment="Bottom"
+										Margin="1,4,0,2">
+									<kcvc:ColorIndicator Height="5" LimitedValue="{Binding HP, Mode=OneWay}" />
+								</Border>
 							</StackPanel>
 
 							<DockPanel Grid.Column="3"
@@ -295,11 +298,13 @@
 									<Run Text="{Binding Fuel.Maximum, Mode=OneWay}"
 										 FontSize="10" />
 								</TextBlock>
-								<kcvc:ColorIndicator DockPanel.Dock="Top"
-													 LimitedValue="{Binding Fuel, Mode=OneWay}"
-													 Height="5"
-													 Columns="5"
-													 Margin="1,2,0,0" />
+								<Border DockPanel.Dock="Top"
+										BorderBrush="{DynamicResource BorderBrushKey}"
+										BorderThickness="1"
+										Height="5"
+										Margin="1,2,0,0">
+									<kcvc:ColorIndicator Height="3" Columns="5" LimitedValue="{Binding Fuel, Mode=OneWay}" />
+								</Border>
 								<Border />
 							</DockPanel>
 
@@ -323,11 +328,13 @@
 									<Run Text="{Binding Bull.Maximum, Mode=OneWay}"
 										 FontSize="10" />
 								</TextBlock>
-								<kcvc:ColorIndicator DockPanel.Dock="Top"
-													 LimitedValue="{Binding Bull, Mode=OneWay}"
-													 Height="5"
-													 Columns="5"
-													 Margin="1,2,0,0" />
+								<Border DockPanel.Dock="Top"
+										BorderBrush="{DynamicResource BorderBrushKey}"
+										BorderThickness="1"
+										Height="5"
+										Margin="1,2,0,0">
+									<kcvc:ColorIndicator Height="3" Columns="5" LimitedValue="{Binding Bull, Mode=OneWay}" />
+								</Border>
 								<Border />
 							</DockPanel>
 

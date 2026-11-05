@@ -161,7 +161,7 @@
 							<!-- マップ位置表示（設定で表示/非表示を切り替え） -->
 							<TextBlock x:Name="SortieInfoText"
 									   Text="{Binding SortieInfo.DisplayText, FallbackValue=''}"
-									   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+									   Foreground="White"
 									   Margin="8,0,0,0">
 								<TextBlock.Style>
 									<Style TargetType="TextBlock" BasedOn="{StaticResource DefaultTextStyleKey}">

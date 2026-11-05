@@ -193,13 +193,16 @@
 										<Run Text="/" />
 										<Run Text="{Binding Ship.HP.Maximum, Mode=OneWay}" />
 									</TextBlock>
-									<kcvc:ColorIndicator x:Name="HPIndicator"
-														 Grid.Row="1"
-														 Grid.Column="4"
-														 Height="6"
-														 VerticalAlignment="Bottom"
-														 Margin="10,0,10,2"
-														 LimitedValue="{Binding Ship.HP, Mode=OneWay}" />
+									<Border x:Name="HPIndicator"
+											Grid.Row="1"
+											Grid.Column="4"
+											Height="6"
+											VerticalAlignment="Bottom"
+											Margin="10,0,10,2"
+											BorderBrush="{DynamicResource BorderBrushKey}"
+											BorderThickness="1">
+										<kcvc:ColorIndicator Height="4" LimitedValue="{Binding Ship.HP, Mode=OneWay}" />
+									</Border>
 
 									<Grid x:Name="RepairIndicator"
 										  Grid.Column="4"
@@ -244,20 +247,24 @@
 											 FontSize="9" />
 									</TextBlock>
 
-									<kcvc:ColorIndicator Grid.Column="6"
-														 Grid.Row="0"
-														 Width="55"
-														 LimitedValue="{Binding Ship.Fuel, Mode=OneWay}"
-														 Height="6"
-														 Columns="5"
-														 Margin="0,6,0,7" />
-									<kcvc:ColorIndicator Grid.Column="6"
-														 Grid.Row="1"
-														 Width="55"
-														 LimitedValue="{Binding Ship.Bull, Mode=OneWay}"
-														 Height="6"
-														 Columns="5"
-														 VerticalAlignment="Top" />
+									<Border Grid.Column="6"
+											Grid.Row="0"
+											Width="55"
+											Height="6"
+											Margin="0,6,0,7"
+											BorderBrush="{DynamicResource BorderBrushKey}"
+											BorderThickness="1">
+										<kcvc:ColorIndicator Height="4" Columns="5" LimitedValue="{Binding Ship.Fuel, Mode=OneWay}" />
+									</Border>
+									<Border Grid.Column="6"
+											Grid.Row="1"
+											Width="55"
+											Height="6"
+											VerticalAlignment="Top"
+											BorderBrush="{DynamicResource BorderBrushKey}"
+											BorderThickness="1">
+										<kcvc:ColorIndicator Height="4" Columns="5" LimitedValue="{Binding Ship.Bull, Mode=OneWay}" />
+									</Border>
 
 									<ItemsControl Grid.Column="7"
 												  Grid.Row="0"
