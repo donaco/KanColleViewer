@@ -1029,6 +1029,9 @@
   <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
     <value>旗舰为维修舰时，不将舰队视为已做好出击准备</value>
   </data>
+  <data name="Ui_Operation_EmphasizeHeavilyDamagedAlert" xml:space="preserve">
+    <value>强化大破警告</value>
+  </data>
   <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
     <value>仅在航空战和防空节点显示制空信息</value>
   </data>

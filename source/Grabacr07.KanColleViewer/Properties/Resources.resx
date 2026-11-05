@@ -1029,6 +1029,9 @@
   <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
     <value>旗艦に工作艦が編成されているときは出撃可能と判断しない</value>
   </data>
+  <data name="Ui_Operation_EmphasizeHeavilyDamagedAlert" xml:space="preserve">
+    <value>大破時の警告を強調する</value>
+  </data>
   <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
     <value>航空戦マス・防空戦のみ制空権の情報を表示する</value>
   </data>

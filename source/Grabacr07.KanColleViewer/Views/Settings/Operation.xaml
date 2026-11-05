@@ -115,6 +115,10 @@
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
+			<CheckBox Content="{Binding [Ui_Operation_EmphasizeHeavilyDamagedAlert], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.EmphasizeHeavilyDamagedAlert}, Path=Value}" />
+
+			<Border Height="8" />
 			<CheckBox Content="{Binding [Ui_Operation_ShowSortieInfo], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.ShowSortieInfo}, Path=Value}" />
 

@@ -122,6 +122,12 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
 		/// <summary>
+		/// 大破時のアクセントカラーを点滅させるかどうかを示す設定値を取得します。
+		/// </summary>
+		public static SerializableProperty<bool> EmphasizeHeavilyDamagedAlert { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+
+		/// <summary>
 		/// 出撃中のマップ位置表示を表示するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> ShowSortieInfo { get; }

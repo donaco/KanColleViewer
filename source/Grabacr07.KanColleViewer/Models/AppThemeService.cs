@@ -94,15 +94,38 @@ namespace Grabacr07.KanColleViewer.Models
         /// </summary>
         public void ChangeAccent(Color color)
         {
+            this.ApplyCustomAccent(color, LightenColor(color, 0.2f), LightenColor(color, -0.1f));
+        }
+
+        internal void FadeAccent(Color from, AppAccent to, double progress)
+        {
+            if (!double.IsFinite(progress) || progress < 0 || progress > 1)
+                throw new ArgumentOutOfRangeException(nameof(progress));
+
+            var target = _accentColors[to];
+            this.ApplyCustomAccent(
+                BlendColors(from, target.accent, progress),
+                BlendColors(LightenColor(from, 0.2f), target.highlight, progress),
+                BlendColors(LightenColor(from, -0.1f), target.active, progress));
+        }
+
+        private static Color BlendColors(Color from, Color to, double progress)
+        {
+            var amount = (float)progress;
+            return Color.FromScRgb(
+                from.ScA + (to.ScA - from.ScA) * amount,
+                from.ScR + (to.ScR - from.ScR) * amount,
+                from.ScG + (to.ScG - from.ScG) * amount,
+                from.ScB + (to.ScB - from.ScB) * amount);
+        }
+
+        private void ApplyCustomAccent(Color color, Color highlight, Color active)
+        {
             var app = this._app;
             if (app == null) return;
 
             // 定義済みアクセントへ戻す際に「変更なし」と誤判定しないよう、現在値を Custom にします。
             this._currentAccent = AppAccent.Custom;
-
-            // ハイライト（+20%明度）・アクティブ（-10%明度）を自動算出
-            var highlight = LightenColor(color, 0.2f);
-            var active    = LightenColor(color, -0.1f);
 
             app.Dispatcher.Invoke(() =>
             {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -69,6 +70,9 @@ namespace Grabacr07.KanColleViewer
 
 		// 大破時のアクセントカラー (Red)
 		private static readonly Color HeavilyDamagedColor = Colors.Red;
+		private static readonly TimeSpan heavilyDamagedAlertFadeDuration = TimeSpan.FromMilliseconds(300);
+		private DispatcherTimer? heavilyDamagedAlertTimer;
+		private readonly Stopwatch heavilyDamagedAlertClock = new Stopwatch();
 
 		public WindowServiceMode Mode
 		{
@@ -138,6 +142,9 @@ namespace Grabacr07.KanColleViewer
 			GeneralSettings.FollowWindowsWithMainWindow
 				.Subscribe(this.HandleFollowWindowsSettingChanged)
 				.AddTo(this);
+			KanColleSettings.EmphasizeHeavilyDamagedAlert
+				.Subscribe(_ => this.UpdateAccent())
+				.AddTo(this);
 
 			if (GeneralSettings.IsProxyMode || useInformationWindowAsMainWindow)
 			{
@@ -193,6 +200,7 @@ namespace Grabacr07.KanColleViewer
 					.Subscribe(nameof(FleetState.Situation), this.UpdateAccent)
 					.AddTo(this.fleetStateListeners);
 			}
+			this.UpdateAccent();
 		}
 
 		/// <summary>
@@ -200,6 +208,24 @@ namespace Grabacr07.KanColleViewer
 		/// </summary>
 		private void UpdateAccent()
 		{
+			if (this.isDisposed) return;
+			var dispatcher = System.Windows.Application.Current.Dispatcher;
+			if (!dispatcher.CheckAccess())
+			{
+				dispatcher.Invoke(this.UpdateAccent);
+				return;
+			}
+
+			var hasHeavilyDamaged = this.currentMode == WindowServiceMode.InSortie
+				&& KanColleClient.Current.Homeport?.Organization.Fleets.Values
+					.Any(f => f.IsInSortie && f.State.Situation.HasFlag(FleetSituation.HeavilyDamaged)) == true;
+			var shouldBlink = hasHeavilyDamaged && KanColleSettings.EmphasizeHeavilyDamagedAlert.Value;
+			if (!shouldBlink)
+			{
+				this.heavilyDamagedAlertTimer?.Stop();
+				this.heavilyDamagedAlertClock.Reset();
+			}
+
 			switch (this.currentMode)
 			{
 				case WindowServiceMode.NotStarted:
@@ -211,15 +237,40 @@ namespace Grabacr07.KanColleViewer
 					break;
 
 				case WindowServiceMode.InSortie:
-					// 出撃中の艦隊に大破艦がいる場合は赤、それ以外はオレンジ
-					var hasHeavilyDamaged = KanColleClient.Current.Homeport.Organization.Fleets.Values
-						.Any(f => f.IsInSortie && f.State.Situation.HasFlag(FleetSituation.HeavilyDamaged));
-					if (hasHeavilyDamaged)
-						AppThemeService.Current.ChangeAccent(HeavilyDamagedColor);
-					else
+					if (!hasHeavilyDamaged)
+					{
 						AppThemeService.Current.ChangeAccent(AppAccent.Orange);
+						break;
+					}
+
+					// 状態通知が続いても、進行中の点滅は最初からやり直しません。
+					if (shouldBlink && this.heavilyDamagedAlertTimer?.IsEnabled == true) break;
+					AppThemeService.Current.ChangeAccent(HeavilyDamagedColor);
+					if (shouldBlink)
+					{
+						if (this.heavilyDamagedAlertTimer == null)
+						{
+							this.heavilyDamagedAlertTimer = new DispatcherTimer(DispatcherPriority.Background, dispatcher)
+							{
+								Interval = TimeSpan.FromMilliseconds(1000.0 / 30),
+							};
+							this.heavilyDamagedAlertTimer.Tick += this.HandleHeavilyDamagedAlertTick;
+						}
+						AppThemeService.Current.ChangeAccent(AppAccent.Orange);
+						this.heavilyDamagedAlertClock.Restart();
+						this.heavilyDamagedAlertTimer.Start();
+					}
 					break;
 			}
+		}
+
+		private void HandleHeavilyDamagedAlertTick(object? sender, EventArgs e)
+		{
+			if (this.isDisposed || this.heavilyDamagedAlertTimer?.IsEnabled != true) return;
+			var phase = (this.heavilyDamagedAlertClock.Elapsed.TotalMilliseconds
+				% (heavilyDamagedAlertFadeDuration.TotalMilliseconds * 2)) / heavilyDamagedAlertFadeDuration.TotalMilliseconds;
+			var progress = Math.Abs(phase - 1);
+			AppThemeService.Current.FadeAccent(HeavilyDamagedColor, AppAccent.Orange, progress);
 		}
 
 		private void UpdateMode()
@@ -697,6 +748,12 @@ namespace Grabacr07.KanColleViewer
 		public void Dispose()
 		{
 			this.isDisposed = true;
+			this.heavilyDamagedAlertClock.Reset();
+			if (this.heavilyDamagedAlertTimer != null)
+			{
+				this.heavilyDamagedAlertTimer.Stop();
+				this.heavilyDamagedAlertTimer.Tick -= this.HandleHeavilyDamagedAlertTick;
+			}
 			this.DetachPrimaryWindow();
 			this.RestoreWindowTopmost(this.adjustedTopmostWindows.ToArray());
 			foreach (var window in this.followedWindows.ToArray()) this.UntrackWindow(window);

@@ -1029,6 +1029,9 @@
   <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
     <value>Do not consider the fleet ready to sortie when a repair ship is the flagship</value>
   </data>
+  <data name="Ui_Operation_EmphasizeHeavilyDamagedAlert" xml:space="preserve">
+    <value>Emphasize heavy damage warnings</value>
+  </data>
   <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
     <value>Show air superiority information only for air battle and air defense nodes</value>
   </data>

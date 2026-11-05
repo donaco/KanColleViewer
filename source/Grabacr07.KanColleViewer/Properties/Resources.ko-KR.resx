@@ -1029,6 +1029,9 @@
   <data name="Ui_Operation_RepairShipFlagship" xml:space="preserve">
     <value>수리함이 기함인 경우 출격 준비 완료로 판단하지 않음</value>
   </data>
+  <data name="Ui_Operation_EmphasizeHeavilyDamagedAlert" xml:space="preserve">
+    <value>대파 경고 강조</value>
+  </data>
   <data name="Ui_Operation_ShowAirSuperiority" xml:space="preserve">
     <value>항공전 및 방공 노드에서만 제공 정보를 표시</value>
   </data>
