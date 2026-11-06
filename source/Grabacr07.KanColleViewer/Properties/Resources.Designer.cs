@@ -1519,6 +1519,91 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   削除する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_Delete {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   旧Verのデータを削除できませんでした。削除予約を解除しました。自動再試行はしません。
+        ///一部のファイルだけが削除された可能性があります。旧版のアプリが終了していることなどを確認してください。
+        ///
+        ///対象: {0}
+        ///詳細: {1} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_DeleteFailed {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_DeleteFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   次回起動時に Ver4.x 系のデータを削除します。チェックを外すと予約を取り消せます。起動時に新旧の両フォルダーが存在する場合のみ選択できます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_Description {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   削除しない に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_DoNotDelete {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_DoNotDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   削除対象フォルダーを開けませんでした。
+        ///
+        ///対象: {0}
+        ///詳細: {1} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_OpenFailed {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_OpenFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   旧Verのデータを削除する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_Title {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ver5.0.0以降で正常に利用できることを確認してから削除してください。
+        ///
+        ///次回起動時に、以下の Chromium フォルダーとその中の全てのデータを削除します。
+        ///旧Verのログイン情報や設定が可能性があります。旧Verのアプリは終了してください。
+        ///WebView2 フォルダーと親フォルダーは削除しません。
+        ///
+        ///［削除する］は次回起動時の削除を予約します。その場では削除しません。再起動前にチェックを外すと取り消せます。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_Warning {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時に WebView2 フォルダーが存在しなかったか、現在存在しないため、旧版のデータは削除しません。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Browser_LegacyData_WebView2Missing {
+            get {
+                return ResourceManager.GetString("Ui_Browser_LegacyData_WebView2Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   (誤ってズームしたとき用) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Browser_ResetZoom_Hint {
@@ -2203,6 +2288,51 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   初期化エラー: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Diagnostics_InitializationError {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Diagnostics_InitializationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   診断ログ: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Diagnostics_LogPath {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Diagnostics_LogPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   診断ログを保存できませんでした: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Diagnostics_LogWriteError {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Diagnostics_LogWriteError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   許可状態の確認エラー: {0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Diagnostics_SettingError {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Diagnostics_SettingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Windows 通知の状態 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Diagnostics_Title {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Diagnostics_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   艦隊に編成されている艦娘の疲労が回復したら通知する に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Notification_FleetRejuvenated {
@@ -2257,6 +2387,78 @@ namespace Grabacr07.KanColleViewer.Properties {
         }
         
         /// <summary>
+        ///   組織のポリシーにより通知が無効です。管理者にお問い合わせください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_DisabledByGroupPolicy {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_DisabledByGroupPolicy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   アプリのマニフェスト設定により通知が無効です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_DisabledByManifest {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_DisabledByManifest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   このアプリの通知は Windows の設定で無効です。通知設定でこのアプリを許可してください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_DisabledForApplication {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_DisabledForApplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ユーザー全体の通知が無効です。Windows の通知設定を確認してください。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_DisabledForUser {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_DisabledForUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Windows のアプリ通知は有効です。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_Enabled {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_Enabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Windows 通知の初期化に失敗しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_InitializationFailed {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_InitializationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   通知の許可状態を確認できません。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_Unknown {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   この Windows 環境では通知機能を利用できません。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Notification_Status_Unsupported {
+            get {
+                return ResourceManager.GetString("Ui_Notification_Status_Unsupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   艦隊自動選択 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Ui_Operation_AutoFleetSelection {
@@ -2298,6 +2500,15 @@ namespace Grabacr07.KanColleViewer.Properties {
         public static string Ui_Operation_Condition_Example {
             get {
                 return ResourceManager.GetString("Ui_Operation_Condition_Example", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   大破時の警告を強調する に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Ui_Operation_EmphasizeHeavilyDamagedAlert {
+            get {
+                return ResourceManager.GetString("Ui_Operation_EmphasizeHeavilyDamagedAlert", resourceCulture);
             }
         }
         

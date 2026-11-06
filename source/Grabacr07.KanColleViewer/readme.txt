@@ -1,6 +1,6 @@
 ﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 提督業も忙しい！ (KanColleViewer)
-version 5.0.0.b4 2026/11/03
+version 5.0.0.b5 2026/11/06
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -47,9 +47,9 @@ https://developer.microsoft.com/microsoft-edge/webview2/
 各画面の解説等は https://dona-co.art/?page_id=3534 を参照してください。
 
 ■保存データ
-・Ver5以降のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\WebView2 に保存します。
-・Ver5以前のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\Chromium に保存され、自動では削除しません。
-・不要な場合はアプリを終了してから Chromium フォルダーだけを手動で削除してください。削除すると旧版のログイン情報なども失われます。
+・Ver5のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\WebView2 に保存します。
+・Ver4のデータは %LOCALAPPDATA%\grabacr.net\KanColleViewer\Chromium に保存され、自動では削除しません。
+・「設定 > ブラウザ操作」の最下部で旧Verデータの削除を予約できます。起動時に WebView2 と Chromium の両フォルダーが存在する場合のみ選択できます。
 ・設定と現在のログイン状態を保つため、親フォルダーや WebView2 フォルダーは削除しないでください。
 
 ■スクリーンショット撮影

@@ -102,7 +102,7 @@
 				<Line X1="15" Y1="15" X2="7" Y2="28.86" Stroke="{DynamicResource DevToolsIconStrokeBrushKey}" StrokeThickness="3.98" Canvas.Left="9.1" Canvas.Top="6"/>
 				<Line X1="15" Y1="15" X2="7" Y2="1.14" Stroke="{DynamicResource DevToolsIconStrokeBrushKey}" StrokeThickness="3.98" Canvas.Left="-3.8" Canvas.Top="6.55"/>
 			</Canvas>
-			<TextBlock Margin="8,0,10,0"
+			<TextBlock Margin="8,10,10,0"
 					   Style="{DynamicResource DefaultTextStyleKey}"
 					   Text="{Binding [Ui_Browser_ShowDevTools_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
@@ -185,5 +185,23 @@
 		</DockPanel>
 
 		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
-    </StackPanel>
+
+		<DockPanel Margin="0,5,0,5"
+				   IsEnabled="{Binding Source={x:Static models:LegacyBrowserData.Current}, Path=IsDeletionAvailable, Mode=OneWay}">
+			<CheckBox DockPanel.Dock="Left"
+					  IsChecked="{Binding Source={x:Static settings:GeneralSettings.DeleteLegacyBrowserDataOnNextStartup}, Path=Value, Mode=OneWay}"
+					  Click="HandleDeleteLegacyBrowserDataClick"
+					  VerticalAlignment="Center"
+					  AutomationProperties.Name="{Binding [Ui_Browser_LegacyData_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+			<StackPanel Margin="8,0,0,0">
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   Text="{Binding [Ui_Browser_LegacyData_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+				<TextBlock Style="{DynamicResource DefaultTextStyleKey}"
+						   TextWrapping="Wrap"
+						   Text="{Binding [Ui_Browser_LegacyData_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}" />
+			</StackPanel>
+		</DockPanel>
+
+		<Rectangle Style="{DynamicResource SeparatorStyleKey}" />
+	</StackPanel>
 </UserControl>

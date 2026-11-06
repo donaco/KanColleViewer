@@ -179,6 +179,8 @@ namespace Grabacr07.KanColleViewer.Views.Controls
 				if (this.disposed) return;
 				GeneralSettings.ClearCacheOnNextStartup.Value = false;
 			}
+			await LegacyBrowserData.Current.DeleteOnStartupAsync();
+			if (this.disposed) return;
 			core.IsMuted = GeneralSettings.IsMuted.Value;
 			this.ready = true;
 			this.ApplySize();

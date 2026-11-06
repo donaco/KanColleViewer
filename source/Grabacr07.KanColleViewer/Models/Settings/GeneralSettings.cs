@@ -69,6 +69,9 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		public static SerializableProperty<bool> ClearCacheOnNextStartup { get; }
 			= new SerializableProperty<bool>(GetKey(), Providers.Local) { AutoSave = true, };
 
+		public static SerializableProperty<bool> DeleteLegacyBrowserDataOnNextStartup { get; }
+			= new SerializableProperty<bool>(GetKey(), Providers.Local, false) { AutoSave = true };
+
 		/// <summary>
 		/// GPU アクセラレーションを無効にするかどうかを示す設定値を取得します。
 		/// true の場合、WebView2 のブラウザー プロセスに --disable-gpu 起動引数を指定します。

@@ -579,6 +579,42 @@
   <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
     <value>The cache will be cleared the next time the application starts. Your login information will not be deleted.</value>
   </data>
+  <data name="Ui_Browser_LegacyData_Title" xml:space="preserve">
+    <value>Delete data from the old version</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Description" xml:space="preserve">
+    <value>Delete version 4.x data on the next startup. Uncheck to cancel. Available only when both the new and old data folders existed at startup.</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Warning" xml:space="preserve">
+    <value>Before deleting the old data, confirm that version 5.0.0 or later works correctly.
+
+The Chromium folder below and all its contents will be deleted on the next startup. Login information and settings from the old version may be lost. This cannot be undone. Close the old version of the application.
+The WebView2 folder and the parent folder will not be deleted.
+
+[Delete] schedules deletion for the next startup; nothing is deleted immediately. Uncheck before restarting to cancel.</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_DoNotDelete" xml:space="preserve">
+    <value>Do not delete</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_WebView2Missing" xml:space="preserve">
+    <value>The WebView2 folder did not exist at startup or no longer exists. Old version data will not be deleted.</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_DeleteFailed" xml:space="preserve">
+    <value>Could not delete old version data. The scheduled deletion has been canceled and will not be retried automatically.
+Some files may already have been deleted. Check that the old version is closed.
+
+Folder: {0}
+Details: {1}</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_OpenFailed" xml:space="preserve">
+    <value>Could not open the target folder.
+
+Folder: {0}
+Details: {1}</value>
+  </data>
   <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
     <value>Go back</value>
   </data>

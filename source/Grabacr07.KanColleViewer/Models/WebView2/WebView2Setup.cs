@@ -32,6 +32,7 @@ namespace Grabacr07.KanColleViewer.Models.WebView2
 
 		public static void Prepare()
 		{
+			LegacyBrowserData.Current.Prepare();
 			try
 			{
 				RuntimeVersion = CoreWebView2Environment.GetAvailableBrowserVersionString();

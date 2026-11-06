@@ -313,7 +313,8 @@
 					   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 			<StackPanel Orientation="Horizontal"
-						HorizontalAlignment="Right">
+						HorizontalAlignment="Right"
+						Margin="0,0,0,10">
 				<TextBlock Text="{Binding [Ui_Settings_DeveloperTools_Description], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 						   Style="{DynamicResource DetailTextStyleKey}"
 						   Margin="16,8" />
@@ -322,7 +323,7 @@
 										 MethodName="ShowDevTools"
 										 Content="{Binding [Ui_Action_Show], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 										 MinWidth="110"
-										 Padding="16,6" />
+										 Padding="16,6"/>
 			</StackPanel>
 		</StackPanel>
 	</StackPanel>

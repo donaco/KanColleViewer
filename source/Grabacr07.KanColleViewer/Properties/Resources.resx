@@ -579,6 +579,43 @@
   <data name="Ui_Browser_ClearCache_Description" xml:space="preserve">
     <value>キャッシュの削除は次回起動時に行われます。ログイン情報は削除されません。</value>
   </data>
+  <data name="Ui_Browser_LegacyData_Title" xml:space="preserve">
+    <value>旧Verのデータを削除する</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Description" xml:space="preserve">
+    <value>次回起動時に Ver4.x 系のデータを削除します。チェックを外すと予約を取り消せます。起動時に新旧の両フォルダーが存在する場合のみ選択できます。</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Warning" xml:space="preserve">
+    <value>Ver5.0.0以降で正常に利用できることを確認してから削除してください。
+
+次回起動時に、以下の Chromium フォルダーとその中の全てのデータを削除します。
+旧Verのログイン情報や設定が可能性があります。旧Verのアプリは終了してください。
+WebView2 フォルダーと親フォルダーは削除しません。
+
+［削除する］は次回起動時の削除を予約します。その場では削除しません。再起動前にチェックを外すと取り消せます。</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_Delete" xml:space="preserve">
+    <value>削除する</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_DoNotDelete" xml:space="preserve">
+    <value>削除しない</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_WebView2Missing" xml:space="preserve">
+    <value>起動時に WebView2 フォルダーが存在しなかったか、現在存在しないため、旧版のデータは削除しません。</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_DeleteFailed" xml:space="preserve">
+    <value>旧Verのデータを削除できませんでした。削除予約を解除しました。自動再試行はしません。
+一部のファイルだけが削除された可能性があります。旧版のアプリが終了していることなどを確認してください。
+
+対象: {0}
+詳細: {1}</value>
+  </data>
+  <data name="Ui_Browser_LegacyData_OpenFailed" xml:space="preserve">
+    <value>削除対象フォルダーを開けませんでした。
+
+対象: {0}
+詳細: {1}</value>
+  </data>
   <data name="Ui_BrowserNavigator_Back" xml:space="preserve">
     <value>前のページに戻る</value>
   </data>

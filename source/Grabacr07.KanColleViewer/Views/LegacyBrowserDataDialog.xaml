@@ -1,0 +1,36 @@
+<metro:MetroWindow x:Class="Grabacr07.KanColleViewer.Views.LegacyBrowserDataDialog"
+				   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+				   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				   xmlns:models="clr-namespace:Grabacr07.KanColleViewer.Models"
+				   Style="{DynamicResource MetroDialogStyleKey}"
+				   Title="{Binding [Ui_Browser_LegacyData_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				   WindowStartupLocation="CenterOwner"
+				   ResizeMode="NoResize"
+				   Width="640"
+				   SizeToContent="Height">
+	<metro:MetroWindow.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="Settings/Common.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</metro:MetroWindow.Resources>
+	<StackPanel Margin="18">
+		<TextBlock Text="{Binding [Ui_Browser_LegacyData_Warning], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+				   TextWrapping="Wrap" />
+		<TextBlock TextWrapping="Wrap" Margin="0,14,0,0">
+			<Hyperlink Click="HandleOpenFolderClick">
+				<Run Text="{Binding DataFolder, Source={x:Static models:LegacyBrowserData.Current}, Mode=OneWay}" 
+					  Foreground="#007ACC" />
+			</Hyperlink>
+		</TextBlock>
+		<WrapPanel HorizontalAlignment="Right" Margin="0,18,0,0">
+			<Button Content="{Binding [Ui_Browser_LegacyData_Delete], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+					Click="HandleDeleteClick" MinWidth="110" Padding="16,6" Margin="6,0" />
+			<Button Content="{Binding [Ui_Browser_LegacyData_DoNotDelete], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+					IsDefault="True" IsCancel="True" MinWidth="110" Padding="16,6" Margin="6,0" />
+		</WrapPanel>
+	</StackPanel>
+</metro:MetroWindow>
