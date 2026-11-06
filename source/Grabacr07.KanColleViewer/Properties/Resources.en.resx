@@ -999,6 +999,45 @@
   <data name="Ui_Notification_NosakiTimer_Description" xml:space="preserve">
     <value>Notifications are sent every 15 minutes after the timer starts and stop when the timer ends.</value>
   </data>
+  <data name="Ui_Notification_Diagnostics_Title" xml:space="preserve">
+    <value>Windows notification status</value>
+  </data>
+  <data name="Ui_Notification_Status_Enabled" xml:space="preserve">
+    <value>Windows app notifications are enabled.</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledForApplication" xml:space="preserve">
+    <value>Notifications for this app are turned off in Windows. Allow notifications for this app in Windows Settings.</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledForUser" xml:space="preserve">
+    <value>Notifications are disabled for this user. Check the Windows notification settings.</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledByGroupPolicy" xml:space="preserve">
+    <value>Notifications are disabled by Group Policy. Contact your administrator.</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledByManifest" xml:space="preserve">
+    <value>Notifications are disabled by the app manifest.</value>
+  </data>
+  <data name="Ui_Notification_Status_Unsupported" xml:space="preserve">
+    <value>Notifications are not supported in this Windows environment.</value>
+  </data>
+  <data name="Ui_Notification_Status_Unknown" xml:space="preserve">
+    <value>The notification permission state could not be determined.</value>
+  </data>
+  <data name="Ui_Notification_Status_InitializationFailed" xml:space="preserve">
+    <value>Windows notifications could not be initialized.</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_InitializationError" xml:space="preserve">
+    <value>Initialization error: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_SettingError" xml:space="preserve">
+    <value>Error checking notification permission: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_LogPath" xml:space="preserve">
+    <value>Diagnostic log: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_LogWriteError" xml:space="preserve">
+    <value>Could not write the diagnostic log: {0}</value>
+  </data>
   <data name="Ui_Notification_ResortieCondition" xml:space="preserve">
     <value>Condition value required before sortie</value>
   </data>

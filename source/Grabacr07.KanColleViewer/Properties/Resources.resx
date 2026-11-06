@@ -999,6 +999,45 @@
   <data name="Ui_Notification_NosakiTimer_Description" xml:space="preserve">
     <value>タイマー起動後、15分毎に通知します。タイマー終了後、通知も終了します。</value>
   </data>
+  <data name="Ui_Notification_Diagnostics_Title" xml:space="preserve">
+    <value>Windows 通知の状態</value>
+  </data>
+  <data name="Ui_Notification_Status_Enabled" xml:space="preserve">
+    <value>Windows のアプリ通知は有効です。</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledForApplication" xml:space="preserve">
+    <value>このアプリの通知は Windows の設定で無効です。通知設定でこのアプリを許可してください。</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledForUser" xml:space="preserve">
+    <value>ユーザー全体の通知が無効です。Windows の通知設定を確認してください。</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledByGroupPolicy" xml:space="preserve">
+    <value>組織のポリシーにより通知が無効です。管理者にお問い合わせください。</value>
+  </data>
+  <data name="Ui_Notification_Status_DisabledByManifest" xml:space="preserve">
+    <value>アプリのマニフェスト設定により通知が無効です。</value>
+  </data>
+  <data name="Ui_Notification_Status_Unsupported" xml:space="preserve">
+    <value>この Windows 環境では通知機能を利用できません。</value>
+  </data>
+  <data name="Ui_Notification_Status_Unknown" xml:space="preserve">
+    <value>通知の許可状態を確認できません。</value>
+  </data>
+  <data name="Ui_Notification_Status_InitializationFailed" xml:space="preserve">
+    <value>Windows 通知の初期化に失敗しました。</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_InitializationError" xml:space="preserve">
+    <value>初期化エラー: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_SettingError" xml:space="preserve">
+    <value>許可状態の確認エラー: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_LogPath" xml:space="preserve">
+    <value>診断ログ: {0}</value>
+  </data>
+  <data name="Ui_Notification_Diagnostics_LogWriteError" xml:space="preserve">
+    <value>診断ログを保存できませんでした: {0}</value>
+  </data>
   <data name="Ui_Notification_ResortieCondition" xml:space="preserve">
     <value>再出撃可能とするコンディション値</value>
   </data>

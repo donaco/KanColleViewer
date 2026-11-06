@@ -26,6 +26,32 @@
 				   Style="{DynamicResource SettingsHeaderTextStyleKey}" />
 
 		<StackPanel Margin="20,0,0,0">
+			<TextBlock Text="{Binding [Ui_Notification_Diagnostics_Title], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
+					   Foreground="{DynamicResource ActiveForegroundBrushKey}" />
+			<TextBlock x:Name="WindowsNotificationStatusText"
+					   Style="{DynamicResource DetailTextStyleKey}"
+					   Margin="0,0,0,0"
+					   TextWrapping="Wrap" />
+			<TextBlock x:Name="NotificationInitializationErrorText"
+					   Visibility="Collapsed"
+					   Style="{DynamicResource DetailTextStyleKey}"
+					   TextWrapping="Wrap" />
+			<TextBlock x:Name="NotificationSettingErrorText"
+					   Visibility="Collapsed"
+					   Style="{DynamicResource DetailTextStyleKey}"
+					   TextWrapping="Wrap" />
+			<TextBlock x:Name="NotificationLogWriteErrorText"
+					   Visibility="Collapsed"
+					   Style="{DynamicResource DetailTextStyleKey}"
+					   TextWrapping="Wrap" />
+			<TextBlock x:Name="NotificationLogPathText"
+					   Visibility="Collapsed"
+					   Style="{DynamicResource DetailTextStyleKey}"
+					   TextWrapping="Wrap" />
+
+			<Rectangle Style="{DynamicResource SeparatorStyleKey}"
+					   Margin="0,8" />
+
 			<CheckBox Content="{Binding Resources.Dockyard_Notifications_Enable, Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding Source={x:Static ms:KanColleSettings.NotifyBuildingCompleted}, Path=Value}" />
 
