@@ -583,12 +583,12 @@
     <value>旧Verのデータを削除する</value>
   </data>
   <data name="Ui_Browser_LegacyData_Description" xml:space="preserve">
-    <value>次回起動時に Ver4.x 系のデータを削除します。チェックを外すと予約を取り消せます。起動時に新旧の両フォルダーが存在する場合のみ選択できます。</value>
+    <value>次回起動時に 旧Verのアプリ/プラグインのデータを削除します。チェックを外すと予約を取り消せます。起動時に新旧の両フォルダーが存在する場合のみ選択できます。</value>
   </data>
   <data name="Ui_Browser_LegacyData_Warning" xml:space="preserve">
     <value>Ver5.0.0以降で正常に利用できることを確認してから削除してください。
 
-次回起動時に、以下の Chromium フォルダーとその中の全てのデータを削除します。
+次回起動時に、以下のフォルダーとその中の全てのデータを削除します。
 旧Verのログイン情報や設定が可能性があります。旧Verのアプリは終了してください。
 WebView2 フォルダーと親フォルダーは削除しません。
 

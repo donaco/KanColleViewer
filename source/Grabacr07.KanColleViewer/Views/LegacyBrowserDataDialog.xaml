@@ -21,12 +21,20 @@
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
 				   TextWrapping="Wrap" />
 		<TextBlock TextWrapping="Wrap" Margin="0,14,0,0">
-			<Hyperlink Click="HandleOpenFolderClick">
-				<Run Text="{Binding DataFolder, Source={x:Static models:LegacyBrowserData.Current}, Mode=OneWay}" 
-					  Foreground="#007ACC" />
+			<Hyperlink Click="HandleOpenFolderClick"
+					   Foreground="{DynamicResource LinkForegroundBrushKey}"
+					   Cursor="Hand">
+				<Run Text="{Binding DataFolder, Source={x:Static models:LegacyBrowserData.Current}, Mode=OneWay}" />
 			</Hyperlink>
 		</TextBlock>
-		<WrapPanel HorizontalAlignment="Right" Margin="0,18,0,0">
+		<TextBlock TextWrapping="Wrap" Margin="0,4,0,0">
+			<Hyperlink Click="HandleOpenLegacyPluginDataFolderClick"
+					   Foreground="{DynamicResource LinkForegroundBrushKey}"
+					   Cursor="Hand">
+				<Run Text="{Binding LegacyPluginDataFolder, Source={x:Static models:LegacyBrowserData.Current}, Mode=OneWay}" />
+			</Hyperlink>
+		</TextBlock>
+		<WrapPanel HorizontalAlignment="Right" Margin="0,18,0,14">
 			<Button Content="{Binding [Ui_Browser_LegacyData_Delete], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"
 					Click="HandleDeleteClick" MinWidth="110" Padding="16,6" Margin="6,0" />
 			<Button Content="{Binding [Ui_Browser_LegacyData_DoNotDelete], Source={x:Static models:ResourceService.Current}, Mode=OneWay}"

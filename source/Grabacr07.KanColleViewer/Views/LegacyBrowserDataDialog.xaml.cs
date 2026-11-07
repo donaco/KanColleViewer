@@ -22,7 +22,17 @@ namespace Grabacr07.KanColleViewer.Views
 		private void HandleOpenFolderClick(object sender, RoutedEventArgs e)
 		{
 			e.Handled = true;
-			var path = LegacyBrowserData.Current.DataFolder;
+			this.OpenFolder(LegacyBrowserData.Current.DataFolder);
+		}
+
+		private void HandleOpenLegacyPluginDataFolderClick(object sender, RoutedEventArgs e)
+		{
+			e.Handled = true;
+			this.OpenFolder(LegacyBrowserData.Current.LegacyPluginDataFolder);
+		}
+
+		private void OpenFolder(string path)
+		{
 			try
 			{
 				if (!Directory.Exists(path)) throw new DirectoryNotFoundException(path);
@@ -30,7 +40,7 @@ namespace Grabacr07.KanColleViewer.Views
 			}
 			catch (Exception ex) when (ex is Win32Exception || ex is IOException || ex is UnauthorizedAccessException)
 			{
-				Debug.WriteLine($"Unable to open legacy browser data folder: {ex}");
+				Debug.WriteLine($"Unable to open legacy data folder: {ex}");
 				Application.ReportRecoverableException("LegacyBrowserData.OpenFolder", this, ex);
 				MessageBox.Show(this,
 					string.Format(ResourceService.Current["Ui_Browser_LegacyData_OpenFailed"], path, ex.Message),

@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +18,10 @@ namespace Grabacr07.KanColleViewer.Models
 			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 			ProductInfo.Company, ProductInfo.Product, "Chromium");
 
+		public string LegacyPluginDataFolder { get; } = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			"terry_u16");
+
 		private bool webView2ExistedOnStartup;
 		private bool deleteOnStartup;
 		private bool isDeletionAvailable;
@@ -29,8 +34,15 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private LegacyBrowserData() { }
 
-		private bool HasLegacyData => Directory.Exists(this.DataFolder)
-			|| Directory.Exists(Providers.LegacyRoamingCompanyDirectoryPath);
+		private string[] DeletionTargets => new[]
+		{
+			this.DataFolder,
+			Providers.LegacyRoamingCompanyDirectoryPath,
+			this.LegacyPluginDataFolder,
+			Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "terry_u16"),
+		};
+
+		private bool HasLegacyData => this.DeletionTargets.Any(Directory.Exists);
 
 		internal void Prepare()
 		{
@@ -55,7 +67,7 @@ namespace Grabacr07.KanColleViewer.Models
 				}
 				await Task.Run(() =>
 				{
-					foreach (var path in new[] { this.DataFolder, Providers.LegacyRoamingCompanyDirectoryPath })
+					foreach (var path in this.DeletionTargets)
 					{
 						deletionPath = path;
 						try
