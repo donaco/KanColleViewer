@@ -46,22 +46,14 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		{
 			try
 			{
-				Providers.Local.Load();
+				Providers.Load();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				File.Delete(Providers.LocalFilePath);
-				Providers.Local.Load();
-			}
-
-			try
-			{
-				Providers.Roaming.Load();
-			}
-			catch (Exception)
-			{
-				File.Delete(Providers.RoamingFilePath);
-				Providers.Roaming.Load();
+				MessageBox.Show(
+					$"設定ファイルの読み込み、または Local への移行に失敗しました。\r\n元の設定ファイルは削除していません。\r\n\r\nエラーの詳細: {ex.Message}",
+					"エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+				throw;
 			}
 
 #pragma warning disable 612
@@ -125,16 +117,6 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 				catch (Exception ex)
 				{
 					MessageBox.Show(string.Format(message, Providers.LocalFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
-					throw;
-				}
-
-				try
-				{
-					Providers.Roaming.Save();
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(string.Format(message, Providers.RoamingFilePath, ex.Message), "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 					throw;
 				}
 			}

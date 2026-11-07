@@ -29,10 +29,13 @@ namespace Grabacr07.KanColleViewer.Models
 
 		private LegacyBrowserData() { }
 
+		private bool HasLegacyData => Directory.Exists(this.DataFolder)
+			|| Directory.Exists(Providers.LegacyRoamingCompanyDirectoryPath);
+
 		internal void Prepare()
 		{
 			this.webView2ExistedOnStartup = Directory.Exists(WebView2Setup.UserDataFolder);
-			this.IsDeletionAvailable = this.webView2ExistedOnStartup && Directory.Exists(this.DataFolder);
+			this.IsDeletionAvailable = this.webView2ExistedOnStartup && this.HasLegacyData;
 			// Capture only the saved reservation, not changes made during this session.
 			this.deleteOnStartup = GeneralSettings.DeleteLegacyBrowserDataOnNextStartup.Value;
 		}
@@ -43,29 +46,40 @@ namespace Grabacr07.KanColleViewer.Models
 			this.deleteOnStartup = false;
 			GeneralSettings.DeleteLegacyBrowserDataOnNextStartup.Value = false;
 			this.IsDeletionAvailable = false;
+			var deletionPath = this.DataFolder;
 			try
 			{
 				if (!this.webView2ExistedOnStartup || !Directory.Exists(WebView2Setup.UserDataFolder))
 				{
 					throw new IOException(ResourceService.Current["Ui_Browser_LegacyData_WebView2Missing"]);
 				}
-				await Task.Run(() => Directory.Delete(this.DataFolder, recursive: true));
-			}
-			catch (DirectoryNotFoundException) when (!Directory.Exists(this.DataFolder))
-			{
-				// The target has already been removed; only clear the reservation.
+				await Task.Run(() =>
+				{
+					foreach (var path in new[] { this.DataFolder, Providers.LegacyRoamingCompanyDirectoryPath })
+					{
+						deletionPath = path;
+						try
+						{
+							Directory.Delete(path, recursive: true);
+						}
+						catch (DirectoryNotFoundException) when (!Directory.Exists(path))
+						{
+							// Already removed; continue with the remaining target.
+						}
+					}
+				});
 			}
 			catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
 			{
 				Debug.WriteLine($"Legacy browser data deletion failed: {ex}");
 				Application.ReportRecoverableException("Startup.LegacyBrowserData", this, ex);
 				MessageBox.Show(
-					string.Format(ResourceService.Current["Ui_Browser_LegacyData_DeleteFailed"], this.DataFolder, ex.Message),
+					string.Format(ResourceService.Current["Ui_Browser_LegacyData_DeleteFailed"], deletionPath, ex.Message),
 					ProductInfo.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 			finally
 			{
-				this.IsDeletionAvailable = this.webView2ExistedOnStartup && Directory.Exists(this.DataFolder);
+				this.IsDeletionAvailable = this.webView2ExistedOnStartup && this.HasLegacyData;
 			}
 		}
 	}

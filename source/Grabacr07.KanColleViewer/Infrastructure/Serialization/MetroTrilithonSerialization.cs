@@ -273,14 +273,44 @@ namespace MetroTrilithon.Serialization
 
         public void Save()
         {
-            if (this._settings.Count == 0) return;
-            var dir = Path.GetDirectoryName(this._path);
-            if (dir == null) throw new DirectoryNotFoundException();
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             lock (this._sync)
             {
-                using (var stream = new FileStream(this._path, FileMode.Create, FileAccess.ReadWrite))
-                    XamlServices.Save(stream, this._settings);
+                if (this._settings.Count == 0) return;
+                var dir = Path.GetDirectoryName(this._path);
+                if (dir == null) throw new DirectoryNotFoundException();
+                Directory.CreateDirectory(dir);
+                var temporaryPath = Path.Combine(dir, Path.GetRandomFileName());
+                try
+                {
+                    using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write))
+                    {
+                        XamlServices.Save(stream, this._settings);
+                        stream.Flush(true);
+                    }
+
+                    if (File.Exists(this._path))
+                        File.Replace(temporaryPath, this._path, null);
+                    else
+                        File.Move(temporaryPath, this._path);
+                }
+                finally
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
+        }
+
+        internal void ImportMissing(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            {
+                var source = XamlServices.Load(stream) as IDictionary<string, object?>
+                    ?? throw new InvalidDataException($"設定ファイルの形式が不正です: {path}");
+                lock (this._sync)
+                {
+                    foreach (var entry in source)
+                        this._settings.TryAdd(entry.Key, entry.Value);
+                }
             }
         }
 
@@ -292,10 +322,9 @@ namespace MetroTrilithon.Serialization
                 {
                     lock (this._sync)
                     {
-                        var source = XamlServices.Load(stream) as IDictionary<string, object?>;
-                        this._settings = source == null
-                            ? new SortedDictionary<string, object?>()
-                            : new SortedDictionary<string, object?>(source);
+                        var source = XamlServices.Load(stream) as IDictionary<string, object?>
+                            ?? throw new InvalidDataException($"設定ファイルの形式が不正です: {this._path}");
+                        this._settings = new SortedDictionary<string, object?>(source);
                     }
                 }
             }
