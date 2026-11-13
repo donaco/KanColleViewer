@@ -22,7 +22,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// 建造中の艦の名前を表示するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> CanDisplayBuildingShipName { get; }
-			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
 		/// <summary>
 		/// 索敵計算に使用するロジックを識別する文字列の設定値を取得します。
@@ -40,7 +40,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// 索敵計算に第2艦隊を含めるかどうかの設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> IsViewRangeCalcIncludeSecondFleet { get; }
-			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
 		/// <summary>
 		/// 建造完了時に通知するかどうかを示す設定値を取得します。
@@ -119,13 +119,13 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// 艦隊が出撃・帰投したときに、その艦隊を自動的に選択状態にするかどうかを表す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> AutoFleetSelectWhenSortie { get; } 
-			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
 
 		/// <summary>
 		/// 大破時のアクセントカラーを点滅させるかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> EmphasizeHeavilyDamagedAlert { get; }
-			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
 		/// <summary>
 		/// 出撃中のマップ位置表示を表示するかどうかを示す設定値を取得します。
@@ -137,7 +137,7 @@ namespace Grabacr07.KanColleViewer.Models.Settings
 		/// マップ位置の表示を、戦闘開始時ではなくセル到達時（start/next）に更新するかどうかを示す設定値を取得します。
 		/// </summary>
 		public static SerializableProperty<bool> ShowCellOnArrival { get; }
-			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, false);
+			= new SerializableProperty<bool>(GetKey(), Providers.Roaming, true);
 
 		/// <summary>
 		/// 航空戦マスのみ制空権の情報を表示するかどうかを示す設定値を取得します。
